@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Externalize exercise templates",
+  "type": "object",
+  "required": ["scope", "eval", "fillTruthTable"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "scope": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["formula"],
+        "additionalProperties": false,
+        "properties": {
+          "formula": { "type": "string", "minLength": 1 },
+          "id": { "type": "string", "pattern": "^scope-\\d{3}$" }
+        }
+      }
+    },
+    "eval": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["formula", "initialAssignment"],
+        "additionalProperties": false,
+        "properties": {
+          "formula": { "type": "string", "minLength": 1 },
+          "initialAssignment": {
+            "type": "object",
+            "additionalProperties": { "type": "boolean" }
+          },
+          "id": { "type": "string", "pattern": "^eval-\\d{3}$" }
+        }
+      }
+    },
+    "fillTruthTable": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["formula", "hiddenRowIndex"],
+        "additionalProperties": false,
+        "properties": {
+          "formula": { "type": "string", "minLength": 1 },
+          "hiddenRowIndex": { "type": "integer", "minimum": 0 },
+          "id": { "type": "string", "pattern": "^tt-\\d{3}$" }
+        }
+      }
+    }
+  }
+}
