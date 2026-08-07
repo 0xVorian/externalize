@@ -116,6 +116,6 @@ New user-facing strings require both locales in the same change. See `docs/i18n.
 Evaluation and structure can be shown as a **truth table**, a **vertical parse tree**, or (later) other layouts. Pick the shape that externalizes what the learner needs *right now* — not one universal widget.
 
 - **Truth table (rows):** small atom set, all cases shown or stepped through (watch / demo). Example: four rows for `P ∧ Q`.
-- **Parse tree:** one assignment, values propagating through subformulas (guided try, eval exercises) or scope selection (main connective exercises).
+- **Parse tree:** nested formulas, values propagating through subformulas (eval exercises with structure) or scope selection (main connective exercises).
 
 Do not use a parse tree when the lesson is only “here are the four truth-table cases”; use a table with a highlighted row instead. See `docs/presentation.md`.

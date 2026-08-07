@@ -1,29 +1,8 @@
-import type { TreeNode } from '../../engine';
-import { learnUi, getLessonCopy, ui, formatTruthValue, type Locale } from '../i18n';
+import { learnUi, getLessonCopy, ui, formatTruthValue } from '../i18n';
 import { LEVEL_0_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
 import { renderShellHeader } from './shell-render';
-
-function nodeValueClass(kind: TreeNode['kind']): string {
-  return kind === 'atom' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
-}
-
-function renderTreeNode(node: TreeNode, locale: Locale): string {
-  const copy = ui(locale);
-  const label = formatTruthValue(locale, node.value);
-  const valueHtml = `<span class="${nodeValueClass(node.kind)}" aria-label="${copy.valueAria(label)}">${label}</span>`;
-  const children = node.children.map((child) => renderTreeNode(child, locale)).join('');
-  return `
-    <li class="tree-node kind-${node.kind}">
-      <div class="node-button node-readonly">
-        <span class="node-label">${node.label}</span>
-        ${valueHtml}
-      </div>
-      ${children ? `<ul class="tree-children">${children}</ul>` : ''}
-    </li>
-  `;
-}
 
 function renderGuidedToggles(state: LessonState): string {
   const copy = ui(state.locale);
@@ -72,21 +51,20 @@ function conjunctionResult(assignment: { P: boolean; Q: boolean }): boolean {
   return assignment.P && assignment.Q;
 }
 
-function renderWatchTruthTable(
+function renderTruthTable(
   state: LessonState,
-  steps: Array<{ assignment: { P: boolean; Q: boolean } }>,
   formula: string,
+  rows: Array<{ assignment: { P: boolean; Q: boolean }; active: boolean; srLabel?: string }>,
 ): string {
   const learn = learnUi(state.locale);
-  const rows = steps
-    .map((step, index) => {
-      const active = index === state.watchStep;
-      const result = conjunctionResult(step.assignment);
+  const body = rows
+    .map((row) => {
+      const result = conjunctionResult(row.assignment);
       return `
-        <tr class="truth-table-row ${active ? 'active' : ''}">
-          <th scope="row" class="sr-only">${learn.stepLabel(index + 1, steps.length)}</th>
-          <td>${formatTruthValue(state.locale, step.assignment.P)}</td>
-          <td>${formatTruthValue(state.locale, step.assignment.Q)}</td>
+        <tr class="truth-table-row ${row.active ? 'active' : ''}">
+          ${row.srLabel ? `<th scope="row" class="sr-only">${row.srLabel}</th>` : ''}
+          <td>${formatTruthValue(state.locale, row.assignment.P)}</td>
+          <td>${formatTruthValue(state.locale, row.assignment.Q)}</td>
           <td class="result-cell">${formatTruthValue(state.locale, result)}</td>
         </tr>
       `;
@@ -103,10 +81,35 @@ function renderWatchTruthTable(
             <th scope="col">${formula}</th>
           </tr>
         </thead>
-        <tbody>${rows}</tbody>
+        <tbody>${body}</tbody>
       </table>
     </div>
   `;
+}
+
+function renderWatchTruthTable(
+  state: LessonState,
+  steps: Array<{ assignment: { P: boolean; Q: boolean } }>,
+  formula: string,
+): string {
+  const learn = learnUi(state.locale);
+  return renderTruthTable(
+    state,
+    formula,
+    steps.map((step, index) => ({
+      assignment: step.assignment,
+      active: index === state.watchStep,
+      srLabel: learn.stepLabel(index + 1, steps.length),
+    })),
+  );
+}
+
+function renderLiveTruthRow(state: LessonState, formula: string): string {
+  const assignment = {
+    P: state.assignment.P ?? false,
+    Q: state.assignment.Q ?? false,
+  };
+  return renderTruthTable(state, formula, [{ assignment, active: true }]);
 }
 
 function renderWatchLesson(state: LessonState): string {
@@ -131,10 +134,8 @@ function renderGuidedLesson(state: LessonState): string {
   return `
     <article class="lesson-card">
       <p class="formula-display">${formula}</p>
-      <section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}">
-        <ul class="tree-root">${renderTreeNode(state.tree, state.locale)}</ul>
-      </section>
       ${renderGuidedToggles(state)}
+      ${renderLiveTruthRow(state, formula)}
       ${hint ? `<p class="feedback ${state.complete ? 'feedback-correct' : 'feedback-info'}" role="status">${hint}</p>` : ''}
     </article>
   `;

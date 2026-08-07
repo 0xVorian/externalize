@@ -70,7 +70,7 @@ No authentication, no server sync, until there is a concrete need.
 
 ### Evaluation presentation: truth table vs parse tree
 
-**Decision:** Use **truth-table rows** for watch/demo lessons that enumerate all assignments on a small formula (e.g. four cases of `P ∧ Q`). Use the **vertical parse tree** for guided practice and exercises where one assignment propagates through subformulas, or for scope-tap tasks.
+**Decision:** Use **truth-table rows** for watch/demo lessons that enumerate all assignments on a small formula (e.g. four cases of `P ∧ Q`). Use a **live single-row table plus toggles** for guided try on the same flat formula. Use the **vertical parse tree** for practice eval on nested formulas and for scope-tap tasks.
 
 **Rationale:** A tree for `P ∧ Q` alone reads as a misaligned list and hides the 2×2 pattern. Tables match standard logic pedagogy and the card-lesson notation (`T ∧ T ⇒ T`, …). Trees remain essential once propagation or scope matters.
 

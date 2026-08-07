@@ -233,7 +233,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         { kind: 'hint', text: 'Good. Now assign F to Q.' },
         {
           kind: 'done',
-          text: 'Under P ↦ T and Q ↦ F, the conjunction P ∧ Q evaluates to F. Confirm the value at ∧.',
+          text: 'Under P ↦ T and Q ↦ F, the conjunction P ∧ Q evaluates to F. Confirm the result column.',
         },
       ],
     },
@@ -311,7 +311,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         { kind: 'hint', text: 'Très bien. Attribuez maintenant F à Q.' },
         {
           kind: 'done',
-          text: 'Sous P ↦ V et Q ↦ F, la conjonction P ∧ Q est F. Vérifiez la valeur au connecteur ∧.',
+          text: 'Sous P ↦ V et Q ↦ F, la conjonction P ∧ Q est F. Vérifiez la colonne résultat.',
         },
       ],
     },

@@ -7,10 +7,11 @@ How we choose **what** to show on screen for evaluation and structure — separa
 | Goal | Prefer |
 |------|--------|
 | Show **all cases** of a small formula (demo / watch) | **Truth table** (rows), optionally a 2×2 grid later |
-| Show **how values propagate** under one assignment (practice / guided) | **Vertical parse tree** with values on every node |
+| Show **one assignment** you build step by step (guided try on a small formula) | **Live truth-table row** + toggles |
+| Show **how values propagate** under one assignment (practice eval, complex formulas) | **Vertical parse tree** with values on every node |
 | Show **scope / main connective** (practice) | **Vertical parse tree** (tap targets, no values required) |
 
-When the lesson is “here are the four assignments for P ∧ Q”, a parse tree is the wrong shape — it hides the 2×2 pattern and reads like an unrelated list. When the lesson is “fix P and Q yourself and watch the formula evaluate”, the tree is right.
+When the lesson is “here are the four assignments for P ∧ Q”, a parse tree is the wrong shape — it hides the 2×2 pattern and reads like an unrelated list. When the learner **sets** P and Q themselves on the same small formula, a **single live table row** plus toggles is enough. Use a parse tree when the formula has nested structure worth propagating (practice eval exercises).
 
 ## Truth table (watch lessons)
 
@@ -29,9 +30,21 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 - Partial tables (one missing cell) for Phase 4 interactive truth-table exercises.
 - Generalize table renderer when watch lessons cover other connectives (`∨`, `→`) with the same small atom set.
 
-## Vertical parse tree (guided + practice)
+## Live truth-table row (guided lessons)
 
-**Used today:** guided lesson `level0-05-guided`, evaluation exercises, scope-tap exercises.
+**Used today:** Level 0 guided lesson `level0-05-guided` (`P ∧ Q`).
+
+- **Toggles first** (interpretation), then a **one-row table** that updates as the learner assigns P and Q.
+- Same column headers and locale labels as the watch table — learner connects “I changed P” to “the row changed”.
+- No parse tree for this lesson: the tree duplicated the toggles and misaligned visually on mobile.
+
+**When to use a tree instead:** practice evaluation on non-flat formulas (e.g. `(P → Q) ↔ ¬R`) where subformula values matter.
+
+## Vertical parse tree (practice)
+
+**Used today:** evaluation exercises (complex formulas), scope-tap exercises.
+
+**Not used for Level 0 guided `P ∧ Q`** — see live row above.
 
 - Single column, mobile-first; **no horizontal pan** on ~320px width.
 - **Parent connective aligns with its children:** if `.tree-children` is indented, the parent’s node row gets the same left offset (`:has(> .tree-children)` in CSS). Avoids the “first line sticks out” bug.
@@ -55,7 +68,7 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 ## Related files
 
-- `src/app/lesson-render.ts` — watch table, guided/lesson tree
+- `src/app/lesson-render.ts` — watch table, guided live row
 - `src/app/render.ts` — practice tree + toggles
 - `src/i18n/messages.ts` — `formatTruthValue`, `formatAssignmentLine`
 - `src/styles/main.css` — `.truth-table-*`, `.tree-*`, `.node-value-*`
