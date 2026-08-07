@@ -21,13 +21,9 @@ import {
 } from './progress-tracker';
 import { getExerciseDefinition } from './exercises';
 import type { Locale } from '../i18n';
+import { type SrsEntry, createSrsEntry, nextSrsEntryAfterResult } from './srs';
 
-export type SrsEntry = {
-  exerciseId: string;
-  due: string;
-  intervalDays: number;
-  ease: number;
-};
+export type { SrsEntry };
 
 export type ProgressStore = {
   version: 5;
@@ -57,8 +53,6 @@ export type ProgressExportBundle = {
   locale?: Locale;
   progress: unknown;
 };
-
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -246,10 +240,6 @@ export function importProgress(raw: string): { progress: ProgressStore; locale?:
   return parseProgressImport(raw);
 }
 
-function isoDaysFromNow(days: number): string {
-  return new Date(Date.now() + days * DAY_MS).toISOString();
-}
-
 export function isPracticeUnlocked(store: ProgressStore): boolean {
   return store.level0Complete;
 }
@@ -348,12 +338,7 @@ export function seedQueue(store: ProgressStore, exerciseIds: string[]): Progress
   const nextQueue = [...store.queue];
   for (const exerciseId of exerciseIds) {
     if (!existing.has(exerciseId)) {
-      nextQueue.push({
-        exerciseId,
-        due: new Date().toISOString(),
-        intervalDays: 0,
-        ease: 2.5,
-      });
+      nextQueue.push(createSrsEntry(exerciseId));
     }
   }
   return { ...store, queue: nextQueue };
@@ -403,33 +388,10 @@ export function recordResult(
     ? store.completed
     : [...store.completed, exerciseId];
 
-  let queue = store.queue;
-  if (!entry) {
-    queue = [
-      ...queue,
-      {
-        exerciseId,
-        due: isoDaysFromNow(correct ? 1 : 0),
-        intervalDays: correct ? 1 : 0,
-        ease: 2.5,
-      },
-    ];
-  } else {
-    const ease = Math.max(1.3, entry.ease + (correct ? 0.1 : -0.2));
-    const intervalDays = correct
-      ? Math.max(1, entry.intervalDays === 0 ? 1 : Math.round(entry.intervalDays * ease))
-      : 0;
-    queue = queue.map((item) =>
-      item.exerciseId === exerciseId
-        ? {
-            exerciseId,
-            ease,
-            intervalDays,
-            due: isoDaysFromNow(intervalDays),
-          }
-        : item,
-    );
-  }
+  const nextEntry = nextSrsEntryAfterResult(entry, exerciseId, correct);
+  const queue = entry
+    ? store.queue.map((item) => (item.exerciseId === exerciseId ? nextEntry : item))
+    : [...store.queue, nextEntry];
 
   return updateResume(
     {
