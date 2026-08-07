@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Learn paths
+
+- **Level 2 unit (Nested formulas)**: 8 lessons on nested structure, double negation, connective precedence, and de Morgan's laws — unlocks after Unit 1 complete; unit picker adds Unit 2 tab; progress store tracks `level2Complete` (storage v5)
+
 - Phase 3 translation MVP: `translate-001` with symbol palette, builder compile, and translation feedback classifier
 - **Level 1 learn path (Unit 1 — Connectives)**: 12 lessons covering ¬, ∨, →, and ↔ — concept cards, truth-table watch lessons, and guided live-row tries
 - Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LEVEL_1_LESSONS } from './lessons';
+import { LEVEL_1_LESSONS, LEVEL_2_LESSONS } from './lessons';
 import {
   loadProgress,
   recordResult,
@@ -96,9 +96,14 @@ describe('storage v3', () => {
 
   it('switches to practice after full learn path', () => {
     let store = loadProgress();
-    for (const id of [...LEVEL_0_IDS, ...LEVEL_1_LESSONS.map((l) => l.id)]) {
+    for (const id of [
+      ...LEVEL_0_IDS,
+      ...LEVEL_1_LESSONS.map((l) => l.id),
+      ...LEVEL_2_LESSONS.map((l) => l.id),
+    ]) {
       store = completeLesson(store, id);
     }
+    expect(store.level2Complete).toBe(true);
     expect(store.resume.mode).toBe('practice');
   });
 
@@ -121,7 +126,31 @@ describe('storage v3', () => {
     const store = loadProgress();
     const raw = JSON.stringify(store);
     const { progress: restored } = importProgress(raw);
-    expect(restored.version).toBe(4);
+    expect(restored.version).toBe(5);
+  });
+
+  it('migrates v4 to v5 with level2Complete', () => {
+    const { progress: store } = importProgress(
+      JSON.stringify({
+        version: 4,
+        lessonsCompleted: ['level0-01-letters'],
+        level0Complete: false,
+        level1Complete: false,
+        queue: [],
+        completed: [],
+        resume: {
+          mode: 'learn',
+          lessonId: 'level0-02-truth',
+          updatedAt: new Date().toISOString(),
+        },
+        skills: {},
+        exerciseStats: {},
+        errorCounts: {},
+        lastVisitedAt: new Date().toISOString(),
+      }),
+    );
+    expect(store.version).toBe(5);
+    expect(store.level2Complete).toBe(false);
   });
 
   it('rejects invalid import data', () => {

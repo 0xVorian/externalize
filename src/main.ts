@@ -166,6 +166,7 @@ function render(): void {
     root.innerHTML = renderLessonView(lessonState, {
       practiceUnlocked,
       level0Complete: progress.level0Complete,
+      level1Complete: progress.level1Complete,
       learnPathComplete: isLearnPathComplete(progress.lessonsCompleted),
     });
     return;
@@ -215,8 +216,11 @@ function continueFromResume(): void {
   setMode(target);
 }
 
-function switchLearnUnit(unit: 0 | 1): void {
+function switchLearnUnit(unit: 0 | 1 | 2): void {
   if (unit === 1 && !progress.level0Complete) {
+    return;
+  }
+  if (unit === 2 && !progress.level1Complete) {
     return;
   }
   lessonState = createLessonState(locale, firstIncompleteLessonInUnit(unit, progress.lessonsCompleted));
@@ -357,7 +361,8 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'select-unit') {
-    const unit = button.dataset.unit === '1' ? 1 : button.dataset.unit === '0' ? 0 : null;
+    const unitRaw = button.dataset.unit;
+    const unit = unitRaw === '2' ? 2 : unitRaw === '1' ? 1 : unitRaw === '0' ? 0 : null;
     if (unit !== null && mode === 'learn' && lessonUnit(lessonState.lesson.id) !== unit) {
       switchLearnUnit(unit);
     }

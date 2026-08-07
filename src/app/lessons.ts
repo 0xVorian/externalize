@@ -5,8 +5,8 @@ export type LessonDefinition = {
   type: LessonType;
   /** Formula for watch/guided lessons */
   formula?: string;
-  /** Unit index: 0 = introductory syntax, 1 = connectives beyond ∧ */
-  unit: 0 | 1;
+  /** Unit index: 0 = introductory syntax, 1 = connectives, 2 = nested formulas */
+  unit: 0 | 1 | 2;
 };
 
 export const LEVEL_0_LESSONS: LessonDefinition[] = [
@@ -32,40 +32,33 @@ export const LEVEL_1_LESSONS: LessonDefinition[] = [
   { id: 'level1-12-iff-guided', type: 'guided', formula: 'P ↔ Q', unit: 1 },
 ];
 
-/** Full learn path: Unit 0 then Unit 1 (Unit 1 gated on level0Complete). */
-export const ALL_LEARN_LESSONS: LessonDefinition[] = [...LEVEL_0_LESSONS, ...LEVEL_1_LESSONS];
+export const LEVEL_2_LESSONS: LessonDefinition[] = [
+  { id: 'level2-01-nesting', type: 'card', unit: 2 },
+  { id: 'level2-02-double-neg', type: 'card', unit: 2 },
+  { id: 'level2-03-double-neg-watch', type: 'watch', formula: '¬¬P', unit: 2 },
+  { id: 'level2-04-double-neg-guided', type: 'guided', formula: '¬¬P', unit: 2 },
+  { id: 'level2-05-precedence', type: 'card', unit: 2 },
+  { id: 'level2-06-demorgan', type: 'card', unit: 2 },
+  { id: 'level2-07-demorgan-watch', type: 'watch', formula: '¬(P ∧ Q)', unit: 2 },
+  { id: 'level2-08-demorgan-guided', type: 'guided', formula: '¬(P ∨ Q)', unit: 2 },
+];
+
+/** Full learn path: Unit 0, then Unit 1 (gated on level0Complete), then Unit 2 (gated on level1Complete). */
+export const ALL_LEARN_LESSONS: LessonDefinition[] = [
+  ...LEVEL_0_LESSONS,
+  ...LEVEL_1_LESSONS,
+  ...LEVEL_2_LESSONS,
+];
 
 /** Unit 0 practice — unlocks after level0Complete. */
 export const LEVEL_0_PRACTICE_UNLOCK_ORDER = ['eval-001', 'scope-012'] as const;
 
 /** Unit 1 practice — unlocks after all 12 Level 1 lessons. */
 export const LEVEL_1_PRACTICE_UNLOCK_ORDER = [
-  'eval-010',
-  'eval-003',
-  'eval-004',
-  'eval-005',
-  'tt-001',
-  'tt-002',
-  'tt-003',
-  'scope-003',
-  'scope-009',
-  'scope-004',
-  'scope-007',
-  'eval-002',
-  'eval-006',
-  'tt-004',
-  'tt-005',
-  'eval-007',
-  'eval-008',
-  'eval-009',
-  'scope-001',
-  'scope-005',
-  'scope-006',
-  'scope-008',
-  'scope-010',
-  'scope-011',
-  'scope-002',
-  'translate-001',
+  'eval-010', 'eval-003', 'eval-004', 'eval-005', 'tt-001', 'tt-002', 'tt-003',
+  'scope-003', 'scope-009', 'scope-004', 'scope-007', 'eval-002', 'eval-006',
+  'tt-004', 'tt-005', 'eval-007', 'eval-008', 'eval-009', 'scope-001', 'scope-005',
+  'scope-006', 'scope-008', 'scope-010', 'scope-011', 'scope-002', 'translate-001',
 ] as const;
 
 export const PRACTICE_UNLOCK_ORDER = [
@@ -87,11 +80,13 @@ export function getLessonDefinition(id: string): LessonDefinition | undefined {
   return LESSON_BY_ID.get(id);
 }
 
-export function lessonsForUnit(unit: 0 | 1): LessonDefinition[] {
-  return unit === 0 ? LEVEL_0_LESSONS : LEVEL_1_LESSONS;
+export function lessonsForUnit(unit: 0 | 1 | 2): LessonDefinition[] {
+  if (unit === 0) return LEVEL_0_LESSONS;
+  if (unit === 1) return LEVEL_1_LESSONS;
+  return LEVEL_2_LESSONS;
 }
 
-export function lessonUnit(lessonId: string): 0 | 1 {
+export function lessonUnit(lessonId: string): 0 | 1 | 2 {
   return getLessonDefinition(lessonId)?.unit ?? 0;
 }
 
@@ -103,43 +98,41 @@ export function isLevel1Complete(completed: string[]): boolean {
   return LEVEL_1_LESSONS.every((lesson) => completed.includes(lesson.id));
 }
 
+export function isLevel2Complete(completed: string[]): boolean {
+  return LEVEL_2_LESSONS.every((lesson) => completed.includes(lesson.id));
+}
+
 export function isLearnPathComplete(completed: string[]): boolean {
   return ALL_LEARN_LESSONS.every((lesson) => completed.includes(lesson.id));
 }
 
 export function nextLessonId(currentId: string): string | null {
   const index = ALL_LEARN_LESSONS.findIndex((lesson) => lesson.id === currentId);
-  if (index < 0 || index >= ALL_LEARN_LESSONS.length - 1) {
-    return null;
-  }
+  if (index < 0 || index >= ALL_LEARN_LESSONS.length - 1) return null;
   return ALL_LEARN_LESSONS[index + 1].id;
 }
 
 export function firstIncompleteLesson(completed: string[]): LessonDefinition {
   for (const lesson of LEVEL_0_LESSONS) {
-    if (!completed.includes(lesson.id)) {
-      return lesson;
-    }
+    if (!completed.includes(lesson.id)) return lesson;
   }
   if (isLevel0Complete(completed)) {
     for (const lesson of LEVEL_1_LESSONS) {
-      if (!completed.includes(lesson.id)) {
-        return lesson;
-      }
+      if (!completed.includes(lesson.id)) return lesson;
+    }
+  }
+  if (isLevel1Complete(completed)) {
+    for (const lesson of LEVEL_2_LESSONS) {
+      if (!completed.includes(lesson.id)) return lesson;
     }
   }
   return ALL_LEARN_LESSONS[ALL_LEARN_LESSONS.length - 1];
 }
 
-export function firstIncompleteLessonInUnit(
-  unit: 0 | 1,
-  completed: string[],
-): LessonDefinition {
+export function firstIncompleteLessonInUnit(unit: 0 | 1 | 2, completed: string[]): LessonDefinition {
   const unitLessons = lessonsForUnit(unit);
   for (const lesson of unitLessons) {
-    if (!completed.includes(lesson.id)) {
-      return lesson;
-    }
+    if (!completed.includes(lesson.id)) return lesson;
   }
   return unitLessons[0];
 }

@@ -43,6 +43,8 @@ export type ProgressSummary = {
   level0Total: number;
   level1Done: number;
   level1Total: number;
+  level2Done: number;
+  level2Total: number;
   lessonsCompleted: string[];
   exercisesUnlocked: string[];
   exercisesCompleted: string[];
@@ -86,6 +88,8 @@ export function buildProgressSummary(input: {
   level0Total: number;
   level1Done: number;
   level1Total: number;
+  level2Done: number;
+  level2Total: number;
   lessonsCompleted: string[];
   exercisesUnlocked: string[];
   exercisesCompleted: string[];
@@ -124,6 +128,8 @@ export function buildProgressSummary(input: {
     level0Total: input.level0Total,
     level1Done: input.level1Done,
     level1Total: input.level1Total,
+    level2Done: input.level2Done,
+    level2Total: input.level2Total,
     lessonsCompleted: input.lessonsCompleted,
     exercisesUnlocked: input.exercisesUnlocked,
     exercisesCompleted: input.exercisesCompleted,

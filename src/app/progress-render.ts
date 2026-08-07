@@ -3,6 +3,7 @@ import { progressUi, formatResumeTime, getLessonCopy } from '../i18n';
 import {
   LEVEL_0_LESSONS,
   LEVEL_1_LESSONS,
+  LEVEL_2_LESSONS,
   LEVEL_0_PRACTICE_UNLOCK_ORDER,
   LEVEL_1_PRACTICE_UNLOCK_ORDER,
 } from './lessons';
@@ -51,11 +52,16 @@ export function buildSummaryFromStore(store: ProgressStore): ProgressSummary {
   const level1Done = LEVEL_1_LESSONS.filter((lesson) =>
     store.lessonsCompleted.includes(lesson.id),
   ).length;
+  const level2Done = LEVEL_2_LESSONS.filter((lesson) =>
+    store.lessonsCompleted.includes(lesson.id),
+  ).length;
   return buildProgressSummary({
     level0Done,
     level0Total: LEVEL_0_LESSONS.length,
     level1Done,
     level1Total: LEVEL_1_LESSONS.length,
+    level2Done,
+    level2Total: LEVEL_2_LESSONS.length,
     lessonsCompleted: store.lessonsCompleted,
     exercisesUnlocked: getUnlockedExerciseIds(store),
     exercisesCompleted: store.completed,
@@ -105,6 +111,26 @@ export function renderProgressView(
           LEVEL_1_LESSONS.length,
         )}</p>
         <ul class="progress-list">${level1Items}</ul>
+      </section>`
+      : '';
+
+
+  const level2Items =
+    store.level1Complete
+      ? LEVEL_2_LESSONS.map((lesson) => {
+          const title = getLessonCopy(locale, lesson.id).title;
+          const done = store.lessonsCompleted.includes(lesson.id);
+          return renderListItem(title, done ? copy.lessonDone : copy.lessonTodo, done);
+        }).join('')
+      : '';
+
+  const level2Section =
+    store.level1Complete && level2Items
+      ? `
+      <section class="progress-card">
+        <h2 class="panel-title">${learnUi(locale).level2Title}</h2>
+        <p class="progress-meta">${copy.level0Status(summary.level2Done, summary.level2Total)}</p>
+        <ul class="progress-list">${level2Items}</ul>
       </section>`
       : '';
 
@@ -195,6 +221,8 @@ export function renderProgressView(
       </section>
 
       ${level1Section}
+
+      ${level2Section}
 
       ${exerciseSection}
 
