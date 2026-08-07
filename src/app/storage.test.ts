@@ -84,7 +84,7 @@ describe('storage v3', () => {
     store = recordResult(store, 'eval-001', true);
     expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010']);
     store = recordResult(store, 'eval-010', true);
-    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010', 'eval-003']);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010', 'eval-019']);
   });
 
 
@@ -97,7 +97,7 @@ describe('storage v3', () => {
       store = recordResult(store, id, true);
     }
     expect(isLevel2PracticeUnlocked(store)).toBe(false);
-    expect(exerciseLockReason(store, 'eval-011')).toBe('unit2');
+    expect(exerciseLockReason(store, 'eval-021')).toBe('unit2');
   });
 
   it('unlocks Unit 2 exercises progressively after Level 2 complete', () => {
@@ -107,9 +107,9 @@ describe('storage v3', () => {
     }
     expect(isLevel2PracticeUnlocked(store)).toBe(true);
     const base = getUnlockedExerciseIds(store);
-    expect(base).toContain('eval-011');
+    expect(base).toContain('eval-021');
     expect(base).not.toContain('scope-013');
-    store = recordResult(store, 'eval-011', true);
+    store = recordResult(store, 'eval-021', true);
     expect(getUnlockedExerciseIds(store)).toContain('scope-013');
   });
 

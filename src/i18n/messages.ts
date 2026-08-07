@@ -221,9 +221,49 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'eval-011': {
       prompt:
-        'Double negation restores the original value: ¬¬P matches P. Set P and read the doubly negated result on the tree.',
+        'Both conjuncts are true here. Confirm that P ∧ Q is true only when P and Q are both true.',
     },
     'eval-012': {
+      prompt:
+        'When both P and Q are false, the conjunction P ∧ Q is false. Set the letters and read the result row.',
+    },
+    'eval-013': {
+      prompt:
+        'Disjunction is false only when both disjuncts are false. Try P and Q both false and read the outcome.',
+    },
+    'eval-014': {
+      prompt:
+        'With P true and Q false, at least one disjunct is true — so P ∨ Q should come out true.',
+    },
+    'eval-015': {
+      prompt:
+        'When the antecedent P is false, material implication P → Q is true regardless of Q. Check this row.',
+    },
+    'eval-016': {
+      prompt:
+        'A false antecedent makes P → Q true even when Q is true. Toggle P and Q and read the result.',
+    },
+    'eval-017': {
+      prompt:
+        'When P and Q share the same truth value, the biconditional P ↔ Q is true. Both are true here.',
+    },
+    'eval-018': {
+      prompt:
+        'Matching falsity also satisfies a biconditional: when P and Q are both false, P ↔ Q is true.',
+    },
+    'eval-019': {
+      prompt:
+        'P is true, so ¬P must be false. Watch the live row flip the value under negation.',
+    },
+    'eval-020': {
+      prompt:
+        'Negation applies after the disjunction inside the parentheses. Trace how ¬(P ∨ Q) is computed from P and Q.',
+    },
+    'eval-021': {
+      prompt:
+        'Double negation restores the original value: ¬¬P matches P. Set P and read the doubly negated result on the tree.',
+    },
+    'eval-022': {
       prompt:
         'Evaluate the negated disjunction: first find P ∨ Q, then apply the outer negation.',
     },
@@ -404,9 +444,49 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'eval-011': {
       prompt:
-        "La double négation restitue la valeur initiale : ¬¬P équivaut à P. Fixez P et lisez le résultat doublement nié sur l'arbre.",
+        'Les deux conjoints sont vrais ici. Vérifiez que P ∧ Q n\'est vrai que lorsque P et Q le sont tous deux.',
     },
     'eval-012': {
+      prompt:
+        'Quand P et Q sont tous deux faux, la conjonction P ∧ Q est fausse. Fixez les variables et lisez la ligne résultat.',
+    },
+    'eval-013': {
+      prompt:
+        'Une disjonction n\'est fausse que si les deux disjonctes le sont. Essayez P et Q faux et lisez le résultat.',
+    },
+    'eval-014': {
+      prompt:
+        'Avec P vrai et Q faux, au moins un disjonct est vrai — P ∨ Q doit donc être vrai.',
+    },
+    'eval-015': {
+      prompt:
+        'Quand l\'antécédent P est faux, l\'implication matérielle P → Q est vraie quelle que soit la valeur de Q. Vérifiez cette ligne.',
+    },
+    'eval-016': {
+      prompt:
+        'Un antécédent faux rend P → Q vrai même si Q est vrai. Basculez P et Q et lisez le résultat.',
+    },
+    'eval-017': {
+      prompt:
+        'Quand P et Q ont la même valeur de vérité, la biconditionnelle P ↔ Q est vraie. Ici, les deux sont vrais.',
+    },
+    'eval-018': {
+      prompt:
+        'La falsité concordante satisfait aussi une biconditionnelle : quand P et Q sont tous deux faux, P ↔ Q est vrai.',
+    },
+    'eval-019': {
+      prompt:
+        'P est vrai, donc ¬P doit être faux. Observez la ligne en direct inverser la valeur sous la négation.',
+    },
+    'eval-020': {
+      prompt:
+        'La négation s\'applique après la disjonction entre parenthèses. Suivez le calcul de ¬(P ∨ Q) à partir de P et Q.',
+    },
+    'eval-021': {
+      prompt:
+        "La double négation restitue la valeur initiale : ¬¬P équivaut à P. Fixez P et lisez le résultat doublement nié sur l'arbre.",
+    },
+    'eval-022': {
       prompt:
         "Évaluez la disjonction niée : calculez d'abord P ∨ Q, puis appliquez la négation extérieure.",
     },

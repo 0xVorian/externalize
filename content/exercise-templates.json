@@ -44,93 +44,29 @@
       "formula": "\u00ac(P \u2228 Q)"
     }
   ],
-  "eval": [
-    {
-      "formula": "P \u2227 Q",
-      "initialAssignment": {
-        "P": true,
-        "Q": false
-      }
-    },
-    {
-      "formula": "(P \u2192 Q) \u2194 \u00acR",
-      "initialAssignment": {
-        "P": true,
-        "Q": false,
-        "R": true
-      }
-    },
-    {
-      "formula": "P \u2228 Q",
-      "initialAssignment": {
-        "P": false,
-        "Q": true
-      }
-    },
-    {
-      "formula": "P \u2192 Q",
-      "initialAssignment": {
-        "P": true,
-        "Q": false
-      }
-    },
-    {
-      "formula": "P \u2194 Q",
-      "initialAssignment": {
-        "P": true,
-        "Q": false
-      }
-    },
-    {
-      "formula": "(P \u2228 Q) \u2192 R",
-      "initialAssignment": {
-        "P": false,
-        "Q": false,
-        "R": true
-      }
-    },
-    {
-      "formula": "P \u2227 (Q \u2228 R)",
-      "initialAssignment": {
-        "P": true,
-        "Q": false,
-        "R": true
-      }
-    },
-    {
-      "formula": "\u00ac(P \u2227 Q)",
-      "initialAssignment": {
-        "P": true,
-        "Q": true
-      }
-    },
-    {
-      "formula": "(P \u2192 Q) \u2227 R",
-      "initialAssignment": {
-        "P": true,
-        "Q": false,
-        "R": true
-      }
-    },
-    {
-      "formula": "\u00acP",
-      "initialAssignment": {
-        "P": false
-      }
-    },
-    {
-      "formula": "\u00ac\u00acP",
-      "initialAssignment": {
-        "P": false
-      }
-    },
-    {
-      "formula": "\u00ac(P \u2228 Q)",
-      "initialAssignment": {
-        "P": true,
-        "Q": true
-      }
-    }
+    "eval": [
+    { "formula": "P ∧ Q", "initialAssignment": { "P": true, "Q": false } },
+    { "formula": "(P → Q) ↔ ¬R", "initialAssignment": { "P": true, "Q": false, "R": true } },
+    { "formula": "P ∨ Q", "initialAssignment": { "P": false, "Q": true } },
+    { "formula": "P → Q", "initialAssignment": { "P": true, "Q": false } },
+    { "formula": "P ↔ Q", "initialAssignment": { "P": true, "Q": false } },
+    { "formula": "(P ∨ Q) → R", "initialAssignment": { "P": false, "Q": false, "R": true } },
+    { "formula": "P ∧ (Q ∨ R)", "initialAssignment": { "P": true, "Q": false, "R": true } },
+    { "formula": "¬(P ∧ Q)", "initialAssignment": { "P": true, "Q": true } },
+    { "formula": "(P → Q) ∧ R", "initialAssignment": { "P": true, "Q": false, "R": true } },
+    { "formula": "¬P", "initialAssignment": { "P": false } },
+    { "id": "eval-011", "formula": "P ∧ Q", "initialAssignment": { "P": true, "Q": true } },
+    { "id": "eval-012", "formula": "P ∧ Q", "initialAssignment": { "P": false, "Q": false } },
+    { "id": "eval-013", "formula": "P ∨ Q", "initialAssignment": { "P": false, "Q": false } },
+    { "id": "eval-014", "formula": "P ∨ Q", "initialAssignment": { "P": true, "Q": false } },
+    { "id": "eval-015", "formula": "P → Q", "initialAssignment": { "P": false, "Q": false } },
+    { "id": "eval-016", "formula": "P → Q", "initialAssignment": { "P": false, "Q": true } },
+    { "id": "eval-017", "formula": "P ↔ Q", "initialAssignment": { "P": true, "Q": true } },
+    { "id": "eval-018", "formula": "P ↔ Q", "initialAssignment": { "P": false, "Q": false } },
+    { "id": "eval-019", "formula": "¬P", "initialAssignment": { "P": true } },
+    { "id": "eval-020", "formula": "¬(P ∨ Q)", "initialAssignment": { "P": true, "Q": false } },
+    { "id": "eval-021", "formula": "¬¬P", "initialAssignment": { "P": false } },
+    { "id": "eval-022", "formula": "¬(P ∨ Q)", "initialAssignment": { "P": true, "Q": true } }
   ],
   "fillTruthTable": [
     {

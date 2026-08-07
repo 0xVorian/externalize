@@ -8,7 +8,7 @@ describe('exercise template generator', () => {
   it('loads the default template bank', () => {
     const templates = loadExerciseTemplates();
     expect(templates.scope).toHaveLength(14);
-    expect(templates.eval).toHaveLength(12);
+    expect(templates.eval).toHaveLength(22);
     expect(templates.fillTruthTable).toHaveLength(6);
   });
 
@@ -47,10 +47,10 @@ describe('exercise template generator', () => {
   });
 
   it('formats JSON for tooling', () => {
-    const result = generateExercises(loadExerciseTemplates(), { patterns: ['eval'], startIds: { eval: 11 } });
+    const result = generateExercises(loadExerciseTemplates(), { patterns: ['eval'] });
     const json = JSON.parse(formatJson(result)) as unknown[];
-    expect(json).toHaveLength(12);
-    expect(json[11]).toMatchObject({ id: 'eval-022', type: 'evaluate-formula' });
+    expect(json).toHaveLength(22);
+    expect(json[21]).toMatchObject({ id: 'eval-022', type: 'evaluate-formula' });
   });
 
   it('rejects invalid formulas and out-of-range hidden rows', () => {

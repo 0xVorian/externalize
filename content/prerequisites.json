@@ -469,6 +469,77 @@
       ]
     },
     {
+      "id": "eval-011",
+      "concept": "conjunction",
+      "requiresLessons": [
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "eval-012",
+      "concept": "conjunction",
+      "requiresLessons": [
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "eval-013",
+      "concept": "disjunction",
+      "requiresLessons": [
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "eval-014",
+      "concept": "disjunction",
+      "requiresLessons": [
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "eval-015",
+      "concept": "conditional",
+      "requiresLessons": [
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "eval-016",
+      "concept": "conditional",
+      "requiresLessons": [
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "eval-017",
+      "concept": "biconditional",
+      "requiresLessons": [
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "eval-018",
+      "concept": "biconditional",
+      "requiresLessons": [
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "eval-019",
+      "concept": "negation",
+      "requiresLessons": [
+        "level1-03-neg-guided"
+      ]
+    },
+    {
+      "id": "eval-020",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-06-or-guided",
+        "level1-03-neg-guided"
+      ]
+    },
+    {
       "id": "translate-001",
       "concept": "translation",
       "requiresLessons": [
@@ -553,7 +624,7 @@
     },
     {
 
-      "id": "eval-011",
+      "id": "eval-021",
       "concept": "double-negation",
       "requiresLessons": [
         "level2-04-double-neg-guided"
@@ -567,7 +638,7 @@
       ]
     },
     {
-      "id": "eval-012",
+      "id": "eval-022",
       "concept": "demorgan",
       "requiresLessons": [
         "level2-07-demorgan-watch"
