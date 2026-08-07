@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Translation feedback semantic equivalence: `classifyTranslation` accepts logically equivalent formulas via `engine/equiv/equivalent.ts` when `acceptEquivalent` is set; specific mistake tags (reversed conditional, negation scope, missing parens, wrong atom) are checked before semantic acceptance
+- **Level 2 guided lesson** `level2-09-de-morgan-guided`: live truth row for `¬P ∧ ¬Q`, contrasting the de Morgan equivalent with `¬(P ∨ Q)` under the same assignment
 
 ### Changed
 
