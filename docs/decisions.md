@@ -30,6 +30,8 @@ Recorded decisions and rationale from planning conversations. Revisit entries ma
 
 **Note:** Choose rule details after propositional translation, evaluation, and truth-table interactions feel solid. Proof UI is high complexity.
 
+**Prep doc:** [natural-deduction.md](natural-deduction.md) — mobile layout constraints, minimal rule-set options (Option C → A lean), fill-one-step vs repair-step patterns, subproof UI at ~320px, Phase 4 dependencies. Update this entry when the starter rule set is finalized.
+
 ### Expression representation: AST
 
 **Decision:** All formulas stored and compared as abstract syntax trees.

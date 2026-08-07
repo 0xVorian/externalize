@@ -42,7 +42,7 @@ Tiers reflect **dependency and payoff**, not roadmap phases. Tier 1 should land 
 | **2×2 grid view** | Alternate renderer for small atom sets | Optional spatial view for `P ∧ Q`-style patterns; see [presentation](presentation.md) |
 | **Accessibility (a11y)** | Keyboard paths, focus order, screen-reader labels | Tap-first stays primary; no hover-only affordances |
 | **PWA manifest** | Home-screen install, offline shell | Lightweight; no sync requirement |
-| **Predicate / ND decision docs** | Recorded choices before UI work | Extend [decisions](decisions.md): notation, rule set, mobile layout constraints for proofs |
+| **Predicate / ND decision docs** | Recorded choices before UI work | **ND prep (done):** [natural-deduction.md](natural-deduction.md); predicate logic still TBD; finalize rule set in [decisions](decisions.md) when Phase 5 starts |
 
 ## Agent batch launch plan
 
@@ -108,6 +108,7 @@ Revisit this list only after Phase 3 translation feels instructive on a phone an
 | [Presentation](presentation.md) | When to use truth tables vs parse trees; 2×2 grid notes |
 | [Content model](content-model.md) | Exercise schema, concept graph, progress shape |
 | [Technical decisions](decisions.md) | Platform, notation, authoring, open questions |
+| [Natural deduction (Phase 5 prep)](natural-deduction.md) | Fitch mobile layout, rule-set options, fill/repair exercise patterns |
 | [Design principles](design-principles.md) | Non-negotiable UX constraints for all workstreams |
 | [Internationalization](i18n.md) | EN/FR copy conventions for Level 1 and exercises |
 
