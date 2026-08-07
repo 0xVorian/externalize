@@ -55,6 +55,7 @@ import {
   type LessonState,
 } from './app/lesson-state';
 import { renderApp } from './app/render';
+import { handleTreeKeydown } from './app/tree-keyboard';
 import { renderLessonView } from './app/lesson-render';
 import { renderProgressView } from './app/progress-render';
 import { renderOnboarding } from './app/onboarding-render';
@@ -554,6 +555,12 @@ root.addEventListener('click', (event) => {
 
   if (action === 'next') {
     advancePractice();
+  }
+});
+
+root.addEventListener('keydown', (event) => {
+  if (handleTreeKeydown(event)) {
+    event.preventDefault();
   }
 });
 
