@@ -2,6 +2,41 @@
 
 How we choose **what** to show on screen for evaluation and structure — separate from the engine (which always uses an AST + per-node values).
 
+## Inventory (current content)
+
+Use this when adding exercises or wondering what UI you will see.
+
+### Level 0 — Course
+
+| ID | Title (EN) | Presentation | Notes |
+|----|------------|--------------|-------|
+| `level0-01-letters` | Sentence letters | Card (text) | No formula tree |
+| `level0-02-truth` | Truth assignments | Card (text) | |
+| `level0-03-and` | Conjunction ∧ | Card (text) | Truth-table notation in example block |
+| `level0-04-watch` | Worked cases: P ∧ Q | **4-row truth table** | Highlight steps 1–4 |
+| `level0-05-guided` | Guided: P ∧ Q | **Toggles + live row** | Same table as watch, one row |
+
+### Practice — unlock order
+
+| Order | ID | Formula | Type | Presentation | Likely issues |
+|-------|-----|---------|------|--------------|---------------|
+| 1 | `eval-001` | `P ∧ Q` | Evaluate | **Toggles + live row** | Fixed — was tree |
+| 2 | `eval-002` | `(P → Q) ↔ ¬R` | Evaluate | **Tree + toggles (P,Q,R)** | Nested tree; verify on phone |
+| 3 | `scope-003` | `¬(P ∧ Q)` | Main connective | **Tree (tap only, no values)** | 3 levels; alignment CSS applies |
+| 4 | `scope-001` | `(P → Q) ∧ R` | Main connective | **Tree (tap only)** | 4 nodes; classic “pick ∧ not →” exercise |
+| 5 | `scope-002` | `(P → Q) ↔ ¬R` | Main connective | **Tree (tap only)** | Deepest scope tree in MVP |
+
+### Other screens
+
+| Screen | Presentation |
+|--------|--------------|
+| Progress | Checklists, stats, export/import — no formulas |
+
+### Auto-routing rule (code)
+
+- `usesLiveTruthRow(formula)` → true **only** for exact string `P ∧ Q` (`src/app/truth-table-render.ts`).
+- New flat formulas do **not** automatically get a table; add an explicit rule or exercise flag when authoring.
+
 ## Rule of thumb
 
 | Goal | Prefer |
