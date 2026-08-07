@@ -2,22 +2,22 @@ import type { Formula, TreeNode } from '../ast/types';
 import { findNodeById } from '../render/tree';
 import { connectiveLabel } from '../render/display';
 
-export type FeedbackTag =
+export type ScopeFeedbackTag =
   | 'correct'
   | 'wrong-main-connective'
   | 'selected-subconnective'
   | 'selected-atom'
   | 'selected-operand-not-connective';
 
-export type FeedbackTemplate = Partial<Record<FeedbackTag, string>>;
+export type FeedbackTemplate = Partial<Record<ScopeFeedbackTag, string>>;
 
 export type FeedbackResult = {
   correct: boolean;
-  tag: FeedbackTag;
+  tag: ScopeFeedbackTag;
   message: string;
 };
 
-const DEFAULT_TEMPLATES: Record<FeedbackTag, string> = {
+const DEFAULT_TEMPLATES: Record<ScopeFeedbackTag, string> = {
   correct: 'Correct.',
   'wrong-main-connective':
     'That is not the main connective of the whole formula. The main connective has the widest scope.',
@@ -28,7 +28,7 @@ const DEFAULT_TEMPLATES: Record<FeedbackTag, string> = {
 };
 
 export function resolveFeedback(
-  tag: FeedbackTag,
+  tag: ScopeFeedbackTag,
   templates: FeedbackTemplate = {},
   vars: Record<string, string> = {},
 ): string {

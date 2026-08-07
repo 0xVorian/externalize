@@ -33,8 +33,17 @@ export {
   resolveFeedback,
   checkMainConnectiveSelection,
   expectedMainConnectiveNodeId,
+  classifyTranslation,
+  resolveTranslationFeedback,
 } from './feedback';
-export type { FeedbackTag, FeedbackTemplate, FeedbackResult } from './feedback';
+export type {
+  FeedbackTag,
+  FeedbackTemplate,
+  FeedbackResult,
+  TranslationFeedbackTag,
+  TranslationFeedbackTemplate,
+  TranslationFeedbackResult,
+} from './feedback';
 export {
   generateTruthTable,
   maskTruthTableRows,

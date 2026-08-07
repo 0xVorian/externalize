@@ -9,19 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Progress storage v4: explicit `level1Complete` flag (migrated from v3)
-- Learn tab unit picker (Unit 0 / Unit 1) when both units are unlocked
-- Formula-aware guided-lesson resume snapshots (supports unary `¬P` and arbitrary atom sets)
-- Unit completion toasts on finishing Unit 0 and Unit 1 guided capstones
-- Progress tab Unit 1 checklist uses dedicated heading and status copy
-- **PWA support**: `manifest.json`, app icons (SVG + PNG), install meta tags in `index.html`, optional service worker caching the app shell
-- **Concept map**: `content/prerequisites.json` graph linking concepts, lessons, and exercise prerequisites
-- Progress tab concept map section (and compact "Up next" prerequisite list when exercises are blocked by incomplete sections)
-- README section on installing Externalize to the home screen
-- **`fill-truth-table-cell` practice exercises** (`tt-001`–`tt-005`): partial truth tables with one blank result cell; tap T/F (V/F in French) to submit; engine `validateCell` wires correctness and feedback
-- Partial truth-table renderer for practice (`truth-table-partial` presentation mode)
-- Practice exercises `eval-010` (evaluate `¬P`) and `scope-012` (main connective of `(P ∧ Q) ∧ R`), EN and FR
-- Tiered practice unlock: Unit 0 exercises after introductory unit; Unit 1 bank after all 12 Level 1 lessons
+- Phase 3 translation MVP: `translate-001` with symbol palette, builder compile, and translation feedback classifier
 - **Level 1 learn path (Unit 1 — Connectives)**: 12 lessons covering ¬, ∨, →, and ↔ — concept cards, truth-table watch lessons, and guided live-row tries
 - Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)
 - Guided lesson hints declare target `atom` + `value`; progression generalized beyond `P ∧ Q`
@@ -49,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Learn navigation chains Unit 0 → Unit 1 (`ALL_LEARN_LESSONS`); practice tab unlocks after Unit 0, Unit 1 exercises after Level 1 complete
+- Learn navigation chains Unit 0 → Unit 1 (`ALL_LEARN_LESSONS`); practice still unlocks after Unit 0
 - End of Unit 0 offers “Continue to Unit 1” instead of jumping straight to exercises
 - Watch lesson for `P ∧ Q` uses a truth table (highlighted row) instead of a parse tree
 - Tree and table truth labels follow locale (`V`/`F` in French, `T`/`F` in English)
@@ -64,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 3 translation MVP: `translate-001` with symbol palette, builder compile, and translation feedback classifier
 - MVP-0 mobile UI: vertical formula tree, main-connective tap exercises, evaluation toggles
 - Feedback module (`engine/feedback/`) with tagged scope-selection messages
 - Path-based tree node IDs (`root`, `root.L`, `root.R`, `root.O`) stable across re-renders
@@ -80,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 3 translation MVP: `translate-001` with symbol palette, builder compile, and translation feedback classifier
 - Project documentation: vision brief, design principles, technical decisions, roadmap, content model
 - Phase 1 propositional logic engine (AST, parser, evaluator, equivalence)
 - Mobile-first design constraint and MVP-0 sequencing

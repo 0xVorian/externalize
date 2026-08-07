@@ -1,11 +1,14 @@
-import type { Assignment, FeedbackTag } from '../../engine';
+import type { FeedbackTag } from '../../engine';
 import type { ExerciseDefinition } from './exercises';
 
-export type SkillId = 'practice:identify-main-connective' | 'practice:evaluate-formula' | 'practice:fill-truth-table-cell';
+export type SkillId =
+  | 'practice:identify-main-connective'
+  | 'practice:evaluate-formula'
+  | 'practice:translate-en-to-formula';
 
 export function skillForExercise(exercise: ExerciseDefinition): SkillId {
   if (exercise.type === 'evaluate-formula') return 'practice:evaluate-formula';
-  if (exercise.type === 'fill-truth-table-cell') return 'practice:fill-truth-table-cell';
+  if (exercise.type === 'translate-en-to-formula') return 'practice:translate-en-to-formula';
   return 'practice:identify-main-connective';
 }
 
@@ -27,7 +30,7 @@ export type ResumePoint = {
   watchStep?: number;
   watchComplete?: boolean;
   guidedStep?: number;
-  guidedAssignment?: Assignment;
+  guidedAssignment?: { P: boolean; Q: boolean };
   guidedComplete?: boolean;
   exerciseId?: string;
   updatedAt: string;
@@ -36,8 +39,6 @@ export type ResumePoint = {
 export type ProgressSummary = {
   level0Done: number;
   level0Total: number;
-  level1Done: number;
-  level1Total: number;
   lessonsCompleted: string[];
   exercisesUnlocked: string[];
   exercisesCompleted: string[];
@@ -79,8 +80,6 @@ export function successRate(stat: SkillStat): number {
 export function buildProgressSummary(input: {
   level0Done: number;
   level0Total: number;
-  level1Done: number;
-  level1Total: number;
   lessonsCompleted: string[];
   exercisesUnlocked: string[];
   exercisesCompleted: string[];
@@ -117,8 +116,6 @@ export function buildProgressSummary(input: {
   return {
     level0Done: input.level0Done,
     level0Total: input.level0Total,
-    level1Done: input.level1Done,
-    level1Total: input.level1Total,
     lessonsCompleted: input.lessonsCompleted,
     exercisesUnlocked: input.exercisesUnlocked,
     exercisesCompleted: input.exercisesCompleted,

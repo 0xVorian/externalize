@@ -27,12 +27,7 @@ const PRESENTATION: Record<string, string> = {
   'eval-003': 'truth-table-live',
   'eval-004': 'truth-table-live',
   'eval-005': 'truth-table-live',
-  'tt-001': 'truth-table-partial',
-  'tt-002': 'truth-table-partial',
-  'tt-003': 'truth-table-partial',
   'eval-006': 'tree-eval',
-  'tt-004': 'truth-table-partial',
-  'tt-005': 'truth-table-partial',
   'eval-007': 'tree-eval',
   'eval-008': 'tree-eval',
   'eval-009': 'tree-eval',
@@ -47,8 +42,7 @@ const PRESENTATION: Record<string, string> = {
   'scope-009': 'tree-scope',
   'scope-010': 'tree-scope',
   'scope-011': 'tree-scope',
-  'scope-012': 'tree-scope',
-  'eval-010': 'truth-table-live',
+  'translate-001': 'translation-palette',
 };
 
 describe('presentation inventory', () => {

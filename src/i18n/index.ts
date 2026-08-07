@@ -11,8 +11,9 @@ export {
   getFeedbackDefaults,
   formatTruthValue,
   formatAssignmentLine,
+  translationUi,
 } from './messages';
-export type { ExerciseCopy, UiCopy, ProgressUiCopy } from './messages';
+export type { ExerciseCopy, UiCopy, ProgressUiCopy, TranslationUiCopy } from './messages';
 export {
   learnUi,
   getLessonCopy,
