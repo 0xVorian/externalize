@@ -1,6 +1,6 @@
 import type { Formula } from '../ast/types';
 
-export type RuleId = 'mp';
+export type RuleId = 'mp' | 'and-elim';
 
 export type ProofLineSpec = {
   formula?: string;

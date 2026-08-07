@@ -68,6 +68,7 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'translate-005', type: 'translate-en-to-formula' },
   { id: 'translate-006', type: 'translate-en-to-formula' },
   { id: 'nd-001', type: 'proof-fill-step' },
+  { id: 'nd-002', type: 'proof-fill-step' },
 ];
 
 export function getExerciseDefinition(id: string): ExerciseDefinition | undefined {

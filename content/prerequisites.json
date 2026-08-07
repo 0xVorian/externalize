@@ -552,6 +552,7 @@
       ]
     },
     {
+
       "id": "eval-011",
       "concept": "double-negation",
       "requiresLessons": [
@@ -591,6 +592,15 @@
       "concept": "demorgan",
       "requiresLessons": [
         "level2-07-demorgan-watch"
+      ]
+    },
+    {
+      "id": "nd-002",
+      "concept": "natural-deduction",
+      "requiresLessons": [
+        "level0-05-guided"
+      ]
+    }
       ]
     }
   ]

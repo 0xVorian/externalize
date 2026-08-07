@@ -1,5 +1,5 @@
 export type { RuleId, ProofLineSpec, ProofLine, ProofFillConfig } from './types';
-export { INFERENCE_RULES, applyModusPonens, applyRule } from './rules';
+export { INFERENCE_RULES, applyModusPonens, applyAndElimLeft, applyRule } from './rules';
 export {
   parseProofLines,
   validateProofFillStep,
