@@ -58,15 +58,25 @@ Tests prefer stable `data-action` hooks already used by the app. A minimal `data
 
 ### CI
 
-There is no GitHub Actions workflow in this repository yet. When CI is added, run:
+GitHub Actions runs on every push and pull request to `master` (see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)):
+
+| Job | Steps |
+|-----|-------|
+| `test-and-build` | `npm ci` → `npm test` → `npm run build` |
+| `e2e` | `npm ci` → Playwright Chromium install → `npm run test:e2e` with `CI=true` |
+
+The e2e job runs after unit tests and build succeed. Playwright config enables retries and a single worker when `CI` is set.
+
+To reproduce locally:
 
 ```bash
 npm ci
+npm test && npm run build
 npx playwright install --with-deps chromium
-npm run test:e2e
+CI=1 npm run test:e2e
 ```
 
-Set `CI=1` so Playwright does not reuse an existing server and enables retries.
+If browser smoke tests prove flaky on GitHub runners, disable the `e2e` job temporarily (comment it out or add `if: false`) while keeping `test-and-build` required.
 
 ### First-time setup
 

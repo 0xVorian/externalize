@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- GitHub Actions CI (`.github/workflows/ci.yml`): `npm test` and `npm run build` on push/PR to `master`; Playwright Chromium smoke tests in a follow-up job
+
 ### Changed
 
 - Ignore Playwright `test-results/` and `playwright-report/`; deduplicate `[0.3.0]` changelog bullets from merge integration
