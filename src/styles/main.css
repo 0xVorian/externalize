@@ -604,3 +604,18 @@ button {
     background: #171412;
   }
 }
+
+.concept-map { display: grid; gap: 1rem; }
+.concept-map-row { padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+.concept-map-row:last-child { border-bottom: 0; }
+.concept-map-title { margin: 0 0 0.25rem; font-size: 1rem; }
+.concept-map-reqs { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.8rem; }
+.concept-map-columns { display: grid; gap: 0.75rem; }
+@media (min-width: 640px) { .concept-map-columns { grid-template-columns: 1fr 1fr; } }
+.concept-map-col-title { margin: 0 0 0.35rem; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.concept-map-lessons, .concept-map-exercises { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.concept-map-lesson, .concept-map-exercise { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.85rem; }
+.concept-map-lesson.done, .concept-map-exercise.done { color: var(--muted); }
+.concept-map-exercise.blocked .concept-map-status { color: var(--muted); font-size: 0.75rem; }
+.concept-map-exercise.ready .concept-map-status { color: var(--accent); font-size: 0.75rem; }
+.concept-map-muted { color: var(--muted); font-size: 0.85rem; }

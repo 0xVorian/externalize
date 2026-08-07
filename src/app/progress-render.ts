@@ -4,6 +4,7 @@ import { LEVEL_0_LESSONS, LEVEL_1_LESSONS, PRACTICE_UNLOCK_ORDER } from './lesso
 import { buildProgressSummary, type ProgressSummary } from './progress-tracker';
 import type { ProgressStore } from './storage';
 import { countReviewDue, getUnlockedExerciseIds } from './storage';
+import { renderConceptMap, renderExercisePrerequisiteList } from './concept-map-render';
 import { renderShellHeader } from './shell-render';
 import { learnUi } from '../i18n';
 
@@ -157,6 +158,10 @@ export function renderProgressView(
         ${summary.reviewDue > 0 ? `<p class="progress-meta review-due">${copy.reviewDue(summary.reviewDue)}</p>` : ''}
         <ul class="progress-list">${exerciseItems.join('')}</ul>
       </section>
+
+      ${renderExercisePrerequisiteList(locale, store)}
+
+      ${renderConceptMap(locale, store)}
 
       <section class="progress-card">
         <h2 class="panel-title">${copy.strugglesHeading}</h2>
