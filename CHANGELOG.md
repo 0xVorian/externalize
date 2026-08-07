@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **2×2 watch grid** for binary watch lessons: `renderWatchGrid()` with P on rows, Q on columns, active-cell highlight; used by `level0-04-watch`, `level1-05-or-watch`, `level1-08-imp-watch`, and `level1-11-iff-watch` (`level1-02-neg-watch` stays on the row table)
 - Accessibility audit doc ([`docs/accessibility.md`](docs/accessibility.md)): MVP UI review, fixes applied, known gaps
 - Phase 3 translation MVP: `translate-001` with symbol palette, builder compile, and translation feedback classifier
+- Translation exercises `translate-002`–`translate-006`: negation scope, missing parentheses, reversed conditional, biconditional confusion; try-again flow on incorrect answers
 - Fill-truth-table-cell practice exercises (`tt-001`–`tt-005`) with partial-table UI and cell validation
 - PWA shell (service worker, manifest) and progress concept map
 - Level 1 UX polish: storage v4, unit picker, formula-aware resume, toast notices

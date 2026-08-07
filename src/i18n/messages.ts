@@ -25,6 +25,7 @@ export type UiCopy = {
   treeNodeSelectAria: (label: string) => string;
   treeNodeDisplayAria: (label: string, value?: string) => string;
   continue: string;
+  tryAgain: string;
   nextExercise: string;
   valuesUpdated: string;
   trueLabel: string;
@@ -210,6 +211,26 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-004': { prompt: 'Three letters, one blank. Fill the result for (P → Q) ∧ R when P and Q are true and R is false.', cellCorrect: 'Correct — the implication is true, but the conjunction fails because R is false.', cellWrong: 'When P and Q are true, (P → Q) is true; with R false, the whole conjunction is false.' },
     'tt-005': { prompt: 'Fill the missing biconditional value: P ↔ Q when P is false and Q is true.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
     'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
+    'translate-002': {
+      prompt: 'It is not the case that both the gate is open and the alarm is on. Build the formula.',
+      feedback: { 'negation-scope': 'Negation must cover the whole conjunction: ¬(P ∧ Q), not ¬P ∧ Q.' },
+    },
+    'translate-003': {
+      prompt: 'If it rains, then the game is cancelled, and the field is closed. Build the formula.',
+      feedback: { 'missing-parens': 'Group the conditional first: (P → Q) before conjoining with R.' },
+    },
+    'translate-004': {
+      prompt: 'If the alarm sounds, then there is smoke. Build the matching formula.',
+      feedback: { 'reversed-conditional': 'The alarm sounding is P — it comes before the conditional arrow.' },
+    },
+    'translate-005': {
+      prompt: 'The door is locked if and only if the key is missing. Build the formula.',
+      feedback: { 'wrong-main-connective': '"If and only if" calls for ↔, not →.' },
+    },
+    'translate-006': {
+      prompt: 'It is not the case that the gate is open or the window is open. Build the formula.',
+      feedback: { 'negation-scope': 'Negation applies to the whole disjunction: ¬(P ∨ Q), not ¬P ∨ Q.' },
+    },
   },
   fr: {
     'scope-001': {
@@ -360,6 +381,7 @@ const UI: Record<Locale, UiCopy> = {
     treeNodeDisplayAria: (label, value) =>
       value ? `${label}, ${value}` : label,
     continue: 'Continue',
+    tryAgain: 'Try again',
     nextExercise: 'Next exercise',
     valuesUpdated: 'Truth values updated at each subformula.',
     trueLabel: 'T',
@@ -386,6 +408,7 @@ const UI: Record<Locale, UiCopy> = {
     treeNodeDisplayAria: (label, value) =>
       value ? `${label}, ${value}` : label,
     continue: 'Continuer',
+    tryAgain: 'Réessayer',
     nextExercise: 'Exercice suivant',
     valuesUpdated: 'Les valeurs de vérité se mettent à jour à chaque sous-formule.',
     trueLabel: 'V',

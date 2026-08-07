@@ -66,6 +66,11 @@ export const LEVEL_1_PRACTICE_UNLOCK_ORDER = [
   'scope-011',
   'scope-002',
   'translate-001',
+  'translate-002',
+  'translate-003',
+  'translate-004',
+  'translate-005',
+  'translate-006',
 ] as const;
 
 export const PRACTICE_UNLOCK_ORDER = [

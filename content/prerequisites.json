@@ -371,6 +371,43 @@
       "requiresLessons": [
         "level1-09-imp-guided"
       ]
+    },
+    {
+      "id": "translate-002",
+      "concept": "translation",
+      "requiresLessons": [
+        "level1-03-neg-guided"
+      ]
+    },
+    {
+      "id": "translate-003",
+      "concept": "translation",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "translate-004",
+      "concept": "translation",
+      "requiresLessons": [
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "translate-005",
+      "concept": "translation",
+      "requiresLessons": [
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "translate-006",
+      "concept": "translation",
+      "requiresLessons": [
+        "level1-03-neg-guided",
+        "level1-06-or-guided"
+      ]
     }
   ]
 }

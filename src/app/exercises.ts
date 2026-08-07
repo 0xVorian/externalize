@@ -39,6 +39,11 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'tt-004', type: 'fill-truth-table-cell', formula: '(P → Q) ∧ R', hiddenRowIndex: 6 },
   { id: 'tt-005', type: 'fill-truth-table-cell', formula: 'P ↔ Q', hiddenRowIndex: 1 },
   { id: 'translate-001', type: 'translate-en-to-formula' },
+  { id: 'translate-002', type: 'translate-en-to-formula' },
+  { id: 'translate-003', type: 'translate-en-to-formula' },
+  { id: 'translate-004', type: 'translate-en-to-formula' },
+  { id: 'translate-005', type: 'translate-en-to-formula' },
+  { id: 'translate-006', type: 'translate-en-to-formula' },
 ];
 
 export function getExerciseDefinition(id: string): ExerciseDefinition | undefined {

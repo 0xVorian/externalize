@@ -34,6 +34,7 @@ import {
   paletteBackspace,
   paletteUndo,
   checkTranslation,
+  tryAgainTranslation,
   type AppState,
 } from './app/state';
 import {
@@ -453,17 +454,16 @@ root.addEventListener('click', (event) => {
   }
   if (action === 'check-translation') {
     practiceState = checkTranslation(ensurePracticeState());
-    if (practiceState.phase === 'answered' && practiceState.feedback) {
-      persistProgress(
-        recordResult(
-          progress,
-          practiceState.exercise.id,
-          practiceState.feedback.correct,
-          practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
-        ),
-      );
+    if (practiceState.phase === 'answered' && practiceState.feedback?.correct) {
+      persistProgress(recordResult(progress, practiceState.exercise.id, true));
       refreshPracticeQueue();
     }
+    render();
+    return;
+  }
+
+  if (action === 'try-again') {
+    practiceState = tryAgainTranslation(ensurePracticeState());
     render();
     return;
   }
