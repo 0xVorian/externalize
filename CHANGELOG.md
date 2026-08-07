@@ -10,12 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Tree keyboard navigation** for main-connective scope exercises: roving tabindex and Arrow/Home/End keys on parse-tree connective buttons (`src/app/tree-keyboard.ts`); documented in [`docs/accessibility.md`](docs/accessibility.md)
-
 - Translation feedback semantic equivalence: `classifyTranslation` accepts logically equivalent formulas via `engine/equiv/equivalent.ts` when `acceptEquivalent` is set; specific mistake tags (reversed conditional, negation scope, missing parens, wrong atom) are checked before semantic acceptance
 - **Level 2 guided lesson** `level2-09-de-morgan-guided`: live truth row for `¬P ∧ ¬Q`, contrasting the de Morgan equivalent with `¬(P ∨ Q)` under the same assignment
 - **Level 2 practice tier** (`eval-021`, `scope-013`, `eval-022`, `counter-005`, `scope-014`, `tt-006`): six exercises on double negation, connective precedence, and de Morgan's laws; unlocks sequentially after all Unit 2 lessons (`level2Complete`); progress UI adds Unit 2 exercise subsection
 - **Natural deduction exercise** (`nd-002`, `proof-fill-step`): fill-one-step proof with ∧ elimination (left conjunct); unlocks after `nd-001`
 - **Evaluate-formula expansion** (`eval-011`–`eval-020`): ten new exercises — nine Level 1 flat-binary rows with varied assignments plus one nested `¬(P ∨ Q)` tree eval; template bank, unlock order, prerequisites, and EN/FR prompts
+- Playwright smoke tests: onboarding skip/finish (`e2e/smoke/onboarding.spec.ts`), `counter-001` find-counterexample (`e2e/smoke/counter-001.spec.ts`), `translate-002` try-again flow (`e2e/smoke/translate-002.spec.ts`)
 
 ### Changed
 
