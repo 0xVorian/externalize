@@ -1,6 +1,6 @@
 import type { Assignment, FeedbackTemplate } from '../../engine';
 
-export type ExerciseType = 'identify-main-connective' | 'evaluate-formula' | 'fill-truth-table-cell' | 'translate-en-to-formula';
+export type ExerciseType = 'identify-main-connective' | 'evaluate-formula' | 'fill-truth-table-cell' | 'translate-en-to-formula' | 'proof-fill-step';
 
 export type ExerciseDefinition = {
   id: string;
@@ -39,6 +39,7 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'tt-004', type: 'fill-truth-table-cell', formula: '(P → Q) ∧ R', hiddenRowIndex: 6 },
   { id: 'tt-005', type: 'fill-truth-table-cell', formula: 'P ↔ Q', hiddenRowIndex: 1 },
   { id: 'translate-001', type: 'translate-en-to-formula' },
+  { id: 'nd-001', type: 'proof-fill-step' },
 ];
 
 export function getExerciseDefinition(id: string): ExerciseDefinition | undefined {

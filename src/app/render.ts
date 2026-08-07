@@ -6,6 +6,7 @@ import { renderLiveTruthRow, renderPartialTruthTable, usesLiveTruthRow } from '.
 import { cellSubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
 import { renderTranslationExerciseBody, renderTranslationActions } from './translation/translation-render';
+import { renderProofExerciseBody, renderProofActions } from './proof/proof-render';
 
 function nodeValueClass(kind: TreeNode['kind']): string {
   return kind === 'atom' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
@@ -96,6 +97,9 @@ function renderExerciseBody(state: AppState): string {
   if (state.exercise.type === 'fill-truth-table-cell') {
     return renderFillTruthTableBody(state);
   }
+  if (state.exercise.type === 'proof-fill-step') {
+    return renderProofExerciseBody(state);
+  }
   return renderScopeBody(state);
 }
 
@@ -119,7 +123,7 @@ export function renderApp(
           : '';
 
   const formulaLine =
-    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell'
+    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'proof-fill-step'
       ? ''
       : `<p class="formula-display" aria-label="Formula">${state.exercise.formula}</p>`;
 
@@ -165,6 +169,11 @@ export function renderApp(
           ${
             state.exercise.type === 'translate-en-to-formula'
               ? renderTranslationActions(state)
+              : ''
+          }
+          ${
+            state.exercise.type === 'proof-fill-step'
+              ? renderProofActions(state)
               : ''
           }
         </div>

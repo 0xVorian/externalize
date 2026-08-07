@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Natural deduction fill-one-step prototype** (`nd-001`): Fitch-style three-line proof with one missing step; tap →E (modus ponens) and cite premises; engine validates MP only; unlocks after Level 1 (`translate-001`)
 - Phase 3 translation MVP: `translate-001` with symbol palette, builder compile, and translation feedback classifier
 - **Level 1 learn path (Unit 1 — Connectives)**: 12 lessons covering ¬, ∨, →, and ↔ — concept cards, truth-table watch lessons, and guided live-row tries
 - Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)

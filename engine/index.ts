@@ -43,7 +43,22 @@ export type {
   TranslationFeedbackTag,
   TranslationFeedbackTemplate,
   TranslationFeedbackResult,
+  ProofFeedbackTag,
 } from './feedback';
+export {
+  parseProofLines,
+  validateProofFillStep,
+  INFERENCE_RULES,
+  applyModusPonens,
+  applyRule,
+} from './proof';
+export type {
+  RuleId,
+  ProofLineSpec,
+  ProofLine,
+  ProofFillConfig,
+  ProofFillResult,
+} from './proof';
 export {
   generateTruthTable,
   maskTruthTableRows,

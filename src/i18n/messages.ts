@@ -48,6 +48,9 @@ const FEEDBACK_DEFAULTS_EN: Record<FeedbackTag, string> = {
   'equivalent-but-noncanonical': 'Equivalent but not canonical.',
   incomplete: 'Formula incomplete.',
   'unbalanced-parens': 'Unbalanced parentheses.',
+  'wrong-rule-for-premises': 'Modus ponens needs a conditional and its antecedent on the cited lines.',
+  'wrong-citation': 'Those line numbers do not match what this rule requires.',
+  'conclusion-does-not-follow': 'That step does not yield the expected formula.',
 };
 
 /** French: logique propositionnelle (connecteur principal, portée, formule atomique). Independent wording — not a translation of the English strings. */
@@ -70,6 +73,9 @@ const FEEDBACK_DEFAULTS_FR: Record<FeedbackTag, string> = {
   'equivalent-but-noncanonical': 'Équivalent mais non canonique.',
   incomplete: 'Formule incomplète.',
   'unbalanced-parens': 'Parenthèses déséquilibrées.',
+  'wrong-rule-for-premises': 'Le modus ponens exige une implication et son antécédent sur les lignes citées.',
+  'wrong-citation': 'Ces numéros de ligne ne correspondent pas à ce que la règle exige.',
+  'conclusion-does-not-follow': 'Cette étape ne produit pas la formule attendue.',
 };
 
 const FEEDBACK_DEFAULTS: Record<Locale, Record<FeedbackTag, string>> = {
@@ -205,6 +211,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-004': { prompt: 'Three letters, one blank. Fill the result for (P → Q) ∧ R when P and Q are true and R is false.', cellCorrect: 'Correct — the implication is true, but the conjunction fails because R is false.', cellWrong: 'When P and Q are true, (P → Q) is true; with R false, the whole conjunction is false.' },
     'tt-005': { prompt: 'Fill the missing biconditional value: P ↔ Q when P is false and Q is true.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
     'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
+    'nd-001': { prompt: 'Complete the proof: choose modus ponens and cite the lines that justify Q.', feedback: { correct: 'Correct — from P → Q and P you derive Q by → elimination (modus ponens).', incomplete: 'Select →E (modus ponens), then tap the premise lines to cite.', 'wrong-rule-for-premises': '→E needs a conditional and its antecedent among the cited lines.', 'wrong-citation': 'Cite the conditional and the matching antecedent (lines 1 and 2).', 'conclusion-does-not-follow': 'That combination does not yield Q on this line.' } },
   },
   fr: {
     'scope-001': {
@@ -333,6 +340,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-004': { prompt: 'Trois variables, une case vide. Donnez le résultat de (P → Q) ∧ R lorsque P et Q sont vrais et R est faux.', cellCorrect: 'Exact — l\'implication est vraie, mais la conjonction échoue car R est faux.', cellWrong: 'Quand P et Q sont vrais, (P → Q) est vrai ; avec R faux, la conjonction entière est fausse.' },
     'tt-005': { prompt: 'Complétez la biconditionnelle manquante : P ↔ Q lorsque P est faux et Q est vrai.', cellCorrect: 'Exact — une biconditionnelle n\'est vraie que si les deux côtés coïncident.', cellWrong: 'P et Q ont ici des valeurs différentes, donc P ↔ Q est faux.' },
     'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
+    'nd-001': { prompt: 'Complétez la démonstration : choisissez le modus ponens et citez les lignes qui justifient Q.', feedback: { correct: 'Exact — de P → Q et P on obtient Q par élimination de → (modus ponens).', incomplete: 'Sélectionnez →E (modus ponens), puis touchez les lignes de prémisses à citer.', 'wrong-rule-for-premises': '→E exige une implication et son antécédent parmi les lignes citées.', 'wrong-citation': 'Citez l\'implication et l\'antécédent correspondant (lignes 1 et 2).', 'conclusion-does-not-follow': 'Cette combinaison ne produit pas Q à cette ligne.' } },
   },
 };
 
@@ -402,7 +410,7 @@ export function formatAssignmentLine(
   return `${copy.assignment}: ${parts.join(' , ')}`;
 }
 
-export type TranslationUiCopy={atomKeyTitle:string;previewTitle:string;previewAria:string;previewEmpty:string;check:string;compileHint:(c:string)=>string};const TRANSLATION_UI:Record<Locale,TranslationUiCopy>={en:{atomKeyTitle:'Sentence letters',previewTitle:'Your formula',previewAria:'Preview',previewEmpty:'Tap symbols below.',check:'Check',compileHint:(c)=>c==='unbalanced-parens'?'Unbalanced parentheses.':'Keep building.'},fr:{atomKeyTitle:'Variables',previewTitle:'Votre formule',previewAria:'Aperçu',previewEmpty:'Touchez les symboles.',check:'Vérifier',compileHint:(c)=>c==='unbalanced-parens'?'Parenthèses déséquilibrées.':'Continuez.'}};export function translationUi(l:Locale){return TRANSLATION_UI[l];}
+export type TranslationUiCopy={atomKeyTitle:string;previewTitle:string;previewAria:string;previewEmpty:string;check:string;compileHint:(c:string)=>string};const TRANSLATION_UI:Record<Locale,TranslationUiCopy>={en:{atomKeyTitle:'Sentence letters',previewTitle:'Your formula',previewAria:'Preview',previewEmpty:'Tap symbols below.',check:'Check',compileHint:(c)=>c==='unbalanced-parens'?'Unbalanced parentheses.':'Keep building.'},fr:{atomKeyTitle:'Variables',previewTitle:'Votre formule',previewAria:'Aperçu',previewEmpty:'Touchez les symboles.',check:'Vérifier',compileHint:(c)=>c==='unbalanced-parens'?'Parenthèses déséquilibrées.':'Continuez.'}};export type ProofUiCopy={panelAria:string;ruleTitle:string;ruleMp:string;premise:string;missingLine:string;citeHint:string;check:string};const PROOF_UI:Record<Locale,ProofUiCopy>={en:{panelAria:'Proof',ruleTitle:'Inference rule',ruleMp:'→E (modus ponens)',premise:'Premise',missingLine:'Fill this line',citeHint:'Tap line numbers to cite, then check.',check:'Check step'},fr:{panelAria:'Démonstration',ruleTitle:"Règle d'inférence",ruleMp:'→E (modus ponens)',premise:'Prémisse',missingLine:'Compléter cette ligne',citeHint:'Touchez les numéros de ligne à citer, puis vérifiez.',check:"Vérifier l'étape"}};export function proofUi(locale:Locale){return PROOF_UI[locale];}export function translationUi(l:Locale){return TRANSLATION_UI[l];}
 export function getExerciseCopy(locale: Locale, exerciseId: string): ExerciseCopy {
   const copy = EXERCISE_COPY[locale][exerciseId];
   if (!copy) {

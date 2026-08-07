@@ -9,7 +9,11 @@ import {
   generateTruthTable,
   maskTruthTableRows,
   validateCell,
+  parseProofLines,
+  validateProofFillStep,
   type TreeNode,
+  type ProofLine,
+  type RuleId,
   type Assignment,
   type FeedbackResult,
   type PartialTruthTable,
@@ -26,6 +30,7 @@ import {
   getTranslationExerciseConfig,
   type BuilderReducerState,
 } from './translation';
+import { getProofExerciseConfig } from './proof/exercise-config';
 
 export type AppPhase = 'ready' | 'answered';
 
@@ -42,6 +47,10 @@ export type AppState = {
   message: string | null;
   submittedCell: boolean | null;
   partialTable: PartialTruthTable | null;
+  proofLines: ProofLine[];
+  proofRule: RuleId | null;
+  proofCites: number[];
+  proofDerivedFormula: string | null;
 };
 
 function placeholderTree(): TreeNode {
@@ -79,6 +88,35 @@ export function createState(locale: Locale, exercise: ExerciseDefinition): AppSt
       message: null,
       submittedCell: null,
       partialTable: null,
+      proofLines: [],
+      proofRule: null,
+      proofCites: [],
+      proofDerivedFormula: null,
+    };
+  }
+
+  if (exercise.type === 'proof-fill-step') {
+    const config = getProofExerciseConfig(exercise.id);
+    if (!config) {
+      throw new Error(`Missing proof config for ${exercise.id}`);
+    }
+    return {
+      locale,
+      exercise,
+      prompt,
+      phase: 'ready',
+      selectedNodeId: null,
+      assignment: {},
+      tree: placeholderTree(),
+      builder: createBuilderReducerState(),
+      feedback: null,
+      message: null,
+      submittedCell: null,
+      partialTable: null,
+      proofLines: parseProofLines(config.lines),
+      proofRule: null,
+      proofCites: [],
+      proofDerivedFormula: null,
     };
   }
 
@@ -107,6 +145,10 @@ export function createState(locale: Locale, exercise: ExerciseDefinition): AppSt
     message: null,
     submittedCell: null,
     partialTable: buildPartialTable(exercise),
+    proofLines: [],
+    proofRule: null,
+    proofCites: [],
+    proofDerivedFormula: null,
   };
 }
 
@@ -251,6 +293,34 @@ export function setAtomValue(state: AppState, atom: string, value: boolean): App
   };
 }
 
+export function selectProofRule(state: AppState, rule: RuleId): AppState {
+  if (state.exercise.type !== 'proof-fill-step' || state.phase === 'answered') return state;
+  return { ...state, proofRule: state.proofRule === rule ? null : rule, feedback: null, message: null };
+}
+
+export function toggleProofCitation(state: AppState, lineNumber: number): AppState {
+  if (state.exercise.type !== 'proof-fill-step' || state.phase === 'answered') return state;
+  const cites = state.proofCites.includes(lineNumber)
+    ? state.proofCites.filter((n) => n !== lineNumber)
+    : [...state.proofCites, lineNumber];
+  return { ...state, proofCites: cites, feedback: null, message: null };
+}
+
+export function checkProofStep(state: AppState): AppState {
+  if (state.exercise.type !== 'proof-fill-step' || state.phase === 'answered') return state;
+  const config = getProofExerciseConfig(state.exercise.id);
+  if (!config) return state;
+  const templates = getFeedbackTemplates(state.locale, state.exercise.id);
+  const result = validateProofFillStep(config, state.proofLines, state.proofRule, state.proofCites, templates);
+  return {
+    ...state,
+    phase: 'answered',
+    feedback: { correct: result.correct, tag: result.tag, message: result.message },
+    message: result.message,
+    proofDerivedFormula: result.derivedFormula,
+  };
+}
+
 export function applyLocale(state: AppState, locale: Locale): AppState {
   const prompt = getExerciseCopy(locale, state.exercise.id).prompt;
   const next: AppState = { ...state, locale, prompt };
@@ -276,6 +346,12 @@ export function applyLocale(state: AppState, locale: Locale): AppState {
         ? validateCell(parse(state.exercise.formula!), assignment, state.submittedCell).correct
         : false;
     return { ...next, message: getCellFeedback(locale, state.exercise.id, correct) };
+  }
+
+  if (state.phase === 'answered' && state.exercise.type === 'proof-fill-step' && state.feedback) {
+    const templates: Record<string, string> = getFeedbackTemplates(locale, state.exercise.id) as Record<string, string>;
+    const message = templates[state.feedback.tag] ?? state.feedback.message;
+    return { ...next, feedback: { ...state.feedback, message }, message };
   }
 
   if (state.message === ui(state.locale).valuesUpdated) {
@@ -306,6 +382,9 @@ export function isExerciseComplete(state: AppState): boolean {
   }
   if (state.exercise.type === 'fill-truth-table-cell') {
     return cellSubmissionCorrect(state) === true;
+  }
+  if (state.exercise.type === 'proof-fill-step') {
+    return state.feedback?.correct === true;
   }
   return state.exercise.type === 'identify-main-connective' && state.feedback?.correct === true;
 }

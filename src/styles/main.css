@@ -606,3 +606,17 @@ button {
 }
 
 .symbol-palette{margin-top:1rem}.palette-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem}.palette-button{min-width:44px;min-height:44px;padding:.5rem .75rem;border:1px solid #ccc;border-radius:8px}.built-formula{font-family:ui-monospace,monospace;font-size:1.25rem}
+
+.proof-panel { margin-top: 0.75rem; }
+.proof-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.proof-line { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: center; padding: 0.5rem 0.65rem; border: 1px solid var(--border); border-radius: 0.65rem; background: var(--surface); }
+.proof-line-missing { border-style: dashed; background: var(--accent-soft); }
+.proof-line-head { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.proof-line-num { display: inline-flex; align-items: center; justify-content: center; min-width: var(--tap-min); min-height: var(--tap-min); font-weight: 600; }
+.proof-formula { font-family: ui-monospace, monospace; font-size: 1rem; overflow-wrap: anywhere; }
+.proof-just { font-size: 0.8rem; color: var(--muted); text-align: right; }
+.proof-palette { margin-top: 1rem; }
+.proof-rule-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.proof-rule-btn, .proof-cite-chip { min-width: var(--tap-min); min-height: var(--tap-min); padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 0.65rem; background: #fff; cursor: pointer; font-size: 0.9rem; }
+.proof-rule-btn.selected, .proof-cite-chip.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.proof-hint { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--muted); }
