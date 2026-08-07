@@ -41,6 +41,45 @@ button {
   font-size: 1.6rem;
 }
 
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.language-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.lang-button {
+  min-width: var(--tap-min);
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.lang-button.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.lang-button:not(.active):hover,
+.lang-button:not(.active):focus-visible {
+  background: var(--border);
+  color: var(--text);
+}
+
 .eyebrow,
 .queue-meta,
 .panel-title {

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- English / French language toggle (EN | FR) in the header, available at any time
+- Locale persisted in `localStorage`; mid-exercise switch re-translates prompts and feedback
+- `src/i18n/` module with UI strings, exercise copy, and feedback templates for both locales
+
 ## [0.2.0] - 2026-08-07
 
 ### Added

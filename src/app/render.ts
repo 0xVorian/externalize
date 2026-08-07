@@ -1,4 +1,5 @@
 import type { TreeNode } from '../../engine';
+import { ui } from '../i18n';
 import type { AppState } from './state';
 
 function truthLabel(value: boolean | undefined): string {
@@ -6,6 +7,11 @@ function truthLabel(value: boolean | undefined): string {
     return '—';
   }
   return value ? 'T' : 'F';
+}
+
+function formatTruthWord(state: AppState, value: boolean): string {
+  const copy = ui(state.locale);
+  return value ? copy.trueLabel : copy.falseLabel;
 }
 
 function renderTreeNode(node: TreeNode, state: AppState): string {
@@ -20,7 +26,7 @@ function renderTreeNode(node: TreeNode, state: AppState): string {
 
   const valueHtml =
     state.exercise.type === 'evaluate-formula'
-      ? `<span class="node-value" aria-label="value ${truthLabel(node.value)}">${truthLabel(node.value)}</span>`
+      ? `<span class="node-value" aria-label="${ui(state.locale).valueAria(truthLabel(node.value))}">${truthLabel(node.value)}</span>`
       : '';
 
   const children = node.children.map((child) => renderTreeNode(child, state)).join('');
@@ -37,10 +43,11 @@ function renderTreeNode(node: TreeNode, state: AppState): string {
 }
 
 function renderAtomToggles(state: AppState): string {
+  const copy = ui(state.locale);
   const atoms = Object.keys(state.assignment).sort();
   return `
-    <section class="atom-panel" aria-label="Truth assignment">
-      <h2 class="panel-title">Assignment</h2>
+    <section class="atom-panel" aria-label="${copy.assignmentAria}">
+      <h2 class="panel-title">${copy.assignment}</h2>
       <div class="atom-toggles">
         ${atoms
           .map(
@@ -53,7 +60,7 @@ function renderAtomToggles(state: AppState): string {
             aria-pressed="${state.assignment[atom]}"
           >
             <span class="atom-name">${atom}</span>
-            <span class="atom-value">${state.assignment[atom] ? 'true' : 'false'}</span>
+            <span class="atom-value">${formatTruthWord(state, state.assignment[atom])}</span>
           </button>
         `,
           )
@@ -63,7 +70,32 @@ function renderAtomToggles(state: AppState): string {
   `;
 }
 
+function renderLanguageToggle(state: AppState): string {
+  const locales = ['en', 'fr'] as const;
+  return `
+    <div class="language-toggle" role="group" aria-label="Language">
+      ${locales
+        .map(
+          (locale) => `
+        <button
+          type="button"
+          class="lang-button ${state.locale === locale ? 'active' : ''}"
+          data-action="set-locale"
+          data-locale="${locale}"
+          aria-pressed="${state.locale === locale}"
+          title="${ui(state.locale).switchTo(locale)}"
+        >
+          ${locale.toUpperCase()}
+        </button>
+      `,
+        )
+        .join('')}
+    </div>
+  `;
+}
+
 export function renderApp(state: AppState, queueSize: number): string {
+  const copy = ui(state.locale);
   const feedbackClass = state.feedback
     ? state.feedback.correct
       ? 'feedback-correct'
@@ -73,18 +105,21 @@ export function renderApp(state: AppState, queueSize: number): string {
       : '';
 
   return `
-    <main class="app">
+    <main class="app" lang="${state.locale}">
       <header class="app-header">
-        <p class="eyebrow">Externalize · MVP-0</p>
-        <h1>Practice</h1>
-        <p class="queue-meta">${queueSize} item${queueSize === 1 ? '' : 's'} in review queue</p>
+        <div class="header-row">
+          <p class="eyebrow">${copy.eyebrow}</p>
+          ${renderLanguageToggle(state)}
+        </div>
+        <h1>${copy.practice}</h1>
+        <p class="queue-meta">${copy.queueMeta(queueSize)}</p>
       </header>
 
       <article class="exercise-card">
-        <p class="exercise-prompt">${state.exercise.prompt}</p>
+        <p class="exercise-prompt">${state.prompt}</p>
         <p class="formula-display" aria-label="Formula">${state.exercise.formula}</p>
 
-        <section class="tree-panel" aria-label="Formula tree">
+        <section class="tree-panel" aria-label="${copy.formulaTreeAria}">
           <ul class="tree-root">${renderTreeNode(state.tree, state)}</ul>
         </section>
 
@@ -99,12 +134,12 @@ export function renderApp(state: AppState, queueSize: number): string {
         <div class="actions">
           ${
             state.exercise.type === 'identify-main-connective' && state.phase === 'answered'
-              ? `<button type="button" class="primary" data-action="next">Continue</button>`
+              ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>`
               : ''
           }
           ${
             state.exercise.type === 'evaluate-formula'
-              ? `<button type="button" class="secondary" data-action="next">Next exercise</button>`
+              ? `<button type="button" class="secondary" data-action="next">${copy.nextExercise}</button>`
               : ''
           }
         </div>

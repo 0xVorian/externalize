@@ -1,5 +1,5 @@
 import './styles/main.css';
-import { EXERCISES, getExercise } from './app/exercises';
+import { EXERCISE_DEFINITIONS, getExerciseDefinition } from './app/exercises';
 import {
   loadProgress,
   saveProgress,
@@ -7,8 +7,9 @@ import {
   pickNextExerciseId,
   recordResult,
 } from './app/storage';
-import { createState, selectNode, toggleAtom, isExerciseComplete } from './app/state';
+import { createState, selectNode, toggleAtom, applyLocale, isExerciseComplete } from './app/state';
 import { renderApp } from './app/render';
+import { loadLocale, saveLocale, type Locale } from './i18n';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) {
@@ -17,30 +18,43 @@ if (!appRoot) {
 
 const root: HTMLDivElement = appRoot;
 
+let locale: Locale = loadLocale();
+
 let progress = seedQueue(
   loadProgress(),
-  EXERCISES.map((exercise) => exercise.id),
+  EXERCISE_DEFINITIONS.map((exercise) => exercise.id),
 );
 
 function currentExerciseId(): string {
   return pickNextExerciseId(
     progress,
-    EXERCISES.map((exercise) => exercise.id),
+    EXERCISE_DEFINITIONS.map((exercise) => exercise.id),
   );
 }
 
 function loadExercise(id: string) {
-  const exercise = getExercise(id);
+  const exercise = getExerciseDefinition(id);
   if (!exercise) {
     throw new Error(`Unknown exercise: ${id}`);
   }
-  return createState(exercise);
+  return createState(locale, exercise);
 }
 
 let state = loadExercise(currentExerciseId());
 
 function render(): void {
+  document.documentElement.lang = state.locale;
   root.innerHTML = renderApp(state, progress.queue.length);
+}
+
+function setLocale(nextLocale: Locale): void {
+  if (nextLocale === locale) {
+    return;
+  }
+  locale = nextLocale;
+  saveLocale(locale);
+  state = applyLocale(state, locale);
+  render();
 }
 
 function advance(): void {
@@ -51,7 +65,7 @@ function advance(): void {
 
   const nextId = pickNextExerciseId(
     progress,
-    EXERCISES.map((exercise) => exercise.id),
+    EXERCISE_DEFINITIONS.map((exercise) => exercise.id),
   );
   state = loadExercise(nextId);
   render();
@@ -65,6 +79,14 @@ root.addEventListener('click', (event) => {
   }
 
   const action = button.dataset.action;
+
+  if (action === 'set-locale') {
+    const nextLocale = button.dataset.locale;
+    if (nextLocale === 'en' || nextLocale === 'fr') {
+      setLocale(nextLocale);
+    }
+    return;
+  }
 
   if (action === 'select-node') {
     const nodeId = button.dataset.nodeId;
