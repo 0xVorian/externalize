@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Future work plan** (`docs/future-work-plan.md`): tiered workstreams, agent batch A/B/C plan, and deferred-scope list — separate from the app roadmap
 - **Progress tab**: resume where you left off, lesson/exercise checklist, review-due count
 - Skill tracking: surfaces what feels easy vs. what you struggle with (from attempt history)
 - Frequent error tags (e.g. picking a sub-connective instead of the main one)
