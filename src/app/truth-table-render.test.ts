@@ -67,7 +67,7 @@ describe('truth-table-render', () => {
 
     it('matches snapshot for ¬P live row', () => {
       expect(normalizeHtml(renderLiveTruthRow('en', '¬P', { P: true }))).toMatchInlineSnapshot(
-        `"<div class=\"truth-table-wrap\"> <table class=\"truth-table\" aria-label=\"Truth table for ¬P\"> <thead> <tr> <th scope=\"col\">P</th> <th scope=\"col\">¬P</th> </tr> </thead> <tbody> <tr class=\"truth-table-row active\"> <td>T</td> <td class=\"result-cell\">F</td> </tr> </tbody> </table> </div>"`,
+        `"<div class="truth-table-wrap"> <table class="truth-table" aria-label="Truth table for ¬P"> <thead> <tr> <th scope="col">P</th> <th scope="col">¬P</th> </tr> </thead> <tbody> <tr class="truth-table-row active" aria-current="step"> <td>T</td> <td class="result-cell">F</td> </tr> </tbody> </table> </div>"`,
       );
     });
   });
