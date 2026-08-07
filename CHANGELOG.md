@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Predicate logic design prep** ([`docs/predicate-logic.md`](docs/predicate-logic.md)): AST extension sketch (terms, predicates, quantifiers), notation choices, parser/renderer/exercise impact, explicit Phase 6 deferrals; linked from future work plan, decisions, and README
 - **Natural deduction design prep** ([`docs/natural-deduction.md`](docs/natural-deduction.md)): Fitch-style mobile layout constraints, minimal starter rule-set options, fill-one-step vs repair-step patterns, subproof UI at ~320px, Phase 4 dependencies; linked from future work plan and decisions
 - **2×2 watch grid** for binary watch lessons: `renderWatchGrid()` with P on rows, Q on columns, active-cell highlight; used by `level0-04-watch`, `level1-05-or-watch`, `level1-08-imp-watch`, and `level1-11-iff-watch` (`level1-02-neg-watch` stays on the row table)
+- Accessibility audit doc ([`docs/accessibility.md`](docs/accessibility.md)): MVP UI review, fixes applied, known gaps
 - **Level 1 learn path (Unit 1 — Connectives)**: 12 lessons covering ¬, ∨, →, and ↔ — concept cards, truth-table watch lessons, and guided live-row tries
 - Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)
 - Guided lesson hints declare target `atom` + `value`; progression generalized beyond `P ∧ Q`
@@ -39,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- MVP UI accessibility pass: ARIA labels and roles on trees, truth tables, V/F segments, mode nav, and progress cards; `:focus-visible` outlines on tap targets; evaluation tree nodes no longer rendered as inert buttons
 - Learn navigation chains Unit 0 → Unit 1 (`ALL_LEARN_LESSONS`); practice still unlocks after Unit 0
 - End of Unit 0 offers “Continue to Unit 1” instead of jumping straight to exercises
 - Watch lesson for `P ∧ Q` uses a truth table (highlighted row) instead of a parse tree
