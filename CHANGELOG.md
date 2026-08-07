@@ -9,9 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- English / French language toggle (EN | FR) in the header, available at any time
-- Locale persisted in `localStorage`; mid-exercise switch re-translates prompts and feedback
-- `src/i18n/` module with UI strings, exercise copy, and feedback templates for both locales
+- Level 0 learn path: 5 lessons (sentence letters, truth values, ∧, watch mode, guided try)
+- Learn / Practice tabs; practice locked until Level 0 complete
+- Operator reference panel (collapsible) during lessons
+- Gated practice unlock: starts with `eval-001`, then unlocks more after completion
+- English / French language toggle with mid-lesson re-translation
+
+### Changed
+
+- New users start in Learn mode instead of practice exercises
+- Progress storage migrated to v2 with lesson completion tracking
+- English and French copy rewritten as independent academic prose (not mirror translations)
+- i18n policy documented (`docs/i18n.md`, design principle §10, Cursor rule)
 
 ## [0.2.0] - 2026-08-07
 

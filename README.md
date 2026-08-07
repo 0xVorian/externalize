@@ -16,12 +16,13 @@ Start here:
 | [Roadmap](docs/roadmap.md) | Build order, MVP scope, and first prototype |
 | [Content model](docs/content-model.md) | How exercises, lessons, and progress will be represented as data |
 | [Versioning & changelog](docs/versioning.md) | Semver policy and release workflow |
+| [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |
 | [Changelog](CHANGELOG.md) | Record of released changes |
 
 ## Status
 
-**Phase:** 2 — MVP-0 built; pending week test on phone  
-**Next step:** Use `npm run dev` on your phone, then decide if Phase 3 (translation) is warranted
+**Phase:** Level 0 learn path + gated practice  
+**Next step:** Complete Level 0 on your phone, then try the unlocked practice tab
 
 ## Development
 

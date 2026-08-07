@@ -1,0 +1,34 @@
+---
+description: Independent EN/FR academic copy — never mirror-translate
+globs: src/i18n/**
+alwaysApply: false
+---
+
+# Locale copy: independent academic traditions
+
+Externalize supports English and French as **parallel course materials**, not as translations.
+
+## Do
+
+- Author English and French strings **independently** in separate blocks (`en`, `fr`) within `src/i18n/`
+- Use each locale's standard logic vocabulary:
+  - **EN:** sentence letter, truth assignment, main connective, conjunct, material conditional, T/F
+  - **FR:** variable propositionnelle, interprétation/valuation, connecteur principal, portée, formule atomique, V/F
+- Use locale-appropriate examples (EN examples in EN; French examples in FR)
+- Match pedagogical intent across locales, not word-for-word wording
+- Add new keys to **both** locales in the same PR
+
+## Do not
+
+- Translate FR from EN (or EN from FR) line by line
+- Share one "source" string and adapt it mechanically
+- Use informal UI phrasing where academic logic terminology exists
+- Assume parity of sentence structure, tab labels, or examples
+
+## When adding copy
+
+1. Write the English block as for an introductory logic course (analytic tradition).
+2. Write the French block fresh, as for a cours de logique propositionnelle.
+3. Review both for correct technical terms — not for matching length or syntax.
+
+See `docs/decisions.md` (Locale copy) and `docs/i18n.md`.

@@ -1,6 +1,7 @@
 import type { TreeNode } from '../../engine';
 import { ui } from '../i18n';
 import type { AppState } from './state';
+import { renderShellHeader } from './shell-render';
 
 function truthLabel(value: boolean | undefined): string {
   if (value === undefined) {
@@ -70,31 +71,11 @@ function renderAtomToggles(state: AppState): string {
   `;
 }
 
-function renderLanguageToggle(state: AppState): string {
-  const locales = ['en', 'fr'] as const;
-  return `
-    <div class="language-toggle" role="group" aria-label="Language">
-      ${locales
-        .map(
-          (locale) => `
-        <button
-          type="button"
-          class="lang-button ${state.locale === locale ? 'active' : ''}"
-          data-action="set-locale"
-          data-locale="${locale}"
-          aria-pressed="${state.locale === locale}"
-          title="${ui(state.locale).switchTo(locale)}"
-        >
-          ${locale.toUpperCase()}
-        </button>
-      `,
-        )
-        .join('')}
-    </div>
-  `;
-}
-
-export function renderApp(state: AppState, queueSize: number): string {
+export function renderApp(
+  state: AppState,
+  queueSize: number,
+  practiceUnlocked: boolean,
+): string {
   const copy = ui(state.locale);
   const feedbackClass = state.feedback
     ? state.feedback.correct
@@ -106,14 +87,14 @@ export function renderApp(state: AppState, queueSize: number): string {
 
   return `
     <main class="app" lang="${state.locale}">
-      <header class="app-header">
-        <div class="header-row">
-          <p class="eyebrow">${copy.eyebrow}</p>
-          ${renderLanguageToggle(state)}
-        </div>
-        <h1>${copy.practice}</h1>
-        <p class="queue-meta">${copy.queueMeta(queueSize)}</p>
-      </header>
+      ${renderShellHeader({
+        locale: state.locale,
+        mode: 'practice',
+        practiceUnlocked,
+        title: copy.practice,
+        meta: copy.queueMeta(queueSize),
+        referenceOpen: false,
+      })}
 
       <article class="exercise-card">
         <p class="exercise-prompt">${state.prompt}</p>

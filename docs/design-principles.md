@@ -98,3 +98,15 @@ Constraints:
 - **Persistence:** `localStorage` / IndexedDB; optional PWA install later for home-screen access
 
 When mobile and desktop affordances conflict, choose the option that works on a phone.
+
+## 10. Independent locale copy (not translation)
+
+English and French are **parallel course materials**, each using that language's standard logic vocabulary.
+
+- **Do** author `en` and `fr` blocks independently in `src/i18n/`
+- **Do** use EN analytic terms (sentence letter, truth assignment, main connective) and FR university terms (variable propositionnelle, interprétation, connecteur principal, portée)
+- **Do** use locale-appropriate examples in each language
+- **Do not** mirror-translate from one locale to the other
+- **Do not** treat either locale as the "source of truth" for wording
+
+New user-facing strings require both locales in the same change. See `docs/i18n.md`.

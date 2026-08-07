@@ -1,3 +1,5 @@
+import { LEVEL_0_LESSONS, PRACTICE_UNLOCK_ORDER } from './lessons';
+
 export type SrsEntry = {
   exerciseId: string;
   due: string;
@@ -6,7 +8,9 @@ export type SrsEntry = {
 };
 
 export type ProgressStore = {
-  version: 1;
+  version: 2;
+  lessonsCompleted: string[];
+  level0Complete: boolean;
   queue: SrsEntry[];
   completed: string[];
   lastExerciseId?: string;
@@ -17,7 +21,41 @@ const STORAGE_KEY = 'externalize-progress-v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function defaultStore(): ProgressStore {
-  return { version: 1, queue: [], completed: [] };
+  return {
+    version: 2,
+    lessonsCompleted: [],
+    level0Complete: false,
+    queue: [],
+    completed: [],
+  };
+}
+
+function migrateStore(raw: unknown): ProgressStore {
+  if (!raw || typeof raw !== 'object') {
+    return defaultStore();
+  }
+  const store = raw as Record<string, unknown>;
+  if (store.version === 2) {
+    return {
+      version: 2,
+      lessonsCompleted: (store.lessonsCompleted as string[] | undefined) ?? [],
+      level0Complete: (store.level0Complete as boolean | undefined) ?? false,
+      queue: (store.queue as SrsEntry[] | undefined) ?? [],
+      completed: (store.completed as string[] | undefined) ?? [],
+      lastExerciseId: store.lastExerciseId as string | undefined,
+    };
+  }
+  if (store.version === 1) {
+    return {
+      version: 2,
+      lessonsCompleted: [],
+      level0Complete: false,
+      queue: (store.queue as SrsEntry[] | undefined) ?? [],
+      completed: (store.completed as string[] | undefined) ?? [],
+      lastExerciseId: store.lastExerciseId as string | undefined,
+    };
+  }
+  return defaultStore();
 }
 
 export function loadProgress(): ProgressStore {
@@ -26,11 +64,7 @@ export function loadProgress(): ProgressStore {
     if (!raw) {
       return defaultStore();
     }
-    const parsed = JSON.parse(raw) as ProgressStore;
-    if (parsed.version !== 1) {
-      return defaultStore();
-    }
-    return parsed;
+    return migrateStore(JSON.parse(raw));
   } catch {
     return defaultStore();
   }
@@ -42,6 +76,36 @@ export function saveProgress(store: ProgressStore): void {
 
 function isoDaysFromNow(days: number): string {
   return new Date(Date.now() + days * DAY_MS).toISOString();
+}
+
+export function isPracticeUnlocked(store: ProgressStore): boolean {
+  return store.level0Complete;
+}
+
+export function getUnlockedExerciseIds(store: ProgressStore): string[] {
+  if (!store.level0Complete) {
+    return [];
+  }
+  const unlocked: string[] = [];
+  for (const exerciseId of PRACTICE_UNLOCK_ORDER) {
+    unlocked.push(exerciseId);
+    if (!store.completed.includes(exerciseId)) {
+      break;
+    }
+  }
+  return unlocked;
+}
+
+export function completeLesson(store: ProgressStore, lessonId: string): ProgressStore {
+  const lessonsCompleted = store.lessonsCompleted.includes(lessonId)
+    ? store.lessonsCompleted
+    : [...store.lessonsCompleted, lessonId];
+  const level0Complete = LEVEL_0_LESSONS.every((lesson) => lessonsCompleted.includes(lesson.id));
+  return {
+    ...store,
+    lessonsCompleted,
+    level0Complete,
+  };
 }
 
 export function seedQueue(store: ProgressStore, exerciseIds: string[]): ProgressStore {
@@ -61,16 +125,19 @@ export function seedQueue(store: ProgressStore, exerciseIds: string[]): Progress
 }
 
 export function pickNextExerciseId(store: ProgressStore, fallbackIds: string[]): string {
+  const allowed = new Set(fallbackIds);
   const now = Date.now();
   const due = store.queue
-    .filter((entry) => new Date(entry.due).getTime() <= now)
+    .filter(
+      (entry) => allowed.has(entry.exerciseId) && new Date(entry.due).getTime() <= now,
+    )
     .sort((a, b) => new Date(a.due).getTime() - new Date(b.due).getTime());
 
   if (due.length > 0) {
     return due[0].exerciseId;
   }
 
-  if (store.lastExerciseId) {
+  if (store.lastExerciseId && allowed.has(store.lastExerciseId)) {
     const index = fallbackIds.indexOf(store.lastExerciseId);
     if (index >= 0) {
       return fallbackIds[(index + 1) % fallbackIds.length];
@@ -98,7 +165,7 @@ export function recordResult(
       ease: 2.5,
     };
     return {
-      version: 1,
+      ...store,
       completed,
       lastExerciseId: exerciseId,
       queue: [...store.queue, fresh],
@@ -118,7 +185,7 @@ export function recordResult(
   };
 
   return {
-    version: 1,
+    ...store,
     completed,
     lastExerciseId: exerciseId,
     queue: store.queue.map((item) => (item.exerciseId === exerciseId ? updated : item)),

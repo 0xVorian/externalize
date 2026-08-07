@@ -1,14 +1,37 @@
 import './styles/main.css';
-import { EXERCISE_DEFINITIONS, getExerciseDefinition } from './app/exercises';
+import { getExerciseDefinition } from './app/exercises';
 import {
   loadProgress,
   saveProgress,
   seedQueue,
   pickNextExerciseId,
   recordResult,
+  completeLesson,
+  isPracticeUnlocked,
+  getUnlockedExerciseIds,
 } from './app/storage';
-import { createState, selectNode, toggleAtom, applyLocale, isExerciseComplete } from './app/state';
+import {
+  firstIncompleteLesson,
+  nextLessonId,
+  getLessonDefinition,
+} from './app/lessons';
+import {
+  createState,
+  selectNode,
+  toggleAtom,
+  applyLocale,
+  isExerciseComplete,
+  type AppState,
+} from './app/state';
+import {
+  createLessonState,
+  advanceWatchStep,
+  toggleGuidedAtom,
+  applyLessonLocale,
+  type LessonState,
+} from './app/lesson-state';
 import { renderApp } from './app/render';
+import { renderLessonView } from './app/lesson-render';
 import { loadLocale, saveLocale, type Locale } from './i18n';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
@@ -18,21 +41,31 @@ if (!appRoot) {
 
 const root: HTMLDivElement = appRoot;
 
+type AppMode = 'learn' | 'practice';
+
 let locale: Locale = loadLocale();
+let progress = loadProgress();
+let mode: AppMode = progress.level0Complete ? 'practice' : 'learn';
 
-let progress = seedQueue(
-  loadProgress(),
-  EXERCISE_DEFINITIONS.map((exercise) => exercise.id),
-);
+let lessonState: LessonState = createLessonState(locale, firstIncompleteLesson(progress.lessonsCompleted));
+let practiceState: AppState | null = null;
 
-function currentExerciseId(): string {
-  return pickNextExerciseId(
-    progress,
-    EXERCISE_DEFINITIONS.map((exercise) => exercise.id),
-  );
+function unlockedExerciseIds(): string[] {
+  return getUnlockedExerciseIds(progress);
 }
 
-function loadExercise(id: string) {
+function refreshPracticeQueue(): void {
+  progress = seedQueue(progress, unlockedExerciseIds());
+  saveProgress(progress);
+}
+
+function loadPracticeState(): AppState {
+  refreshPracticeQueue();
+  const pool = unlockedExerciseIds();
+  if (pool.length === 0) {
+    throw new Error('No practice exercises unlocked');
+  }
+  const id = pickNextExerciseId(progress, pool);
   const exercise = getExerciseDefinition(id);
   if (!exercise) {
     throw new Error(`Unknown exercise: ${id}`);
@@ -40,11 +73,24 @@ function loadExercise(id: string) {
   return createState(locale, exercise);
 }
 
-let state = loadExercise(currentExerciseId());
+function ensurePracticeState(): AppState {
+  practiceState = loadPracticeState();
+  return practiceState;
+}
 
 function render(): void {
-  document.documentElement.lang = state.locale;
-  root.innerHTML = renderApp(state, progress.queue.length);
+  document.documentElement.lang = locale;
+  const practiceUnlocked = isPracticeUnlocked(progress);
+
+  if (mode === 'learn') {
+    root.innerHTML = renderLessonView(lessonState, {
+      practiceUnlocked,
+      level0Complete: progress.level0Complete,
+    });
+    return;
+  }
+
+  root.innerHTML = renderApp(ensurePracticeState(), progress.queue.length, practiceUnlocked);
 }
 
 function setLocale(nextLocale: Locale): void {
@@ -53,21 +99,67 @@ function setLocale(nextLocale: Locale): void {
   }
   locale = nextLocale;
   saveLocale(locale);
-  state = applyLocale(state, locale);
+  lessonState = applyLessonLocale(lessonState, locale);
+  if (practiceState) {
+    practiceState = applyLocale(practiceState, locale);
+  }
   render();
 }
 
-function advance(): void {
+function setMode(nextMode: AppMode): void {
+  if (nextMode === 'practice' && !isPracticeUnlocked(progress)) {
+    return;
+  }
+  mode = nextMode;
+  if (mode === 'practice') {
+    practiceState = loadPracticeState();
+  } else {
+    lessonState = createLessonState(locale, firstIncompleteLesson(progress.lessonsCompleted));
+  }
+  render();
+}
+
+function completeCurrentLesson(): void {
+  progress = completeLesson(progress, lessonState.lesson.id);
+  saveProgress(progress);
+  refreshPracticeQueue();
+
+  if (progress.level0Complete) {
+    mode = 'practice';
+    practiceState = loadPracticeState();
+    render();
+    return;
+  }
+
+  const nextId = nextLessonId(lessonState.lesson.id);
+  if (nextId) {
+    const lesson = getLessonDefinition(nextId);
+    if (lesson) {
+      lessonState = createLessonState(locale, lesson);
+    }
+  }
+  render();
+}
+
+function handleLessonNext(): void {
+  if (lessonState.lesson.type === 'watch' && !lessonState.complete) {
+    lessonState = advanceWatchStep(lessonState);
+    render();
+    return;
+  }
+
+  completeCurrentLesson();
+}
+
+function advancePractice(): void {
+  const state = ensurePracticeState();
   if (state.feedback) {
     progress = recordResult(progress, state.exercise.id, state.feedback.correct);
     saveProgress(progress);
+    refreshPracticeQueue();
   }
 
-  const nextId = pickNextExerciseId(
-    progress,
-    EXERCISE_DEFINITIONS.map((exercise) => exercise.id),
-  );
-  state = loadExercise(nextId);
+  practiceState = loadPracticeState();
   render();
 }
 
@@ -88,15 +180,41 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'set-mode') {
+    const nextMode = button.dataset.mode;
+    if (nextMode === 'learn' || nextMode === 'practice') {
+      setMode(nextMode);
+    }
+    return;
+  }
+
+  if (action === 'lesson-next') {
+    handleLessonNext();
+    return;
+  }
+
+  if (mode === 'learn') {
+    if (action === 'guided-toggle') {
+      const atom = button.dataset.atom;
+      if (!atom) {
+        return;
+      }
+      lessonState = toggleGuidedAtom(lessonState, atom);
+      render();
+    }
+    return;
+  }
+
   if (action === 'select-node') {
     const nodeId = button.dataset.nodeId;
     if (!nodeId) {
       return;
     }
-    state = selectNode(state, nodeId);
-    if (isExerciseComplete(state)) {
-      progress = recordResult(progress, state.exercise.id, true);
+    practiceState = selectNode(ensurePracticeState(), nodeId);
+    if (isExerciseComplete(practiceState)) {
+      progress = recordResult(progress, practiceState.exercise.id, true);
       saveProgress(progress);
+      refreshPracticeQueue();
     }
     render();
     return;
@@ -107,13 +225,13 @@ root.addEventListener('click', (event) => {
     if (!atom) {
       return;
     }
-    state = toggleAtom(state, atom);
+    practiceState = toggleAtom(ensurePracticeState(), atom);
     render();
     return;
   }
 
   if (action === 'next') {
-    advance();
+    advancePractice();
   }
 });
 

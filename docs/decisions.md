@@ -80,6 +80,18 @@ No authentication, no server sync, until there is a concrete need.
 
 **Rationale:** Avoids silent ambiguity in teaching material. Documented and tested; authors enforce parens in exercise strings.
 
+### Locale copy: independent academic traditions
+
+**Decision:** English and French strings are **authored independently**, not translated from one another.
+
+**English** follows analytic philosophy / introductory logic: sentence letters, truth assignment, main connective, conjunct, material conditional, T/F.
+
+**French** follows logique propositionnelle (French university usage): variables propositionnelles, interprétation/valuation, connecteur principal, portée, formule atomique, V/F.
+
+Each locale uses its own examples and standard vocabulary. Parity of pedagogy, not parity of wording.
+
+**Implementation:** Separate EN/FR blocks in `src/i18n/messages.ts` and `src/i18n/lessons.ts`; treat as parallel course notes, not a translation pair.
+
 ### Scope visualization
 
 **Decision:** Use indentation, boxes, or connecting lines — not colour alone. On mobile, prefer **vertical tree layout** and collapsible subexpression nodes over wide horizontal formulas.

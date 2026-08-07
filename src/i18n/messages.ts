@@ -23,111 +23,123 @@ export type UiCopy = {
   switchTo: (locale: Locale) => string;
 };
 
+/** English: analytic philosophy / introductory logic (sentence letters, truth assignments, main connective). */
+const FEEDBACK_DEFAULTS_EN: Record<FeedbackTag, string> = {
+  correct: 'Correct.',
+  'wrong-main-connective':
+    'That is not the main connective of the formula. The main connective determines the outermost logical form.',
+  'selected-subconnective':
+    '{label} is the main connective of a proper subformula, not of the entire formula.',
+  'selected-atom': '{label} is a sentence letter — an atomic formula — not a connective.',
+  'selected-operand-not-connective': 'That expression is not a connective.',
+};
+
+/** French: logique propositionnelle (connecteur principal, portée, formule atomique). Independent wording — not a translation of the English strings. */
+const FEEDBACK_DEFAULTS_FR: Record<FeedbackTag, string> = {
+  correct: 'Exact.',
+  'wrong-main-connective':
+    "Ce n'est pas le connecteur principal. C'est lui qui détermine la structure logique externe de la formule.",
+  'selected-subconnective':
+    "Ici, {label} gouverne seulement une sous-formule ; le connecteur principal porte sur l'ensemble de la formule.",
+  'selected-atom':
+    '{label} est une formule atomique (une variable propositionnelle), pas un connecteur.',
+  'selected-operand-not-connective': "Cet élément n'est pas un connecteur logique.",
+};
+
 const FEEDBACK_DEFAULTS: Record<Locale, Record<FeedbackTag, string>> = {
-  en: {
-    correct: 'Correct.',
-    'wrong-main-connective':
-      'That is not the main connective of the whole formula. The main connective has the widest scope.',
-    'selected-subconnective':
-      '{label} is the main connective of a subformula, but not of the whole formula.',
-    'selected-atom': '{label} is a sentence letter, not a connective.',
-    'selected-operand-not-connective': 'That node is not a connective.',
-  },
-  fr: {
-    correct: 'Correct.',
-    'wrong-main-connective':
-      "Ce n'est pas le connecteur principal de la formule entière. Le connecteur principal a la portée la plus large.",
-    'selected-subconnective':
-      "{label} est le connecteur principal d'une sous-formule, mais pas de la formule entière.",
-    'selected-atom': "{label} est une lettre propositionnelle, pas un connecteur.",
-    'selected-operand-not-connective': "Ce nœud n'est pas un connecteur.",
-  },
+  en: FEEDBACK_DEFAULTS_EN,
+  fr: FEEDBACK_DEFAULTS_FR,
 };
 
 const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
   en: {
     'scope-001': {
-      prompt: 'Tap the main connective of the whole formula.',
+      prompt: 'Select the main connective of the formula.',
       feedback: {
         'selected-subconnective':
-          '→ is the main connective of (P → Q), but not of the whole formula. The outer operator binds last.',
+          '→ is the main connective of (P → Q), but the formula as a whole is a conjunction. The outermost connective has widest scope.',
       },
     },
     'scope-002': {
-      prompt: 'Tap the main connective of the whole formula.',
+      prompt: 'Select the main connective of the formula.',
     },
     'scope-003': {
-      prompt: 'Tap the main connective of the whole formula.',
+      prompt: 'Select the main connective of the formula.',
       feedback: {
         'selected-subconnective':
-          '∧ is inside the scope of ¬. The main connective governs the entire formula.',
+          '∧ falls within the scope of ¬. The main connective applies to the entire well-formed formula.',
       },
     },
     'eval-001': {
-      prompt: 'Toggle the truth values below. Every node shows its computed value.',
+      prompt:
+        'Assign truth values to the sentence letters. The tree shows how each subformula evaluates under your assignment.',
     },
     'eval-002': {
-      prompt: 'Toggle atoms and watch intermediate values update.',
+      prompt:
+        'Change the assignment and observe how truth values propagate from the letters through each subformula.',
     },
   },
   fr: {
     'scope-001': {
-      prompt: 'Touchez le connecteur principal de la formule entière.',
+      prompt: 'Indiquez le connecteur principal de la formule.',
       feedback: {
         'selected-subconnective':
-          '→ est le connecteur principal de (P → Q), mais pas de la formule entière. L’opérateur extérieur lie en dernier.',
+          "L'implication → structure (P → Q), mais la formule entière est une conjonction : le connecteur le plus externe a la portée maximale.",
       },
     },
     'scope-002': {
-      prompt: 'Touchez le connecteur principal de la formule entière.',
+      prompt: 'Indiquez le connecteur principal de la formule.',
     },
     'scope-003': {
-      prompt: 'Touchez le connecteur principal de la formule entière.',
+      prompt: 'Indiquez le connecteur principal de la formule.',
       feedback: {
         'selected-subconnective':
-          '∧ est dans la portée de ¬. Le connecteur principal régit la formule entière.',
+          'La conjonction ∧ est dans la portée de la négation ¬ : le connecteur principal s\'applique à la formule bien formée dans son ensemble.',
       },
     },
     'eval-001': {
-      prompt: 'Basculez les valeurs de vérité ci-dessous. Chaque nœud affiche sa valeur calculée.',
+      prompt:
+        'Fixez une valuation des variables propositionnelles. L\'arbre indique comment chaque sous-formule se comporte sous cette interprétation.',
     },
     'eval-002': {
-      prompt: 'Basculez les atomes et observez les valeurs intermédiaires se mettre à jour.',
+      prompt:
+        'Modifiez la valuation et suivez la propagation des valeurs de vérité à travers les sous-formules.',
     },
   },
 };
 
 const UI: Record<Locale, UiCopy> = {
   en: {
-    eyebrow: 'Externalize · MVP-0',
-    practice: 'Practice',
-    queueMeta: (count) => `${count} item${count === 1 ? '' : 's'} in review queue`,
-    assignment: 'Assignment',
-    assignmentAria: 'Truth assignment',
-    formulaTreeAria: 'Formula tree',
+    eyebrow: 'Externalize',
+    practice: 'Exercises',
+    queueMeta: (count) =>
+      `${count} exercise${count === 1 ? '' : 's'} scheduled for review`,
+    assignment: 'Truth assignment',
+    assignmentAria: 'Truth assignment to sentence letters',
+    formulaTreeAria: 'Parsing tree of the formula',
     continue: 'Continue',
     nextExercise: 'Next exercise',
-    valuesUpdated: 'Values updated at every node.',
-    trueLabel: 'true',
-    falseLabel: 'false',
-    valueAria: (value) => `value ${value}`,
+    valuesUpdated: 'Truth values updated at each subformula.',
+    trueLabel: 'T',
+    falseLabel: 'F',
+    valueAria: (value) => `truth value ${value}`,
     languageToggle: (locale) => (locale === 'en' ? 'English' : 'French'),
     switchTo: (locale) => (locale === 'en' ? 'Switch to English' : 'Passer en français'),
   },
   fr: {
-    eyebrow: 'Externalize · MVP-0',
-    practice: 'Pratique',
+    eyebrow: 'Externalize',
+    practice: 'Exercices',
     queueMeta: (count) =>
-      `${count} élément${count === 1 ? '' : 's'} dans la file de révision`,
-    assignment: 'Valuation',
-    assignmentAria: 'Valuation de vérité',
-    formulaTreeAria: 'Arbre de formule',
+      `${count} exercice${count === 1 ? '' : 's'} à revoir`,
+    assignment: 'Interprétation',
+    assignmentAria: 'Interprétation (valuation des variables propositionnelles)',
+    formulaTreeAria: 'Arbre de décomposition de la formule',
     continue: 'Continuer',
     nextExercise: 'Exercice suivant',
-    valuesUpdated: 'Valeurs mises à jour à chaque nœud.',
-    trueLabel: 'vrai',
-    falseLabel: 'faux',
-    valueAria: (value) => `valeur ${value}`,
+    valuesUpdated: 'Les valeurs de vérité se mettent à jour à chaque sous-formule.',
+    trueLabel: 'V',
+    falseLabel: 'F',
+    valueAria: (value) => `valeur de vérité ${value}`,
     languageToggle: (locale) => (locale === 'en' ? 'Anglais' : 'Français'),
     switchTo: (locale) => (locale === 'en' ? 'Switch to English' : 'Passer en français'),
   },
