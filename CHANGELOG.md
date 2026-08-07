@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Skill tracking: surfaces what feels easy vs. what you struggle with (from attempt history)
 - Frequent error tags (e.g. picking a sub-connective instead of the main one)
 - Progress storage v3: resume point, per-skill stats, error counts, last-visited timestamp
+- Progress export/import (JSON file) for moving between devices
 - Level 0 learn path: 5 lessons (sentence letters, truth values, ∧, watch mode, guided try)
 - Learn / Practice tabs; practice locked until Level 0 complete
 - Operator reference panel (collapsible) during lessons

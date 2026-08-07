@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadProgress, recordResult, completeLesson, getUnlockedExerciseIds } from './storage';
+import { loadProgress, recordResult, completeLesson, getUnlockedExerciseIds, serializeProgressExport, importProgress } from './storage';
 
 describe('storage v3', () => {
   it('migrates v2 store to v3 with resume point', () => {
@@ -68,5 +68,31 @@ describe('storage v3', () => {
     }
     expect(store.level0Complete).toBe(true);
     expect(store.resume.mode).toBe('practice');
+  });
+
+  it('round-trips progress through export and import', () => {
+    let store = loadProgress();
+    store = completeLesson(store, 'level0-01-letters');
+    store = recordResult(store, 'eval-001', false, 'selected-subconnective');
+
+    const raw = serializeProgressExport(store, 'fr');
+    const { progress: restored, locale } = importProgress(raw);
+
+    expect(locale).toBe('fr');
+    expect(restored.lessonsCompleted).toEqual(store.lessonsCompleted);
+    expect(restored.skills).toEqual(store.skills);
+    expect(restored.errorCounts).toEqual(store.errorCounts);
+  });
+
+  it('imports bare progress JSON for backward compatibility', () => {
+    const store = loadProgress();
+    const raw = JSON.stringify(store);
+    const { progress: restored } = importProgress(raw);
+    expect(restored.version).toBe(3);
+  });
+
+  it('rejects invalid import data', () => {
+    expect(() => importProgress('not json')).toThrow();
+    expect(() => importProgress('{"kind":"externalize-progress-export","exportVersion":99}')).toThrow();
   });
 });

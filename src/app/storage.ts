@@ -9,6 +9,7 @@ import {
   skillForExercise,
 } from './progress-tracker';
 import { getExerciseDefinition } from './exercises';
+import type { Locale } from '../i18n';
 
 export type SrsEntry = {
   exerciseId: string;
@@ -32,6 +33,17 @@ export type ProgressStore = {
 };
 
 const STORAGE_KEY = 'externalize-progress-v1';
+
+export const PROGRESS_EXPORT_KIND = 'externalize-progress-export';
+export const PROGRESS_EXPORT_VERSION = 1;
+
+export type ProgressExportBundle = {
+  kind: typeof PROGRESS_EXPORT_KIND;
+  exportVersion: typeof PROGRESS_EXPORT_VERSION;
+  exportedAt: string;
+  locale?: Locale;
+  progress: unknown;
+};
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -144,6 +156,52 @@ export function saveProgress(store: ProgressStore): ProgressStore {
   const next = { ...store, lastVisitedAt: nowIso() };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   return next;
+}
+
+export function serializeProgressExport(store: ProgressStore, locale?: Locale): string {
+  const bundle: ProgressExportBundle = {
+    kind: PROGRESS_EXPORT_KIND,
+    exportVersion: PROGRESS_EXPORT_VERSION,
+    exportedAt: nowIso(),
+    locale,
+    progress: store,
+  };
+  return JSON.stringify(bundle, null, 2);
+}
+
+export function parseProgressImport(raw: string): { progress: ProgressStore; locale?: Locale } {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error('Invalid JSON');
+  }
+
+  if (!parsed || typeof parsed !== 'object') {
+    throw new Error('Invalid export');
+  }
+
+  const record = parsed as Record<string, unknown>;
+
+  if (record.kind === PROGRESS_EXPORT_KIND) {
+    if (record.exportVersion !== PROGRESS_EXPORT_VERSION) {
+      throw new Error('Unsupported export version');
+    }
+    const locale = record.locale;
+    if (locale !== undefined && locale !== 'en' && locale !== 'fr') {
+      throw new Error('Invalid locale in export');
+    }
+    return {
+      progress: migrateStore(record.progress),
+      locale: locale as Locale | undefined,
+    };
+  }
+
+  return { progress: migrateStore(parsed) };
+}
+
+export function importProgress(raw: string): { progress: ProgressStore; locale?: Locale } {
+  return parseProgressImport(raw);
 }
 
 function isoDaysFromNow(days: number): string {

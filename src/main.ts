@@ -11,6 +11,8 @@ import {
   isPracticeUnlocked,
   getUnlockedExerciseIds,
   updateResume,
+  serializeProgressExport,
+  importProgress,
   type ProgressStore,
 } from './app/storage';
 import {
@@ -37,7 +39,7 @@ import { renderApp } from './app/render';
 import { renderLessonView } from './app/lesson-render';
 import { renderProgressView } from './app/progress-render';
 import type { AppMode } from './app/shell-render';
-import { loadLocale, saveLocale, type Locale } from './i18n';
+import { loadLocale, saveLocale, progressUi, type Locale } from './i18n';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) {
@@ -52,6 +54,26 @@ let mode: AppMode = resolveInitialMode(progress);
 
 let lessonState: LessonState = loadLessonFromProgress(progress);
 let practiceState: AppState | null = null;
+let importNotice: { kind: 'success' | 'error'; message: string } | null = null;
+
+const importInput = document.createElement('input');
+importInput.type = 'file';
+importInput.accept = 'application/json,.json';
+importInput.hidden = true;
+document.body.appendChild(importInput);
+
+importInput.addEventListener('change', () => {
+  const file = importInput.files?.[0];
+  importInput.value = '';
+  if (!file) {
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    handleImportRaw(String(reader.result ?? ''));
+  };
+  reader.readAsText(file);
+});
 
 function resolveInitialMode(store: ProgressStore): AppMode {
   if (store.resume.mode === 'progress') {
@@ -124,7 +146,9 @@ function render(): void {
   const practiceUnlocked = isPracticeUnlocked(progress);
 
   if (mode === 'progress') {
-    root.innerHTML = renderProgressView(locale, progress, practiceUnlocked);
+    root.innerHTML = renderProgressView(locale, progress, practiceUnlocked, {
+      importNotice: importNotice ?? undefined,
+    });
     return;
   }
 
@@ -155,6 +179,9 @@ function setLocale(nextLocale: Locale): void {
 function setMode(nextMode: AppMode): void {
   if (nextMode === 'practice' && !isPracticeUnlocked(progress)) {
     return;
+  }
+  if (nextMode !== 'progress') {
+    importNotice = null;
   }
   mode = nextMode;
   if (mode === 'progress') {
@@ -226,6 +253,46 @@ function advancePractice(): void {
   render();
 }
 
+function exportProgressFile(): void {
+  const json = serializeProgressExport(progress, locale);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `externalize-progress-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function applyImportedProgress(imported: ProgressStore, importedLocale?: Locale): void {
+  progress = saveProgress(imported);
+  lessonState = loadLessonFromProgress(progress);
+  practiceState = null;
+  mode = resolveInitialMode(progress);
+
+  if (importedLocale && importedLocale !== locale) {
+    locale = importedLocale;
+    saveLocale(locale);
+    lessonState = applyLessonLocale(lessonState, locale);
+  }
+}
+
+function handleImportRaw(raw: string): void {
+  const copy = progressUi(locale);
+  try {
+    const { progress: imported, locale: importedLocale } = importProgress(raw);
+    applyImportedProgress(imported, importedLocale);
+    importNotice = { kind: 'success', message: copy.importSuccess };
+    mode = 'progress';
+    persistProgress(updateResume(progress, { mode: 'progress' }));
+    render();
+  } catch {
+    importNotice = { kind: 'error', message: copy.importError };
+    mode = 'progress';
+    render();
+  }
+}
+
 root.addEventListener('click', (event) => {
   const target = event.target as HTMLElement;
   const button = target.closest<HTMLElement>('[data-action]');
@@ -256,6 +323,16 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'export-progress') {
+    exportProgressFile();
+    return;
+  }
+
+  if (action === 'import-progress') {
+    importInput.click();
+    return;
+  }
+
   if (action === 'lesson-next') {
     handleLessonNext();
     return;
@@ -271,6 +348,10 @@ root.addEventListener('click', (event) => {
       persistLessonResume();
       render();
     }
+    return;
+  }
+
+  if (mode === 'progress') {
     return;
   }
 

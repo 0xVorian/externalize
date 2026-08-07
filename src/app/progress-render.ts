@@ -28,10 +28,15 @@ export function buildSummaryFromStore(store: ProgressStore): ProgressSummary {
   });
 }
 
+export type ProgressViewOptions = {
+  importNotice?: { kind: 'success' | 'error'; message: string };
+};
+
 export function renderProgressView(
   locale: Locale,
   store: ProgressStore,
   practiceUnlocked: boolean,
+  options: ProgressViewOptions = {},
 ): string {
   const copy = progressUi(locale);
   const summary = buildSummaryFromStore(store);
@@ -95,6 +100,20 @@ export function renderProgressView(
         <button type="button" class="primary" data-action="continue-resume">
           ${resume.mode === 'learn' ? copy.continueLearn : resume.mode === 'practice' ? copy.continuePractice : copy.continueProgress}
         </button>
+      </section>
+
+      <section class="progress-card">
+        <h2 class="panel-title">${copy.syncHeading}</h2>
+        <p class="progress-meta">${copy.syncHint}</p>
+        ${
+          options.importNotice
+            ? `<p class="progress-notice progress-notice-${options.importNotice.kind}" role="status">${options.importNotice.message}</p>`
+            : ''
+        }
+        <div class="progress-actions">
+          <button type="button" class="secondary" data-action="export-progress">${copy.exportProgress}</button>
+          <button type="button" class="secondary" data-action="import-progress">${copy.importProgress}</button>
+        </div>
       </section>
 
       <section class="progress-card">

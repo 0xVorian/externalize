@@ -296,6 +296,30 @@ button {
   padding: 0.35rem 0;
 }
 
+.progress-actions {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.progress-notice {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.progress-notice-success {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+}
+
+.progress-notice-error {
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdca;
+}
+
 .exercise-prompt {
   margin: 0 0 0.75rem;
   font-size: 1rem;

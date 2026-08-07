@@ -192,6 +192,12 @@ export type ProgressUiCopy = {
   lessonTodo: string;
   exerciseDone: string;
   exerciseLocked: string;
+  syncHeading: string;
+  syncHint: string;
+  exportProgress: string;
+  importProgress: string;
+  importSuccess: string;
+  importError: string;
 };
 
 const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
@@ -225,6 +231,12 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lessonTodo: 'remaining',
     exerciseDone: 'done',
     exerciseLocked: 'locked',
+    syncHeading: 'Another device',
+    syncHint: 'Export on this device, then import the file where you want to continue.',
+    exportProgress: 'Export progress',
+    importProgress: 'Import progress',
+    importSuccess: 'Progress restored. You can pick up where you left off.',
+    importError: 'That file could not be read. Choose an Externalize progress export.',
   },
   fr: {
     progress: 'Parcours',
@@ -256,6 +268,12 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lessonTodo: 'reste',
     exerciseDone: 'fait',
     exerciseLocked: 'fermé',
+    syncHeading: 'Autre appareil',
+    syncHint: 'Exportez ici, puis importez le fichier sur l\'appareil où vous voulez reprendre.',
+    exportProgress: 'Exporter le parcours',
+    importProgress: 'Importer un parcours',
+    importSuccess: 'Parcours restauré. Vous pouvez reprendre.',
+    importError: 'Fichier illisible. Choisissez une exportation Externalize.',
   },
 };
 
