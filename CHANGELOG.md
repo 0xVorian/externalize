@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Predicate logic AST spike**: extend `Formula` with `pred`, `forall`, `exists`, and `Term` types; parser accepts `∀`/`∃`, predicate application `F(x)`, and comma-separated arguments; migrate propositional letters to 0-place `pred`; helpers `collectFreeVariables` and `collectPredicateSymbols`; grammar documented in [`docs/predicate-logic.md`](docs/predicate-logic.md)
 - **Progress concept map graph**: SVG prerequisite diagram on the Progress tab (completed, available, and locked nodes; EN/FR labels from `content/prerequisites.json`)
 - Exercise template generator (`tools/exercise-generator/`, `content/exercise-templates.json`): validates scope, evaluate-formula, and fill-truth-table patterns and prints TypeScript/JSON snippets for author review (`npm run generate:exercises`); documented in `docs/authoring.md`
+- **Find-counterexample exercises** (`counter-001`–`counter-004`): toggle truth assignments to make a formula evaluate to a target value; live row UI and `validateCounterexample`; unlocks after matching truth-table fill exercises
 - **Predicate logic design prep** ([`docs/predicate-logic.md`](docs/predicate-logic.md)): AST extension sketch (terms, predicates, quantifiers), notation choices, parser/renderer/exercise impact, explicit Phase 6 deferrals; linked from future work plan, decisions, and README
 - **Natural deduction design prep** ([`docs/natural-deduction.md`](docs/natural-deduction.md)): Fitch-style mobile layout constraints, minimal starter rule-set options, fill-one-step vs repair-step patterns, subproof UI at ~320px, Phase 4 dependencies; linked from future work plan and decisions
 - **2×2 watch grid** for binary watch lessons: `renderWatchGrid()` with P on rows, Q on columns, active-cell highlight; used by `level0-04-watch`, `level1-05-or-watch`, `level1-08-imp-watch`, and `level1-11-iff-watch` (`level1-02-neg-watch` stays on the row table)
@@ -37,6 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Content model** (`docs/content-model.md`) updated to reflect current TypeScript layout (replacing provisional YAML sketch)
 - **Future work plan** (`docs/future-work-plan.md`): tiered workstreams, agent batch A/B/C plan, and deferred-scope list — separate from the app roadmap
 - **Progress tab**: resume where you left off, lesson/exercise checklist, review-due count
+- **Progress tab “What next?”**: smart suggestion (resume point, weakest skill, or next unlocked exercise)
+- **First-run onboarding**: three-screen intro (externalize idea, V/F segments, Progress tab); progress storage v5 with `onboardingComplete`
 - Skill tracking: surfaces what feels easy vs. what you struggle with (from attempt history)
 - Frequent error tags (e.g. picking a sub-connective instead of the main one)
 - Progress storage v3: resume point, per-skill stats, error counts, last-visited timestamp

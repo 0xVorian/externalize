@@ -9,13 +9,14 @@ import {
   generateTruthTable,
   maskTruthTableRows,
   validateCell,
+  validateCounterexample,
   type TreeNode,
   type Assignment,
   type FeedbackResult,
   type PartialTruthTable,
 } from '../../engine';
 import type { Locale } from '../i18n';
-import { getExerciseCopy, getCellFeedback, getFeedbackTemplates, ui } from '../i18n';
+import { getExerciseCopy, getCellFeedback, getCounterFeedback, getFeedbackTemplates, ui } from '../i18n';
 import type { ExerciseDefinition } from './exercises';
 import {
   createBuilderReducerState,
@@ -85,12 +86,12 @@ export function createState(locale: Locale, exercise: ExerciseDefinition): AppSt
   const formula = parse(exercise.formula!);
   const atoms = [...collectAtoms(formula)].sort();
   const assignment =
-    exercise.type === 'evaluate-formula' && exercise.initialAssignment
+    (exercise.type === 'evaluate-formula' || exercise.type === 'find-counterexample') && exercise.initialAssignment
       ? exercise.initialAssignment
       : Object.fromEntries(atoms.map((atom) => [atom, false]));
 
   const tree =
-    exercise.type === 'evaluate-formula'
+    exercise.type === 'evaluate-formula' || exercise.type === 'find-counterexample'
       ? evaluateWithNodes(formula, assignment).tree
       : toVerticalTree(formula);
 
@@ -246,7 +247,7 @@ export function tryAgainTranslation(state: AppState): AppState {
 }
 
 export function setAtomValue(state: AppState, atom: string, value: boolean): AppState {
-  if (state.exercise.type !== 'evaluate-formula') {
+  if (state.exercise.type !== 'evaluate-formula' && state.exercise.type !== 'find-counterexample') {
     return state;
   }
 
@@ -258,7 +259,31 @@ export function setAtomValue(state: AppState, atom: string, value: boolean): App
     ...state,
     assignment,
     tree,
-    message: ui(state.locale).valuesUpdated,
+    phase: state.exercise.type === 'find-counterexample' ? 'ready' : state.phase,
+    message: state.exercise.type === 'evaluate-formula' ? ui(state.locale).valuesUpdated : null,
+    feedback: state.exercise.type === 'find-counterexample' ? null : state.feedback,
+  };
+}
+
+export function checkCounterexample(state: AppState): AppState {
+  if (state.exercise.type !== 'find-counterexample' || state.phase === 'answered') {
+    return state;
+  }
+  if (state.exercise.targetValue === undefined) {
+    throw new Error(`Missing targetValue for ${state.exercise.id}`);
+  }
+  const formula = parse(state.exercise.formula!);
+  const validation = validateCounterexample(formula, state.assignment, state.exercise.targetValue);
+  const message = getCounterFeedback(state.locale, state.exercise.id, validation.correct);
+  return {
+    ...state,
+    phase: 'answered',
+    feedback: {
+      correct: validation.correct,
+      tag: validation.correct ? 'correct' : 'counterexample-miss',
+      message,
+    },
+    message,
   };
 }
 
@@ -289,6 +314,11 @@ export function applyLocale(state: AppState, locale: Locale): AppState {
     return { ...next, message: getCellFeedback(locale, state.exercise.id, correct) };
   }
 
+  if (state.phase === 'answered' && state.exercise.type === 'find-counterexample' && state.feedback) {
+    const message = getCounterFeedback(locale, state.exercise.id, state.feedback.correct);
+    return { ...next, feedback: { ...state.feedback, message }, message };
+  }
+
   if (state.message === ui(state.locale).valuesUpdated) {
     return { ...next, message: ui(locale).valuesUpdated };
   }
@@ -317,6 +347,9 @@ export function isExerciseComplete(state: AppState): boolean {
   }
   if (state.exercise.type === 'fill-truth-table-cell') {
     return cellSubmissionCorrect(state) === true;
+  }
+  if (state.exercise.type === 'find-counterexample') {
+    return state.feedback?.correct === true;
   }
   return state.exercise.type === 'identify-main-connective' && state.feedback?.correct === true;
 }

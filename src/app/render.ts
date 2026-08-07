@@ -7,6 +7,10 @@ import { cellSubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
 import { renderTranslationExerciseBody, renderTranslationActions } from './translation/translation-render';
 
+function showsEvaluatedTree(type: AppState['exercise']['type']): boolean {
+  return type === 'evaluate-formula' || type === 'find-counterexample';
+}
+
 function nodeValueClass(kind: TreeNode['kind']): string {
   return kind === 'pred' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
 }
@@ -19,15 +23,14 @@ function renderTreeNode(node: TreeNode, state: AppState): string {
   if (selected) classes.push('selected');
   if (isTappable) classes.push('tappable');
   const truthLabel = formatTruthValue(state.locale, node.value);
-  const valueHtml =
-    state.exercise.type === 'evaluate-formula'
+  const valueHtml = showsEvaluatedTree(state.exercise.type)
       ? `<span class="${nodeValueClass(node.kind)}" aria-label="${copy.valueAria(truthLabel)}">${truthLabel}</span>`
       : '';
   const nodeContent = `<span class="node-label">${node.label}</span>${valueHtml}`;
   const hasChildren = node.children.length > 0;
   const nodeInner = isTappable
     ? `<button type="button" class="node-button" data-action="select-node" data-node-id="${node.id}" aria-pressed="${selected}" aria-label="${copy.treeNodeSelectAria(node.label)}">${nodeContent}</button>`
-    : `<div class="node-button node-readonly" aria-label="${copy.treeNodeDisplayAria(node.label, state.exercise.type === 'evaluate-formula' ? truthLabel : undefined)}">${nodeContent}</div>`;
+    : `<div class="node-button node-readonly" aria-label="${copy.treeNodeDisplayAria(node.label, showsEvaluatedTree(state.exercise.type) ? truthLabel : undefined)}">${nodeContent}</div>`;
   const children = node.children.map((c) => renderTreeNode(c, state)).join('');
   return `<li class="${classes.join(' ')}" role="treeitem" data-node-id="${node.id}"${hasChildren ? ' aria-expanded="true"' : ''}>${nodeInner}${children ? `<ul class="tree-children" role="group">${children}</ul>` : ''}</li>`;
 }
@@ -57,6 +60,16 @@ function renderEvaluationBody(state: AppState): string {
   return `<section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}"><ul class="tree-root" role="tree">${renderTreeNode(state.tree, state)}</ul></section>${renderAtomToggles(state)}`;
 }
 
+function renderCounterexampleBody(state: AppState): string {
+  if (state.exercise.type !== 'find-counterexample') {
+    return '';
+  }
+  if (usesLiveTruthRow(state.exercise.formula!)) {
+    return `${renderAtomToggles(state)}${renderLiveTruthRow(state.locale, state.exercise.formula!, state.assignment)}`;
+  }
+  return `<section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}"><ul class="tree-root" role="tree">${renderTreeNode(state.tree, state)}</ul></section>${renderAtomToggles(state)}`;
+}
+
 function renderScopeBody(state: AppState): string {
   return `<section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}"><ul class="tree-root" role="tree">${renderTreeNode(state.tree, state)}</ul></section>`;
 }
@@ -68,10 +81,24 @@ function renderExerciseBody(state: AppState): string {
   if (state.exercise.type === 'evaluate-formula') {
     return renderEvaluationBody(state);
   }
+  if (state.exercise.type === 'find-counterexample') {
+    return renderCounterexampleBody(state);
+  }
   if (state.exercise.type === 'fill-truth-table-cell') {
     return renderFillTruthTableBody(state);
   }
   return renderScopeBody(state);
+}
+
+function renderCounterexampleActions(state: AppState): string {
+  const copy = ui(state.locale);
+  if (state.phase === 'answered' && state.feedback?.correct) {
+    return `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
+  }
+  if (state.phase === 'ready') {
+    return `<button type="button" class="primary" data-action="check-counterexample">${copy.checkCounterexample}</button>`;
+  }
+  return '';
 }
 
 export function renderApp(state: AppState, queueSize: number, practiceUnlocked: boolean): string {
@@ -113,6 +140,7 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
           ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
           ${state.exercise.type === 'fill-truth-table-cell' && state.phase === 'answered' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
           ${state.exercise.type === 'evaluate-formula' ? `<button type="button" class="secondary" data-action="next">${copy.nextExercise}</button>` : ''}
+          ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state) : ''}
           ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state) : ''}
         </div>
       </article>

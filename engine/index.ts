@@ -7,7 +7,35 @@ export { evaluate, evaluateWithNodes, allAssignments } from './eval/evaluate';
 export type { EvaluationResult } from './eval/evaluate';
 export { equivalent, distinct, semanticallyEquivalent } from './equiv/equivalent';
 export type { EquivalenceOptions } from './equiv/equivalent';
-export { resolveFeedback, checkMainConnectiveSelection, expectedMainConnectiveNodeId, classifyTranslation, resolveTranslationFeedback } from './feedback';
-export type { FeedbackTag, FeedbackTemplate, FeedbackResult, TranslationFeedbackTag, TranslationFeedbackTemplate, TranslationFeedbackResult } from './feedback';
-export { generateTruthTable, maskTruthTableRows, expectedCellValue, validateCell } from './truth-table';
-export type { TruthTable, TruthTableRow, PartialTruthTable, PartialTruthTableRow, CellValidation } from './truth-table';
+export {
+  resolveFeedback,
+  checkMainConnectiveSelection,
+  expectedMainConnectiveNodeId,
+  classifyTranslation,
+  resolveTranslationFeedback,
+} from './feedback';
+export type {
+  FeedbackTag,
+  FeedbackTemplate,
+  FeedbackResult,
+  TranslationFeedbackTag,
+  TranslationFeedbackTemplate,
+  TranslationFeedbackResult,
+} from './feedback';
+export {
+  generateTruthTable,
+  maskTruthTableRows,
+  expectedCellValue,
+  validateCell,
+  validateCounterexample,
+  hasAssignmentForValue,
+} from './truth-table';
+export type {
+  TruthTable,
+  TruthTableRow,
+  PartialTruthTable,
+  PartialTruthTableRow,
+  CellValidation,
+  CounterexampleValidation,
+} from './truth-table';
+

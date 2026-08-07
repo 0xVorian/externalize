@@ -121,9 +121,11 @@ describe('storage v3', () => {
     const store = loadProgress();
     const raw = JSON.stringify(store);
     const { progress: restored } = importProgress(raw);
-    expect(restored.version).toBe(4);
+    expect(restored.version).toBe(5);
   });
 
+  it('migrates v4 to v5', () => { const {progress:store}=importProgress(JSON.stringify({version:4,lessonsCompleted:['level0-01-letters'],level0Complete:false,level1Complete:false,queue:[],completed:[],resume:{mode:'learn',lessonId:'level0-02-truth',updatedAt:new Date().toISOString()},skills:{},exerciseStats:{},errorCounts:{},lastVisitedAt:new Date().toISOString()})); expect(store.version).toBe(5); expect(store.onboardingComplete).toBe(true); });
+  it('new store needs onboarding', () => expect(loadProgress().onboardingComplete).toBe(false));
   it('rejects invalid import data', () => {
     expect(() => importProgress('not json')).toThrow();
     expect(() => importProgress('{"kind":"externalize-progress-export","exportVersion":99}')).toThrow();

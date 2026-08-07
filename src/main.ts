@@ -13,6 +13,8 @@ import {
   updateResume,
   serializeProgressExport,
   importProgress,
+  completeOnboarding,
+  needsOnboarding,
   type ProgressStore,
 } from './app/storage';
 import {
@@ -35,6 +37,7 @@ import {
   paletteUndo,
   checkTranslation,
   tryAgainTranslation,
+  checkCounterexample,
   type AppState,
 } from './app/state';
 import {
@@ -49,6 +52,7 @@ import {
 import { renderApp } from './app/render';
 import { renderLessonView } from './app/lesson-render';
 import { renderProgressView } from './app/progress-render';
+import { renderOnboarding } from './app/onboarding-render';
 import type { AppMode } from './app/shell-render';
 import { loadLocale, saveLocale, progressUi, type Locale } from './i18n';
 
@@ -65,6 +69,7 @@ let mode: AppMode = resolveInitialMode(progress);
 
 let lessonState: LessonState = loadLessonFromProgress(progress);
 let practiceState: AppState | null = null;
+let onboardingStep = 0;
 let importNotice: { kind: 'success' | 'error'; message: string } | null = null;
 
 const importInput = document.createElement('input');
@@ -156,6 +161,7 @@ function render(): void {
   document.documentElement.lang = locale;
   const practiceUnlocked = isPracticeUnlocked(progress);
 
+  if (needsOnboarding(progress)) { root.innerHTML = renderOnboarding(locale, onboardingStep); return; }
   if (mode === 'progress') {
     root.innerHTML = renderProgressView(locale, progress, practiceUnlocked, {
       importNotice: importNotice ?? undefined,
@@ -196,6 +202,7 @@ function setMode(nextMode: AppMode): void {
     importNotice = null;
   }
   mode = nextMode;
+  if (needsOnboarding(progress)) { root.innerHTML = renderOnboarding(locale, onboardingStep); return; }
   if (mode === 'progress') {
     persistProgress(updateResume(progress, { mode: 'progress' }));
   } else if (mode === 'practice') {
@@ -207,6 +214,8 @@ function setMode(nextMode: AppMode): void {
   render();
 }
 
+function finishOnboarding(): void { persistProgress(completeOnboarding(progress)); onboardingStep = 0; render(); }
+function startPracticeExercise(exerciseId: string): void { if (!isPracticeUnlocked(progress)) return; mode = 'practice'; practiceState = loadPracticeState(exerciseId); render(); }
 function continueFromResume(): void {
   const target = progress.resume.mode;
   if (target === 'practice' && !progress.level0Complete) {
@@ -265,6 +274,16 @@ function advancePractice(): void {
     refreshPracticeQueue();
   } else if (state.exercise.type === 'fill-truth-table-cell') {
     persistProgress(recordResult(progress, state.exercise.id, cellSubmissionCorrect(state) ?? false));
+    refreshPracticeQueue();
+  } else if (state.exercise.type === 'find-counterexample' && state.feedback) {
+    persistProgress(
+      recordResult(
+        progress,
+        state.exercise.id,
+        state.feedback.correct,
+        state.feedback.correct ? undefined : state.feedback.tag,
+      ),
+    );
     refreshPracticeQueue();
   } else if (state.feedback) {
     persistProgress(
@@ -342,10 +361,10 @@ root.addEventListener('click', (event) => {
     return;
   }
 
-  if (action === 'continue-resume') {
-    continueFromResume();
-    return;
-  }
+  if (action === 'continue-resume') { continueFromResume(); return; }
+  if (action === 'practice-exercise') { const e = button.dataset.exerciseId; if (e) startPracticeExercise(e); return; }
+  if (action === 'onboarding-next') { onboardingStep++; render(); return; }
+  if (action === 'onboarding-skip' || action === 'onboarding-finish') { finishOnboarding(); return; }
 
   if (action === 'export-progress') {
     exportProgressFile();
@@ -397,6 +416,7 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (needsOnboarding(progress)) { root.innerHTML = renderOnboarding(locale, onboardingStep); return; }
   if (mode === 'progress') {
     return;
   }
@@ -464,6 +484,23 @@ root.addEventListener('click', (event) => {
 
   if (action === 'try-again') {
     practiceState = tryAgainTranslation(ensurePracticeState());
+    render();
+    return;
+  }
+
+  if (action === 'check-counterexample') {
+    practiceState = checkCounterexample(ensurePracticeState());
+    if (practiceState.phase === 'answered' && practiceState.feedback) {
+      persistProgress(
+        recordResult(
+          progress,
+          practiceState.exercise.id,
+          practiceState.feedback.correct,
+          practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
+        ),
+      );
+      refreshPracticeQueue();
+    }
     render();
     return;
   }

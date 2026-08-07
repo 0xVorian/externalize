@@ -7,6 +7,8 @@ export type ExerciseCopy = {
   feedback?: FeedbackTemplate;
   cellCorrect?: string;
   cellWrong?: string;
+  counterCorrect?: string;
+  counterWrong?: string;
 };
 
 export type UiCopy = {
@@ -27,6 +29,7 @@ export type UiCopy = {
   continue: string;
   tryAgain: string;
   nextExercise: string;
+  checkCounterexample: string;
   valuesUpdated: string;
   trueLabel: string;
   falseLabel: string;
@@ -53,6 +56,7 @@ const FEEDBACK_DEFAULTS_EN: Record<FeedbackTag, string> = {
   'wrong-atom': 'Wrong sentence letter.',
   'equivalent-but-noncanonical': 'Equivalent but not canonical.',
   incomplete: 'Formula incomplete.',
+  'counterexample-miss': 'This assignment does not match the target truth value.',
   'unbalanced-parens': 'Unbalanced parentheses.',
 };
 
@@ -75,6 +79,7 @@ const FEEDBACK_DEFAULTS_FR: Record<FeedbackTag, string> = {
   'wrong-atom': 'Mauvaise variable.',
   'equivalent-but-noncanonical': 'Équivalent mais non canonique.',
   incomplete: 'Formule incomplète.',
+  'counterexample-miss': "Cette interprétation ne correspond pas à la valeur de vérité demandée.",
   'unbalanced-parens': 'Parenthèses déséquilibrées.',
 };
 
@@ -210,6 +215,10 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-003': { prompt: 'Complete the table: what is P ∨ Q when both P and Q are false?', cellCorrect: 'Correct — disjunction is false only when both disjuncts are false.', cellWrong: 'With neither disjunct true, P ∨ Q is false.' },
     'tt-004': { prompt: 'Three letters, one blank. Fill the result for (P → Q) ∧ R when P and Q are true and R is false.', cellCorrect: 'Correct — the implication is true, but the conjunction fails because R is false.', cellWrong: 'When P and Q are true, (P → Q) is true; with R false, the whole conjunction is false.' },
     'tt-005': { prompt: 'Fill the missing biconditional value: P ↔ Q when P is false and Q is true.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
+    'counter-001': { prompt: 'Find a truth assignment that makes P ∧ Q false. Toggle P and Q, then check.', counterCorrect: 'Correct — at least one conjunct is false.', counterWrong: 'Both conjuncts are still true.' },
+    'counter-002': { prompt: 'Find an assignment where P → Q is false.', counterCorrect: 'Correct — true antecedent, false consequent.', counterWrong: 'This assignment still makes P → Q true.' },
+    'counter-003': { prompt: 'Find an assignment that makes P ∨ Q false.', counterCorrect: 'Correct — both disjuncts false.', counterWrong: 'At least one disjunct is still true.' },
+    'counter-004': { prompt: 'Find an assignment where P ↔ Q is false.', counterCorrect: 'Correct — P and Q differ.', counterWrong: 'P and Q still match.' },
     'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
     'translate-002': {
       prompt: 'It is not the case that both the gate is open and the alarm is on. Build the formula.',
@@ -358,6 +367,10 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-003': { prompt: 'Complétez le tableau : quelle est la valeur de P ∨ Q lorsque P et Q sont tous deux faux ?', cellCorrect: 'Exact — une disjonction n\'est fausse que si les deux disjonctes le sont.', cellWrong: 'Aucun disjonct n\'étant vrai, P ∨ Q est faux.' },
     'tt-004': { prompt: 'Trois variables, une case vide. Donnez le résultat de (P → Q) ∧ R lorsque P et Q sont vrais et R est faux.', cellCorrect: 'Exact — l\'implication est vraie, mais la conjonction échoue car R est faux.', cellWrong: 'Quand P et Q sont vrais, (P → Q) est vrai ; avec R faux, la conjonction entière est fausse.' },
     'tt-005': { prompt: 'Complétez la biconditionnelle manquante : P ↔ Q lorsque P est faux et Q est vrai.', cellCorrect: 'Exact — une biconditionnelle n\'est vraie que si les deux côtés coïncident.', cellWrong: 'P et Q ont ici des valeurs différentes, donc P ↔ Q est faux.' },
+    'counter-001': { prompt: 'Trouvez une interprétation qui rend P ∧ Q faux.', counterCorrect: 'Exact — au moins un conjoint est faux.', counterWrong: 'Les deux conjoints sont encore vrais.' },
+    'counter-002': { prompt: 'Trouvez une interprétation où P → Q est faux.', counterCorrect: 'Exact — antécédent vrai, conséquent faux.', counterWrong: 'P → Q reste vrai.' },
+    'counter-003': { prompt: 'Trouvez une interprétation qui rend P ∨ Q faux.', counterCorrect: 'Exact — les deux disjonctes sont faux.', counterWrong: 'Au moins un disjonct est encore vrai.' },
+    'counter-004': { prompt: 'Trouvez une interprétation où P ↔ Q est faux.', counterCorrect: 'Exact — P et Q diffèrent.', counterWrong: 'P et Q ont encore la même valeur.' },
     'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
   },
 };
@@ -383,6 +396,7 @@ const UI: Record<Locale, UiCopy> = {
     continue: 'Continue',
     tryAgain: 'Try again',
     nextExercise: 'Next exercise',
+    checkCounterexample: 'Check assignment',
     valuesUpdated: 'Truth values updated at each subformula.',
     trueLabel: 'T',
     falseLabel: 'F',
@@ -410,6 +424,7 @@ const UI: Record<Locale, UiCopy> = {
     continue: 'Continuer',
     tryAgain: 'Réessayer',
     nextExercise: 'Exercice suivant',
+    checkCounterexample: 'Vérifier l\'interprétation',
     valuesUpdated: 'Les valeurs de vérité se mettent à jour à chaque sous-formule.',
     trueLabel: 'V',
     falseLabel: 'F',
@@ -456,6 +471,13 @@ export function getCellFeedback(locale: Locale, exerciseId: string, correct: boo
   return correct
     ? (copy.cellCorrect ?? FEEDBACK_DEFAULTS[locale].correct)
     : (copy.cellWrong ?? FEEDBACK_DEFAULTS[locale].correct);
+}
+
+export function getCounterFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
+  const copy = getExerciseCopy(locale, exerciseId);
+  return correct
+    ? (copy.counterCorrect ?? FEEDBACK_DEFAULTS[locale].correct)
+    : (copy.counterWrong ?? FEEDBACK_DEFAULTS[locale]['counterexample-miss']);
 }
 
 export function getFeedbackTemplates(locale: Locale, exerciseId: string): FeedbackTemplate {
@@ -505,6 +527,15 @@ export type ProgressUiCopy = {
   importError: string;
   progressItemAria: (label: string, status: string) => string;
   modeProgressAria: string;
+  whatNextTitle: string;
+  whatNextWeakestSkill: (skill: string, rate: number) => string;
+  whatNextNextExercise: (exerciseId: string) => string;
+  whatNextReviewDue: (count: number) => string;
+  whatNextResumeLesson: (lesson: string) => string;
+  whatNextResumePractice: string;
+  whatNextResumeProgress: string;
+  whatNextPracticeSkill: string;
+  whatNextStartExercise: string;
 };
 
 const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
@@ -555,6 +586,15 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     importError: 'That file could not be read. Choose an Externalize progress export.',
     progressItemAria: (label, status) => `${label}, ${status}`,
     modeProgressAria: 'Progress',
+    whatNextTitle: 'What next?',
+    whatNextWeakestSkill: (skill, rate) => `${skill} is at ${rate}% — a few targeted exercises should help.`,
+    whatNextNextExercise: (id) => `Next up: ${id}.`,
+    whatNextReviewDue: (count) => `${count} exercise${count === 1 ? '' : 's'} scheduled for review.`,
+    whatNextResumeLesson: (lesson) => `Continue the course at “${lesson}”.`,
+    whatNextResumePractice: 'Pick up your last exercise session.',
+    whatNextResumeProgress: 'Start or continue the introductory unit.',
+    whatNextPracticeSkill: 'Practice this skill',
+    whatNextStartExercise: 'Start exercise',
   },
   fr: {
     progress: 'Parcours',
@@ -603,6 +643,15 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     importError: 'Fichier illisible. Choisissez une exportation Externalize.',
     progressItemAria: (label, status) => `${label}, ${status}`,
     modeProgressAria: 'Parcours',
+    whatNextTitle: 'Et ensuite ?',
+    whatNextWeakestSkill: (skill, rate) => `${skill} : ${rate} % — quelques exercices ciblés devraient aider.`,
+    whatNextNextExercise: (id) => `Prochain exercice : ${id}.`,
+    whatNextReviewDue: (count) => `${count} exercice${count > 1 ? 's' : ''} à revoir.`,
+    whatNextResumeLesson: (lesson) => `Reprendre le cours à « ${lesson} ».`,
+    whatNextResumePractice: "Reprendre la dernière session d'exercices.",
+    whatNextResumeProgress: "Commencer ou poursuivre l'unité d'introduction.",
+    whatNextPracticeSkill: 'Travailler cette compétence',
+    whatNextStartExercise: "Commencer l'exercice",
   },
 };
 
@@ -610,6 +659,10 @@ export function progressUi(locale: Locale): ProgressUiCopy {
   return PROGRESS_UI[locale];
 }
 
+export type OnboardingScreenCopy={title:string;body:string;visual?:string};
+export type OnboardingUiCopy={stepLabel:(c:number,t:number)=>string;next:string;skip:string;getStarted:string;screens:OnboardingScreenCopy[]};
+const ONBOARDING_UI:Record<Locale,OnboardingUiCopy>={en:{stepLabel:(c,t)=>`${c} of ${t}`,next:'Next',skip:'Skip intro',getStarted:'Get started',screens:[{title:'See the structure',body:'Formulas are easier when structure is visible. Externalize shows how connectives bind sub-expressions and how truth values flow — so you do not have to hold it all in memory.',visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Tap V or F',body:'Each sentence letter gets True/False segments. Tap to set values and watch the formula evaluate step by step in the vertical tree.',visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment-label">P</span><span class="onboarding-segment active">T</span><span class="onboarding-segment">F</span></div>'},{title:'Your progress stays here',body:'The Progress tab tracks lessons, exercises, and skills that need work. Everything is stored on this device — export anytime to move to another phone.',visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item">Course</span><span class="onboarding-nav-item">Exercises</span><span class="onboarding-nav-item active">Progress</span></div>'}]},fr:{stepLabel:(c,t)=>`${c} sur ${t}`,next:'Suivant',skip:"Passer l'intro",getStarted:'Commencer',screens:[{title:'Voir la structure',body:"Une formule est plus lisible quand sa structure est externalisée. Externalize montre comment les connecteurs lient les sous-formules et comment les valeurs de vérité se propagent — sans tout retenir en mémoire.",visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Appuyez sur V ou F',body:"Chaque variable propositionnelle a des segments V/F. Touchez pour fixer une interprétation et suivre l'évaluation dans l'arbre vertical.",visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment-label">P</span><span class="onboarding-segment active">V</span><span class="onboarding-segment">F</span></div>'},{title:'Votre parcours ici',body:"L'onglet Parcours suit les sections, les exercices et les compétences à consolider. Tout reste sur cet appareil — exportez pour continuer ailleurs.",visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item">Cours</span><span class="onboarding-nav-item">Exercices</span><span class="onboarding-nav-item active">Parcours</span></div>'}]}};
+export function onboardingUi(locale: Locale): OnboardingUiCopy { return ONBOARDING_UI[locale]; }
 export function formatResumeTime(locale: Locale, iso: string): string {
   const date = new Date(iso);
   return date.toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
