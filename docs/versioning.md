@@ -4,9 +4,9 @@ Externalize uses [Semantic Versioning](https://semver.org/) and documents change
 
 ## Current version
 
-See `CHANGELOG.md` for the latest release. Before Phase 1 code lands, the project is at **0.1.0** (documentation and planning).
+Latest **released** version: **0.2.0** (MVP-0).
 
-When `package.json` is added, its `"version"` field must match the latest release entry in the changelog.
+`package.json` `"version"` matches the latest changelog release.
 
 ## Semver policy
 

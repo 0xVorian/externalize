@@ -1,17 +1,98 @@
-import { parse, format, evaluateWithNodes } from '../engine';
+import './styles/main.css';
+import { EXERCISES, getExercise } from './app/exercises';
+import {
+  loadProgress,
+  saveProgress,
+  seedQueue,
+  pickNextExerciseId,
+  recordResult,
+} from './app/storage';
+import { createState, selectNode, toggleAtom, isExerciseComplete } from './app/state';
+import { renderApp } from './app/render';
 
-const app = document.querySelector<HTMLDivElement>('#app')!;
+const appRoot = document.querySelector<HTMLDivElement>('#app');
+if (!appRoot) {
+  throw new Error('Missing #app root element');
+}
 
-const formula = parse('(P → Q) ↔ ¬R');
-const assignment = { P: true, Q: false, R: true };
-const { root, tree } = evaluateWithNodes(formula, assignment);
+const root: HTMLDivElement = appRoot;
 
-app.innerHTML = `
-  <main style="font-family: system-ui; padding: 1rem; max-width: 24rem; margin: 0 auto;">
-    <h1>Externalize</h1>
-    <p>Engine spike — Phase 1</p>
-    <p><strong>Formula:</strong> ${format(formula)}</p>
-    <p><strong>Result:</strong> ${root ? 'true' : 'false'}</p>
-    <pre style="font-size: 0.875rem; overflow-x: auto;">${JSON.stringify(tree, null, 2)}</pre>
-  </main>
-`;
+let progress = seedQueue(
+  loadProgress(),
+  EXERCISES.map((exercise) => exercise.id),
+);
+
+function currentExerciseId(): string {
+  return pickNextExerciseId(
+    progress,
+    EXERCISES.map((exercise) => exercise.id),
+  );
+}
+
+function loadExercise(id: string) {
+  const exercise = getExercise(id);
+  if (!exercise) {
+    throw new Error(`Unknown exercise: ${id}`);
+  }
+  return createState(exercise);
+}
+
+let state = loadExercise(currentExerciseId());
+
+function render(): void {
+  root.innerHTML = renderApp(state, progress.queue.length);
+}
+
+function advance(): void {
+  if (state.feedback) {
+    progress = recordResult(progress, state.exercise.id, state.feedback.correct);
+    saveProgress(progress);
+  }
+
+  const nextId = pickNextExerciseId(
+    progress,
+    EXERCISES.map((exercise) => exercise.id),
+  );
+  state = loadExercise(nextId);
+  render();
+}
+
+root.addEventListener('click', (event) => {
+  const target = event.target as HTMLElement;
+  const button = target.closest<HTMLElement>('[data-action]');
+  if (!button) {
+    return;
+  }
+
+  const action = button.dataset.action;
+
+  if (action === 'select-node') {
+    const nodeId = button.dataset.nodeId;
+    if (!nodeId) {
+      return;
+    }
+    state = selectNode(state, nodeId);
+    if (isExerciseComplete(state)) {
+      progress = recordResult(progress, state.exercise.id, true);
+      saveProgress(progress);
+    }
+    render();
+    return;
+  }
+
+  if (action === 'toggle-atom') {
+    const atom = button.dataset.atom;
+    if (!atom) {
+      return;
+    }
+    state = toggleAtom(state, atom);
+    render();
+    return;
+  }
+
+  if (action === 'next') {
+    advance();
+  }
+});
+
+render();

@@ -1,6 +1,6 @@
 # Roadmap
 
-## Phase 0 — Documentation (current)
+## Phase 0 — Documentation
 
 - [x] Preserve original brief
 - [x] Record design principles and technical decisions
@@ -30,14 +30,14 @@ Goal: validate the core UX on a phone — externalized scope, visible evaluation
 
 **Interactions:**
 
-- [ ] Formula displayed as a **vertical tree** (readable at ~320px width)
-- [ ] Tap to identify main connective / scope boundaries
-- [ ] Toggle atom truth values; every node shows its computed value
-- [ ] Local feedback for wrong scope selection (names the bug)
-- [ ] 3–5 hard-coded exercises
-- [ ] Minimal spaced-repetition queue in local storage
+- [x] Formula displayed as a **vertical tree** (readable at ~320px width)
+- [x] Tap to identify main connective / scope boundaries
+- [x] Toggle atom truth values; every node shows its computed value
+- [x] Local feedback for wrong scope selection (names the bug)
+- [x] 5 hard-coded exercises
+- [x] Minimal spaced-repetition queue in local storage
 
-**Exit criterion:** You use it on your phone for a week and want to return. Working-memory load is visibly reduced.
+**Exit criterion:** You use it on your phone for a week and want to return. Working-memory load is visibly reduced. **Pending real-world week test.**
 
 ## Phase 3 — Translation prototype
 

@@ -7,22 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-07
+
 ### Added
 
-- Phase 1 logic engine: AST types, parser, formatter, vertical tree renderer
-- Evaluator with per-node truth values for visible intermediate steps
-- Structural equivalence check with optional commutativity and semantic flags
-- Vite + TypeScript + Vitest project scaffold (mobile viewport meta, `npm test`, `npm run dev`)
-- 15 unit tests covering parse, evaluate, and equivalence exit criteria
+- MVP-0 mobile UI: vertical formula tree, main-connective tap exercises, evaluation toggles
+- Feedback module (`engine/feedback/`) with tagged scope-selection messages
+- Path-based tree node IDs (`root`, `root.L`, `root.R`, `root.O`) stable across re-renders
+- 5 hard-coded exercises and localStorage spaced-repetition queue
+- Golden-tree evaluation test and feedback unit tests (25 total)
+
+### Changed
+
+- `evaluateWithNodes` uses a single traversal that builds tree and values together
+- UI stack: Vite + vanilla TypeScript with structured `src/app/` modules
+- Implication associativity policy documented; learner exercises require explicit parentheses
 
 ## [0.1.0] - 2026-08-07
 
 ### Added
 
 - Project documentation: vision brief, design principles, technical decisions, roadmap, content model
-- Mobile-first browser as a primary design constraint
-- MVP-0 sequencing: scope recognition and evaluation before translation exercises
-- Git repository initialized at `/home/vorian/Projects/externalize`
+- Phase 1 propositional logic engine (AST, parser, evaluator, equivalence)
+- Mobile-first design constraint and MVP-0 sequencing
+- Versioning policy and Cursor rule
 
 [Unreleased]: #
+[0.2.0]: #
 [0.1.0]: #

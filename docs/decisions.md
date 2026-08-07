@@ -68,6 +68,18 @@ No authentication, no server sync, until there is a concrete need.
 
 **Rationale:** Mobile-first rules out hover and mouse-only interactions. Drag-and-drop is pedagogically useful for scope but must never be the only way to complete an exercise.
 
+### UI stack: Vite + vanilla TypeScript
+
+**Decision:** Vite for bundling; vanilla TS with structured modules under `src/app/` for MVP-0. No React/Svelte until component complexity justifies it.
+
+**Rationale:** Zero ceremony, aligns with engine-only dependencies, mobile tap UI is manageable with explicit render functions. Revisit if proof editor or complex state makes vanilla unwieldy.
+
+### Implication associativity and learner-facing input
+
+**Decision:** The parser treats `→` and `↔` as **left-associative** when chained (`P → Q → R` parses as `(P → Q) → R`). **Learner-facing exercises must use explicit parentheses**; bare implication chains are not used in authored content.
+
+**Rationale:** Avoids silent ambiguity in teaching material. Documented and tested; authors enforce parens in exercise strings.
+
 ### Scope visualization
 
 **Decision:** Use indentation, boxes, or connecting lines — not colour alone. On mobile, prefer **vertical tree layout** and collapsible subexpression nodes over wide horizontal formulas.
@@ -119,9 +131,9 @@ Pair each exercise with a structural check (main connective, scope boundary) and
 
 | Question | Current lean | Status |
 |----------|--------------|--------|
-| Web framework | Lightweight (Vite + vanilla TS or small React/Svelte); mobile viewport testing from day one | **Open** — decide at spike |
-| Testing strategy | Unit tests on AST/eval engine; manual phone testing for UI; few automated UI tests initially | **Open** |
-| SRS algorithm | SM-2 or simplified variant keyed on error type | **Open** |
+| Web framework | Vite + vanilla TS (`src/app/` modules) | **Decided** |
+| Testing strategy | Unit tests on engine; manual phone testing for UI | **Decided** for MVP-0 |
+| SRS algorithm | Simplified interval queue in localStorage | **Decided** for MVP-0 |
 | Multiple valid translations | Accept semantically equivalent formulas where English is ambiguous; flag non-canonical but valid answers | **Provisional** |
 | PWA manifest | Add when MVP-0 is stable | **Defer** |
 | Accessibility | Screen-reader labels for all symbols; keyboard navigation on desktop | **Required** — details TBD |

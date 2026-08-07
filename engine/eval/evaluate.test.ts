@@ -22,5 +22,11 @@ describe('evaluate', () => {
 
   it('throws when an atom is unassigned', () => {
     expect(() => evaluate(parse('P'), {})).toThrow(/Missing assignment/);
+    expect(() => evaluateWithNodes(parse('P ∧ Q'), { P: true })).toThrow(/Missing assignment/);
+  });
+
+  it('evaluates double negation', () => {
+    expect(evaluate(parse('¬¬P'), { P: true })).toBe(true);
+    expect(evaluate(parse('¬¬P'), { P: false })).toBe(false);
   });
 });

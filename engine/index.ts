@@ -24,8 +24,14 @@ export {
 
 export { parse, mainConnective, ParseError } from './parse/parse';
 export { format, connectiveLabel } from './render/display';
-export { toVerticalTree, annotateTreeValues, resetTreeIds } from './render/tree';
+export { toVerticalTree, findNodeById, annotateTreeValues, resetTreeIds } from './render/tree';
 export { evaluate, evaluateWithNodes, allAssignments } from './eval/evaluate';
 export type { EvaluationResult } from './eval/evaluate';
 export { equivalent, distinct, semanticallyEquivalent } from './equiv/equivalent';
 export type { EquivalenceOptions } from './equiv/equivalent';
+export {
+  resolveFeedback,
+  checkMainConnectiveSelection,
+  expectedMainConnectiveNodeId,
+} from './feedback';
+export type { FeedbackTag, FeedbackTemplate, FeedbackResult } from './feedback';

@@ -1,0 +1,229 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f4f1ea;
+  --surface: #fffdf8;
+  --text: #1f1c18;
+  --muted: #5f574f;
+  --border: #d8d0c4;
+  --accent: #2f5d50;
+  --accent-soft: #e2eee9;
+  --wrong-soft: #fde9e7;
+  --wrong-text: #8a2f28;
+  --correct-soft: #e7f3ea;
+  --correct-text: #245c31;
+  --tap-min: 44px;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  line-height: 1.45;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+}
+
+.app {
+  max-width: 26rem;
+  margin: 0 auto;
+  padding: 1rem 1rem 2rem;
+}
+
+.app-header h1 {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 1.6rem;
+}
+
+.eyebrow,
+.queue-meta,
+.panel-title {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.exercise-card {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.exercise-prompt {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.formula-display {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: var(--accent-soft);
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.tree-panel {
+  margin-bottom: 1rem;
+}
+
+.tree-root,
+.tree-children {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.tree-children {
+  margin-top: 0.35rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+}
+
+.tree-node {
+  margin: 0.35rem 0;
+}
+
+.node-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--tap-min);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--text);
+}
+
+.tree-node.tappable .node-button {
+  cursor: pointer;
+}
+
+.tree-node.selected .node-button {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.node-label {
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 1rem;
+}
+
+.node-value {
+  min-width: 1.5rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.atom-panel {
+  margin-bottom: 1rem;
+}
+
+.atom-toggles {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.atom-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.atom-toggle.true {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.atom-name,
+.atom-value {
+  font-family: "Fira Code", "Cascadia Code", monospace;
+}
+
+.feedback {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.feedback-correct {
+  background: var(--correct-soft);
+  color: var(--correct-text);
+}
+
+.feedback-wrong {
+  background: var(--wrong-soft);
+  color: var(--wrong-text);
+}
+
+.feedback-info {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+.actions {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.primary,
+.secondary {
+  min-height: var(--tap-min);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.secondary {
+  background: #fff;
+  color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #151311;
+    --surface: #1f1b18;
+    --text: #f6f1ea;
+    --muted: #b7aea3;
+    --border: #3a342f;
+    --accent: #79b8a8;
+    --accent-soft: #24312d;
+    --wrong-soft: #3a2422;
+    --wrong-text: #ffb4ab;
+    --correct-soft: #203025;
+    --correct-text: #9fd5a9;
+  }
+
+  .node-button,
+  .atom-toggle,
+  .secondary {
+    background: #171412;
+  }
+}

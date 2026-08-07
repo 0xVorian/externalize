@@ -20,8 +20,8 @@ Start here:
 
 ## Status
 
-**Phase:** 1 complete — engine spike  
-**Next step:** Phase 2 MVP-0 UI — formula tree, scope tap, evaluation on phone (see [roadmap](docs/roadmap.md))
+**Phase:** 2 — MVP-0 built; pending week test on phone  
+**Next step:** Use `npm run dev` on your phone, then decide if Phase 3 (translation) is warranted
 
 ## Development
 
@@ -29,8 +29,22 @@ Start here:
 npm install
 npm test          # run engine unit tests
 npm run dev       # dev server (mobile-friendly viewport)
-npm run build     # typecheck + production build
+npm run build          # typecheck + production build
 ```
+
+## Deploy (Cloudflare Pages)
+
+Connect the GitHub repository in Cloudflare Pages with:
+
+| Setting | Value |
+|---------|-------|
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Node.js version | `20` (or set `NODE_VERSION=20`) |
+
+No environment variables required for MVP-0. Progress is stored in the browser (`localStorage`).
+
+After deploy, open the Pages URL on your phone to run the week test.
 
 ## Success criterion
 
