@@ -520,9 +520,9 @@ button {
 }
 
 .atom-segment.active.false {
-  border-color: var(--text);
-  background: var(--surface);
-  color: var(--text);
+  border-color: var(--wrong-text);
+  background: var(--wrong-soft);
+  color: var(--wrong-text);
 }
 
 .atom-segment:disabled {
