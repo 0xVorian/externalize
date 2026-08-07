@@ -9,11 +9,14 @@ How lessons, exercises, and progress are represented in the codebase today.
 - Skill tags and error tags drive spaced repetition (see progress record below)
 - Exercise UIs must be completable on a phone browser (tap-first; no hover-only steps)
 
-Future direction: YAML/JSON authoring under `content/` may replace hand-edited TypeScript arrays. Until then, follow [Authoring guide](authoring.md).
+Future direction: YAML/JSON authoring under `content/` may replace hand-edited TypeScript arrays. `content/prerequisites.json` is the first content file; lesson/exercise definitions remain in TypeScript until migrated. Follow [Authoring guide](authoring.md).
 
 ## File layout (current)
 
 ```
+content/
+  prerequisites.json   — concept graph (lessons → exercises prerequisites)
+
 src/app/
   lessons.ts           — LEVEL_0_LESSONS, LEVEL_1_LESSONS, PRACTICE_UNLOCK_ORDER
   exercises.ts         — EXERCISE_DEFINITIONS
@@ -21,6 +24,9 @@ src/app/
   lesson-render.ts     — card, watch table, guided live row
   render.ts            — practice tree + toggles
   truth-table-render.ts
+  progress-render.ts   — progress tab + concept map
+  concept-map-render.ts
+  prerequisites.ts     — loads content/prerequisites.json
   storage.ts           — progress persistence
 
 src/i18n/
@@ -116,9 +122,9 @@ Presentation mode is **not** stored on the lesson/exercise definition. It is inf
 
 Modes: `card`, `truth-table-multi`, `truth-table-live`, `tree-eval`, `tree-scope`.
 
-## Concept graph (illustrative)
+## Concept graph (data)
 
-Concepts are nodes; edges are prerequisites. Not yet encoded as data — skill tags on exercises approximate this.
+Prerequisite relationships live in [`content/prerequisites.json`](../content/prerequisites.json). The Progress tab renders concepts, lessons, and exercise prerequisites via `src/app/prerequisites.ts`.
 
 ```
 proposition          → (none)
