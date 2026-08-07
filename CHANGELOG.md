@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Spaced-repetition intervals are tuned per skill: translation and fill-truth-table exercises review sooner than scope tasks; evaluate-formula sits between the two
 - MVP UI accessibility pass: ARIA labels and roles on trees, truth tables, V/F segments, mode nav, and progress cards; `:focus-visible` outlines on tap targets; evaluation tree nodes no longer rendered as inert buttons
 - Learn navigation chains Unit 0 → Unit 1 (`ALL_LEARN_LESSONS`); practice still unlocks after Unit 0
 - End of Unit 0 offers “Continue to Unit 1” instead of jumping straight to exercises
