@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Tree keyboard navigation** for main-connective scope exercises: roving tabindex and Arrow/Home/End keys on parse-tree connective buttons (`src/app/tree-keyboard.ts`); documented in [`docs/accessibility.md`](docs/accessibility.md)
+
 - Translation feedback semantic equivalence: `classifyTranslation` accepts logically equivalent formulas via `engine/equiv/equivalent.ts` when `acceptEquivalent` is set; specific mistake tags (reversed conditional, negation scope, missing parens, wrong atom) are checked before semantic acceptance
 
 ### Changed
@@ -20,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2026-08-07
 
 ### Added
+
+- **Tree keyboard navigation** for main-connective scope exercises: roving tabindex and Arrow/Home/End keys on parse-tree connective buttons (`src/app/tree-keyboard.ts`); documented in [`docs/accessibility.md`](docs/accessibility.md)
 
 - **Natural deduction prototype** (`nd-001`, `proof-fill-step`): Fitch-style fill-one-step exercise with modus ponens rule selection and line citation
 - **Predicate logic AST spike**: extend `Formula` with `pred`, `forall`, `exists`, and `Term` types; parser accepts `∀`/`∃`, predicate application `F(x)`, and comma-separated arguments; migrate propositional letters to 0-place `pred`; helpers `collectFreeVariables` and `collectPredicateSymbols`; grammar documented in [`docs/predicate-logic.md`](docs/predicate-logic.md)
@@ -90,6 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Tree keyboard navigation** for main-connective scope exercises: roving tabindex and Arrow/Home/End keys on parse-tree connective buttons (`src/app/tree-keyboard.ts`); documented in [`docs/accessibility.md`](docs/accessibility.md)
+
 - MVP-0 mobile UI: vertical formula tree, main-connective tap exercises, evaluation toggles
 - Feedback module (`engine/feedback/`) with tagged scope-selection messages
 - Path-based tree node IDs (`root`, `root.L`, `root.R`, `root.O`) stable across re-renders
@@ -105,6 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-08-07
 
 ### Added
+
+- **Tree keyboard navigation** for main-connective scope exercises: roving tabindex and Arrow/Home/End keys on parse-tree connective buttons (`src/app/tree-keyboard.ts`); documented in [`docs/accessibility.md`](docs/accessibility.md)
 
 - Project documentation: vision brief, design principles, technical decisions, roadmap, content model
 - Phase 1 propositional logic engine (AST, parser, evaluator, equivalence)

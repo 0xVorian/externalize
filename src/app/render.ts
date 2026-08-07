@@ -7,6 +7,7 @@ import { cellSubmissionCorrect, tautologySubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
 import { renderTranslationExerciseBody, renderTranslationActions } from './translation/translation-render';
 import { renderProofExerciseBody, renderProofActions } from './proof/proof-render';
+import { treeFocusNodeId } from './tree-keyboard';
 
 function showsEvaluatedTree(type: AppState['exercise']['type']): boolean {
   return type === 'evaluate-formula' || type === 'find-counterexample';
@@ -16,7 +17,7 @@ function nodeValueClass(kind: TreeNode['kind']): string {
   return kind === 'pred' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
 }
 
-function renderTreeNode(node: TreeNode, state: AppState): string {
+function renderTreeNode(node: TreeNode, state: AppState, focusNodeId?: string): string {
   const copy = ui(state.locale);
   const isTappable = state.exercise.type === 'identify-main-connective';
   const selected = state.selectedNodeId === node.id;
@@ -29,11 +30,17 @@ function renderTreeNode(node: TreeNode, state: AppState): string {
       : '';
   const nodeContent = `<span class="node-label">${node.label}</span>${valueHtml}`;
   const hasChildren = node.children.length > 0;
+  const tabIndexAttr = isTappable ? ` tabindex="${node.id === focusNodeId ? '0' : '-1'}"` : '';
   const nodeInner = isTappable
-    ? `<button type="button" class="node-button" data-action="select-node" data-node-id="${node.id}" aria-pressed="${selected}" aria-label="${copy.treeNodeSelectAria(node.label)}">${nodeContent}</button>`
+    ? `<button type="button" class="node-button" data-action="select-node" data-node-id="${node.id}"${tabIndexAttr} aria-pressed="${selected}" aria-label="${copy.treeNodeSelectAria(node.label)}">${nodeContent}</button>`
     : `<div class="node-button node-readonly" aria-label="${copy.treeNodeDisplayAria(node.label, showsEvaluatedTree(state.exercise.type) ? truthLabel : undefined)}">${nodeContent}</div>`;
-  const children = node.children.map((c) => renderTreeNode(c, state)).join('');
-  return `<li class="${classes.join(' ')}" role="treeitem" data-node-id="${node.id}"${hasChildren ? ' aria-expanded="true"' : ''}>${nodeInner}${children ? `<ul class="tree-children" role="group">${children}</ul>` : ''}</li>`;
+  const children = node.children.map((c) => renderTreeNode(c, state, focusNodeId)).join('');
+  return `<li class="${classes.join(' ')}" role="treeitem" data-node-id="${node.id}"${hasChildren ? ' aria-expanded="true"' : ''}${selected ? ' aria-selected="true"' : ''}>${nodeInner}${children ? `<ul class="tree-children" role="group">${children}</ul>` : ''}</li>`;
+}
+
+function renderTreePanel(state: AppState, trailing = ''): string {
+  const focusNodeId = treeFocusNodeId(state);
+  return `<section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}"><ul class="tree-root" role="tree">${renderTreeNode(state.tree, state, focusNodeId)}</ul></section>${trailing}`;
 }
 
 function renderAtomToggles(state: AppState): string {
@@ -63,7 +70,7 @@ function renderEvaluationBody(state: AppState): string {
   if (usesLiveTruthRow(state.exercise.formula!)) {
     return `${renderAtomToggles(state)}${renderLiveTruthRow(state.locale, state.exercise.formula!, state.assignment)}`;
   }
-  return `<section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}"><ul class="tree-root" role="tree">${renderTreeNode(state.tree, state)}</ul></section>${renderAtomToggles(state)}`;
+  return renderTreePanel(state, renderAtomToggles(state));
 }
 
 function renderCounterexampleBody(state: AppState): string {
@@ -73,11 +80,11 @@ function renderCounterexampleBody(state: AppState): string {
   if (usesLiveTruthRow(state.exercise.formula!)) {
     return `${renderAtomToggles(state)}${renderLiveTruthRow(state.locale, state.exercise.formula!, state.assignment)}`;
   }
-  return `<section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}"><ul class="tree-root" role="tree">${renderTreeNode(state.tree, state)}</ul></section>${renderAtomToggles(state)}`;
+  return renderTreePanel(state, renderAtomToggles(state));
 }
 
 function renderScopeBody(state: AppState): string {
-  return `<section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}"><ul class="tree-root" role="tree">${renderTreeNode(state.tree, state)}</ul></section>`;
+  return renderTreePanel(state);
 }
 
 function renderExerciseBody(state: AppState): string {

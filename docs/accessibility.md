@@ -47,6 +47,7 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 
 - **Focus-visible:** Consistent `:focus-visible` outline on buttons (mode nav, language, tree nodes, V/F segments, primary/secondary actions, palette stub, reference `<summary>`).
 - **Keyboard activation:** All interactive controls remain native `<button>` elements; Enter/Space activate via the existing delegated click handler. Read-only tree nodes are not in the tab order.
+- **Tree keyboard navigation:** Scope exercises (main-connective selection) use roving `tabindex` on connective buttons; Arrow Up/Down move between visible nodes, Arrow Right/Left move to first child or parent, Home/End jump to first/last node. Focus-visible outline applies; `aria-selected` reflects selection on `treeitem` elements.
 
 ### Symbol palette (stub)
 
@@ -55,7 +56,6 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 ## Known gaps
 
 - **Truth-table inactive rows:** Dimmed non-current rows are still read by screen readers; no `aria-hidden` (would hide pedagogical context).
-- **Tree keyboard navigation:** No arrow-key roving tabindex; users tab through tappable connective buttons in DOM order.
 - **Progress stats lists:** Skill/error summaries lack per-item `aria-label`; headings provide context only.
 - **Reference panel:** Native `<details>`; no custom expand/collapse announcements beyond browser defaults.
 - **Live region politeness:** Feedback uses `role="status"` but not `aria-live="polite"` explicitly (implicit for status role in most browsers).
