@@ -234,6 +234,17 @@ export function checkTranslation(state: AppState): AppState {
   };
 }
 
+export function tryAgainTranslation(state: AppState): AppState {
+  if (
+    state.exercise.type !== 'translate-en-to-formula' ||
+    state.phase !== 'answered' ||
+    state.feedback?.correct
+  ) {
+    return state;
+  }
+  return { ...state, phase: 'ready', feedback: null, message: null };
+}
+
 export function setAtomValue(state: AppState, atom: string, value: boolean): AppState {
   if (state.exercise.type !== 'evaluate-formula') {
     return state;

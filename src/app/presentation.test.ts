@@ -49,6 +49,11 @@ const PRESENTATION: Record<string, string> = {
   'scope-012': 'tree-scope',
   'eval-010': 'truth-table-live',
   'translate-001': 'translation-palette',
+  'translate-002': 'translation-palette',
+  'translate-003': 'translation-palette',
+  'translate-004': 'translation-palette',
+  'translate-005': 'translation-palette',
+  'translate-006': 'translation-palette',
 };
 
 describe('presentation inventory', () => {

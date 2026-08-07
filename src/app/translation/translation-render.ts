@@ -45,7 +45,10 @@ export function renderTranslationExerciseBody(state: AppState): string {
 export function renderTranslationActions(state: AppState): string {
   const copy = ui(state.locale);
   if (state.phase === 'answered') {
-    return `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
+    if (state.feedback?.correct) {
+      return `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
+    }
+    return `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button><button type="button" class="secondary" data-action="next">${copy.continue}</button>`;
   }
   return `<button type="button" class="primary" data-action="check-translation">${translationUi(state.locale).check}</button>`;
 }
