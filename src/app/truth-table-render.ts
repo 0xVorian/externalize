@@ -1,6 +1,6 @@
 import { evaluate, parse, collectAtoms } from '../../engine';
-import type { Assignment } from '../../engine';
-import { learnUi, formatTruthValue, type Locale } from '../i18n';
+import type { Assignment, PartialTruthTable } from '../../engine';
+import { learnUi, ui, formatTruthValue, type Locale } from '../i18n';
 
 /** Flat formulas that use a live single-row truth table in lessons and practice. */
 const LIVE_TRUTH_ROW_FORMULAS = new Set(['P ∧ Q', '¬P', 'P ∨ Q', 'P → Q', 'P ↔ Q']);
@@ -131,8 +131,30 @@ export function renderWatchGrid(
             <span class="watch-grid-row-label">${formatTruthValue(locale, false)}</span>
           </div>
           <div class="watch-grid-cells">${cells}</div>
-        </div>
       </div>
     </div>
   `;
+function renderBlankResultCell(
+  rowIndex: number,
+  submitted: boolean | null,
+  answered: boolean,
+  const copy = ui(locale);
+  if (answered && submitted !== null) {
+    return `<td class="result-cell">${formatTruthValue(locale, submitted)}</td>`;
+  return `<td class="result-cell blank-cell"><div class="cell-segments" role="group" aria-label="${copy.cellFillAria(rowIndex + 1)}"><button type="button" class="cell-segment true" data-action="submit-cell-value" data-value="true">${copy.trueLabel}</button><button type="button" class="cell-segment false" data-action="submit-cell-value" data-value="false">${copy.falseLabel}</button></div></td>`;
+}
+export function renderPartialTruthTable(
+  table: PartialTruthTable,
+  options: { hiddenRowIndex: number; submitted: boolean | null; answered: boolean },
+  const body = table.rows
+    .map((row, index) => {
+      const atomCells = table.atoms
+        .map((atom) => `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`)
+      const resultCell =
+        index === options.hiddenRowIndex
+          ? renderBlankResultCell(locale, index, options.submitted, options.answered)
+          : `<td class="result-cell">${formatTruthValue(locale, row.result ?? false)}</td>`;
+      return `<tr class="truth-table-row ${index === options.hiddenRowIndex ? 'active' : ''}">${atomCells}${resultCell}</tr>`;
+  const headerCells = table.atoms.map((atom) => `<th scope="col">${atom}</th>`).join('');
+  return `<div class="truth-table-wrap"><table class="truth-table" aria-label="${learn.truthTableAria(formula)}"><thead><tr>${headerCells}<th scope="col">${formula}</th></tr></thead><tbody>${body}</tbody></table></div>`;
 }

@@ -2,10 +2,7 @@ import type { FeedbackTag, FeedbackTemplate } from '../../engine';
 import type { Locale } from './locale';
 import type { ResumePoint } from '../app/progress-tracker';
 
-export type ExerciseCopy = {
-  prompt: string;
-  feedback?: FeedbackTemplate;
-};
+export type ExerciseCopy = { prompt: string; feedback?: FeedbackTemplate; cellCorrect?: string; cellWrong?: string; };
 
 export type UiCopy = {
   eyebrow: string;
@@ -15,6 +12,7 @@ export type UiCopy = {
   assignmentAria: string;
   assignmentHint: string;
   atomGroupAria: (atom: string) => string;
+  cellFillAria: (rowNumber: number) => string;
   formulaTreeAria: string;
   continue: string;
   nextExercise: string;
@@ -161,10 +159,12 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'Negation applies after the conjunction inside the parentheses is evaluated. Follow the tree from the atoms outward.',
     },
-    'eval-009': {
-      prompt:
-        'Each conjunct is evaluated separately. The conjunction is true only when both (P → Q) and R are true.',
-    },
+    'eval-009': { prompt: 'Each conjunct is evaluated separately. The conjunction is true only when both (P → Q) and R are true.' },
+    'tt-001': { prompt: 'The table is almost complete. Tap T or F to fill the missing entry for P ∧ Q when P is true and Q is false.', cellCorrect: 'Correct — conjunction requires both conjuncts to be true.', cellWrong: 'Under this assignment, P is true and Q is false, so P ∧ Q is false.' },
+    'tt-002': { prompt: 'Fill the blank result for P → Q when P is true and Q is false.', cellCorrect: 'Correct — a material conditional is false only in this case.', cellWrong: 'When the antecedent is true and the consequent is false, P → Q is false.' },
+    'tt-003': { prompt: 'Complete the table: what is P ∨ Q when both P and Q are false?', cellCorrect: 'Correct — disjunction is false only when both disjuncts are false.', cellWrong: 'With neither disjunct true, P ∨ Q is false.' },
+    'tt-004': { prompt: 'Three letters, one blank. Fill the result for (P → Q) ∧ R when P and Q are true and R is false.', cellCorrect: 'Correct — the implication is true, but the conjunction fails because R is false.', cellWrong: 'When P and Q are true, (P → Q) is true; with R false, the whole conjunction is false.' },
+    'tt-005': { prompt: 'Fill the missing biconditional value: P ↔ Q when P is false and Q is true.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
   },
   fr: {
     'scope-001': {
@@ -272,10 +272,12 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'La négation s\'applique après l\'évaluation de la conjonction entre parenthèses. Remontez l\'arbre depuis les variables.',
     },
-    'eval-009': {
-      prompt:
-        'Chaque conjoint est évalué séparément. La conjonction n\'est vraie que si (P → Q) et R le sont tous deux.',
-    },
+    'eval-009': { prompt: 'Chaque conjoint est évalué séparément. La conjonction n\'est vraie que si (P → Q) et R le sont tous deux.' },
+    'tt-001': { prompt: 'Le tableau est presque complet. Toucher V ou F pour la case manquante de P ∧ Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — une conjonction exige que les deux conjoints soient vrais.', cellWrong: 'Sous cette interprétation, P est vrai et Q est faux, donc P ∧ Q est faux.' },
+    'tt-002': { prompt: 'Complétez la case vide pour P → Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — l\'implication matérielle n\'est fausse que dans ce cas.', cellWrong: 'Quand l\'antécédent est vrai et le conséquent faux, P → Q est faux.' },
+    'tt-003': { prompt: 'Complétez le tableau : quelle est la valeur de P ∨ Q lorsque P et Q sont tous deux faux ?', cellCorrect: 'Exact — une disjonction n\'est fausse que si les deux disjonctes le sont.', cellWrong: 'Aucun disjonct n\'étant vrai, P ∨ Q est faux.' },
+    'tt-004': { prompt: 'Trois variables, une case vide. Donnez le résultat de (P → Q) ∧ R lorsque P et Q sont vrais et R est faux.', cellCorrect: 'Exact — l\'implication est vraie, mais la conjonction échoue car R est faux.', cellWrong: 'Quand P et Q sont vrais, (P → Q) est vrai ; avec R faux, la conjonction entière est fausse.' },
+    'tt-005': { prompt: 'Complétez la biconditionnelle manquante : P ↔ Q lorsque P est faux et Q est vrai.', cellCorrect: 'Exact — une biconditionnelle n\'est vraie que si les deux côtés coïncident.', cellWrong: 'P et Q ont ici des valeurs différentes, donc P ↔ Q est faux.' },
   },
 };
 
@@ -289,6 +291,7 @@ const UI: Record<Locale, UiCopy> = {
     assignmentAria: 'Truth assignment to sentence letters',
     assignmentHint: 'Tap V or F for each letter to set its truth value.',
     atomGroupAria: (atom) => `Truth value for ${atom}`,
+    cellFillAria: (rowNumber) => `Fill result for row ${rowNumber}`,
     formulaTreeAria: 'Parsing tree of the formula',
     continue: 'Continue',
     nextExercise: 'Next exercise',
@@ -308,6 +311,7 @@ const UI: Record<Locale, UiCopy> = {
     assignmentAria: 'Interprétation (valuation des variables propositionnelles)',
     assignmentHint: 'Toucher V ou F pour fixer la valeur de chaque variable.',
     atomGroupAria: (atom) => `Valeur de vérité de ${atom}`,
+    cellFillAria: (rowNumber) => `Remplir le résultat de la ligne ${rowNumber}`,
     formulaTreeAria: 'Arbre de décomposition de la formule',
     continue: 'Continuer',
     nextExercise: 'Exercice suivant',
@@ -349,6 +353,11 @@ export function getExerciseCopy(locale: Locale, exerciseId: string): ExerciseCop
     throw new Error(`Missing exercise copy for ${exerciseId} (${locale})`);
   }
   return copy;
+}
+
+export function getCellFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
+  const copy = getExerciseCopy(locale, exerciseId);
+  return correct ? (copy.cellCorrect ?? FEEDBACK_DEFAULTS[locale].correct) : (copy.cellWrong ?? FEEDBACK_DEFAULTS[locale].correct);
 }
 
 export function getFeedbackTemplates(locale: Locale, exerciseId: string): FeedbackTemplate {
@@ -419,8 +428,10 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     skillLabel: (id) =>
       id === 'practice:evaluate-formula'
         ? 'Evaluating formulas'
-        : id === 'practice:identify-main-connective'
-          ? 'Main connective'
+        : id === 'practice:fill-truth-table-cell'
+          ? 'Truth-table cells'
+          : id === 'practice:identify-main-connective'
+            ? 'Main connective'
           : id,
     errorLabel: (tag) => FEEDBACK_DEFAULTS_EN[tag].split('.')[0],
     rateLabel: (rate, attempts) => `${Math.round(rate * 100)}% over ${attempts} attempts`,
@@ -458,8 +469,10 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     skillLabel: (id) =>
       id === 'practice:evaluate-formula'
         ? 'Évaluation de formules'
-        : id === 'practice:identify-main-connective'
-          ? 'Connecteur principal'
+        : id === 'practice:fill-truth-table-cell'
+          ? 'Cases de table de vérité'
+          : id === 'practice:identify-main-connective'
+            ? 'Connecteur principal'
           : id,
     errorLabel: (tag) => FEEDBACK_DEFAULTS_FR[tag].split('.')[0],
     rateLabel: (rate, attempts) => `${Math.round(rate * 100)} % sur ${attempts} essai${attempts > 1 ? 's' : ''}`,

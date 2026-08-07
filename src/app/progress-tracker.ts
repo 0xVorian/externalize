@@ -1,14 +1,12 @@
 import type { Assignment, FeedbackTag } from '../../engine';
 import type { ExerciseDefinition } from './exercises';
 
-export type SkillId =
-  | 'practice:identify-main-connective'
-  | 'practice:evaluate-formula';
+export type SkillId = 'practice:identify-main-connective' | 'practice:evaluate-formula' | 'practice:fill-truth-table-cell';
 
 export function skillForExercise(exercise: ExerciseDefinition): SkillId {
-  return exercise.type === 'evaluate-formula'
-    ? 'practice:evaluate-formula'
-    : 'practice:identify-main-connective';
+  if (exercise.type === 'evaluate-formula') return 'practice:evaluate-formula';
+  if (exercise.type === 'fill-truth-table-cell') return 'practice:fill-truth-table-cell';
+  return 'practice:identify-main-connective';
 }
 
 export type SkillStat = {

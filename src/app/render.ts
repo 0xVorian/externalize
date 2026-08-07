@@ -2,7 +2,8 @@ import type { TreeNode } from '../../engine';
 import { ui, formatTruthValue } from '../i18n';
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
-import { renderLiveTruthRow, usesLiveTruthRow } from './truth-table-render';
+import { renderLiveTruthRow, renderPartialTruthTable, usesLiveTruthRow } from './truth-table-render';
+import { cellSubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
 
 function nodeValueClass(kind: TreeNode['kind']): string {
@@ -46,6 +47,17 @@ function renderAtomToggles(state: AppState): string {
   });
 }
 
+function renderFillTruthTableBody(state: AppState): string {
+  if (!state.partialTable || state.exercise.hiddenRowIndex === undefined) return '';
+  return renderPartialTruthTable(state.locale, state.exercise.formula, state.partialTable, { hiddenRowIndex: state.exercise.hiddenRowIndex, submitted: state.submittedCell, answered: state.phase === 'answered' });
+}
+
+function renderExerciseBody(state: AppState): string {
+  if (state.exercise.type === 'evaluate-formula') return renderEvaluationBody(state);
+  if (state.exercise.type === 'fill-truth-table-cell') return renderFillTruthTableBody(state);
+  return `<section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}"><ul class="tree-root">${renderTreeNode(state.tree, state)}</ul></section>`;
+}
+
 function renderEvaluationBody(state: AppState): string {
   if (usesLiveTruthRow(state.exercise.formula)) {
     return `
@@ -68,13 +80,14 @@ export function renderApp(
   practiceUnlocked: boolean,
 ): string {
   const copy = ui(state.locale);
+  const cellCorrect = cellSubmissionCorrect(state);
   const feedbackClass = state.feedback
     ? state.feedback.correct
       ? 'feedback-correct'
       : 'feedback-wrong'
-    : state.message
-      ? 'feedback-info'
-      : '';
+    : state.message && cellCorrect === false ? 'feedback-wrong'
+      : state.message && cellCorrect === true ? 'feedback-correct'
+      : state.message ? 'feedback-info' : '';
 
   return `
     <main class="app" lang="${state.locale}">
@@ -89,15 +102,9 @@ export function renderApp(
 
       <article class="exercise-card">
         <p class="exercise-prompt">${state.prompt}</p>
-        <p class="formula-display" aria-label="Formula">${state.exercise.formula}</p>
+        ${state.exercise.type === 'fill-truth-table-cell' ? '' : `<p class="formula-display" aria-label="Formula">${state.exercise.formula}</p>`}
 
-        ${
-          state.exercise.type === 'evaluate-formula'
-            ? renderEvaluationBody(state)
-            : `<section class="tree-panel" aria-label="${copy.formulaTreeAria}">
-          <ul class="tree-root">${renderTreeNode(state.tree, state)}</ul>
-        </section>`
-        }
+        ${renderExerciseBody(state)}
 
         ${
           state.message
@@ -108,6 +115,11 @@ export function renderApp(
         <div class="actions">
           ${
             state.exercise.type === 'identify-main-connective' && state.phase === 'answered'
+              ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>`
+              : ''
+          }
+          ${
+            state.exercise.type === 'fill-truth-table-cell' && state.phase === 'answered'
               ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>`
               : ''
           }
