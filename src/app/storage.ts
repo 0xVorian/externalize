@@ -30,7 +30,7 @@ export type SrsEntry = {
 };
 
 export type ProgressStore = {
-  version: 4;
+  version: 5;
   lessonsCompleted: string[];
   level0Complete: boolean;
   level1Complete: boolean;
@@ -42,6 +42,7 @@ export type ProgressStore = {
   exerciseStats: Record<string, ExerciseStat>;
   errorCounts: Partial<Record<FeedbackTag, number>>;
   lastVisitedAt: string;
+  onboardingComplete: boolean;
 };
 
 const STORAGE_KEY = 'externalize-progress-v1';
@@ -84,6 +85,7 @@ function defaultStore(): ProgressStore {
     exerciseStats: {},
     errorCounts: {},
     lastVisitedAt: nowIso(),
+    onboardingComplete: false,
   };
 }
 
@@ -93,9 +95,8 @@ function migrateStore(raw: unknown): ProgressStore {
   }
   const store = raw as Record<string, unknown>;
 
-  if (store.version === 4) {
-    return normalizeV4(store);
-  }
+  if (store.version === 5) return normalizeV5(store);
+  if (store.version === 4) return migrateV4ToV5(store);
 
   if (store.version === 3) {
     return migrateV3ToV4(store);
@@ -132,10 +133,10 @@ function migrateStore(raw: unknown): ProgressStore {
   return defaultStore();
 }
 
-function normalizeV4(store: Record<string, unknown>): ProgressStore {
+function normalizeV5(store: Record<string, unknown>): ProgressStore {
   const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
   return {
-    version: 4,
+    version: 5,
     lessonsCompleted,
     level0Complete:
       (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
@@ -149,12 +150,18 @@ function normalizeV4(store: Record<string, unknown>): ProgressStore {
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
     errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
     lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
+    onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? false,
   };
+}
+
+function migrateV4ToV5(store: Record<string, unknown>): ProgressStore {
+  const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
+  return { version:5, lessonsCompleted, level0Complete:(store.level0Complete as boolean|undefined)??isLevel0Complete(lessonsCompleted), level1Complete:(store.level1Complete as boolean|undefined)??isLevel1Complete(lessonsCompleted), queue:(store.queue as SrsEntry[]|undefined)??[], completed:(store.completed as string[]|undefined)??[], lastExerciseId: store.lastExerciseId as string|undefined, resume:(store.resume as ResumePoint|undefined)??defaultResume(), skills:(store.skills as Record<string,SkillStat>|undefined)??{}, exerciseStats:(store.exerciseStats as Record<string,ExerciseStat>|undefined)??{}, errorCounts:(store.errorCounts as Partial<Record<FeedbackTag,number>>|undefined)??{}, lastVisitedAt:(store.lastVisitedAt as string|undefined)??nowIso(), onboardingComplete:true };
 }
 
 function migrateV3ToV4(store: Record<string, unknown>): ProgressStore {
   const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
-  return {
+  return migrateV4ToV5({
     version: 4,
     lessonsCompleted,
     level0Complete:
@@ -168,7 +175,7 @@ function migrateV3ToV4(store: Record<string, unknown>): ProgressStore {
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
     errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
     lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
-  };
+  });
 }
 
 function firstIncompleteLessonId(completed: string[]): string {
@@ -306,6 +313,8 @@ export function countReviewDue(store: ProgressStore): number {
   ).length;
 }
 
+export function completeOnboarding(store: ProgressStore): ProgressStore { return { ...store, onboardingComplete: true }; }
+export function needsOnboarding(store: ProgressStore): boolean { return !store.onboardingComplete; }
 export function updateResume(store: ProgressStore, resume: Partial<ResumePoint>): ProgressStore {
   return {
     ...store,

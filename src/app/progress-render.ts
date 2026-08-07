@@ -11,6 +11,7 @@ import type { ProgressStore } from './storage';
 import { countReviewDue, getUnlockedExerciseIds, exerciseLockReason } from './storage';
 import { renderShellHeader } from './shell-render';
 import { learnUi } from '../i18n';
+import { computeWhatNext } from './what-next';
 
 function renderListItem(
   locale: Locale,
@@ -86,6 +87,7 @@ export function renderProgressView(
   const copy = progressUi(locale);
   const summary = buildSummaryFromStore(store);
   const resume = store.resume;
+  const suggestion = computeWhatNext(locale, store, summary);
 
   const lessonItems = LEVEL_0_LESSONS.map((lesson) => {
     const title = getLessonCopy(locale, lesson.id).title;
@@ -173,12 +175,11 @@ export function renderProgressView(
         referenceOpen: false,
       })}
 
-      <section class="progress-card continue-card" aria-labelledby="progress-continue-heading">
-        <h2 class="panel-title" id="progress-continue-heading">${copy.continueTitle}</h2>
+      <section class="progress-card what-next-card" aria-labelledby="progress-what-next-heading">
+        <h2 class="panel-title" id="progress-what-next-heading">${suggestion.title}</h2>
+        <p class="what-next-detail">${suggestion.detail}</p>
         <p class="progress-meta">${copy.lastSeen(formatResumeTime(locale, resume.updatedAt))}</p>
-        <button type="button" class="primary" data-action="continue-resume">
-          ${resume.mode === 'learn' ? copy.continueLearn : resume.mode === 'practice' ? copy.continuePractice : copy.continueProgress}
-        </button>
+        <button type="button" class="primary" data-action="${suggestion.action}" ${suggestion.exerciseId ? `data-exercise-id="${suggestion.exerciseId}"` : ''}>${suggestion.buttonLabel}</button>
       </section>
 
       <section class="progress-card">

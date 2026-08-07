@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Content model** (`docs/content-model.md`) updated to reflect current TypeScript layout (replacing provisional YAML sketch)
 - **Future work plan** (`docs/future-work-plan.md`): tiered workstreams, agent batch A/B/C plan, and deferred-scope list — separate from the app roadmap
 - **Progress tab**: resume where you left off, lesson/exercise checklist, review-due count
+- **Progress tab “What next?”**: smart suggestion (resume point, weakest skill, or next unlocked exercise)
+- **First-run onboarding**: three-screen intro (externalize idea, V/F segments, Progress tab); progress storage v5 with `onboardingComplete`
 - Skill tracking: surfaces what feels easy vs. what you struggle with (from attempt history)
 - Frequent error tags (e.g. picking a sub-connective instead of the main one)
 - Progress storage v3: resume point, per-skill stats, error counts, last-visited timestamp

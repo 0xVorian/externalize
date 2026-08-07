@@ -3,6 +3,7 @@ export { loadLocale, saveLocale, otherLocale } from './locale';
 export {
   ui,
   progressUi,
+  onboardingUi,
   formatResumeTime,
   resumeContinueLabel,
   getExerciseCopy,
@@ -13,7 +14,7 @@ export {
   formatAssignmentLine,
   translationUi,
 } from './messages';
-export type { ExerciseCopy, UiCopy, ProgressUiCopy, TranslationUiCopy } from './messages';
+export type { ExerciseCopy, UiCopy, ProgressUiCopy, TranslationUiCopy, OnboardingUiCopy } from './messages';
 export {
   learnUi,
   getLessonCopy,
