@@ -14,29 +14,57 @@ export type LessonState = {
   complete: boolean;
 };
 
-export function createLessonState(locale: Locale, lesson: LessonDefinition): LessonState {
+import type { ResumePoint } from './progress-tracker';
+
+export type LessonResume = Pick<
+  ResumePoint,
+  'watchStep' | 'watchComplete' | 'guidedStep' | 'guidedAssignment' | 'guidedComplete'
+>;
+
+export function createLessonState(
+  locale: Locale,
+  lesson: LessonDefinition,
+  resume?: LessonResume,
+): LessonState {
+  const assignment = resume?.guidedAssignment ?? { P: false, Q: false };
   const base: LessonState = {
     locale,
     lesson,
-    watchStep: 0,
-    guidedStep: 0,
-    assignment: { P: false, Q: false },
+    watchStep: resume?.watchStep ?? 0,
+    guidedStep: resume?.guidedStep ?? 0,
+    assignment,
     tree: evaluateWithNodes(parse('P'), { P: false }).tree,
     message: null,
-    complete: false,
+    complete: resume?.guidedComplete ?? false,
   };
 
   if (lesson.type === 'watch' && lesson.formula) {
-    return initWatchLesson(base);
+    const copy = getLessonCopy(locale, lesson.id);
+    const stepIndex = resume?.watchStep ?? 0;
+    const step = copy.watchSteps?.[stepIndex] ?? copy.watchSteps?.[0];
+    if (!step) {
+      return base;
+    }
+    const { tree } = evaluateWithNodes(parse(lesson.formula), step.assignment);
+    return {
+      ...base,
+      watchStep: stepIndex,
+      assignment: step.assignment,
+      tree,
+      message: step.explanation,
+      complete: resume?.watchComplete ?? false,
+    };
   }
 
   if (lesson.type === 'guided' && lesson.formula) {
-    const { tree } = evaluateWithNodes(parse(lesson.formula), base.assignment);
-    return {
+    const { tree } = evaluateWithNodes(parse(lesson.formula), assignment);
+    const merged = {
       ...base,
       tree,
-      message: currentGuidedHint({ ...base, tree }),
+      guidedStep: resume?.guidedStep ?? 0,
+      complete: resume?.guidedComplete ?? false,
     };
+    return { ...merged, message: currentGuidedHint(merged) };
   }
 
   return base;
@@ -165,6 +193,16 @@ export function currentGuidedHint(state: LessonState): string {
     return steps[steps.length - 1]?.text ?? '';
   }
   return steps[state.guidedStep]?.text ?? '';
+}
+
+export function lessonResumeSnapshot(state: LessonState): LessonResume {
+  return {
+    watchStep: state.watchStep,
+    watchComplete: state.complete && state.lesson.type === 'watch',
+    guidedStep: state.guidedStep,
+    guidedAssignment: { P: state.assignment.P ?? false, Q: state.assignment.Q ?? false },
+    guidedComplete: state.complete && state.lesson.type === 'guided',
+  };
 }
 
 export function isGuidedAtomEnabled(state: LessonState, atom: string): boolean {

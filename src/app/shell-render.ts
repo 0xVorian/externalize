@@ -1,5 +1,8 @@
 import type { Locale } from '../i18n';
 import { learnUi, getReference } from '../i18n';
+import { progressUi } from '../i18n';
+
+export type AppMode = 'learn' | 'practice' | 'progress';
 
 export function renderLanguageToggle(locale: Locale): string {
   const locales = ['en', 'fr'] as const;
@@ -26,12 +29,13 @@ export function renderLanguageToggle(locale: Locale): string {
 
 export function renderModeNav(
   locale: Locale,
-  mode: 'learn' | 'practice',
+  mode: AppMode,
   practiceUnlocked: boolean,
 ): string {
-  const copy = learnUi(locale);
+  const learn = learnUi(locale);
+  const progress = progressUi(locale);
   return `
-    <nav class="mode-nav" aria-label="Mode">
+    <nav class="mode-nav mode-nav-three" aria-label="Mode">
       <button
         type="button"
         class="mode-button ${mode === 'learn' ? 'active' : ''}"
@@ -39,7 +43,7 @@ export function renderModeNav(
         data-mode="learn"
         aria-pressed="${mode === 'learn'}"
       >
-        ${copy.learn}
+        ${learn.learn}
       </button>
       <button
         type="button"
@@ -48,9 +52,18 @@ export function renderModeNav(
         data-mode="practice"
         aria-pressed="${mode === 'practice'}"
         ${practiceUnlocked ? '' : 'disabled'}
-        title="${practiceUnlocked ? '' : copy.practiceLocked}"
+        title="${practiceUnlocked ? '' : learn.practiceLocked}"
       >
-        ${copy.practice}
+        ${learn.practice}
+      </button>
+      <button
+        type="button"
+        class="mode-button ${mode === 'progress' ? 'active' : ''}"
+        data-action="set-mode"
+        data-mode="progress"
+        aria-pressed="${mode === 'progress'}"
+      >
+        ${progress.progress}
       </button>
     </nav>
   `;
@@ -84,7 +97,7 @@ export function renderReferencePanel(locale: Locale, open: boolean): string {
 
 export function renderShellHeader(options: {
   locale: Locale;
-  mode: 'learn' | 'practice';
+  mode: AppMode;
   practiceUnlocked: boolean;
   title: string;
   meta?: string;
@@ -100,7 +113,7 @@ export function renderShellHeader(options: {
       ${renderModeNav(locale, mode, practiceUnlocked)}
       <h1>${title}</h1>
       ${meta ? `<p class="queue-meta">${meta}</p>` : ''}
-      ${renderReferencePanel(locale, referenceOpen)}
+      ${mode === 'learn' ? renderReferencePanel(locale, referenceOpen) : ''}
     </header>
   `;
 }

@@ -5,10 +5,13 @@ import {
   saveProgress,
   seedQueue,
   pickNextExerciseId,
+  pickResumeExerciseId,
   recordResult,
   completeLesson,
   isPracticeUnlocked,
   getUnlockedExerciseIds,
+  updateResume,
+  type ProgressStore,
 } from './app/storage';
 import {
   firstIncompleteLesson,
@@ -20,7 +23,6 @@ import {
   selectNode,
   toggleAtom,
   applyLocale,
-  isExerciseComplete,
   type AppState,
 } from './app/state';
 import {
@@ -28,10 +30,13 @@ import {
   advanceWatchStep,
   toggleGuidedAtom,
   applyLessonLocale,
+  lessonResumeSnapshot,
   type LessonState,
 } from './app/lesson-state';
 import { renderApp } from './app/render';
 import { renderLessonView } from './app/lesson-render';
+import { renderProgressView } from './app/progress-render';
+import type { AppMode } from './app/shell-render';
 import { loadLocale, saveLocale, type Locale } from './i18n';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
@@ -41,46 +46,87 @@ if (!appRoot) {
 
 const root: HTMLDivElement = appRoot;
 
-type AppMode = 'learn' | 'practice';
-
 let locale: Locale = loadLocale();
-let progress = loadProgress();
-let mode: AppMode = progress.level0Complete ? 'practice' : 'learn';
+let progress: ProgressStore = loadProgress();
+let mode: AppMode = resolveInitialMode(progress);
 
-let lessonState: LessonState = createLessonState(locale, firstIncompleteLesson(progress.lessonsCompleted));
+let lessonState: LessonState = loadLessonFromProgress(progress);
 let practiceState: AppState | null = null;
+
+function resolveInitialMode(store: ProgressStore): AppMode {
+  if (store.resume.mode === 'progress') {
+    return 'progress';
+  }
+  if (store.resume.mode === 'practice' && store.level0Complete) {
+    return 'practice';
+  }
+  return 'learn';
+}
+
+function loadLessonFromProgress(store: ProgressStore): LessonState {
+  const lessonId = store.resume.lessonId ?? firstIncompleteLesson(store.lessonsCompleted).id;
+  const lesson = getLessonDefinition(lessonId) ?? firstIncompleteLesson(store.lessonsCompleted);
+  return createLessonState(locale, lesson, {
+    watchStep: store.resume.watchStep,
+    watchComplete: store.resume.watchComplete,
+    guidedStep: store.resume.guidedStep,
+    guidedAssignment: store.resume.guidedAssignment,
+    guidedComplete: store.resume.guidedComplete,
+  });
+}
+
+function persistProgress(next: ProgressStore): void {
+  progress = saveProgress(next);
+}
+
+function persistLessonResume(): void {
+  persistProgress(
+    updateResume(progress, {
+      mode: 'learn',
+      lessonId: lessonState.lesson.id,
+      ...lessonResumeSnapshot(lessonState),
+    }),
+  );
+}
 
 function unlockedExerciseIds(): string[] {
   return getUnlockedExerciseIds(progress);
 }
 
 function refreshPracticeQueue(): void {
-  progress = seedQueue(progress, unlockedExerciseIds());
-  saveProgress(progress);
+  persistProgress(seedQueue(progress, unlockedExerciseIds()));
 }
 
-function loadPracticeState(): AppState {
+function loadPracticeState(exerciseId?: string): AppState {
   refreshPracticeQueue();
   const pool = unlockedExerciseIds();
   if (pool.length === 0) {
     throw new Error('No practice exercises unlocked');
   }
-  const id = pickNextExerciseId(progress, pool);
+  const id = exerciseId ?? pickResumeExerciseId(progress) ?? pickNextExerciseId(progress, pool);
   const exercise = getExerciseDefinition(id);
   if (!exercise) {
     throw new Error(`Unknown exercise: ${id}`);
   }
+  persistProgress(updateResume(progress, { mode: 'practice', exerciseId: id }));
   return createState(locale, exercise);
 }
 
 function ensurePracticeState(): AppState {
-  practiceState = loadPracticeState();
+  if (!practiceState) {
+    practiceState = loadPracticeState();
+  }
   return practiceState;
 }
 
 function render(): void {
   document.documentElement.lang = locale;
   const practiceUnlocked = isPracticeUnlocked(progress);
+
+  if (mode === 'progress') {
+    root.innerHTML = renderProgressView(locale, progress, practiceUnlocked);
+    return;
+  }
 
   if (mode === 'learn') {
     root.innerHTML = renderLessonView(lessonState, {
@@ -111,17 +157,28 @@ function setMode(nextMode: AppMode): void {
     return;
   }
   mode = nextMode;
-  if (mode === 'practice') {
+  if (mode === 'progress') {
+    persistProgress(updateResume(progress, { mode: 'progress' }));
+  } else if (mode === 'practice') {
     practiceState = loadPracticeState();
   } else {
-    lessonState = createLessonState(locale, firstIncompleteLesson(progress.lessonsCompleted));
+    lessonState = loadLessonFromProgress(progress);
+    persistLessonResume();
   }
   render();
 }
 
+function continueFromResume(): void {
+  const target = progress.resume.mode;
+  if (target === 'practice' && !progress.level0Complete) {
+    setMode('learn');
+    return;
+  }
+  setMode(target);
+}
+
 function completeCurrentLesson(): void {
-  progress = completeLesson(progress, lessonState.lesson.id);
-  saveProgress(progress);
+  persistProgress(completeLesson(progress, lessonState.lesson.id));
   refreshPracticeQueue();
 
   if (progress.level0Complete) {
@@ -136,6 +193,7 @@ function completeCurrentLesson(): void {
     const lesson = getLessonDefinition(nextId);
     if (lesson) {
       lessonState = createLessonState(locale, lesson);
+      persistLessonResume();
     }
   }
   render();
@@ -144,6 +202,7 @@ function completeCurrentLesson(): void {
 function handleLessonNext(): void {
   if (lessonState.lesson.type === 'watch' && !lessonState.complete) {
     lessonState = advanceWatchStep(lessonState);
+    persistLessonResume();
     render();
     return;
   }
@@ -153,9 +212,13 @@ function handleLessonNext(): void {
 
 function advancePractice(): void {
   const state = ensurePracticeState();
-  if (state.feedback) {
-    progress = recordResult(progress, state.exercise.id, state.feedback.correct);
-    saveProgress(progress);
+  if (state.exercise.type === 'evaluate-formula') {
+    persistProgress(recordResult(progress, state.exercise.id, true));
+    refreshPracticeQueue();
+  } else if (state.feedback) {
+    persistProgress(
+      recordResult(progress, state.exercise.id, state.feedback.correct, state.feedback.tag),
+    );
     refreshPracticeQueue();
   }
 
@@ -182,9 +245,14 @@ root.addEventListener('click', (event) => {
 
   if (action === 'set-mode') {
     const nextMode = button.dataset.mode;
-    if (nextMode === 'learn' || nextMode === 'practice') {
+    if (nextMode === 'learn' || nextMode === 'practice' || nextMode === 'progress') {
       setMode(nextMode);
     }
+    return;
+  }
+
+  if (action === 'continue-resume') {
+    continueFromResume();
     return;
   }
 
@@ -200,8 +268,13 @@ root.addEventListener('click', (event) => {
         return;
       }
       lessonState = toggleGuidedAtom(lessonState, atom);
+      persistLessonResume();
       render();
     }
+    return;
+  }
+
+  if (mode !== 'practice') {
     return;
   }
 
@@ -211,9 +284,15 @@ root.addEventListener('click', (event) => {
       return;
     }
     practiceState = selectNode(ensurePracticeState(), nodeId);
-    if (isExerciseComplete(practiceState)) {
-      progress = recordResult(progress, practiceState.exercise.id, true);
-      saveProgress(progress);
+    if (practiceState.phase === 'answered' && practiceState.feedback) {
+      persistProgress(
+        recordResult(
+          progress,
+          practiceState.exercise.id,
+          practiceState.feedback.correct,
+          practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
+        ),
+      );
       refreshPracticeQueue();
     }
     render();

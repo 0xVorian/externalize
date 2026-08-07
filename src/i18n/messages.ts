@@ -1,5 +1,6 @@
 import type { FeedbackTag, FeedbackTemplate } from '../../engine';
 import type { Locale } from './locale';
+import type { ResumePoint } from '../app/progress-tracker';
 
 export type ExerciseCopy = {
   prompt: string;
@@ -164,4 +165,121 @@ export function getFeedbackTemplates(locale: Locale, exerciseId: string): Feedba
 
 export function getFeedbackDefaults(locale: Locale): Record<FeedbackTag, string> {
   return FEEDBACK_DEFAULTS[locale];
+}
+
+export type ProgressUiCopy = {
+  progress: string;
+  continueTitle: string;
+  continueLearn: string;
+  continuePractice: string;
+  continueProgress: string;
+  lastSeen: (when: string) => string;
+  level0Heading: string;
+  level0Status: (done: number, total: number) => string;
+  exercisesHeading: string;
+  exercisesStatus: (done: number, unlocked: number) => string;
+  reviewDue: (count: number) => string;
+  strugglesHeading: string;
+  strugglesEmpty: string;
+  comfortableHeading: string;
+  comfortableEmpty: string;
+  errorsHeading: string;
+  errorsEmpty: string;
+  skillLabel: (id: string) => string;
+  errorLabel: (tag: FeedbackTag) => string;
+  rateLabel: (rate: number, attempts: number) => string;
+  lessonDone: string;
+  lessonTodo: string;
+  exerciseDone: string;
+  exerciseLocked: string;
+};
+
+const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
+  en: {
+    progress: 'Progress',
+    continueTitle: 'Pick up where you left off',
+    continueLearn: 'Continue course',
+    continuePractice: 'Continue exercises',
+    continueProgress: 'View progress',
+    lastSeen: (when) => `Last activity: ${when}`,
+    level0Heading: 'Introductory unit',
+    level0Status: (done, total) => `${done} of ${total} sections complete`,
+    exercisesHeading: 'Exercises',
+    exercisesStatus: (done, unlocked) => `${done} completed · ${unlocked} unlocked`,
+    reviewDue: (count) => `${count} scheduled for review`,
+    strugglesHeading: 'Needs work',
+    strugglesEmpty: 'Nothing flagged yet — mistakes on exercises will show up here.',
+    comfortableHeading: 'Going well',
+    comfortableEmpty: 'Keep practicing — strong areas appear after a few successful attempts.',
+    errorsHeading: 'Recurring mistakes',
+    errorsEmpty: 'No repeated error patterns yet.',
+    skillLabel: (id) =>
+      id === 'practice:evaluate-formula'
+        ? 'Evaluating formulas'
+        : id === 'practice:identify-main-connective'
+          ? 'Main connective'
+          : id,
+    errorLabel: (tag) => FEEDBACK_DEFAULTS_EN[tag].split('.')[0],
+    rateLabel: (rate, attempts) => `${Math.round(rate * 100)}% over ${attempts} attempts`,
+    lessonDone: 'done',
+    lessonTodo: 'remaining',
+    exerciseDone: 'done',
+    exerciseLocked: 'locked',
+  },
+  fr: {
+    progress: 'Parcours',
+    continueTitle: 'Reprendre',
+    continueLearn: 'Reprendre le cours',
+    continuePractice: 'Reprendre les exercices',
+    continueProgress: 'Voir le parcours',
+    lastSeen: (when) => `Dernière activité : ${when}`,
+    level0Heading: 'Unité d\'introduction',
+    level0Status: (done, total) => `${done} section${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}`,
+    exercisesHeading: 'Exercices',
+    exercisesStatus: (done, unlocked) => `${done} réussi${done > 1 ? 's' : ''} · ${unlocked} ouvert${unlocked > 1 ? 's' : ''}`,
+    reviewDue: (count) => `${count} à revoir`,
+    strugglesHeading: 'À consolidér',
+    strugglesEmpty: 'Rien pour l\'instant — les erreurs aux exercices s\'afficheront ici.',
+    comfortableHeading: 'Acquis solides',
+    comfortableEmpty: 'Continuez — les points maîtrisés apparaissent après plusieurs réussites.',
+    errorsHeading: 'Erreurs fréquentes',
+    errorsEmpty: 'Pas encore de motif d\'erreur répété.',
+    skillLabel: (id) =>
+      id === 'practice:evaluate-formula'
+        ? 'Évaluation de formules'
+        : id === 'practice:identify-main-connective'
+          ? 'Connecteur principal'
+          : id,
+    errorLabel: (tag) => FEEDBACK_DEFAULTS_FR[tag].split('.')[0],
+    rateLabel: (rate, attempts) => `${Math.round(rate * 100)} % sur ${attempts} essai${attempts > 1 ? 's' : ''}`,
+    lessonDone: 'fait',
+    lessonTodo: 'reste',
+    exerciseDone: 'fait',
+    exerciseLocked: 'fermé',
+  },
+};
+
+export function progressUi(locale: Locale): ProgressUiCopy {
+  return PROGRESS_UI[locale];
+}
+
+export function formatResumeTime(locale: Locale, iso: string): string {
+  const date = new Date(iso);
+  return date.toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
+export function resumeContinueLabel(locale: Locale, resume: ResumePoint): string {
+  const copy = progressUi(locale);
+  if (resume.mode === 'learn') {
+    return copy.continueLearn;
+  }
+  if (resume.mode === 'practice') {
+    return copy.continuePractice;
+  }
+  return copy.continueProgress;
 }
