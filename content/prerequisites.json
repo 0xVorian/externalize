@@ -226,6 +226,46 @@
       ]
     },
     {
+      "id": "val-001",
+      "concept": "disjunction",
+      "requiresLessons": [
+        "level1-11-iff-watch",
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "val-002",
+      "concept": "conjunction",
+      "requiresLessons": [
+        "level1-11-iff-watch",
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "val-003",
+      "concept": "conditional",
+      "requiresLessons": [
+        "level1-11-iff-watch",
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "val-004",
+      "concept": "conditional",
+      "requiresLessons": [
+        "level1-11-iff-watch",
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "val-005",
+      "concept": "conjunction",
+      "requiresLessons": [
+        "level1-11-iff-watch",
+        "level1-12-iff-guided"
+      ]
+    },
+    {
       "id": "scope-003",
       "concept": "scope",
       "requiresLessons": [

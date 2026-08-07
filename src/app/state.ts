@@ -9,13 +9,14 @@ import {
   generateTruthTable,
   maskTruthTableRows,
   validateCell,
+  validateTautologyAnswer,
   type TreeNode,
   type Assignment,
   type FeedbackResult,
   type PartialTruthTable,
 } from '../../engine';
 import type { Locale } from '../i18n';
-import { getExerciseCopy, getCellFeedback, getFeedbackTemplates, ui } from '../i18n';
+import { getExerciseCopy, getCellFeedback, getTautologyFeedback, getFeedbackTemplates, ui } from '../i18n';
 import type { ExerciseDefinition } from './exercises';
 import {
   createBuilderReducerState,
@@ -126,6 +127,21 @@ export function selectNode(state: AppState, nodeId: string): AppState {
     feedback: result,
     message: result.message,
   };
+}
+
+
+export function submitTautologyAnswer(state: AppState, answerIsTautology: boolean): AppState {
+  if (state.exercise.type !== 'classify-tautology' || state.phase === 'answered') return state;
+  const formula = state.exercise.formula;
+  if (!formula) return state;
+  const validation = validateTautologyAnswer(parse(formula), answerIsTautology);
+  return { ...state, submittedCell: answerIsTautology, phase: 'answered', message: getTautologyFeedback(state.locale, state.exercise.id, validation.correct) };
+}
+export function tautologySubmissionCorrect(state: AppState): boolean | null {
+  if (state.exercise.type !== 'classify-tautology' || state.submittedCell === null) return null;
+  const formula = state.exercise.formula;
+  if (!formula) return null;
+  return validateTautologyAnswer(parse(formula), state.submittedCell).correct;
 }
 
 export function submitCellValue(state: AppState, value: boolean): AppState {
@@ -268,6 +284,11 @@ export function applyLocale(state: AppState, locale: Locale): AppState {
     return { ...next, feedback: { ...state.feedback, message }, message };
   }
 
+  if (state.phase === 'answered' && state.exercise.type === 'classify-tautology' && state.submittedCell !== null) {
+    const correct = validateTautologyAnswer(parse(state.exercise.formula!), state.submittedCell).correct;
+    return { ...next, message: getTautologyFeedback(locale, state.exercise.id, correct) };
+  }
+
   if (state.phase === 'answered' && state.exercise.type === 'fill-truth-table-cell' && state.submittedCell !== null) {
     const idx = state.exercise.hiddenRowIndex;
     const assignment = idx !== undefined ? state.partialTable?.rows[idx]?.assignment : undefined;
@@ -304,8 +325,7 @@ export function isExerciseComplete(state: AppState): boolean {
   if (state.exercise.type === 'translate-en-to-formula') {
     return state.feedback?.correct === true;
   }
-  if (state.exercise.type === 'fill-truth-table-cell') {
-    return cellSubmissionCorrect(state) === true;
-  }
+  if (state.exercise.type === 'fill-truth-table-cell') return cellSubmissionCorrect(state) === true;
+  if (state.exercise.type === 'classify-tautology') return tautologySubmissionCorrect(state) === true;
   return state.exercise.type === 'identify-main-connective' && state.feedback?.correct === true;
 }

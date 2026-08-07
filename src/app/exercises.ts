@@ -1,6 +1,6 @@
 import type { Assignment, FeedbackTemplate } from '../../engine';
 
-export type ExerciseType = 'identify-main-connective' | 'evaluate-formula' | 'fill-truth-table-cell' | 'translate-en-to-formula';
+export type ExerciseType = 'identify-main-connective' | 'evaluate-formula' | 'fill-truth-table-cell' | 'classify-tautology' | 'translate-en-to-formula';
 
 export type ExerciseDefinition = {
   id: string;
@@ -38,6 +38,11 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'tt-003', type: 'fill-truth-table-cell', formula: 'P ∨ Q', hiddenRowIndex: 0 },
   { id: 'tt-004', type: 'fill-truth-table-cell', formula: '(P → Q) ∧ R', hiddenRowIndex: 6 },
   { id: 'tt-005', type: 'fill-truth-table-cell', formula: 'P ↔ Q', hiddenRowIndex: 1 },
+  { id: 'val-001', type: 'classify-tautology', formula: 'P ∨ ¬P' },
+  { id: 'val-002', type: 'classify-tautology', formula: 'P ∧ ¬P' },
+  { id: 'val-003', type: 'classify-tautology', formula: 'P → P' },
+  { id: 'val-004', type: 'classify-tautology', formula: '(P → Q) ∨ (Q → P)' },
+  { id: 'val-005', type: 'classify-tautology', formula: 'P ∧ Q' },
   { id: 'translate-001', type: 'translate-en-to-formula' },
 ];
 

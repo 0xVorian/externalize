@@ -5,11 +5,13 @@ export type SkillId =
   | 'practice:identify-main-connective'
   | 'practice:evaluate-formula'
   | 'practice:fill-truth-table-cell'
+  | 'practice:classify-tautology'
   | 'practice:translate-en-to-formula';
 
 export function skillForExercise(exercise: ExerciseDefinition): SkillId {
   if (exercise.type === 'evaluate-formula') return 'practice:evaluate-formula';
   if (exercise.type === 'fill-truth-table-cell') return 'practice:fill-truth-table-cell';
+  if (exercise.type === 'classify-tautology') return 'practice:classify-tautology';
   if (exercise.type === 'translate-en-to-formula') return 'practice:translate-en-to-formula';
   return 'practice:identify-main-connective';
 }

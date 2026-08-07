@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { parse } from '../parse/parse';
+import { evaluate } from '../eval/evaluate';
 import {
   expectedCellValue,
   generateTruthTable,
   maskTruthTableRows,
-  validateCell,
+  validateCell, classifyFormula, isTautology, findFalsifyingAssignment, validateTautologyAnswer,
 } from './truth-table';
 
 describe('generateTruthTable', () => {
@@ -99,3 +100,26 @@ describe('validateCell', () => {
     expect(validateCell(formula, assignment, false).correct).toBe(false);
   });
 });
+
+describe('classifyFormula', () => {
+  it('identifies a tautology', () => { expect(classifyFormula(parse('P ∨ ¬P'))).toBe('tautology'); expect(isTautology(parse('P → P'))).toBe(true); });
+  it('identifies a contradiction', () => { expect(classifyFormula(parse('P ∧ ¬P'))).toBe('contradiction'); });
+  it('identifies contingency', () => { expect(classifyFormula(parse('P ∧ Q'))).toBe('contingency'); });
+  it('handles three atoms', () => { expect(classifyFormula(parse('(P → Q) ∧ R'))).toBe('contingency'); });
+  it('rejects more than three atoms', () => { expect(() => classifyFormula(parse('P ∧ Q'), ['P','Q','R','S'])).toThrow(/at most 3 atoms/); });
+});
+describe('validateTautologyAnswer', () => {
+  it('accepts yes for a tautology', () => { const r = validateTautologyAnswer(parse('P ∨ ¬P'), true); expect(r.correct).toBe(true); expect(r.counterexample).toBeNull(); });
+  it('accepts no for a non-tautology', () => { const r = validateTautologyAnswer(parse('P ∧ Q'), false); expect(r.correct).toBe(true); expect(r.counterexample).toEqual({ P: false, Q: false }); });
+  it('rejects wrong yes', () => { expect(validateTautologyAnswer(parse('P ∧ Q'), true).correct).toBe(false); });
+  it('rejects wrong no', () => { expect(validateTautologyAnswer(parse('(P → Q) ∨ (Q → P)'), false).correct).toBe(false); });
+});
+describe('findFalsifyingAssignment', () => {
+  it('returns null for a tautology', () => { expect(findFalsifyingAssignment(parse('P → P'))).toBeNull(); });
+  it('returns a counterexample for a contradiction', () => {
+    const ce = findFalsifyingAssignment(parse('P ∧ ¬P'));
+    expect(ce).not.toBeNull();
+    expect(evaluate(parse('P ∧ ¬P'), ce!)).toBe(false);
+  });
+});
+
