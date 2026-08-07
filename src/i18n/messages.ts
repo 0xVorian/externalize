@@ -219,6 +219,28 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'Set the truth value of P. The live row shows how negation flips it: ¬P is true exactly when P is false.',
     },
+    'eval-011': {
+      prompt:
+        'Double negation restores the original value: ¬¬P matches P. Set P and read the doubly negated result on the tree.',
+    },
+    'eval-012': {
+      prompt:
+        'Evaluate the negated disjunction: first find P ∨ Q, then apply the outer negation.',
+    },
+    'scope-013': {
+      prompt: 'Select the main connective. Without parentheses, → binds less tightly than ∨.',
+      feedback: {
+        'selected-subconnective':
+          '∨ combines P and Q, but the whole disjunction is the antecedent of →. The implication has outermost scope: (P ∨ Q) → R.',
+      },
+    },
+    'scope-014': {
+      prompt: 'Select the main connective of the negated disjunction.',
+      feedback: {
+        'selected-subconnective':
+          '∨ is inside the parentheses, but the outermost operator is ¬ — its scope covers the entire disjunction.',
+      },
+    },
     'tt-001': { prompt: 'The table is almost complete. Tap T or F to fill the missing entry for P ∧ Q when P is true and Q is false.', cellCorrect: 'Correct — conjunction requires both conjuncts to be true.', cellWrong: 'Under this assignment, P is true and Q is false, so P ∧ Q is false.' },
     'tt-002': { prompt: 'Fill the blank result for P → Q when P is true and Q is false.', cellCorrect: 'Correct — a material conditional is false only in this case.', cellWrong: 'When the antecedent is true and the consequent is false, P → Q is false.' },
     'tt-003': { prompt: 'Complete the table: what is P ∨ Q when both P and Q are false?', cellCorrect: 'Correct — disjunction is false only when both disjuncts are false.', cellWrong: 'With neither disjunct true, P ∨ Q is false.' },
@@ -229,10 +251,12 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'val-004': { prompt: 'Two sentence letters, four assignments. Is (P → Q) ∨ (Q → P) a tautology?', cellCorrect: 'Correct — at least one implication is true on each row, so the disjunction is a tautology.', cellWrong: 'Check each row: either P → Q or Q → P (often both) is true, so the disjunction never comes out false.' },
     'val-005': { prompt: 'Look at the result column for P ∧ Q. Is this formula a tautology?', cellCorrect: 'Correct — conjunction is true only when both conjuncts are true, so this contingent formula is not a tautology.', cellWrong: 'A tautology is true on every row. P ∧ Q is false whenever at least one conjunct is false.' },
     'tt-005': { prompt: 'Fill the missing biconditional value: P ↔ Q when P is false and Q is true.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
+    'tt-006': { prompt: 'Fill the blank for ¬(P ∨ Q) when both P and Q are false.', cellCorrect: 'Correct — with neither disjunct true, P ∨ Q is false and its negation is true.', cellWrong: 'When both P and Q are false, P ∨ Q is false, so ¬(P ∨ Q) is true.' },
     'counter-001': { prompt: 'Find a truth assignment that makes P ∧ Q false. Toggle P and Q, then check.', counterCorrect: 'Correct — at least one conjunct is false.', counterWrong: 'Both conjuncts are still true.' },
     'counter-002': { prompt: 'Find an assignment where P → Q is false.', counterCorrect: 'Correct — true antecedent, false consequent.', counterWrong: 'This assignment still makes P → Q true.' },
     'counter-003': { prompt: 'Find an assignment that makes P ∨ Q false.', counterCorrect: 'Correct — both disjuncts false.', counterWrong: 'At least one disjunct is still true.' },
     'counter-004': { prompt: 'Find an assignment where P ↔ Q is false.', counterCorrect: 'Correct — P and Q differ.', counterWrong: 'P and Q still match.' },
+    'counter-005': { prompt: 'Find an assignment that makes ¬(P ∨ Q) true. Both disjuncts must be false.', counterCorrect: 'Correct — neither P nor Q is true, so the negated disjunction is true.', counterWrong: 'At least one disjunct is still true, so ¬(P ∨ Q) remains false.' },
     'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
     'translate-002': {
       prompt: 'It is not the case that both the gate is open and the alarm is on. Build the formula.',
@@ -377,6 +401,28 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'Fixez la valeur de P. La ligne en direct montre la négation : ¬P est vrai exactement lorsque P est faux.',
     },
+    'eval-011': {
+      prompt:
+        "La double négation restitue la valeur initiale : ¬¬P équivaut à P. Fixez P et lisez le résultat doublement nié sur l'arbre.",
+    },
+    'eval-012': {
+      prompt:
+        "Évaluez la disjonction niée : calculez d'abord P ∨ Q, puis appliquez la négation extérieure.",
+    },
+    'scope-013': {
+      prompt: 'Indiquez le connecteur principal. Sans parenthèses, → lie moins fort que ∨.',
+      feedback: {
+        'selected-subconnective':
+          "∨ combine P et Q, mais toute la disjonction est l'antécédent de →. C'est l'implication qui a la portée externe : (P ∨ Q) → R.",
+      },
+    },
+    'scope-014': {
+      prompt: 'Indiquez le connecteur principal de la disjonction niée.',
+      feedback: {
+        'selected-subconnective':
+          "∨ est à l'intérieur des parenthèses, mais l'opérateur le plus externe est ¬ — sa portée couvre toute la disjonction.",
+      },
+    },
     'tt-001': { prompt: 'Le tableau est presque complet. Toucher V ou F pour la case manquante de P ∧ Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — une conjonction exige que les deux conjoints soient vrais.', cellWrong: 'Sous cette interprétation, P est vrai et Q est faux, donc P ∧ Q est faux.' },
     'tt-002': { prompt: 'Complétez la case vide pour P → Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — l\'implication matérielle n\'est fausse que dans ce cas.', cellWrong: 'Quand l\'antécédent est vrai et le conséquent faux, P → Q est faux.' },
     'tt-003': { prompt: 'Complétez le tableau : quelle est la valeur de P ∨ Q lorsque P et Q sont tous deux faux ?', cellCorrect: 'Exact — une disjonction n\'est fausse que si les deux disjonctes le sont.', cellWrong: 'Aucun disjonct n\'étant vrai, P ∨ Q est faux.' },
@@ -387,10 +433,12 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'val-004': { prompt: 'Deux variables, quatre lignes. (P → Q) ∨ (Q → P) est-elle une tautologie ?', cellCorrect: 'Exact — au moins une implication est vraie sur chaque ligne, donc la disjonction est une tautologie.', cellWrong: 'Vérifiez chaque ligne : P → Q ou Q → P (souvent les deux) est vrai, la disjonction ne sort jamais faux.' },
     'val-005': { prompt: 'Observez la colonne résultat pour P ∧ Q. Cette formule est-elle une tautologie ?', cellCorrect: "Exact — une conjonction n'est vraie que si les deux conjoints le sont ; cette formule contingente n'est pas une tautologie.", cellWrong: "Une tautologie est vraie sur chaque ligne. P ∧ Q est faux dès qu'au moins un conjoint est faux." },
     'tt-005': { prompt: 'Complétez la biconditionnelle manquante : P ↔ Q lorsque P est faux et Q est vrai.', cellCorrect: 'Exact — une biconditionnelle n\'est vraie que si les deux côtés coïncident.', cellWrong: 'P et Q ont ici des valeurs différentes, donc P ↔ Q est faux.' },
+    'tt-006': { prompt: 'Complétez la case pour ¬(P ∨ Q) lorsque P et Q sont tous deux faux.', cellCorrect: 'Exact — aucun disjonct n\'est vrai, donc P ∨ Q est faux et sa négation est vraie.', cellWrong: 'Lorsque P et Q sont faux, P ∨ Q est faux, donc ¬(P ∨ Q) est vrai.' },
     'counter-001': { prompt: 'Trouvez une interprétation qui rend P ∧ Q faux.', counterCorrect: 'Exact — au moins un conjoint est faux.', counterWrong: 'Les deux conjoints sont encore vrais.' },
     'counter-002': { prompt: 'Trouvez une interprétation où P → Q est faux.', counterCorrect: 'Exact — antécédent vrai, conséquent faux.', counterWrong: 'P → Q reste vrai.' },
     'counter-003': { prompt: 'Trouvez une interprétation qui rend P ∨ Q faux.', counterCorrect: 'Exact — les deux disjonctes sont faux.', counterWrong: 'Au moins un disjonct est encore vrai.' },
     'counter-004': { prompt: 'Trouvez une interprétation où P ↔ Q est faux.', counterCorrect: 'Exact — P et Q diffèrent.', counterWrong: 'P et Q ont encore la même valeur.' },
+    'counter-005': { prompt: 'Trouvez une interprétation qui rend ¬(P ∨ Q) vrai. Les deux disjoncts doivent être faux.', counterCorrect: 'Exact — ni P ni Q n\'est vrai, donc la disjonction niée est vraie.', counterWrong: 'Au moins un disjonct est encore vrai, donc ¬(P ∨ Q) reste faux.' },
     'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
     'translate-002': {
       prompt: 'Il n\'est pas le cas que la porte soit ouverte et l\'alarme activée. Construisez la formule.',
@@ -568,8 +616,10 @@ export type ProgressUiCopy = {
   exerciseDone: string;
   exerciseLocked: string;
   exerciseLockedUnit1: string;
+  exerciseLockedUnit2: string;
   level0ExercisesHeading: string;
   level1ExercisesHeading: string;
+  level2ExercisesHeading: string;
   syncHeading: string;
   syncHint: string;
   exportProgress: string;
@@ -629,8 +679,10 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     exerciseDone: 'done',
     exerciseLocked: 'locked',
     exerciseLockedUnit1: 'Unit 1',
+    exerciseLockedUnit2: 'Unit 2',
     level0ExercisesHeading: 'Unit 0 exercises',
     level1ExercisesHeading: 'Unit 1 exercises',
+    level2ExercisesHeading: 'Unit 2 exercises',
     syncHeading: 'Another device',
     syncHint: 'Export on this device, then import the file where you want to continue.',
     exportProgress: 'Export progress',
@@ -686,8 +738,10 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     exerciseDone: 'fait',
     exerciseLocked: 'fermé',
     exerciseLockedUnit1: 'Unité 1',
+    exerciseLockedUnit2: 'Unité 2',
     level0ExercisesHeading: 'Exercices — unité 0',
     level1ExercisesHeading: 'Exercices — unité 1',
+    level2ExercisesHeading: 'Exercices — unité 2',
     syncHeading: 'Autre appareil',
     syncHint: 'Exportez ici, puis importez le fichier sur l\'appareil où vous voulez reprendre.',
     exportProgress: 'Exporter le parcours',

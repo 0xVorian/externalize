@@ -7,9 +7,9 @@ import { presentationForExercise } from './presentation';
 describe('exercise template generator', () => {
   it('loads the default template bank', () => {
     const templates = loadExerciseTemplates();
-    expect(templates.scope).toHaveLength(12);
-    expect(templates.eval).toHaveLength(10);
-    expect(templates.fillTruthTable).toHaveLength(5);
+    expect(templates.scope).toHaveLength(14);
+    expect(templates.eval).toHaveLength(12);
+    expect(templates.fillTruthTable).toHaveLength(6);
   });
 
   it('generates definitions matching the current scope/eval/tt bank', () => {
@@ -49,8 +49,8 @@ describe('exercise template generator', () => {
   it('formats JSON for tooling', () => {
     const result = generateExercises(loadExerciseTemplates(), { patterns: ['eval'], startIds: { eval: 11 } });
     const json = JSON.parse(formatJson(result)) as unknown[];
-    expect(json).toHaveLength(10);
-    expect(json[9]).toMatchObject({ id: 'eval-020', type: 'evaluate-formula' });
+    expect(json).toHaveLength(12);
+    expect(json[11]).toMatchObject({ id: 'eval-022', type: 'evaluate-formula' });
   });
 
   it('rejects invalid formulas and out-of-range hidden rows', () => {

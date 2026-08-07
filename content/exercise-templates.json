@@ -1,36 +1,161 @@
 {
   "$schema": "../tools/exercise-generator/exercise-templates.schema.json",
   "scope": [
-    { "formula": "(P → Q) ∧ R" },
-    { "formula": "(P → Q) ↔ ¬R" },
-    { "formula": "¬(P ∧ Q)" },
-    { "formula": "P ∨ (Q ∧ R)" },
-    { "formula": "(P ∨ Q) → R" },
-    { "formula": "¬(P → Q)" },
-    { "formula": "(P ∧ Q) ∨ R" },
-    { "formula": "P → (Q ∨ R)" },
-    { "formula": "¬P ∧ Q" },
-    { "formula": "(P → Q) → R" },
-    { "formula": "P ↔ (Q → R)" },
-    { "formula": "(P ∧ Q) ∧ R" }
+    {
+      "formula": "(P \u2192 Q) \u2227 R"
+    },
+    {
+      "formula": "(P \u2192 Q) \u2194 \u00acR"
+    },
+    {
+      "formula": "\u00ac(P \u2227 Q)"
+    },
+    {
+      "formula": "P \u2228 (Q \u2227 R)"
+    },
+    {
+      "formula": "(P \u2228 Q) \u2192 R"
+    },
+    {
+      "formula": "\u00ac(P \u2192 Q)"
+    },
+    {
+      "formula": "(P \u2227 Q) \u2228 R"
+    },
+    {
+      "formula": "P \u2192 (Q \u2228 R)"
+    },
+    {
+      "formula": "\u00acP \u2227 Q"
+    },
+    {
+      "formula": "(P \u2192 Q) \u2192 R"
+    },
+    {
+      "formula": "P \u2194 (Q \u2192 R)"
+    },
+    {
+      "formula": "(P \u2227 Q) \u2227 R"
+    },
+    {
+      "formula": "P \u2228 Q \u2192 R"
+    },
+    {
+      "formula": "\u00ac(P \u2228 Q)"
+    }
   ],
   "eval": [
-    { "formula": "P ∧ Q", "initialAssignment": { "P": true, "Q": false } },
-    { "formula": "(P → Q) ↔ ¬R", "initialAssignment": { "P": true, "Q": false, "R": true } },
-    { "formula": "P ∨ Q", "initialAssignment": { "P": false, "Q": true } },
-    { "formula": "P → Q", "initialAssignment": { "P": true, "Q": false } },
-    { "formula": "P ↔ Q", "initialAssignment": { "P": true, "Q": false } },
-    { "formula": "(P ∨ Q) → R", "initialAssignment": { "P": false, "Q": false, "R": true } },
-    { "formula": "P ∧ (Q ∨ R)", "initialAssignment": { "P": true, "Q": false, "R": true } },
-    { "formula": "¬(P ∧ Q)", "initialAssignment": { "P": true, "Q": true } },
-    { "formula": "(P → Q) ∧ R", "initialAssignment": { "P": true, "Q": false, "R": true } },
-    { "formula": "¬P", "initialAssignment": { "P": false } }
+    {
+      "formula": "P \u2227 Q",
+      "initialAssignment": {
+        "P": true,
+        "Q": false
+      }
+    },
+    {
+      "formula": "(P \u2192 Q) \u2194 \u00acR",
+      "initialAssignment": {
+        "P": true,
+        "Q": false,
+        "R": true
+      }
+    },
+    {
+      "formula": "P \u2228 Q",
+      "initialAssignment": {
+        "P": false,
+        "Q": true
+      }
+    },
+    {
+      "formula": "P \u2192 Q",
+      "initialAssignment": {
+        "P": true,
+        "Q": false
+      }
+    },
+    {
+      "formula": "P \u2194 Q",
+      "initialAssignment": {
+        "P": true,
+        "Q": false
+      }
+    },
+    {
+      "formula": "(P \u2228 Q) \u2192 R",
+      "initialAssignment": {
+        "P": false,
+        "Q": false,
+        "R": true
+      }
+    },
+    {
+      "formula": "P \u2227 (Q \u2228 R)",
+      "initialAssignment": {
+        "P": true,
+        "Q": false,
+        "R": true
+      }
+    },
+    {
+      "formula": "\u00ac(P \u2227 Q)",
+      "initialAssignment": {
+        "P": true,
+        "Q": true
+      }
+    },
+    {
+      "formula": "(P \u2192 Q) \u2227 R",
+      "initialAssignment": {
+        "P": true,
+        "Q": false,
+        "R": true
+      }
+    },
+    {
+      "formula": "\u00acP",
+      "initialAssignment": {
+        "P": false
+      }
+    },
+    {
+      "formula": "\u00ac\u00acP",
+      "initialAssignment": {
+        "P": false
+      }
+    },
+    {
+      "formula": "\u00ac(P \u2228 Q)",
+      "initialAssignment": {
+        "P": true,
+        "Q": true
+      }
+    }
   ],
   "fillTruthTable": [
-    { "formula": "P ∧ Q", "hiddenRowIndex": 2 },
-    { "formula": "P → Q", "hiddenRowIndex": 2 },
-    { "formula": "P ∨ Q", "hiddenRowIndex": 0 },
-    { "formula": "(P → Q) ∧ R", "hiddenRowIndex": 6 },
-    { "formula": "P ↔ Q", "hiddenRowIndex": 1 }
+    {
+      "formula": "P \u2227 Q",
+      "hiddenRowIndex": 2
+    },
+    {
+      "formula": "P \u2192 Q",
+      "hiddenRowIndex": 2
+    },
+    {
+      "formula": "P \u2228 Q",
+      "hiddenRowIndex": 0
+    },
+    {
+      "formula": "(P \u2192 Q) \u2227 R",
+      "hiddenRowIndex": 6
+    },
+    {
+      "formula": "P \u2194 Q",
+      "hiddenRowIndex": 1
+    },
+    {
+      "formula": "\u00ac(P \u2228 Q)",
+      "hiddenRowIndex": 0
+    }
   ]
 }

@@ -98,17 +98,32 @@ export const LEVEL_1_PRACTICE_UNLOCK_ORDER = [
   'nd-001',
 ] as const;
 
+/** Unit 2 practice — unlocks after all 8 Level 2 lessons. */
+export const LEVEL_2_PRACTICE_UNLOCK_ORDER = [
+  'eval-011',
+  'scope-013',
+  'eval-012',
+  'counter-005',
+  'scope-014',
+  'tt-006',
+] as const;
+
 export const PRACTICE_UNLOCK_ORDER = [
   ...LEVEL_0_PRACTICE_UNLOCK_ORDER,
   ...LEVEL_1_PRACTICE_UNLOCK_ORDER,
+  ...LEVEL_2_PRACTICE_UNLOCK_ORDER,
 ] as const;
 
-export type PracticeTier = 'unit0' | 'unit1';
+export type PracticeTier = 'unit0' | 'unit1' | 'unit2';
 
 export function practiceTier(exerciseId: string): PracticeTier {
-  return (LEVEL_0_PRACTICE_UNLOCK_ORDER as readonly string[]).includes(exerciseId)
-    ? 'unit0'
-    : 'unit1';
+  if ((LEVEL_0_PRACTICE_UNLOCK_ORDER as readonly string[]).includes(exerciseId)) {
+    return 'unit0';
+  }
+  if ((LEVEL_2_PRACTICE_UNLOCK_ORDER as readonly string[]).includes(exerciseId)) {
+    return 'unit2';
+  }
+  return 'unit1';
 }
 
 const LESSON_BY_ID = new Map(ALL_LEARN_LESSONS.map((lesson) => [lesson.id, lesson]));
