@@ -32,6 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile-first design constraint and MVP-0 sequencing
 - Versioning policy and Cursor rule
 
-[Unreleased]: #
-[0.2.0]: #
-[0.1.0]: #
+[Unreleased]: https://github.com/0xVorian/externalize/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/0xVorian/externalize/releases/tag/v0.2.0
+[0.1.0]: https://github.com/0xVorian/externalize/releases/tag/v0.1.0
