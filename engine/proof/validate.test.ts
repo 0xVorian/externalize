@@ -1,29 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { parseProofLines, validateProofFillStep } from './validate';
-
-const cfg = {
-  hiddenLineIndex: 2,
-  lines: [
-    { formula: 'P → Q', justification: 'premise' as const },
-    { formula: 'P', justification: 'premise' as const },
-    { hidden: true },
-  ],
-  expected: { rule: 'mp' as const, cites: [1, 2], formula: 'Q' },
-  allowedRules: ['mp' as const],
-};
-
+const mpCfg = { hiddenLineIndex: 2, lines: [{ formula: 'P → Q', justification: 'premise' as const }, { formula: 'P', justification: 'premise' as const }, { hidden: true }], expected: { rule: 'mp' as const, cites: [1, 2], formula: 'Q' }, allowedRules: ['mp' as const] };
+const andElimCfg = { hiddenLineIndex: 1, lines: [{ formula: 'P ∧ Q', justification: 'premise' as const }, { hidden: true }], expected: { rule: 'and-elim' as const, cites: [1], formula: 'P' }, allowedRules: ['and-elim' as const] };
 describe('validateProofFillStep', () => {
-  const lines = parseProofLines(cfg.lines);
-
-  it('accepts MP', () => {
-    expect(validateProofFillStep(cfg, lines, 'mp', [1, 2]).correct).toBe(true);
-  });
-
-  it('rejects incomplete', () => {
-    expect(validateProofFillStep(cfg, lines, null, []).tag).toBe('incomplete');
-  });
-
-  it('rejects citing only the antecedent', () => {
-    expect(validateProofFillStep(cfg, lines, 'mp', [1, 1]).tag).toBe('wrong-citation');
-  });
+  describe('modus ponens', () => { const lines = parseProofLines(mpCfg.lines); it('accepts MP', () => { expect(validateProofFillStep(mpCfg, lines, 'mp', [1, 2]).correct).toBe(true); }); it('rejects incomplete', () => { expect(validateProofFillStep(mpCfg, lines, null, []).tag).toBe('incomplete'); }); it('rejects citing only the antecedent', () => { expect(validateProofFillStep(mpCfg, lines, 'mp', [1, 1]).tag).toBe('wrong-citation'); }); });
+  describe('conjunction elimination', () => { const lines = parseProofLines(andElimCfg.lines); it('accepts left conjunct from conjunction', () => { expect(validateProofFillStep(andElimCfg, lines, 'and-elim', [1]).correct).toBe(true); }); it('rejects when cited line is not a conjunction', () => { const badCfg = { ...andElimCfg, lines: [{ formula: 'P', justification: 'premise' as const }, { hidden: true }] }; expect(validateProofFillStep(badCfg, parseProofLines(badCfg.lines), 'and-elim', [1]).tag).toBe('wrong-rule-for-premises'); }); });
 });

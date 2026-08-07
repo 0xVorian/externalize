@@ -96,6 +96,7 @@ export const LEVEL_1_PRACTICE_UNLOCK_ORDER = [
   'translate-005',
   'translate-006',
   'nd-001',
+  'nd-002',
 ] as const;
 
 export const PRACTICE_UNLOCK_ORDER = [

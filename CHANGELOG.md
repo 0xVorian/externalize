@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Natural deduction exercise** (`nd-002`, `proof-fill-step`): fill-one-step proof with ∧ elimination (left conjunct); unlocks after `nd-001`
+
 ### Changed
 
 - Ignore Playwright `test-results/` and `playwright-report/`; deduplicate `[0.3.0]` changelog bullets from merge integration

@@ -72,6 +72,7 @@ const PRESENTATION: Record<string, string> = {
   'translate-005': 'translation-palette',
   'translate-006': 'translation-palette',
   'nd-001': 'proof-fill-step',
+  'nd-002': 'proof-fill-step',
 };
 
 describe('presentation inventory', () => {
