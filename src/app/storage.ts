@@ -1,9 +1,11 @@
 import {
   LEVEL_0_LESSONS,
   LEVEL_1_LESSONS,
+  LEVEL_2_LESSONS,
   ALL_LEARN_LESSONS,
   isLevel0Complete,
   isLevel1Complete,
+  isLevel2Complete,
   isLearnPathComplete,
   firstIncompleteLesson,
   PRACTICE_UNLOCK_ORDER,
@@ -30,6 +32,7 @@ export type ProgressStore = {
   lessonsCompleted: string[];
   level0Complete: boolean;
   level1Complete: boolean;
+  level2Complete: boolean;
   queue: SrsEntry[];
   completed: string[];
   lastExerciseId?: string;
@@ -72,6 +75,7 @@ function defaultStore(): ProgressStore {
     lessonsCompleted: [],
     level0Complete: false,
     level1Complete: false,
+    level2Complete: false,
     queue: [],
     completed: [],
     resume: defaultResume(),
@@ -136,6 +140,30 @@ function normalizeV5(store: Record<string, unknown>): ProgressStore {
       (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
     level1Complete:
       (store.level1Complete as boolean | undefined) ?? isLevel1Complete(lessonsCompleted),
+    level2Complete:
+      (store.level2Complete as boolean | undefined) ?? isLevel2Complete(lessonsCompleted),
+    queue: (store.queue as SrsEntry[] | undefined) ?? [],
+    completed: (store.completed as string[] | undefined) ?? [],
+    lastExerciseId: store.lastExerciseId as string | undefined,
+    resume: (store.resume as ResumePoint | undefined) ?? defaultResume(),
+    skills: (store.skills as Record<string, SkillStat> | undefined) ?? {},
+    exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
+    errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
+    lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
+    onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? true,
+  };
+}
+
+function migrateV4ToV5(store: Record<string, unknown>): ProgressStore {
+  const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
+  return {
+    version: 5,
+    lessonsCompleted,
+    level0Complete:
+      (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
+    level1Complete:
+      (store.level1Complete as boolean | undefined) ?? isLevel1Complete(lessonsCompleted),
+    level2Complete: isLevel2Complete(lessonsCompleted),
     queue: (store.queue as SrsEntry[] | undefined) ?? [],
     completed: (store.completed as string[] | undefined) ?? [],
     lastExerciseId: store.lastExerciseId as string | undefined,
@@ -322,9 +350,10 @@ export function completeLesson(store: ProgressStore, lessonId: string): Progress
     : [...store.lessonsCompleted, lessonId];
   const level0Complete = isLevel0Complete(lessonsCompleted);
   const level1Complete = isLevel1Complete(lessonsCompleted);
+  const level2Complete = isLevel2Complete(lessonsCompleted);
   const learnPathComplete = isLearnPathComplete(lessonsCompleted);
   const nextLesson = firstIncompleteLesson(lessonsCompleted);
-  const nextStore = { ...store, lessonsCompleted, level0Complete, level1Complete };
+  const nextStore = { ...store, lessonsCompleted, level0Complete, level1Complete, level2Complete };
 
   return updateResume(nextStore, {
     mode: learnPathComplete ? 'practice' : 'learn',
@@ -428,4 +457,10 @@ export function pickResumeExerciseId(store: ProgressStore): string | null {
   return pickNextExerciseId(store, pool);
 }
 
-export { LEVEL_0_LESSONS, LEVEL_1_LESSONS, ALL_LEARN_LESSONS, PRACTICE_UNLOCK_ORDER };
+export {
+  LEVEL_0_LESSONS,
+  LEVEL_1_LESSONS,
+  LEVEL_2_LESSONS,
+  ALL_LEARN_LESSONS,
+  PRACTICE_UNLOCK_ORDER,
+};

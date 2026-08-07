@@ -35,12 +35,15 @@ export type LearnUiCopy = {
   practiceLocked: string;
   level0Title: string;
   level1Title: string;
+  level2Title: string;
   continueUnit1: string;
+  continueUnit2: string;
   lessonProgress: (current: number, total: number) => string;
   nextStep: string;
   startPractice: string;
   level0Complete: string;
   level1Complete: string;
+  level2Complete: string;
   unitPickerLabel: string;
   referenceTitle: string;
   referenceToggle: string;
@@ -137,7 +140,9 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     practiceLocked: 'Complete the introductory unit before exercises unlock.',
     level0Title: 'Unit 0 — Propositional syntax',
     level1Title: 'Unit 1 — Connectives',
+    level2Title: 'Unit 2 — Nested formulas',
     continueUnit1: 'Continue to Unit 1',
+    continueUnit2: 'Continue to Unit 2',
     lessonProgress: (current, total) => `Section ${current} of ${total}`,
     nextStep: 'Continue',
     startPractice: 'Begin exercises',
@@ -145,6 +150,8 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
       'Introductory unit complete. Exercises are unlocked — first up: evaluating P ∧ Q under an assignment.',
     level1Complete:
       'Unit 1 complete. You have covered negation, disjunction, implication, and biconditional — continue to exercises for more practice.',
+    level2Complete:
+      'Unit 2 complete. You can read nested structure, cancel double negations, respect connective precedence, and apply de Morgan\'s laws.',
     unitPickerLabel: 'Course unit',
     referenceTitle: 'Connectives',
     referenceToggle: 'Connective reference',
@@ -164,7 +171,9 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     practiceLocked: 'Terminez l\'unité d\'introduction pour accéder aux exercices.',
     level0Title: 'Unité 0 — Syntaxe propositionnelle',
     level1Title: 'Unité 1 — Connecteurs',
+    level2Title: 'Unité 2 — Formules imbriquées',
     continueUnit1: 'Passer à l\'unité 1',
+    continueUnit2: 'Passer à l\'unité 2',
     lessonProgress: (current, total) => `Section ${current} sur ${total}`,
     nextStep: 'Continuer',
     startPractice: 'Passer aux exercices',
@@ -172,6 +181,8 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
       'Unité d\'introduction terminée. Les exercices sont ouverts — on commence par l\'évaluation de P ∧ Q sous une interprétation.',
     level1Complete:
       'Unité 1 terminée. Vous avez vu la négation, la disjonction, l\'implication et l\'équivalence — poursuivez avec les exercices.',
+    level2Complete:
+      'Unité 2 terminée. Vous savez lire une structure imbriquée, simplifier une double négation, respecter la priorité des connecteurs et appliquer les lois de De Morgan.',
     unitPickerLabel: 'Unité du cours',
     referenceTitle: 'Connecteurs',
     referenceToggle: 'Référence des connecteurs',
@@ -449,6 +460,15 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         },
       ],
     },
+    'level2-01-nesting': { title: 'Nested structure', subtitle: 'Subformulas inside larger formulas.', card: { title: 'Building complex formulas', body: ['Connectives combine not only sentence letters but entire subformulas. Parentheses mark which subformula a connective governs.', 'In (P ∧ Q) → R, the antecedent is the whole conjunction — not P alone. The main connective of the full formula is →.', "Reading nested structure correctly is prerequisite for scope exercises and for applying equivalences such as de Morgan's laws."], example: '(P ∧ Q) → R\nP ∧ (Q ∨ R)' } },
+    'level2-02-double-neg': { title: 'Double negation', subtitle: 'Two negations cancel.', card: { title: '¬¬P is equivalent to P', body: ['Negating twice returns the original truth value: if P is true, ¬P is false and ¬¬P is true again.', 'This is the double-negation equivalence — a standard rewrite when simplifying formulas or reading proofs.', 'Do not confuse ¬¬P with ¬(¬P ∧ Q): parentheses determine whether the second negation applies to P alone or to a larger subformula.'], example: 'P  ⇔  ¬¬P' } },
+    'level2-03-double-neg-watch': { title: 'Worked cases: ¬¬P', subtitle: 'Double negation on each assignment for P.', watchSteps: [{ assignment: { P: true }, explanation: 'P is true, so ¬P is false and ¬¬P is true again. The outer negation restores the original value.' }, { assignment: { P: false }, explanation: 'P is false; negating twice yields false again. The highlighted row shows ¬¬P = F.' }] },
+    'level2-04-double-neg-guided': { title: 'Guided evaluation: ¬¬P', subtitle: 'Set P and read the doubly negated result.', guidedSteps: [{ kind: 'hint', text: 'Tap T for P.', atom: 'P', value: true }, { kind: 'done', text: 'Under P ↦ T, negation gives ¬P = F and a second negation gives ¬¬P = T.' }] },
+    'level2-05-precedence': { title: 'Connective precedence', subtitle: 'Which connective is the main one?', card: { title: 'Reading main connectives in nested formulas', body: ['When parentheses are omitted in informal notation, convention fixes the main connective: ¬ binds tightest, then ∧, then ∨, then →, then ↔.', 'In P ∨ Q → R, implication is main: the whole disjunction is the antecedent — (P ∨ Q) → R, not P ∨ (Q → R).', 'Parentheses override convention. Always identify the connective whose scope covers the entire formula (aside from an outermost negation).'], example: 'P ∨ Q → R  means  (P ∨ Q) → R' } },
+    'level2-06-demorgan': { title: "De Morgan's laws", subtitle: 'Negating a compound formula.', card: { title: 'Distributing negation over ∧ and ∨', body: ['Negating a conjunction flips to a disjunction of negations: ¬(P ∧ Q) is equivalent to ¬P ∨ ¬Q.', 'Negating a disjunction flips to a conjunction of negations: ¬(P ∨ Q) is equivalent to ¬P ∧ ¬Q.', 'These rewrites preserve truth on every assignment and are central when translating natural-language denials or simplifying formulas.'], example: '¬(P ∧ Q)  ⇔  ¬P ∨ ¬Q\n¬(P ∨ Q)  ⇔  ¬P ∧ ¬Q' } },
+    'level2-07-demorgan-watch': { title: 'Worked cases: ¬(P ∧ Q)', subtitle: 'Evaluate the negated conjunction row by row.', watchSteps: [{ assignment: { P: true, Q: true }, explanation: 'P ∧ Q is true, so its negation ¬(P ∧ Q) evaluates to F.' }, { assignment: { P: true, Q: false }, explanation: 'The conjunction is false (Q is false), so negating it yields T.' }, { assignment: { P: false, Q: true }, explanation: 'Again P ∧ Q is false, so ¬(P ∧ Q) is T.' }, { assignment: { P: false, Q: false }, explanation: 'Both conjuncts false — the conjunction is false — so the negation is T.' }] },
+    'level2-08-demorgan-guided': { title: 'Guided evaluation: ¬(P ∨ Q)', subtitle: 'Build an assignment and read the negated disjunction.', guidedSteps: [{ kind: 'hint', text: 'Tap T for P.', atom: 'P', value: true }, { kind: 'hint', text: 'Now tap F for Q.', atom: 'Q', value: false }, { kind: 'done', text: 'P ∨ Q is true (P is true), so ¬(P ∨ Q) evaluates to F.' }] },
+
   },
   fr: {
     'level0-01-letters': {
@@ -711,6 +731,15 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         },
       ],
     },
+    'level2-01-nesting': { title: 'Structure imbriquée', subtitle: "Sous-formules à l'intérieur de formules plus grandes.", card: { title: 'Composer des formules complexes', body: ['Les connecteurs combinent non seulement des variables, mais des sous-formules entières. Les parenthèses indiquent la portée.', "Dans (P ∧ Q) → R, l'antécédent est la conjonction tout entière — pas P seul. Le connecteur principal de la formule complète est →.", "Lire correctement l'imbrication est nécessaire pour les exercices de portée et pour appliquer des équivalences comme les lois de De Morgan."], example: '(P ∧ Q) → R\nP ∧ (Q ∨ R)' } },
+    'level2-02-double-neg': { title: 'Double négation', subtitle: "Deux négations s'annulent.", card: { title: '¬¬P équivaut à P', body: ['Nier deux fois restitue la valeur de vérité initiale : si P est vrai, ¬P est faux et ¬¬P redevient vrai.', "C'est l'équivalence de double négation — une réécriture standard pour simplifier une formule ou lire une démonstration.", 'Ne confondez pas ¬¬P avec ¬(¬P ∧ Q) : les parenthèses fixent si la seconde négation porte sur P seul ou sur une sous-formule plus large.'], example: 'P  ⇔  ¬¬P' } },
+    'level2-03-double-neg-watch': { title: 'Cas typiques : ¬¬P', subtitle: 'Double négation sur chaque interprétation de P.', watchSteps: [{ assignment: { P: true }, explanation: 'P est vrai : ¬P est faux et ¬¬P redevient vrai. La négation extérieure restitue la valeur initiale.' }, { assignment: { P: false }, explanation: 'P est faux ; deux négations redonnent faux. La ligne surlignée montre ¬¬P = F.' }] },
+    'level2-04-double-neg-guided': { title: 'À vous : évaluer ¬¬P', subtitle: 'Fixez P et lisez le résultat doublement nié.', guidedSteps: [{ kind: 'hint', text: 'Toucher V pour P.', atom: 'P', value: true }, { kind: 'done', text: 'Sous P ↦ V, la négation donne ¬P = F et une seconde négation donne ¬¬P = V.' }] },
+    'level2-05-precedence': { title: 'Priorité des connecteurs', subtitle: 'Quel connecteur est principal ?', card: { title: 'Lire le connecteur principal dans une formule imbriquée', body: ['Sans parenthèses explicites, la convention fixe le connecteur principal : ¬ lie le plus fort, puis ∧, puis ∨, puis →, puis ↔.', "Dans P ∨ Q → R, l'implication est principale : toute la disjonction est l'antécédent — (P ∨ Q) → R, et non P ∨ (Q → R).", "Les parenthèses l'emportent sur la convention. Repérez toujours le connecteur dont la portée couvre la formule entière (hors une négation extérieure)."], example: 'P ∨ Q → R  signifie  (P ∨ Q) → R' } },
+    'level2-06-demorgan': { title: 'Lois de De Morgan', subtitle: 'Nier une formule composée.', card: { title: 'Distribuer la négation sur ∧ et ∨', body: ['Nier une conjonction donne une disjonction de négations : ¬(P ∧ Q) équivaut à ¬P ∨ ¬Q.', 'Nier une disjonction donne une conjonction de négations : ¬(P ∨ Q) équivaut à ¬P ∧ ¬Q.', 'Ces réécritures préservent la vérité sur toute interprétation et servent à traduire une négation en langue naturelle ou à simplifier une formule.'], example: '¬(P ∧ Q)  ⇔  ¬P ∨ ¬Q\n¬(P ∨ Q)  ⇔  ¬P ∧ ¬Q' } },
+    'level2-07-demorgan-watch': { title: 'Cas typiques : ¬(P ∧ Q)', subtitle: 'Évaluer la conjonction niée ligne par ligne.', watchSteps: [{ assignment: { P: true, Q: true }, explanation: 'P ∧ Q est vrai, donc sa négation ¬(P ∧ Q) vaut F.' }, { assignment: { P: true, Q: false }, explanation: 'La conjonction est fausse (Q est faux), donc la nier donne V.' }, { assignment: { P: false, Q: true }, explanation: 'Encore P ∧ Q est faux, donc ¬(P ∧ Q) vaut V.' }, { assignment: { P: false, Q: false }, explanation: 'Les deux conjoints faux — la conjonction est fausse — donc la négation vaut V.' }] },
+    'level2-08-demorgan-guided': { title: 'À vous : évaluer ¬(P ∨ Q)', subtitle: 'Construisez une interprétation et lisez la disjonction niée.', guidedSteps: [{ kind: 'hint', text: 'Toucher V pour P.', atom: 'P', value: true }, { kind: 'hint', text: 'Toucher F pour Q.', atom: 'Q', value: false }, { kind: 'done', text: 'P ∨ Q est vrai (P est vrai), donc ¬(P ∨ Q) vaut F.' }] },
+
   },
 };
 
