@@ -66,10 +66,21 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
     formula: 'P ↔ (Q → R)',
   },
   {
+    id: 'scope-012',
+    type: 'identify-main-connective',
+    formula: '(P ∧ Q) ∧ R',
+  },
+  {
     id: 'eval-001',
     type: 'evaluate-formula',
     formula: 'P ∧ Q',
     initialAssignment: { P: true, Q: false },
+  },
+  {
+    id: 'eval-010',
+    type: 'evaluate-formula',
+    formula: '¬P',
+    initialAssignment: { P: false },
   },
   {
     id: 'eval-002',

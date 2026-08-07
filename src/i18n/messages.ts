@@ -129,9 +129,20 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
           '→ is the main connective of (Q → R) on the right, but ↔ is the main connective of the entire biconditional.',
       },
     },
+    'scope-012': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '∧ binds P and Q inside the parentheses, but the outer ∧ is the main connective — it joins (P ∧ Q) to R for the whole formula.',
+      },
+    },
     'eval-001': {
       prompt:
         'Tap V or F for each letter. The table row shows how P ∧ Q evaluates under your assignment.',
+    },
+    'eval-010': {
+      prompt:
+        'Set the truth value of P. The live row shows how negation flips it: ¬P is true exactly when P is false.',
     },
     'eval-002': {
       prompt:
@@ -240,9 +251,20 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
           'L\'implication → gouverne (Q → R) à droite, mais l\'équivalence ↔ est le connecteur principal de la biconditionnelle entière.',
       },
     },
+    'scope-012': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'La conjonction ∧ lie P et Q entre parenthèses, mais c\'est la ∧ externe qui est le connecteur principal — elle unit (P ∧ Q) à R pour toute la formule.',
+      },
+    },
     'eval-001': {
       prompt:
         'Toucher V ou F pour chaque variable. La ligne du tableau indique la valeur de P ∧ Q sous cette interprétation.',
+    },
+    'eval-010': {
+      prompt:
+        'Fixez la valeur de P. La ligne en direct montre la négation : ¬P est vrai exactement lorsque P est faux.',
     },
     'eval-002': {
       prompt:
@@ -385,6 +407,9 @@ export type ProgressUiCopy = {
   lessonTodo: string;
   exerciseDone: string;
   exerciseLocked: string;
+  exerciseLockedUnit1: string;
+  level0ExercisesHeading: string;
+  level1ExercisesHeading: string;
   syncHeading: string;
   syncHint: string;
   exportProgress: string;
@@ -424,6 +449,9 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lessonTodo: 'remaining',
     exerciseDone: 'done',
     exerciseLocked: 'locked',
+    exerciseLockedUnit1: 'Unit 1',
+    level0ExercisesHeading: 'Unit 0 exercises',
+    level1ExercisesHeading: 'Unit 1 exercises',
     syncHeading: 'Another device',
     syncHint: 'Export on this device, then import the file where you want to continue.',
     exportProgress: 'Export progress',
@@ -461,6 +489,9 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lessonTodo: 'reste',
     exerciseDone: 'fait',
     exerciseLocked: 'fermé',
+    exerciseLockedUnit1: 'Unité 1',
+    level0ExercisesHeading: 'Exercices — unité 0',
+    level1ExercisesHeading: 'Exercices — unité 1',
     syncHeading: 'Autre appareil',
     syncHint: 'Exportez ici, puis importez le fichier sur l\'appareil où vous voulez reprendre.',
     exportProgress: 'Exporter le parcours',

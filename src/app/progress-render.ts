@@ -1,9 +1,14 @@
 import type { Locale } from '../i18n';
 import { progressUi, formatResumeTime, getLessonCopy } from '../i18n';
-import { LEVEL_0_LESSONS, LEVEL_1_LESSONS, PRACTICE_UNLOCK_ORDER } from './lessons';
+import {
+  LEVEL_0_LESSONS,
+  LEVEL_1_LESSONS,
+  LEVEL_0_PRACTICE_UNLOCK_ORDER,
+  LEVEL_1_PRACTICE_UNLOCK_ORDER,
+} from './lessons';
 import { buildProgressSummary, type ProgressSummary } from './progress-tracker';
 import type { ProgressStore } from './storage';
-import { countReviewDue, getUnlockedExerciseIds } from './storage';
+import { countReviewDue, getUnlockedExerciseIds, exerciseLockReason } from './storage';
 import { renderShellHeader } from './shell-render';
 import { learnUi } from '../i18n';
 
@@ -14,6 +19,29 @@ function renderListItem(label: string, status: string, done: boolean): string {
       <span class="progress-item-status">${status}</span>
     </li>
   `;
+}
+
+function renderExerciseTier(
+  store: ProgressStore,
+  copy: ReturnType<typeof progressUi>,
+  order: readonly string[],
+): string {
+  const unlocked = new Set(getUnlockedExerciseIds(store));
+  return order
+    .map((id) => {
+      const done = store.completed.includes(id);
+      const reason = exerciseLockReason(store, id);
+      const locked = !unlocked.has(id);
+      const status = done
+        ? copy.exerciseDone
+        : reason === 'unit1'
+          ? copy.exerciseLockedUnit1
+          : locked
+            ? copy.exerciseLocked
+            : copy.lessonTodo;
+      return renderListItem(id, status, done);
+    })
+    .join('');
 }
 
 export function buildSummaryFromStore(store: ProgressStore): ProgressSummary {
@@ -75,13 +103,12 @@ export function renderProgressView(
       </section>`
       : '';
 
-  const unlocked = new Set(summary.exercisesUnlocked);
-  const exerciseItems = PRACTICE_UNLOCK_ORDER.map((id) => {
-    const done = store.completed.includes(id);
-    const locked = !unlocked.has(id);
-    const status = done ? copy.exerciseDone : locked ? copy.exerciseLocked : copy.lessonTodo;
-    return renderListItem(id, status, done);
-  });
+  const unit0ExerciseItems = practiceUnlocked
+    ? renderExerciseTier(store, copy, LEVEL_0_PRACTICE_UNLOCK_ORDER)
+    : '';
+  const unit1ExerciseItems = practiceUnlocked
+    ? renderExerciseTier(store, copy, LEVEL_1_PRACTICE_UNLOCK_ORDER)
+    : '';
 
   const struggleItems =
     summary.struggles.length === 0
@@ -109,6 +136,19 @@ export function renderProgressView(
       : `<ul class="progress-stats">${summary.frequentErrors
           .map((e) => `<li>${copy.errorLabel(e.tag)} (${e.count}×)</li>`)
           .join('')}</ul>`;
+
+  const exerciseSection = practiceUnlocked
+    ? `
+      <section class="progress-card">
+        <h2 class="panel-title">${copy.exercisesHeading}</h2>
+        <p class="progress-meta">${copy.exercisesStatus(store.completed.length, summary.exercisesUnlocked.length)}</p>
+        ${summary.reviewDue > 0 ? `<p class="progress-meta review-due">${copy.reviewDue(summary.reviewDue)}</p>` : ''}
+        <h3 class="progress-subheading">${copy.level0ExercisesHeading}</h3>
+        <ul class="progress-list">${unit0ExerciseItems}</ul>
+        <h3 class="progress-subheading">${copy.level1ExercisesHeading}</h3>
+        <ul class="progress-list">${unit1ExerciseItems}</ul>
+      </section>`
+    : '';
 
   return `
     <main class="app" lang="${locale}">
@@ -151,12 +191,7 @@ export function renderProgressView(
 
       ${level1Section}
 
-      <section class="progress-card">
-        <h2 class="panel-title">${copy.exercisesHeading}</h2>
-        <p class="progress-meta">${copy.exercisesStatus(store.completed.length, summary.exercisesUnlocked.length)}</p>
-        ${summary.reviewDue > 0 ? `<p class="progress-meta review-due">${copy.reviewDue(summary.reviewDue)}</p>` : ''}
-        <ul class="progress-list">${exerciseItems.join('')}</ul>
-      </section>
+      ${exerciseSection}
 
       <section class="progress-card">
         <h2 class="panel-title">${copy.strugglesHeading}</h2>

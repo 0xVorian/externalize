@@ -42,6 +42,8 @@ const PRESENTATION: Record<string, string> = {
   'scope-009': 'tree-scope',
   'scope-010': 'tree-scope',
   'scope-011': 'tree-scope',
+  'scope-012': 'tree-scope',
+  'eval-010': 'truth-table-live',
 };
 
 describe('presentation inventory', () => {
