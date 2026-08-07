@@ -15,7 +15,8 @@ Start here:
 | [Technical decisions](docs/decisions.md) | Platform, architecture, notation, and open questions with current answers |
 | [Roadmap](docs/roadmap.md) | Build order, MVP scope, and first prototype |
 | [Future work plan](docs/future-work-plan.md) | Proactive content/engine prep and agent batch plan (not the app roadmap) |
-| [Content model](docs/content-model.md) | How exercises, lessons, and progress will be represented as data |
+| [Content model](docs/content-model.md) | How exercises, lessons, and progress are represented as data |
+| [Authoring guide](docs/authoring.md) | How to add lessons and exercises (worked examples, checklist) |
 | [Versioning & changelog](docs/versioning.md) | Semver policy and release workflow |
 | [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |
 | [Presentation](docs/presentation.md) | When to use truth tables vs parse trees, layout rules |
