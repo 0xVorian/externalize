@@ -1,4 +1,4 @@
-import { evaluate, parse, collectAtoms } from '../../engine';
+import { evaluate, parse, collectAtoms, generateTruthTable } from '../../engine';
 import type { Assignment, PartialTruthTable } from '../../engine';
 import { learnUi, ui, formatTruthValue, type Locale } from '../i18n';
 
@@ -172,3 +172,24 @@ export function renderPartialTruthTable(
   const headerCells = table.atoms.map((atom) => `<th scope="col">${atom}</th>`).join('');
   return `<div class="truth-table-wrap"><table class="truth-table" aria-label="${learn.truthTableAria(formula)}"><thead><tr>${headerCells}<th scope="col">${formula}</th></tr></thead><tbody>${body}</tbody></table></div>`;
 }
+
+export function renderCompleteTruthTable(locale: Locale, formula: string): string {
+  const table = generateTruthTable(parse(formula), formulaAtoms(formula));
+  const learn = learnUi(locale);
+  const atoms = table.atoms;
+  const body = table.rows.map((row) => {
+    const atomCells = atoms.map((atom) => `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`).join('');
+    return `<tr class="truth-table-row">${atomCells}<td class="result-cell">${formatTruthValue(locale, row.result)}</td></tr>`;
+  }).join('');
+  const headerCells = atoms.map((atom) => `<th scope="col">${atom}</th>`).join('');
+  return `<div class="truth-table-wrap truth-table-static"><table class="truth-table" aria-label="${learn.truthTableAria(formula)}"><thead><tr>${headerCells}<th scope="col">${formula}</th></tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+export function renderTautologyChoice(locale: Locale, submitted: boolean | null, answered: boolean): string {
+  const copy = ui(locale);
+  if (answered && submitted !== null) {
+    return `<p class="tautology-answer" role="status">${submitted ? copy.tautologyYes : copy.tautologyNo}</p>`;
+  }
+  return `<div class="tautology-choice"><div class="tautology-segments" role="group" aria-label="${copy.tautologyChoiceAria}"><button type="button" class="tautology-segment" data-action="submit-tautology-answer" data-value="true">${copy.tautologyYes}</button><button type="button" class="tautology-segment" data-action="submit-tautology-answer" data-value="false">${copy.tautologyNo}</button></div></div>`;
+}
+

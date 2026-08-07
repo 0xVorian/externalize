@@ -1,10 +1,12 @@
 import type { Assignment, FeedbackTemplate } from '../../engine';
 
+<<<<<<< HEAD
 export type ExerciseType =
   | 'identify-main-connective'
   | 'evaluate-formula'
   | 'fill-truth-table-cell'
   | 'find-counterexample'
+  | 'classify-tautology'
   | 'translate-en-to-formula';
 
 export type ExerciseDefinition = {
@@ -48,6 +50,11 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'counter-002', type: 'find-counterexample', formula: 'P → Q', targetValue: false, initialAssignment: { P: false, Q: true } },
   { id: 'counter-003', type: 'find-counterexample', formula: 'P ∨ Q', targetValue: false, initialAssignment: { P: true, Q: false } },
   { id: 'counter-004', type: 'find-counterexample', formula: 'P ↔ Q', targetValue: false, initialAssignment: { P: true, Q: true } },
+  { id: 'val-001', type: 'classify-tautology', formula: 'P ∨ ¬P' },
+  { id: 'val-002', type: 'classify-tautology', formula: 'P ∧ ¬P' },
+  { id: 'val-003', type: 'classify-tautology', formula: 'P → P' },
+  { id: 'val-004', type: 'classify-tautology', formula: '(P → Q) ∨ (Q → P)' },
+  { id: 'val-005', type: 'classify-tautology', formula: 'P ∧ Q' },
   { id: 'translate-001', type: 'translate-en-to-formula' },
   { id: 'translate-002', type: 'translate-en-to-formula' },
   { id: 'translate-003', type: 'translate-en-to-formula' },

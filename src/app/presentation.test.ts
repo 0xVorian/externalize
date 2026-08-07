@@ -32,10 +32,18 @@ const PRESENTATION: Record<string, string> = {
   'eval-006': 'tree-eval',
   'tt-004': 'truth-table-partial',
   'tt-005': 'truth-table-partial',
+<<<<<<< HEAD
   'counter-001': 'truth-table-live',
   'counter-002': 'truth-table-live',
   'counter-003': 'truth-table-live',
   'counter-004': 'truth-table-live',
+=======
+  'val-001': 'truth-table-tautology',
+  'val-002': 'truth-table-tautology',
+  'val-003': 'truth-table-tautology',
+  'val-004': 'truth-table-tautology',
+  'val-005': 'truth-table-tautology',
+>>>>>>> feature/validity-tautology-challenges
   'eval-007': 'tree-eval',
   'eval-008': 'tree-eval',
   'eval-009': 'tree-eval',

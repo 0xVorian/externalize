@@ -9,6 +9,7 @@ export {
   getExerciseCopy,
   getCellFeedback,
   getCounterFeedback,
+  getTautologyFeedback,
   getFeedbackTemplates,
   getFeedbackDefaults,
   formatTruthValue,

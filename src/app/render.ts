@@ -2,8 +2,8 @@ import type { TreeNode } from '../../engine';
 import { ui, formatTruthValue } from '../i18n';
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
-import { renderLiveTruthRow, renderPartialTruthTable, usesLiveTruthRow } from './truth-table-render';
-import { cellSubmissionCorrect } from './state';
+import { renderLiveTruthRow, renderPartialTruthTable, renderCompleteTruthTable, renderTautologyChoice, usesLiveTruthRow } from './truth-table-render';
+import { cellSubmissionCorrect, tautologySubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
 import { renderTranslationExerciseBody, renderTranslationActions } from './translation/translation-render';
 
@@ -37,6 +37,11 @@ function renderTreeNode(node: TreeNode, state: AppState): string {
 
 function renderAtomToggles(state: AppState): string {
   return renderAtomPanel({ locale: state.locale, assignment: state.assignment, action: 'set-atom-value' });
+}
+
+function renderTautologyBody(state: AppState): string {
+  if (!state.exercise.formula) return '';
+  return `${renderCompleteTruthTable(state.locale, state.exercise.formula)}${renderTautologyChoice(state.locale, state.submittedCell, state.phase === 'answered')}`;
 }
 
 function renderFillTruthTableBody(state: AppState): string {
@@ -87,6 +92,7 @@ function renderExerciseBody(state: AppState): string {
   if (state.exercise.type === 'fill-truth-table-cell') {
     return renderFillTruthTableBody(state);
   }
+  if (state.exercise.type === 'classify-tautology') return renderTautologyBody(state);
   return renderScopeBody(state);
 }
 
@@ -104,20 +110,21 @@ function renderCounterexampleActions(state: AppState): string {
 export function renderApp(state: AppState, queueSize: number, practiceUnlocked: boolean): string {
   const copy = ui(state.locale);
   const cellCorrect = cellSubmissionCorrect(state);
+  const tautologyCorrect = tautologySubmissionCorrect(state);
   const feedbackClass = state.feedback
     ? state.feedback.correct
       ? 'feedback-correct'
       : 'feedback-wrong'
-    : state.message && cellCorrect === false
+    : state.message && (cellCorrect === false || tautologyCorrect === false)
       ? 'feedback-wrong'
-      : state.message && cellCorrect === true
+      : state.message && (cellCorrect === true || tautologyCorrect === true)
         ? 'feedback-correct'
         : state.message
           ? 'feedback-info'
           : '';
 
   const formulaLine =
-    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell'
+    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology'
       ? ''
       : `<p class="formula-display" aria-label="${copy.formulaDisplayAria}">${state.exercise.formula}</p>`;
 
@@ -138,7 +145,7 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
         ${state.message ? `<p class="feedback ${feedbackClass}" role="status">${state.message}</p>` : ''}
         <div class="actions">
           ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
-          ${state.exercise.type === 'fill-truth-table-cell' && state.phase === 'answered' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
+          ${(state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology') && state.phase === 'answered' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
           ${state.exercise.type === 'evaluate-formula' ? `<button type="button" class="secondary" data-action="next">${copy.nextExercise}</button>` : ''}
           ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state) : ''}
           ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state) : ''}

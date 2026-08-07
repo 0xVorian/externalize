@@ -29,6 +29,11 @@ export {
   validateCell,
   validateCounterexample,
   hasAssignmentForValue,
+  classifyFormula,
+  isTautology,
+  findFalsifyingAssignment,
+  validateTautologyAnswer,
+  MAX_TAUTOLOGY_ATOMS,
 } from './truth-table';
 export type {
   TruthTable,
@@ -37,5 +42,7 @@ export type {
   PartialTruthTableRow,
   CellValidation,
   CounterexampleValidation,
+  FormulaClassification,
+  TautologyValidation,
 } from './truth-table';
 

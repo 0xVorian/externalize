@@ -567,6 +567,12 @@ button {
   opacity: 0.65;
 }
 
+.truth-table-static .truth-table-row { opacity: 1; }
+.tautology-choice { margin-top: 0.75rem; }
+.tautology-segments { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.tautology-segment { min-height: var(--tap-min); padding: 0.65rem 0.75rem; border: 1px solid var(--border); border-radius: 0.65rem; background: #fff; color: var(--text); cursor: pointer; font-size: 0.9rem; font-weight: 600; line-height: 1.3; }
+.tautology-segment:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 .truth-table-row.active .result-cell {
   color: var(--accent);
   font-weight: 700;

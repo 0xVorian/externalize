@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 3 translation prototype design doc ([`docs/phase3-translation.md`](docs/phase3-translation.md)): tap-based symbol palette, builder-vs-typing, AST comparison, feedback taxonomy, drag/tap parity
 - Minimal translation spike stub ([`src/app/translation/`](src/app/translation/)): exercise types, example `translate-001`, `renderSymbolPalette()` HTML renderer
 - Truth-table engine module (`engine/truth-table/`): full table generation, partial-row masking, single-cell validation (locale-agnostic booleans for Phase 4 exercises)
+- **Tautology validity challenges** (`classify-tautology`): five exercises (`val-001`–`val-005`) with read-only full truth tables and Yes/No tautology judgment; engine classifies formulas with ≤3 atoms via finite truth-table check
 - **Authoring guide** (`docs/authoring.md`): step-by-step instructions for lessons and exercises, worked examples (watch step + scope exercise), i18n/presentation pointers, changelog expectations
 - **Content model** (`docs/content-model.md`) updated to reflect current TypeScript layout (replacing provisional YAML sketch)
 - **Future work plan** (`docs/future-work-plan.md`): tiered workstreams, agent batch A/B/C plan, and deferred-scope list — separate from the app roadmap

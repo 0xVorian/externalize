@@ -30,8 +30,10 @@ import {
   selectNode,
   setAtomValue,
   submitCellValue,
+  submitTautologyAnswer,
   applyLocale,
   cellSubmissionCorrect,
+  tautologySubmissionCorrect,
   paletteInsertToken,
   paletteBackspace,
   paletteUndo,
@@ -284,6 +286,8 @@ function advancePractice(): void {
         state.feedback.correct ? undefined : state.feedback.tag,
       ),
     );
+  } else if (state.exercise.type === 'classify-tautology') {
+    persistProgress(recordResult(progress, state.exercise.id, tautologySubmissionCorrect(state) ?? false));
     refreshPracticeQueue();
   } else if (state.feedback) {
     persistProgress(
@@ -440,6 +444,17 @@ root.addEventListener('click', (event) => {
           practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
         ),
       );
+      refreshPracticeQueue();
+    }
+    render();
+    return;
+  }
+
+  if (action === 'submit-tautology-answer') {
+    const value = button.dataset.value === 'true';
+    practiceState = submitTautologyAnswer(ensurePracticeState(), value);
+    if (practiceState.phase === 'answered') {
+      persistProgress(recordResult(progress, practiceState.exercise.id, tautologySubmissionCorrect(practiceState) ?? false));
       refreshPracticeQueue();
     }
     render();

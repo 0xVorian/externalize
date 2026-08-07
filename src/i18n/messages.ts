@@ -36,6 +36,9 @@ export type UiCopy = {
   valueAria: (value: string) => string;
   languageToggle: (locale: Locale) => string;
   switchTo: (locale: Locale) => string;
+  tautologyYes: string;
+  tautologyNo: string;
+  tautologyChoiceAria: string;
 };
 
 /** English: analytic philosophy / introductory logic (sentence letters, truth assignments, main connective). */
@@ -214,6 +217,11 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-002': { prompt: 'Fill the blank result for P → Q when P is true and Q is false.', cellCorrect: 'Correct — a material conditional is false only in this case.', cellWrong: 'When the antecedent is true and the consequent is false, P → Q is false.' },
     'tt-003': { prompt: 'Complete the table: what is P ∨ Q when both P and Q are false?', cellCorrect: 'Correct — disjunction is false only when both disjuncts are false.', cellWrong: 'With neither disjunct true, P ∨ Q is false.' },
     'tt-004': { prompt: 'Three letters, one blank. Fill the result for (P → Q) ∧ R when P and Q are true and R is false.', cellCorrect: 'Correct — the implication is true, but the conjunction fails because R is false.', cellWrong: 'When P and Q are true, (P → Q) is true; with R false, the whole conjunction is false.' },
+    'val-001': { prompt: 'Inspect the full truth table for P ∨ ¬P. Is this formula a tautology?', cellCorrect: 'Correct — every row reads T, so the formula is true under every assignment.', cellWrong: 'A tautology is true on every row. Here the result column is uniformly T.' },
+    'val-002': { prompt: 'The table for P ∧ ¬P is displayed. Is this a tautology?', cellCorrect: 'Correct — the result column is never uniformly T; this is a contradiction, not a tautology.', cellWrong: 'A tautology must be true in every row. This formula is false throughout — a contradiction.' },
+    'val-003': { prompt: 'Is P → P a tautology? Read the result column before answering.', cellCorrect: 'Correct — material implication with identical antecedent and consequent is true on every assignment.', cellWrong: 'Compare antecedent and consequent row by row: P → P is true in every case.' },
+    'val-004': { prompt: 'Two sentence letters, four assignments. Is (P → Q) ∨ (Q → P) a tautology?', cellCorrect: 'Correct — at least one implication is true on each row, so the disjunction is a tautology.', cellWrong: 'Check each row: either P → Q or Q → P (often both) is true, so the disjunction never comes out false.' },
+    'val-005': { prompt: 'Look at the result column for P ∧ Q. Is this formula a tautology?', cellCorrect: 'Correct — conjunction is true only when both conjuncts are true, so this contingent formula is not a tautology.', cellWrong: 'A tautology is true on every row. P ∧ Q is false whenever at least one conjunct is false.' },
     'tt-005': { prompt: 'Fill the missing biconditional value: P ↔ Q when P is false and Q is true.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
     'counter-001': { prompt: 'Find a truth assignment that makes P ∧ Q false. Toggle P and Q, then check.', counterCorrect: 'Correct — at least one conjunct is false.', counterWrong: 'Both conjuncts are still true.' },
     'counter-002': { prompt: 'Find an assignment where P → Q is false.', counterCorrect: 'Correct — true antecedent, false consequent.', counterWrong: 'This assignment still makes P → Q true.' },
@@ -366,6 +374,11 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-002': { prompt: 'Complétez la case vide pour P → Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — l\'implication matérielle n\'est fausse que dans ce cas.', cellWrong: 'Quand l\'antécédent est vrai et le conséquent faux, P → Q est faux.' },
     'tt-003': { prompt: 'Complétez le tableau : quelle est la valeur de P ∨ Q lorsque P et Q sont tous deux faux ?', cellCorrect: 'Exact — une disjonction n\'est fausse que si les deux disjonctes le sont.', cellWrong: 'Aucun disjonct n\'étant vrai, P ∨ Q est faux.' },
     'tt-004': { prompt: 'Trois variables, une case vide. Donnez le résultat de (P → Q) ∧ R lorsque P et Q sont vrais et R est faux.', cellCorrect: 'Exact — l\'implication est vraie, mais la conjonction échoue car R est faux.', cellWrong: 'Quand P et Q sont vrais, (P → Q) est vrai ; avec R faux, la conjonction entière est fausse.' },
+    'val-001': { prompt: 'Examinez le tableau complet de P ∨ ¬P. Cette formule est-elle une tautologie ?', cellCorrect: 'Exact — chaque ligne affiche V : la formule est vraie sous toute interprétation.', cellWrong: 'Une tautologie est vraie sur chaque ligne. Ici la colonne résultat est uniformément V.' },
+    'val-002': { prompt: "Le tableau de P ∧ ¬P est affiché. S'agit-il d'une tautologie ?", cellCorrect: "Exact — la colonne résultat n'est jamais uniformément V ; c'est une contradiction, pas une tautologie.", cellWrong: 'Une tautologie doit être vraie sur chaque ligne. Cette formule est fausse partout — une contradiction.' },
+    'val-003': { prompt: 'P → P est-elle une tautologie ? Lisez la colonne résultat avant de répondre.', cellCorrect: "Exact — une implication matérielle dont l'antécédent et le conséquent coïncident est vraie sur toute interprétation.", cellWrong: 'Comparez antécédent et conséquent ligne par ligne : P → P est vrai dans tous les cas.' },
+    'val-004': { prompt: 'Deux variables, quatre lignes. (P → Q) ∨ (Q → P) est-elle une tautologie ?', cellCorrect: 'Exact — au moins une implication est vraie sur chaque ligne, donc la disjonction est une tautologie.', cellWrong: 'Vérifiez chaque ligne : P → Q ou Q → P (souvent les deux) est vrai, la disjonction ne sort jamais faux.' },
+    'val-005': { prompt: 'Observez la colonne résultat pour P ∧ Q. Cette formule est-elle une tautologie ?', cellCorrect: "Exact — une conjonction n'est vraie que si les deux conjoints le sont ; cette formule contingente n'est pas une tautologie.", cellWrong: "Une tautologie est vraie sur chaque ligne. P ∧ Q est faux dès qu'au moins un conjoint est faux." },
     'tt-005': { prompt: 'Complétez la biconditionnelle manquante : P ↔ Q lorsque P est faux et Q est vrai.', cellCorrect: 'Exact — une biconditionnelle n\'est vraie que si les deux côtés coïncident.', cellWrong: 'P et Q ont ici des valeurs différentes, donc P ↔ Q est faux.' },
     'counter-001': { prompt: 'Trouvez une interprétation qui rend P ∧ Q faux.', counterCorrect: 'Exact — au moins un conjoint est faux.', counterWrong: 'Les deux conjoints sont encore vrais.' },
     'counter-002': { prompt: 'Trouvez une interprétation où P → Q est faux.', counterCorrect: 'Exact — antécédent vrai, conséquent faux.', counterWrong: 'P → Q reste vrai.' },
@@ -403,6 +416,9 @@ const UI: Record<Locale, UiCopy> = {
     valueAria: (value) => `truth value ${value}`,
     languageToggle: (locale) => (locale === 'en' ? 'English' : 'French'),
     switchTo: (locale) => (locale === 'en' ? 'Switch to English' : 'Passer en français'),
+    tautologyYes: 'Yes — tautology',
+    tautologyNo: 'No — not a tautology',
+    tautologyChoiceAria: 'Is this formula a tautology?',
   },
   fr: {
     eyebrow: 'Externalize',
@@ -431,6 +447,9 @@ const UI: Record<Locale, UiCopy> = {
     valueAria: (value) => `valeur de vérité ${value}`,
     languageToggle: (locale) => (locale === 'en' ? 'Anglais' : 'Français'),
     switchTo: (locale) => (locale === 'en' ? 'Switch to English' : 'Passer en français'),
+    tautologyYes: 'Oui — tautologie',
+    tautologyNo: 'Non — pas une tautologie',
+    tautologyChoiceAria: 'Cette formule est-elle une tautologie ?',
   },
 };
 
@@ -473,6 +492,7 @@ export function getCellFeedback(locale: Locale, exerciseId: string, correct: boo
     : (copy.cellWrong ?? FEEDBACK_DEFAULTS[locale].correct);
 }
 
+<<<<<<< HEAD
 export function getCounterFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
   const copy = getExerciseCopy(locale, exerciseId);
   return correct
@@ -480,6 +500,13 @@ export function getCounterFeedback(locale: Locale, exerciseId: string, correct: 
     : (copy.counterWrong ?? FEEDBACK_DEFAULTS[locale]['counterexample-miss']);
 }
 
+=======
+export function getTautologyFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
+  return getCellFeedback(locale, exerciseId, correct);
+}
+
+
+>>>>>>> feature/validity-tautology-challenges
 export function getFeedbackTemplates(locale: Locale, exerciseId: string): FeedbackTemplate {
   const exerciseFeedback = EXERCISE_COPY[locale][exerciseId]?.feedback ?? {};
   return { ...FEEDBACK_DEFAULTS[locale], ...exerciseFeedback };
@@ -564,6 +591,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
         ? 'Evaluating formulas'
         : id === 'practice:fill-truth-table-cell'
           ? 'Truth-table cells'
+          : id === 'practice:classify-tautology'
+            ? 'Tautology check'
           : id === 'practice:translate-en-to-formula'
             ? 'English to formula'
             : id === 'practice:identify-main-connective'
