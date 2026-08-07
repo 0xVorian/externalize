@@ -186,6 +186,46 @@
       ]
     },
     {
+      "id": "tt-001",
+      "concept": "conjunction",
+      "requiresLessons": [
+        "level0-04-watch",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "tt-002",
+      "concept": "conditional",
+      "requiresLessons": [
+        "level1-08-imp-watch",
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "tt-003",
+      "concept": "disjunction",
+      "requiresLessons": [
+        "level1-05-or-watch",
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "tt-004",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "tt-005",
+      "concept": "biconditional",
+      "requiresLessons": [
+        "level1-11-iff-watch",
+        "level1-12-iff-guided"
+      ]
+    },
+    {
       "id": "scope-003",
       "concept": "scope",
       "requiresLessons": [

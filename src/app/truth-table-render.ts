@@ -45,7 +45,7 @@ export function renderTruthTable(
         .map((atom) => `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`)
         .join('');
       return `
-        <tr class="truth-table-row ${row.active ? 'active' : ''}">
+        <tr class="truth-table-row ${row.active ? 'active' : ''}"${row.active ? ' aria-current="step"' : ''}>
           ${row.srLabel ? `<th scope="row" class="sr-only">${row.srLabel}</th>` : ''}
           ${atomCells}
           <td class="result-cell">${formatTruthValue(locale, result)}</td>
@@ -131,30 +131,44 @@ export function renderWatchGrid(
             <span class="watch-grid-row-label">${formatTruthValue(locale, false)}</span>
           </div>
           <div class="watch-grid-cells">${cells}</div>
+        </div>
       </div>
     </div>
   `;
+}
+
 function renderBlankResultCell(
+  locale: Locale,
   rowIndex: number,
   submitted: boolean | null,
   answered: boolean,
+): string {
   const copy = ui(locale);
   if (answered && submitted !== null) {
     return `<td class="result-cell">${formatTruthValue(locale, submitted)}</td>`;
+  }
   return `<td class="result-cell blank-cell"><div class="cell-segments" role="group" aria-label="${copy.cellFillAria(rowIndex + 1)}"><button type="button" class="cell-segment true" data-action="submit-cell-value" data-value="true">${copy.trueLabel}</button><button type="button" class="cell-segment false" data-action="submit-cell-value" data-value="false">${copy.falseLabel}</button></div></td>`;
 }
+
 export function renderPartialTruthTable(
+  locale: Locale,
+  formula: string,
   table: PartialTruthTable,
   options: { hiddenRowIndex: number; submitted: boolean | null; answered: boolean },
+): string {
+  const learn = learnUi(locale);
   const body = table.rows
     .map((row, index) => {
       const atomCells = table.atoms
         .map((atom) => `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`)
+        .join('');
       const resultCell =
         index === options.hiddenRowIndex
           ? renderBlankResultCell(locale, index, options.submitted, options.answered)
           : `<td class="result-cell">${formatTruthValue(locale, row.result ?? false)}</td>`;
       return `<tr class="truth-table-row ${index === options.hiddenRowIndex ? 'active' : ''}">${atomCells}${resultCell}</tr>`;
+    })
+    .join('');
   const headerCells = table.atoms.map((atom) => `<th scope="col">${atom}</th>`).join('');
   return `<div class="truth-table-wrap"><table class="truth-table" aria-label="${learn.truthTableAria(formula)}"><thead><tr>${headerCells}<th scope="col">${formula}</th></tr></thead><tbody>${body}</tbody></table></div>`;
 }
