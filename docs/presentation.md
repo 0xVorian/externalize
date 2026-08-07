@@ -13,7 +13,7 @@ Use this when adding exercises or wondering what UI you will see.
 | `level0-01-letters` | Sentence letters | Card (text) | No formula tree |
 | `level0-02-truth` | Truth assignments | Card (text) | |
 | `level0-03-and` | Conjunction ∧ | Card (text) | Truth-table notation in example block |
-| `level0-04-watch` | Worked cases: P ∧ Q | **4-row truth table** | Highlight steps 1–4 |
+| `level0-04-watch` | Worked cases: P ∧ Q | **2×2 truth grid** | Highlight steps 1–4; P rows, Q columns |
 | `level0-05-guided` | Guided: P ∧ Q | **Toggles + live row** | Same table as watch, one row |
 
 ### Level 1 — Connectives
@@ -24,13 +24,13 @@ Use this when adding exercises or wondering what UI you will see.
 | `level1-02-neg-watch` | Worked cases: ¬P | **2-row truth table** | Single atom |
 | `level1-03-neg-guided` | Guided: ¬P | **Toggles + live row** | One atom column |
 | `level1-04-or` | Disjunction ∨ | Card (text) | |
-| `level1-05-or-watch` | Worked cases: P ∨ Q | **4-row truth table** | |
+| `level1-05-or-watch` | Worked cases: P ∨ Q | **2×2 truth grid** | |
 | `level1-06-or-guided` | Guided: P ∨ Q | **Toggles + live row** | |
 | `level1-07-imp` | Material conditional → | Card (text) | |
-| `level1-08-imp-watch` | Worked cases: P → Q | **4-row truth table** | |
+| `level1-08-imp-watch` | Worked cases: P → Q | **2×2 truth grid** | |
 | `level1-09-imp-guided` | Guided: P → Q | **Toggles + live row** | |
 | `level1-10-iff` | Biconditional ↔ | Card (text) | |
-| `level1-11-iff-watch` | Worked cases: P ↔ Q | **4-row truth table** | |
+| `level1-11-iff-watch` | Worked cases: P ↔ Q | **2×2 truth grid** | |
 | `level1-12-iff-guided` | Guided: P ↔ Q | **Toggles + live row** | |
 
 ### Practice — unlock order (20 exercises)
@@ -73,7 +73,7 @@ Use this when adding exercises or wondering what UI you will see.
 
 | Goal | Prefer |
 |------|--------|
-| Show **all cases** of a small formula (demo / watch) | **Truth table** (rows), optionally a 2×2 grid later |
+| Show **all cases** of a small formula (demo / watch) | **Truth table** (rows) or **2×2 grid** for binary formulas |
 | Show **one assignment** you build step by step (guided try on a small formula) | **Live truth-table row** + toggles |
 | Show **how values propagate** under one assignment (practice eval, complex formulas) | **Vertical parse tree** with values on every node |
 | Show **scope / main connective** (practice) | **Vertical parse tree** (tap targets, no values required) |
@@ -82,21 +82,32 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 ## Truth table (watch lessons)
 
-**Used today:** Level 0 watch lesson `level0-04-watch` (`P ∧ Q`, four steps).
+**Used today:** Binary watch lessons use the **2×2 grid**; single-atom watch `level1-02-neg-watch` (`¬P`, two steps) uses the **row table**.
+
+### Row table (single-atom and fallback)
 
 - All rows visible; **highlight the active row**; dim inactive rows slightly.
 - Columns: atom assignments + result column (formula header, e.g. `P ∧ Q`).
 - Step counter (“Case 1 of 4”) plus row highlight — redundant on purpose (orientation + focus).
 - Locale-aware truth labels in cells (`T`/`F` EN, `V`/`F` FR) via `formatTruthValue()`.
-- **Interpretation controls:** each letter has explicit **V / F segment buttons** (not a single opaque row); hint text under the panel title explains tap-to-set.
 
-**Authoring:** `watchSteps` in `src/i18n/lessons.ts` — each step is `{ assignment, explanation }`. Result column is computed (`P && Q` for this lesson); do not duplicate in copy.
+**Single-atom default:** `level1-02-neg-watch` (`¬P`) — two rows, not a 2×2 grid.
+
+### 2×2 grid (binary watch lessons)
+
+**Used today:** `level0-04-watch`, `level1-05-or-watch`, `level1-08-imp-watch`, `level1-11-iff-watch`.
+
+- **P on rows** (T then F, top to bottom), **Q on columns** (T then F, left to right); top-left cell is P=T, Q=T.
+- Each cell shows the formula result under that assignment; **highlight the active cell** matching the current watch step; dim inactive cells.
+- Same step counter and locale labels as the row table.
+- Set per lesson via `watchLayout: 'grid' | 'table'` in `src/app/lessons.ts`; binary formulas default to grid when eligible.
+
+**Authoring:** `watchSteps` in `src/i18n/lessons.ts` — each step is `{ assignment, explanation }`. Result cells are computed by the engine; do not duplicate in copy.
 
 **Future extensions:**
 
-- 2×2 grid view for the same data (spatial “only top-left is true” pattern) — optional alternate renderer, not a replacement for the table until tested.
+- Layout toggle (grid ↔ table) on binary watch lessons for learners who prefer rows.
 - Partial tables (one missing cell) for Phase 4 interactive truth-table exercises.
-- Generalize table renderer when watch lessons cover other connectives (`∨`, `→`) with the same small atom set.
 
 ## Live truth-table row (guided lessons)
 
@@ -138,8 +149,9 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 ## Related files
 
+- `src/app/truth-table-render.ts` — truth table, live row, watch grid
 - `src/app/atom-toggles-render.ts` — shared V/F segment controls
-- `src/app/lesson-render.ts` — watch table, guided live row
+- `src/app/lesson-render.ts` — watch table/grid, guided live row
 - `src/app/render.ts` — practice tree + toggles
 - `src/i18n/messages.ts` — `formatTruthValue`, `formatAssignmentLine`
-- `src/styles/main.css` — `.truth-table-*`, `.tree-*`, `.node-value-*`
+- `src/styles/main.css` — `.truth-table-*`, `.watch-grid-*`, `.tree-*`, `.node-value-*`

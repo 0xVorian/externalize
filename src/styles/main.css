@@ -370,6 +370,11 @@ button {
   cursor: pointer;
 }
 
+.node-readonly.node-button {
+  cursor: default;
+  border-style: dashed;
+}
+
 .tree-node.selected .node-button {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-soft);

@@ -40,6 +40,8 @@ export type LearnUiCopy = {
   nextStep: string;
   startPractice: string;
   level0Complete: string;
+  level1Complete: string;
+  unitPickerLabel: string;
   referenceTitle: string;
   referenceToggle: string;
   watchPrompt: string;
@@ -137,6 +139,9 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     startPractice: 'Begin exercises',
     level0Complete:
       'Introductory unit complete. Exercises are unlocked — first up: evaluating P ∧ Q under an assignment.',
+    level1Complete:
+      'Unit 1 complete. You have covered negation, disjunction, implication, and biconditional — continue to exercises for more practice.',
+    unitPickerLabel: 'Course unit',
     referenceTitle: 'Connectives',
     referenceToggle: 'Connective reference',
     watchPrompt:
@@ -156,6 +161,9 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     startPractice: 'Passer aux exercices',
     level0Complete:
       'Unité d\'introduction terminée. Les exercices sont ouverts — on commence par l\'évaluation de P ∧ Q sous une interprétation.',
+    level1Complete:
+      'Unité 1 terminée. Vous avez vu la négation, la disjonction, l\'implication et l\'équivalence — poursuivez avec les exercices.',
+    unitPickerLabel: 'Unité du cours',
     referenceTitle: 'Connecteurs',
     referenceToggle: 'Référence des connecteurs',
     watchPrompt:
