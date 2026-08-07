@@ -107,3 +107,16 @@ export function firstIncompleteLesson(completed: string[]): LessonDefinition {
   }
   return ALL_LEARN_LESSONS[ALL_LEARN_LESSONS.length - 1];
 }
+
+export function firstIncompleteLessonInUnit(
+  unit: 0 | 1,
+  completed: string[],
+): LessonDefinition {
+  const unitLessons = lessonsForUnit(unit);
+  for (const lesson of unitLessons) {
+    if (!completed.includes(lesson.id)) {
+      return lesson;
+    }
+  }
+  return unitLessons[0];
+}

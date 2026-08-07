@@ -5,7 +5,6 @@ import { buildProgressSummary, type ProgressSummary } from './progress-tracker';
 import type { ProgressStore } from './storage';
 import { countReviewDue, getUnlockedExerciseIds } from './storage';
 import { renderShellHeader } from './shell-render';
-import { learnUi } from '../i18n';
 
 function renderListItem(label: string, status: string, done: boolean): string {
   return `
@@ -20,9 +19,14 @@ export function buildSummaryFromStore(store: ProgressStore): ProgressSummary {
   const level0Done = LEVEL_0_LESSONS.filter((lesson) =>
     store.lessonsCompleted.includes(lesson.id),
   ).length;
+  const level1Done = LEVEL_1_LESSONS.filter((lesson) =>
+    store.lessonsCompleted.includes(lesson.id),
+  ).length;
   return buildProgressSummary({
     level0Done,
     level0Total: LEVEL_0_LESSONS.length,
+    level1Done,
+    level1Total: LEVEL_1_LESSONS.length,
     lessonsCompleted: store.lessonsCompleted,
     exercisesUnlocked: getUnlockedExerciseIds(store),
     exercisesCompleted: store.completed,
@@ -66,11 +70,8 @@ export function renderProgressView(
     store.level0Complete && level1Items
       ? `
       <section class="progress-card">
-        <h2 class="panel-title">${learnUi(locale).level1Title}</h2>
-        <p class="progress-meta">${copy.level0Status(
-          LEVEL_1_LESSONS.filter((l) => store.lessonsCompleted.includes(l.id)).length,
-          LEVEL_1_LESSONS.length,
-        )}</p>
+        <h2 class="panel-title">${copy.level1Heading}</h2>
+        <p class="progress-meta">${copy.level1Status(summary.level1Done, summary.level1Total)}</p>
         <ul class="progress-list">${level1Items}</ul>
       </section>`
       : '';

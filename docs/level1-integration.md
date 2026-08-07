@@ -36,10 +36,14 @@ Unit 1 (connectives beyond ∧) is **content-complete** and **minimally wired** 
 
 1. **`docs/presentation.md` inventory** — Level 1 rows and 20-exercise unlock order added.
 2. **Practice exercises** for Level 1 connectives — flat eval `eval-003`/`004`/`005` ship in exercise bank; nested scope/eval items follow in unlock order.
-3. **`level1Complete` flag** in progress storage (optional; currently inferred from `lessonsCompleted`).
-4. **Resume migration** — `guidedAssignment` resume snapshot still stores `{ P, Q }` only; sufficient for current formulas but should become formula-aware if atoms beyond P/Q appear.
-5. **Unit picker in Learn tab** — let learners jump between Unit 0 and Unit 1 when both are unlocked.
-6. **Completion toast** — surface `level0Complete` / Unit 1 complete messages from `learnUi` (copy exists for Unit 0; Unit 1 message TBD).
+
+## Shipped (UX polish batch)
+
+- **`level1Complete` flag** in progress storage (v4; migrated from v3)
+- **Unit picker** in Learn tab when Unit 0 and Unit 1 are both unlocked
+- **Formula-aware resume** for guided lessons (`guidedAssignment` stores all formula atoms)
+- **Completion toasts** for Unit 0 and Unit 1 guided capstones
+- **Progress tab** Unit 1 section uses `level1Heading` / `level1Status`
 
 ## Key files
 

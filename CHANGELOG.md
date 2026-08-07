@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Progress storage v4: explicit `level1Complete` flag (migrated from v3)
+- Learn tab unit picker (Unit 0 / Unit 1) when both units are unlocked
+- Formula-aware guided-lesson resume snapshots (supports unary `¬P` and arbitrary atom sets)
+- Unit completion toasts on finishing Unit 0 and Unit 1 guided capstones
+- Progress tab Unit 1 checklist uses dedicated heading and status copy
 - **Level 1 learn path (Unit 1 — Connectives)**: 12 lessons covering ¬, ∨, →, and ↔ — concept cards, truth-table watch lessons, and guided live-row tries
 - Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)
 - Guided lesson hints declare target `atom` + `value`; progression generalized beyond `P ∧ Q`

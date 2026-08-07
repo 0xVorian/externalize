@@ -40,11 +40,15 @@ export type LearnUiCopy = {
   nextStep: string;
   startPractice: string;
   level0Complete: string;
+  level1Complete: string;
+  unitPickerLabel: string;
   referenceTitle: string;
   referenceToggle: string;
   watchPrompt: string;
+  watchGridPrompt: string;
   stepLabel: (current: number, total: number) => string;
   truthTableAria: (formula: string) => string;
+  watchGridAria: (formula: string) => string;
 };
 
 const REFERENCE: Record<Locale, ReferenceEntry[]> = {
@@ -137,12 +141,18 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     startPractice: 'Begin exercises',
     level0Complete:
       'Introductory unit complete. Exercises are unlocked — first up: evaluating P ∧ Q under an assignment.',
+    level1Complete:
+      'Unit 1 complete. You have covered negation, disjunction, implication, and biconditional — continue to exercises for more practice.',
+    unitPickerLabel: 'Course unit',
     referenceTitle: 'Connectives',
     referenceToggle: 'Connective reference',
     watchPrompt:
       'Each row is one assignment. Read the highlighted row, then continue to the next case.',
+    watchGridPrompt:
+      'P runs down the side, Q across the top. Read the highlighted cell, then continue to the next case.',
     stepLabel: (current, total) => `Case ${current} of ${total}`,
     truthTableAria: (formula) => `Truth table for ${formula}`,
+    watchGridAria: (formula) => `Truth grid for ${formula}`,
   },
   fr: {
     learn: 'Cours',
@@ -156,12 +166,18 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     startPractice: 'Passer aux exercices',
     level0Complete:
       'Unité d\'introduction terminée. Les exercices sont ouverts — on commence par l\'évaluation de P ∧ Q sous une interprétation.',
+    level1Complete:
+      'Unité 1 terminée. Vous avez vu la négation, la disjonction, l\'implication et l\'équivalence — poursuivez avec les exercices.',
+    unitPickerLabel: 'Unité du cours',
     referenceTitle: 'Connecteurs',
     referenceToggle: 'Référence des connecteurs',
     watchPrompt:
       'Chaque ligne correspond à une interprétation. Lisez la ligne surlignée, puis passez au cas suivant.',
+    watchGridPrompt:
+      'P est en ligne, Q en colonne. Lisez la case surlignée, puis passez au cas suivant.',
     stepLabel: (current, total) => `Cas ${current} sur ${total}`,
     truthTableAria: (formula) => `Table de vérité de ${formula}`,
+    watchGridAria: (formula) => `Grille de vérité de ${formula}`,
   },
 };
 

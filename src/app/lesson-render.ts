@@ -73,6 +73,32 @@ function renderGuidedLesson(state: LessonState): string {
   `;
 }
 
+function renderUnitPicker(state: LessonState, unit0Complete: boolean): string {
+  if (!unit0Complete) {
+    return '';
+  }
+  const learn = learnUi(state.locale);
+  const unit = lessonUnit(state.lesson.id);
+  return `
+    <nav class="unit-picker" role="tablist" aria-label="${learn.unitPickerLabel}">
+      <button type="button" class="unit-button ${unit === 0 ? 'active' : ''}" role="tab" aria-selected="${unit === 0}" data-action="select-unit" data-unit="0">${learn.level0Title}</button>
+      <button type="button" class="unit-button ${unit === 1 ? 'active' : ''}" role="tab" aria-selected="${unit === 1}" data-action="select-unit" data-unit="1">${learn.level1Title}</button>
+    </nav>
+  `;
+}
+
+function renderCompletionToast(state: LessonState): string {
+  const learn = learnUi(state.locale);
+  const unit = lessonUnit(state.lesson.id);
+  const unitLessons = lessonsForUnit(unit);
+  const isLastInUnit = unitLessons[unitLessons.length - 1]?.id === state.lesson.id;
+  if (!state.complete || !isLastInUnit || state.lesson.type !== 'guided') {
+    return '';
+  }
+  const message = unit === 0 ? learn.level0Complete : learn.level1Complete;
+  return `<p class="completion-toast" role="status">${message}</p>`;
+}
+
 export function renderLessonView(state: LessonState, options: {
   practiceUnlocked: boolean;
   level0Complete: boolean;
@@ -119,6 +145,9 @@ export function renderLessonView(state: LessonState, options: {
         title: unitTitle,
         meta: `${copy.subtitle ?? copy.title} · ${learn.lessonProgress(lessonIndex, unitLessons.length)}`,
       })}
+
+      ${renderUnitPicker(state, options.level0Complete)}
+      ${renderCompletionToast(state)}
 
       ${body}
 

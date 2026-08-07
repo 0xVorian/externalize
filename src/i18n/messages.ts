@@ -369,6 +369,8 @@ export type ProgressUiCopy = {
   lastSeen: (when: string) => string;
   level0Heading: string;
   level0Status: (done: number, total: number) => string;
+  level1Heading: string;
+  level1Status: (done: number, total: number) => string;
   exercisesHeading: string;
   exercisesStatus: (done: number, unlocked: number) => string;
   reviewDue: (count: number) => string;
@@ -403,6 +405,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lastSeen: (when) => `Last activity: ${when}`,
     level0Heading: 'Introductory unit',
     level0Status: (done, total) => `${done} of ${total} sections complete`,
+    level1Heading: 'Connectives unit',
+    level1Status: (done, total) => `${done} of ${total} sections complete`,
     exercisesHeading: 'Exercises',
     exercisesStatus: (done, unlocked) => `${done} completed · ${unlocked} unlocked`,
     reviewDue: (count) => `${count} scheduled for review`,
@@ -440,6 +444,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lastSeen: (when) => `Dernière activité : ${when}`,
     level0Heading: 'Unité d\'introduction',
     level0Status: (done, total) => `${done} section${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}`,
+    level1Heading: 'Unité connecteurs',
+    level1Status: (done, total) => `${done} section${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}`,
     exercisesHeading: 'Exercices',
     exercisesStatus: (done, unlocked) => `${done} réussi${done > 1 ? 's' : ''} · ${unlocked} ouvert${unlocked > 1 ? 's' : ''}`,
     reviewDue: (count) => `${count} à revoir`,

@@ -246,14 +246,16 @@ export function currentGuidedHint(state: LessonState): string {
 }
 
 export function lessonResumeSnapshot(state: LessonState): LessonResume {
+  const guidedAssignment =
+    state.lesson.type === 'guided' && state.lesson.formula
+      ? assignmentForFormula(state.lesson.formula, state.assignment)
+      : { ...state.assignment };
+
   return {
     watchStep: state.watchStep,
     watchComplete: state.complete && state.lesson.type === 'watch',
     guidedStep: state.guidedStep,
-    guidedAssignment: {
-      P: state.assignment.P ?? false,
-      Q: state.assignment.Q ?? false,
-    },
+    guidedAssignment,
     guidedComplete: state.complete && state.lesson.type === 'guided',
   };
 }

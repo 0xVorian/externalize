@@ -1,8 +1,61 @@
 import { describe, expect, it } from 'vitest';
 import { loadProgress, recordResult, completeLesson, getUnlockedExerciseIds, serializeProgressExport, importProgress } from './storage';
 
-describe('storage v3', () => {
-  it('migrates v2 store to v3 with resume point', () => {
+describe('storage v4', () => {
+  it('migrates v3 store to v4 with level1Complete inferred', () => {
+    const v3 = {
+      version: 3,
+      lessonsCompleted: [
+        'level0-01-letters',
+        'level0-02-truth',
+        'level0-03-and',
+        'level0-04-watch',
+        'level0-05-guided',
+        'level1-01-neg',
+      ],
+      level0Complete: true,
+      queue: [],
+      completed: [],
+      resume: { mode: 'learn' as const, lessonId: 'level1-02-neg-watch', updatedAt: new Date().toISOString() },
+      skills: {},
+      exerciseStats: {},
+      errorCounts: {},
+      lastVisitedAt: new Date().toISOString(),
+    };
+    const { progress: restored } = importProgress(JSON.stringify(v3));
+    expect(restored.version).toBe(4);
+    expect(restored.level1Complete).toBe(false);
+    expect(restored.level0Complete).toBe(true);
+  });
+
+  it('sets level1Complete when final unit 1 lesson is completed', () => {
+    let store = loadProgress();
+    for (const id of [
+      'level0-01-letters',
+      'level0-02-truth',
+      'level0-03-and',
+      'level0-04-watch',
+      'level0-05-guided',
+      'level1-01-neg',
+      'level1-02-neg-watch',
+      'level1-03-neg-guided',
+      'level1-04-or',
+      'level1-05-or-watch',
+      'level1-06-or-guided',
+      'level1-07-imp',
+      'level1-08-imp-watch',
+      'level1-09-imp-guided',
+      'level1-10-iff',
+      'level1-11-iff-watch',
+      'level1-12-iff-guided',
+    ]) {
+      store = completeLesson(store, id);
+    }
+    expect(store.level1Complete).toBe(true);
+    expect(store.version).toBe(4);
+  });
+
+  it('migrates v2 store to v4 with resume point', () => {
     const v2 = {
       version: 2,
       lessonsCompleted: ['level0-01-letters'],
@@ -11,21 +64,9 @@ describe('storage v3', () => {
       completed: [],
       lastExerciseId: 'eval-001',
     };
-    expect(v2.version).toBe(2);
-    const store = {
-      version: 3 as const,
-      lessonsCompleted: ['level0-01-letters'],
-      level0Complete: false,
-      queue: [],
-      completed: [],
-      resume: { mode: 'learn' as const, lessonId: 'level0-02-truth', updatedAt: new Date().toISOString() },
-      skills: {},
-      exerciseStats: {},
-      errorCounts: {},
-      lastVisitedAt: new Date().toISOString(),
-    };
-    expect(store.version).toBe(3);
-    expect(store.resume.lessonId).toBeTruthy();
+    const { progress: restored } = importProgress(JSON.stringify(v2));
+    expect(restored.version).toBe(4);
+    expect(restored.resume.lessonId).toBeTruthy();
   });
 
   it('records skill stats on incorrect answer', () => {
@@ -115,7 +156,7 @@ describe('storage v3', () => {
     const store = loadProgress();
     const raw = JSON.stringify(store);
     const { progress: restored } = importProgress(raw);
-    expect(restored.version).toBe(3);
+    expect(restored.version).toBe(4);
   });
 
   it('rejects invalid import data', () => {

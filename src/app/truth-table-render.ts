@@ -23,6 +23,14 @@ export function usesLiveTruthRow(formula: string): boolean {
   return LIVE_TRUTH_ROW_FORMULAS.has(formula);
 }
 
+export function usesWatchGrid(formula: string): boolean {
+  return usesLiveTruthRow(formula) && formulaAtoms(formula).length === 2;
+}
+
+function assignmentsMatch(a: Assignment, b: Assignment, atoms: string[]): boolean {
+  return atoms.every((atom) => (a[atom] ?? false) === (b[atom] ?? false));
+}
+
 export function renderTruthTable(
   locale: Locale,
   formula: string,
@@ -74,4 +82,57 @@ export function renderLiveTruthRow(
     row[atom] = assignment[atom] ?? false;
   }
   return renderTruthTable(locale, formula, [{ assignment: row, active: true }]);
+}
+
+export function renderWatchGrid(
+  locale: Locale,
+  formula: string,
+  activeAssignment: Assignment,
+): string {
+  const learn = learnUi(locale);
+  const atoms = formulaAtoms(formula);
+  if (atoms.length !== 2) {
+    return renderLiveTruthRow(locale, formula, activeAssignment);
+  }
+  const [rowAtom, colAtom] = atoms;
+  const rowValues = [true, false];
+  const colValues = [true, false];
+  const cells = rowValues
+    .map((rowVal) => {
+      const rowCells = colValues
+        .map((colVal) => {
+          const assignment: Assignment = { [rowAtom]: rowVal, [colAtom]: colVal };
+          const active = assignmentsMatch(assignment, activeAssignment, atoms);
+          const result = evaluateFormula(formula, assignment);
+          return `
+            <div class="watch-grid-cell ${active ? 'active' : ''}"${active ? ' aria-current="true"' : ''}>
+              <span class="watch-grid-value">${formatTruthValue(locale, result)}</span>
+            </div>
+          `;
+        })
+        .join('');
+      return `<div class="watch-grid-row">${rowCells}</div>`;
+    })
+    .join('');
+
+  return `
+    <div class="watch-grid-wrap">
+      <div class="watch-grid" role="grid" aria-label="${learn.watchGridAria(formula)}">
+        <div class="watch-grid-corner"></div>
+        <div class="watch-grid-col-labels">
+          <span class="watch-grid-col-label">${colAtom}</span>
+          <span class="watch-grid-col-label">${formatTruthValue(locale, true)}</span>
+          <span class="watch-grid-col-label">${formatTruthValue(locale, false)}</span>
+        </div>
+        <div class="watch-grid-body">
+          <div class="watch-grid-row-labels">
+            <span class="watch-grid-row-label">${rowAtom}</span>
+            <span class="watch-grid-row-label">${formatTruthValue(locale, true)}</span>
+            <span class="watch-grid-row-label">${formatTruthValue(locale, false)}</span>
+          </div>
+          <div class="watch-grid-cells">${cells}</div>
+        </div>
+      </div>
+    </div>
+  `;
 }

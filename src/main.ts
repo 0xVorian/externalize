@@ -17,9 +17,11 @@ import {
 } from './app/storage';
 import {
   firstIncompleteLesson,
+  firstIncompleteLessonInUnit,
   nextLessonId,
   getLessonDefinition,
   isLearnPathComplete,
+  lessonUnit,
 } from './app/lessons';
 import {
   createState,
@@ -207,6 +209,15 @@ function continueFromResume(): void {
   setMode(target);
 }
 
+function switchLearnUnit(unit: 0 | 1): void {
+  if (unit === 1 && !progress.level0Complete) {
+    return;
+  }
+  lessonState = createLessonState(locale, firstIncompleteLessonInUnit(unit, progress.lessonsCompleted));
+  persistLessonResume();
+  render();
+}
+
 function completeCurrentLesson(): void {
   persistProgress(completeLesson(progress, lessonState.lesson.id));
   refreshPracticeQueue();
@@ -333,6 +344,14 @@ root.addEventListener('click', (event) => {
 
   if (action === 'import-progress') {
     importInput.click();
+    return;
+  }
+
+  if (action === 'select-unit') {
+    const unit = button.dataset.unit === '1' ? 1 : button.dataset.unit === '0' ? 0 : null;
+    if (unit !== null && mode === 'learn' && lessonUnit(lessonState.lesson.id) !== unit) {
+      switchLearnUnit(unit);
+    }
     return;
   }
 
