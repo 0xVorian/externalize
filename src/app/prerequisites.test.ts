@@ -7,7 +7,11 @@ import {
   orderedConcepts,
   requiredLessonsForExercise,
 } from './prerequisites';
-import { renderConceptMap } from './concept-map-render';
+import {
+  conceptStatus,
+  isConceptCompleted,
+  renderConceptMap,
+} from './concept-map-render';
 import { loadProgress } from './storage';
 
 describe('prerequisites graph', () => {
@@ -39,9 +43,25 @@ describe('prerequisites graph', () => {
 });
 
 describe('concept map render', () => {
-  it('renders concept map section', () => {
-    const html = renderConceptMap('en', loadProgress());
+  it('renders SVG graph with concept nodes and edges', () => {
+    const store = loadProgress();
+    const html = renderConceptMap('en', store);
     expect(html).toContain('Concept map');
+    expect(html).toContain('<svg');
+    expect(html).toContain('concept-map-edge');
+    expect(html).toContain('data-concept-id="conjunction"');
     expect(html).toContain('Conjunction');
+  });
+
+  it('marks root concept available on fresh progress', () => {
+    const store = loadProgress();
+    expect(conceptStatus(store, 'proposition')).toBe('available');
+    expect(isConceptCompleted(store, 'proposition')).toBe(false);
+  });
+
+  it('uses French labels', () => {
+    const html = renderConceptMap('fr', loadProgress());
+    expect(html).toContain('Carte des concepts');
+    expect(html).toContain('Conjonction');
   });
 });

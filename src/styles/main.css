@@ -326,6 +326,106 @@ button {
   border: 1px solid #fecdca;
 }
 
+.concept-map-graph-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.concept-map-graph {
+  display: block;
+  width: 100%;
+  min-width: 17rem;
+  height: auto;
+}
+
+.concept-map-edge {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+.concept-map-node rect {
+  stroke-width: 1.5;
+}
+
+.concept-map-node-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.concept-map-node-completed rect {
+  fill: var(--correct-soft);
+  stroke: var(--correct-text);
+}
+
+.concept-map-node-completed .concept-map-node-label {
+  fill: var(--correct-text);
+}
+
+.concept-map-node-available rect {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+}
+
+.concept-map-node-available .concept-map-node-label {
+  fill: var(--accent);
+}
+
+.concept-map-node-locked rect {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-dasharray: 4 3;
+}
+
+.concept-map-node-locked .concept-map-node-label {
+  fill: var(--muted);
+}
+
+.concept-map-legend {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.concept-map-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.concept-map-swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 0.25rem;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+}
+
+.concept-map-swatch.concept-map-node-completed {
+  background: var(--correct-soft);
+  border-color: var(--correct-text);
+}
+
+.concept-map-swatch.concept-map-node-available {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.concept-map-swatch.concept-map-node-locked {
+  background: var(--surface);
+  border-style: dashed;
+}
+
+#concept-map-arrow path {
+  fill: var(--border);
+}
+
 .exercise-prompt {
   margin: 0 0 0.75rem;
   font-size: 1rem;

@@ -11,6 +11,7 @@ import type { ProgressStore } from './storage';
 import { countReviewDue, getUnlockedExerciseIds, exerciseLockReason } from './storage';
 import { renderShellHeader } from './shell-render';
 import { learnUi } from '../i18n';
+import { renderConceptMap } from './concept-map-render';
 
 function renderListItem(
   locale: Locale,
@@ -204,6 +205,8 @@ export function renderProgressView(
       ${level1Section}
 
       ${exerciseSection}
+
+      ${renderConceptMap(locale, store)}
 
       <section class="progress-card">
         <h2 class="panel-title">${copy.strugglesHeading}</h2>
