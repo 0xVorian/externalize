@@ -15,7 +15,7 @@ Future direction: YAML/JSON authoring under `content/` may replace hand-edited T
 
 ```
 src/app/
-  lessons.ts           — LEVEL_0_LESSONS, PRACTICE_UNLOCK_ORDER
+  lessons.ts           — LEVEL_0_LESSONS, LEVEL_1_LESSONS, PRACTICE_UNLOCK_ORDER
   exercises.ts         — EXERCISE_DEFINITIONS
   presentation.test.ts — presentation inventory (must stay in sync)
   lesson-render.ts     — card, watch table, guided live row
@@ -56,7 +56,7 @@ Copy shape in `src/i18n/lessons.ts`:
 | `watchSteps[]` with `{ assignment, explanation }` | `watch` | Truth-table walkthrough |
 | `guidedSteps[]` with `{ kind: 'hint' \| 'done', text }` | `guided` | Step-by-step learner try |
 
-Level 0 lessons live in `LEVEL_0_LESSONS`. Level 1 will add a parallel array when connective lessons ship.
+Level 0 lessons live in `LEVEL_0_LESSONS`; Unit 1 connectives in `LEVEL_1_LESSONS`. Combined navigation uses `ALL_LEARN_LESSONS`.
 
 ## Exercise schema
 

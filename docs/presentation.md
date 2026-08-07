@@ -16,15 +16,47 @@ Use this when adding exercises or wondering what UI you will see.
 | `level0-04-watch` | Worked cases: P ∧ Q | **4-row truth table** | Highlight steps 1–4 |
 | `level0-05-guided` | Guided: P ∧ Q | **Toggles + live row** | Same table as watch, one row |
 
-### Practice — unlock order
+### Level 1 — Connectives
+
+| ID | Title (EN) | Presentation | Notes |
+|----|------------|--------------|-------|
+| `level1-01-neg` | Negation | Card (text) | |
+| `level1-02-neg-watch` | Worked cases: ¬P | **2-row truth table** | Single atom |
+| `level1-03-neg-guided` | Guided: ¬P | **Toggles + live row** | One atom column |
+| `level1-04-or` | Disjunction ∨ | Card (text) | |
+| `level1-05-or-watch` | Worked cases: P ∨ Q | **4-row truth table** | |
+| `level1-06-or-guided` | Guided: P ∨ Q | **Toggles + live row** | |
+| `level1-07-imp` | Material conditional → | Card (text) | |
+| `level1-08-imp-watch` | Worked cases: P → Q | **4-row truth table** | |
+| `level1-09-imp-guided` | Guided: P → Q | **Toggles + live row** | |
+| `level1-10-iff` | Biconditional ↔ | Card (text) | |
+| `level1-11-iff-watch` | Worked cases: P ↔ Q | **4-row truth table** | |
+| `level1-12-iff-guided` | Guided: P ↔ Q | **Toggles + live row** | |
+
+### Practice — unlock order (20 exercises)
 
 | Order | ID | Formula | Type | Presentation | Likely issues |
 |-------|-----|---------|------|--------------|---------------|
-| 1 | `eval-001` | `P ∧ Q` | Evaluate | **Toggles + live row** | Fixed — was tree |
-| 2 | `eval-002` | `(P → Q) ↔ ¬R` | Evaluate | **Tree + toggles (P,Q,R)** | Nested tree; verify on phone |
-| 3 | `scope-003` | `¬(P ∧ Q)` | Main connective | **Tree (tap only, no values)** | 3 levels; alignment CSS applies |
-| 4 | `scope-001` | `(P → Q) ∧ R` | Main connective | **Tree (tap only)** | 4 nodes; classic “pick ∧ not →” exercise |
-| 5 | `scope-002` | `(P → Q) ↔ ¬R` | Main connective | **Tree (tap only)** | Deepest scope tree in MVP |
+| 1 | `eval-001` | `P ∧ Q` | Evaluate | **Toggles + live row** | |
+| 2 | `eval-003` | `P ∨ Q` | Evaluate | **Toggles + live row** | |
+| 3 | `eval-004` | `P → Q` | Evaluate | **Toggles + live row** | |
+| 4 | `eval-005` | `P ↔ Q` | Evaluate | **Toggles + live row** | |
+| 5 | `scope-003` | `¬(P ∧ Q)` | Main connective | **Tree (tap only)** | |
+| 6 | `scope-009` | `¬P ∧ Q` | Main connective | **Tree (tap only)** | |
+| 7 | `scope-004` | `P ∨ (Q ∧ R)` | Main connective | **Tree (tap only)** | |
+| 8 | `scope-007` | `(P ∧ Q) ∨ R` | Main connective | **Tree (tap only)** | |
+| 9 | `eval-002` | `(P → Q) ↔ ¬R` | Evaluate | **Tree + toggles (P,Q,R)** | Nested tree |
+| 10 | `eval-006` | `(P ∨ Q) → R` | Evaluate | **Tree + toggles** | |
+| 11 | `eval-007` | `P ∧ (Q ∨ R)` | Evaluate | **Tree + toggles** | |
+| 12 | `eval-008` | `¬(P ∧ Q)` | Evaluate | **Tree + toggles** | |
+| 13 | `eval-009` | `(P → Q) ∧ R` | Evaluate | **Tree + toggles** | |
+| 14 | `scope-001` | `(P → Q) ∧ R` | Main connective | **Tree (tap only)** | Classic “pick ∧ not →” |
+| 15 | `scope-005` | `(P ∨ Q) → R` | Main connective | **Tree (tap only)** | |
+| 16 | `scope-006` | `¬(P → Q)` | Main connective | **Tree (tap only)** | |
+| 17 | `scope-008` | `P → (Q ∨ R)` | Main connective | **Tree (tap only)** | |
+| 18 | `scope-010` | `(P → Q) → R` | Main connective | **Tree (tap only)** | |
+| 19 | `scope-011` | `P ↔ (Q → R)` | Main connective | **Tree (tap only)** | |
+| 20 | `scope-002` | `(P → Q) ↔ ¬R` | Main connective | **Tree (tap only)** | Deepest scope tree |
 
 ### Other screens
 
@@ -34,8 +66,8 @@ Use this when adding exercises or wondering what UI you will see.
 
 ### Auto-routing rule (code)
 
-- `usesLiveTruthRow(formula)` → true **only** for exact string `P ∧ Q` (`src/app/truth-table-render.ts`).
-- New flat formulas do **not** automatically get a table; add an explicit rule or exercise flag when authoring.
+- `usesLiveTruthRow(formula)` → true for flat lesson/practice formulas: `P ∧ Q`, `¬P`, `P ∨ Q`, `P → Q`, `P ↔ Q` (`src/app/truth-table-render.ts`).
+- Nested or multi-atom formulas stay on parse-tree eval; add new flat formulas to the set explicitly when authoring.
 
 ## Rule of thumb
 
