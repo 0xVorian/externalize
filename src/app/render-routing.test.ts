@@ -33,7 +33,7 @@ describe('practice presentation routing', () => {
   it('renderApp uses tree panel for nested evaluate formulas', () => {
     const nested = EXERCISE_DEFINITIONS.filter(
       (candidate) =>
-        candidate.type === 'evaluate-formula' && !usesLiveTruthRow(candidate.formula),
+        candidate.type === 'evaluate-formula' && candidate.formula && !usesLiveTruthRow(candidate.formula),
     );
 
     for (const exercise of nested) {

@@ -17,15 +17,23 @@ import {
 } from './app/storage';
 import {
   firstIncompleteLesson,
+  firstIncompleteLessonInUnit,
   nextLessonId,
   getLessonDefinition,
   isLearnPathComplete,
+  lessonUnit,
 } from './app/lessons';
 import {
   createState,
   selectNode,
   setAtomValue,
+  submitCellValue,
   applyLocale,
+  cellSubmissionCorrect,
+  paletteInsertToken,
+  paletteBackspace,
+  paletteUndo,
+  checkTranslation,
   type AppState,
 } from './app/state';
 import {
@@ -207,6 +215,15 @@ function continueFromResume(): void {
   setMode(target);
 }
 
+function switchLearnUnit(unit: 0 | 1): void {
+  if (unit === 1 && !progress.level0Complete) {
+    return;
+  }
+  lessonState = createLessonState(locale, firstIncompleteLessonInUnit(unit, progress.lessonsCompleted));
+  persistLessonResume();
+  render();
+}
+
 function completeCurrentLesson(): void {
   persistProgress(completeLesson(progress, lessonState.lesson.id));
   refreshPracticeQueue();
@@ -244,6 +261,9 @@ function advancePractice(): void {
   const state = ensurePracticeState();
   if (state.exercise.type === 'evaluate-formula') {
     persistProgress(recordResult(progress, state.exercise.id, true));
+    refreshPracticeQueue();
+  } else if (state.exercise.type === 'fill-truth-table-cell') {
+    persistProgress(recordResult(progress, state.exercise.id, cellSubmissionCorrect(state) ?? false));
     refreshPracticeQueue();
   } else if (state.feedback) {
     persistProgress(
@@ -336,6 +356,14 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'select-unit') {
+    const unit = button.dataset.unit === '1' ? 1 : button.dataset.unit === '0' ? 0 : null;
+    if (unit !== null && mode === 'learn' && lessonUnit(lessonState.lesson.id) !== unit) {
+      switchLearnUnit(unit);
+    }
+    return;
+  }
+
   if (action === 'lesson-next') {
     handleLessonNext();
     return;
@@ -397,9 +425,58 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'submit-cell-value') {
+    const value = button.dataset.value === 'true';
+    practiceState = submitCellValue(ensurePracticeState(), value);
+    if (practiceState.phase === 'answered') {
+      persistProgress(recordResult(progress, practiceState.exercise.id, cellSubmissionCorrect(practiceState) ?? false));
+      refreshPracticeQueue();
+    }
+    render();
+    return;
+  }
+
+  if (action === 'palette-insert') {
+    practiceState = paletteInsertToken(ensurePracticeState(), button.dataset.token, button.dataset.value);
+    render();
+    return;
+  }
+  if (action === 'palette-backspace') {
+    practiceState = paletteBackspace(ensurePracticeState());
+    render();
+    return;
+  }
+  if (action === 'palette-undo') {
+    practiceState = paletteUndo(ensurePracticeState());
+    render();
+    return;
+  }
+  if (action === 'check-translation') {
+    practiceState = checkTranslation(ensurePracticeState());
+    if (practiceState.phase === 'answered' && practiceState.feedback) {
+      persistProgress(
+        recordResult(
+          progress,
+          practiceState.exercise.id,
+          practiceState.feedback.correct,
+          practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
+        ),
+      );
+      refreshPracticeQueue();
+    }
+    render();
+    return;
+  }
+
   if (action === 'next') {
     advancePractice();
   }
 });
 
 render();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}

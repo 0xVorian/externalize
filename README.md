@@ -51,6 +51,18 @@ No environment variables required for MVP-0. Progress is stored in the browser (
 
 After deploy, open the Pages URL on your phone to run the week test.
 
+## Install as PWA (home screen)
+
+Externalize ships a web app manifest and a lightweight service worker that caches the app shell (HTML, manifest, icons). Progress still lives in `localStorage` on each device — use Progress → Export/Import to move between installs.
+
+**Android (Chrome):** open the site → menu (⋮) → **Install app** or **Add to Home screen**.
+
+**iOS (Safari):** open the site → Share → **Add to Home Screen**.
+
+**Desktop (Chrome / Edge):** install icon in the address bar, or browser menu → **Install Externalize**.
+
+Requires HTTPS (or `localhost` during development). After install, the app opens standalone without the browser chrome.
+
 ## Success criterion
 
 The project succeeds if it makes symbolic reasoning easier to practise regularly and reduces the amount of state the learner must retain mentally. A small application that reliably teaches propositional and predicate logic to its creator is sufficient; it does not need to become a commercial platform.

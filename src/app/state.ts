@@ -3,14 +3,29 @@ import {
   toVerticalTree,
   evaluateWithNodes,
   checkMainConnectiveSelection,
+  classifyTranslation,
   collectAtoms,
+  resolveTranslationFeedback,
+  generateTruthTable,
+  maskTruthTableRows,
+  validateCell,
   type TreeNode,
   type Assignment,
   type FeedbackResult,
+  type PartialTruthTable,
 } from '../../engine';
 import type { Locale } from '../i18n';
-import { getExerciseCopy, getFeedbackTemplates, ui } from '../i18n';
+import { getExerciseCopy, getCellFeedback, getFeedbackTemplates, ui } from '../i18n';
 import type { ExerciseDefinition } from './exercises';
+import {
+  createBuilderReducerState,
+  builderInsert,
+  builderBackspace,
+  builderUndo,
+  parsePaletteInsert,
+  getTranslationExerciseConfig,
+  type BuilderReducerState,
+} from './translation';
 
 export type AppPhase = 'ready' | 'answered';
 
@@ -22,15 +37,57 @@ export type AppState = {
   selectedNodeId: string | null;
   assignment: Assignment;
   tree: TreeNode;
+  builder: BuilderReducerState;
   feedback: FeedbackResult | null;
   message: string | null;
+  submittedCell: boolean | null;
+  partialTable: PartialTruthTable | null;
 };
 
+function placeholderTree(): TreeNode {
+  return toVerticalTree(parse('P'));
+}
+
+function buildPartialTable(exercise: ExerciseDefinition): PartialTruthTable | null {
+  if (exercise.type !== 'fill-truth-table-cell') {
+    return null;
+  }
+  if (exercise.hiddenRowIndex === undefined) {
+    throw new Error(`Missing hiddenRowIndex for ${exercise.id}`);
+  }
+  const formula = parse(exercise.formula!);
+  return maskTruthTableRows(
+    generateTruthTable(formula, [...collectAtoms(formula)].sort()),
+    [exercise.hiddenRowIndex],
+  );
+}
+
 export function createState(locale: Locale, exercise: ExerciseDefinition): AppState {
-  const formula = parse(exercise.formula);
+  const prompt = getExerciseCopy(locale, exercise.id).prompt;
+
+  if (exercise.type === 'translate-en-to-formula') {
+    return {
+      locale,
+      exercise,
+      prompt,
+      phase: 'ready',
+      selectedNodeId: null,
+      assignment: {},
+      tree: placeholderTree(),
+      builder: createBuilderReducerState(),
+      feedback: null,
+      message: null,
+      submittedCell: null,
+      partialTable: null,
+    };
+  }
+
+  const formula = parse(exercise.formula!);
   const atoms = [...collectAtoms(formula)].sort();
   const assignment =
-    exercise.initialAssignment ?? Object.fromEntries(atoms.map((atom) => [atom, false]));
+    exercise.type === 'evaluate-formula' && exercise.initialAssignment
+      ? exercise.initialAssignment
+      : Object.fromEntries(atoms.map((atom) => [atom, false]));
 
   const tree =
     exercise.type === 'evaluate-formula'
@@ -40,13 +97,16 @@ export function createState(locale: Locale, exercise: ExerciseDefinition): AppSt
   return {
     locale,
     exercise,
-    prompt: getExerciseCopy(locale, exercise.id).prompt,
+    prompt,
     phase: 'ready',
     selectedNodeId: null,
     assignment,
     tree,
+    builder: createBuilderReducerState(),
     feedback: null,
     message: null,
+    submittedCell: null,
+    partialTable: buildPartialTable(exercise),
   };
 }
 
@@ -55,8 +115,8 @@ export function selectNode(state: AppState, nodeId: string): AppState {
     return state;
   }
 
-  const formula = parse(state.exercise.formula);
-  const templates = getFeedbackTemplates(state.locale, state.exercise.id);
+  const formula = parse(state.exercise.formula!);
+  const templates: Record<string, string> = getFeedbackTemplates(state.locale, state.exercise.id) as Record<string, string>;
   const result = checkMainConnectiveSelection(formula, state.tree, nodeId, templates);
 
   return {
@@ -68,8 +128,110 @@ export function selectNode(state: AppState, nodeId: string): AppState {
   };
 }
 
-export function toggleAtom(state: AppState, atom: string): AppState {
-  return setAtomValue(state, atom, !state.assignment[atom]);
+export function submitCellValue(state: AppState, value: boolean): AppState {
+  if (state.exercise.type !== 'fill-truth-table-cell' || state.phase === 'answered') {
+    return state;
+  }
+  const idx = state.exercise.hiddenRowIndex;
+  if (idx === undefined || !state.partialTable) {
+    return state;
+  }
+  const assignment = state.partialTable.rows[idx]?.assignment;
+  if (!assignment) {
+    return state;
+  }
+  const validation = validateCell(parse(state.exercise.formula!), assignment, value);
+  return {
+    ...state,
+    submittedCell: value,
+    phase: 'answered',
+    message: getCellFeedback(state.locale, state.exercise.id, validation.correct),
+  };
+}
+
+export function paletteInsertToken(
+  state: AppState,
+  tokenKind: string | undefined,
+  value: string | undefined,
+): AppState {
+  if (state.exercise.type !== 'translate-en-to-formula' || state.phase === 'answered') {
+    return state;
+  }
+  const token = parsePaletteInsert(tokenKind, value);
+  if (!token) {
+    return state;
+  }
+  return {
+    ...state,
+    builder: builderInsert(state.builder, token),
+    feedback: null,
+    message: null,
+  };
+}
+
+export function paletteBackspace(state: AppState): AppState {
+  if (state.exercise.type !== 'translate-en-to-formula' || state.phase === 'answered') {
+    return state;
+  }
+  return { ...state, builder: builderBackspace(state.builder), feedback: null, message: null };
+}
+
+export function paletteUndo(state: AppState): AppState {
+  if (state.exercise.type !== 'translate-en-to-formula' || state.phase === 'answered') {
+    return state;
+  }
+  return { ...state, builder: builderUndo(state.builder), feedback: null, message: null };
+}
+
+export function checkTranslation(state: AppState): AppState {
+  if (state.exercise.type !== 'translate-en-to-formula' || state.phase === 'answered') {
+    return state;
+  }
+
+  const config = getTranslationExerciseConfig(state.exercise.id);
+  if (!config) {
+    return state;
+  }
+
+  const templates = getFeedbackTemplates(state.locale, state.exercise.id);
+
+  if (state.builder.compileError === 'unbalanced-parens') {
+    const tag = 'unbalanced-parens';
+    const message = templates[tag] ?? resolveTranslationFeedback(tag);
+    return {
+      ...state,
+      phase: 'answered',
+      feedback: { correct: false, tag, message },
+      message,
+    };
+  }
+
+  if (!state.builder.formula) {
+    const tag = 'incomplete';
+    const message = templates[tag] ?? resolveTranslationFeedback(tag);
+    return {
+      ...state,
+      phase: 'answered',
+      feedback: { correct: false, tag, message },
+      message,
+    };
+  }
+
+  const expected = parse(config.expected.formula);
+  const result = classifyTranslation(expected, state.builder.formula, {
+    allowCommutativeAnd: config.expected.acceptCommutativeAnd,
+    allowCommutativeOr: config.expected.acceptCommutativeOr,
+    allowSemantic: config.expected.acceptEquivalent,
+  });
+
+  const message = templates[result.tag] ?? result.message;
+
+  return {
+    ...state,
+    phase: 'answered',
+    feedback: { correct: result.correct, tag: result.tag, message },
+    message,
+  };
 }
 
 export function setAtomValue(state: AppState, atom: string, value: boolean): AppState {
@@ -77,11 +239,8 @@ export function setAtomValue(state: AppState, atom: string, value: boolean): App
     return state;
   }
 
-  const formula = parse(state.exercise.formula);
-  const assignment = {
-    ...state.assignment,
-    [atom]: value,
-  };
+  const formula = parse(state.exercise.formula!);
+  const assignment = { ...state.assignment, [atom]: value };
   const { tree } = evaluateWithNodes(formula, assignment);
 
   return {
@@ -96,20 +255,27 @@ export function applyLocale(state: AppState, locale: Locale): AppState {
   const prompt = getExerciseCopy(locale, state.exercise.id).prompt;
   const next: AppState = { ...state, locale, prompt };
 
-  if (state.phase === 'answered' && state.selectedNodeId) {
-    const formula = parse(state.exercise.formula);
+  if (state.phase === 'answered' && state.selectedNodeId && state.exercise.type === 'identify-main-connective') {
+    const formula = parse(state.exercise.formula!);
     const templates = getFeedbackTemplates(locale, state.exercise.id);
-    const result = checkMainConnectiveSelection(
-      formula,
-      state.tree,
-      state.selectedNodeId,
-      templates,
-    );
-    return {
-      ...next,
-      feedback: result,
-      message: result.message,
-    };
+    const result = checkMainConnectiveSelection(formula, state.tree, state.selectedNodeId, templates);
+    return { ...next, feedback: result, message: result.message };
+  }
+
+  if (state.phase === 'answered' && state.exercise.type === 'translate-en-to-formula' && state.feedback) {
+    const templates: Record<string, string> = getFeedbackTemplates(locale, state.exercise.id) as Record<string, string>;
+    const message = templates[state.feedback.tag] ?? state.feedback.message;
+    return { ...next, feedback: { ...state.feedback, message }, message };
+  }
+
+  if (state.phase === 'answered' && state.exercise.type === 'fill-truth-table-cell' && state.submittedCell !== null) {
+    const idx = state.exercise.hiddenRowIndex;
+    const assignment = idx !== undefined ? state.partialTable?.rows[idx]?.assignment : undefined;
+    const correct =
+      assignment !== undefined
+        ? validateCell(parse(state.exercise.formula!), assignment, state.submittedCell).correct
+        : false;
+    return { ...next, message: getCellFeedback(locale, state.exercise.id, correct) };
   }
 
   if (state.message === ui(state.locale).valuesUpdated) {
@@ -119,6 +285,27 @@ export function applyLocale(state: AppState, locale: Locale): AppState {
   return { ...next, message: null };
 }
 
+export function cellSubmissionCorrect(state: AppState): boolean | null {
+  if (state.exercise.type !== 'fill-truth-table-cell' || state.submittedCell === null) {
+    return null;
+  }
+  const idx = state.exercise.hiddenRowIndex;
+  if (idx === undefined || !state.partialTable) {
+    return null;
+  }
+  const assignment = state.partialTable.rows[idx]?.assignment;
+  if (!assignment) {
+    return null;
+  }
+  return validateCell(parse(state.exercise.formula!), assignment, state.submittedCell).correct;
+}
+
 export function isExerciseComplete(state: AppState): boolean {
+  if (state.exercise.type === 'translate-en-to-formula') {
+    return state.feedback?.correct === true;
+  }
+  if (state.exercise.type === 'fill-truth-table-cell') {
+    return cellSubmissionCorrect(state) === true;
+  }
   return state.exercise.type === 'identify-main-connective' && state.feedback?.correct === true;
 }

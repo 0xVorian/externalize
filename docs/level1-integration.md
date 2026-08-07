@@ -12,7 +12,7 @@ Unit 1 (connectives beyond ∧) is **content-complete** and **minimally wired** 
 | Guided step progression (`atom` + `value` in copy) | Done |
 | Navigation: Unit 0 → Unit 1 → practice | Done |
 | Gating: Unit 1 after `level0Complete` | Done |
-| Practice unlock: still after Unit 0 | Done |
+| Practice unlock: Unit 0 after `level0Complete`, Unit 1 after `level1Complete` | Done |
 | Progress checklist for Unit 1 | Done |
 
 ## Lesson inventory
@@ -32,14 +32,21 @@ Unit 1 (connectives beyond ∧) is **content-complete** and **minimally wired** 
 | `level1-11-iff-watch` | ↔ | watch | `P ↔ Q` |
 | `level1-12-iff-guided` | ↔ | guided | `P ↔ Q` |
 
+## Practice tiers
+
+| Tier | Gate | First exercises |
+|------|------|-----------------|
+| Unit 0 | `level0Complete` | `eval-001` → `scope-012` |
+| Unit 1 | `level1Complete` (all 12 lessons) | `eval-010` (¬P) → flat eval for ∨/→/↔ → nested scope/eval |
+
+New exercise IDs: **`eval-010`**, **`scope-012`**.
+
 ## Remaining work (future batches)
 
-1. **`docs/presentation.md` inventory** — Level 1 rows and 20-exercise unlock order added.
-2. **Practice exercises** for Level 1 connectives — flat eval `eval-003`/`004`/`005` ship in exercise bank; nested scope/eval items follow in unlock order.
-3. **`level1Complete` flag** in progress storage (optional; currently inferred from `lessonsCompleted`).
-4. **Resume migration** — `guidedAssignment` resume snapshot still stores `{ P, Q }` only; sufficient for current formulas but should become formula-aware if atoms beyond P/Q appear.
-5. **Unit picker in Learn tab** — let learners jump between Unit 0 and Unit 1 when both are unlocked.
-6. **Completion toast** — surface `level0Complete` / Unit 1 complete messages from `learnUi` (copy exists for Unit 0; Unit 1 message TBD).
+1. **`level1Complete` flag** in progress storage (optional; currently inferred from `lessonsCompleted`).
+2. **Resume migration** — `guidedAssignment` resume snapshot still stores `{ P, Q }` only; sufficient for current formulas but should become formula-aware if atoms beyond P/Q appear.
+3. **Unit picker in Learn tab** — let learners jump between Unit 0 and Unit 1 when both are unlocked.
+4. **Completion toast** — surface `level0Complete` / Unit 1 complete messages from `learnUi` (copy exists for Unit 0; Unit 1 message TBD).
 
 ## Key files
 

@@ -45,10 +45,12 @@ export type LearnUiCopy = {
   referenceTitle: string;
   referenceToggle: string;
   watchPrompt: string;
+  watchGridPrompt: string;
   stepLabel: (current: number, total: number) => string;
   truthTableAria: (formula: string) => string;
   modeLearnAria: string;
   modePracticeAria: string;
+  watchGridAria: (formula: string) => string;
 };
 
 const REFERENCE: Record<Locale, ReferenceEntry[]> = {
@@ -148,10 +150,13 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     referenceToggle: 'Connective reference',
     watchPrompt:
       'Each row is one assignment. Read the highlighted row, then continue to the next case.',
+    watchGridPrompt:
+      'P runs down the side, Q across the top. Read the highlighted cell, then continue to the next case.',
     stepLabel: (current, total) => `Case ${current} of ${total}`,
     truthTableAria: (formula) => `Truth table for ${formula}`,
     modeLearnAria: 'Learn',
     modePracticeAria: 'Exercises',
+    watchGridAria: (formula) => `Truth grid for ${formula}`,
   },
   fr: {
     learn: 'Cours',
@@ -172,10 +177,13 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     referenceToggle: 'Référence des connecteurs',
     watchPrompt:
       'Chaque ligne correspond à une interprétation. Lisez la ligne surlignée, puis passez au cas suivant.',
+    watchGridPrompt:
+      'P est en ligne, Q en colonne. Lisez la case surlignée, puis passez au cas suivant.',
     stepLabel: (current, total) => `Cas ${current} sur ${total}`,
     truthTableAria: (formula) => `Table de vérité de ${formula}`,
     modeLearnAria: 'Cours',
     modePracticeAria: 'Exercices',
+    watchGridAria: (formula) => `Grille de vérité de ${formula}`,
   },
 };
 

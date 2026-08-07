@@ -17,6 +17,8 @@ describe('lesson i18n', () => {
       expect(ui.learn).toBeTruthy();
       expect(ui.level0Title).toBeTruthy();
       expect(ui.level1Title).toBeTruthy();
+      expect(ui.level1Complete).toBeTruthy();
+      expect(ui.unitPickerLabel).toBeTruthy();
       expect(ui.continueUnit1).toBeTruthy();
     });
 

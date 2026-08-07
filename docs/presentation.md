@@ -33,11 +33,20 @@ Use this when adding exercises or wondering what UI you will see.
 | `level1-11-iff-watch` | Worked cases: P ↔ Q | **2×2 truth grid** | |
 | `level1-12-iff-guided` | Guided: P ↔ Q | **Toggles + live row** | |
 
-### Practice — unlock order (20 exercises)
+### Practice — tiered unlock (22 exercises)
+
+**Unit 0** (after introductory unit complete):
+
+| Order | ID | Formula | Type | Presentation |
+|-------|-----|---------|------|--------------|
+| 1 | `eval-001` | `P ∧ Q` | Evaluate | **Toggles + live row** |
+| 2 | `scope-012` | `(P ∧ Q) ∧ R` | Main connective | **Tree (tap only)** |
+
+**Unit 1** (after all 12 Level 1 lessons):
 
 | Order | ID | Formula | Type | Presentation | Likely issues |
 |-------|-----|---------|------|--------------|---------------|
-| 1 | `eval-001` | `P ∧ Q` | Evaluate | **Toggles + live row** | |
+| 1 | `eval-010` | `¬P` | Evaluate | **Toggles + live row** | |
 | 2 | `eval-003` | `P ∨ Q` | Evaluate | **Toggles + live row** | |
 | 3 | `eval-004` | `P → Q` | Evaluate | **Toggles + live row** | |
 | 4 | `eval-005` | `P ↔ Q` | Evaluate | **Toggles + live row** | |

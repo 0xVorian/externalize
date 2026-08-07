@@ -5,6 +5,8 @@ import type { ResumePoint } from '../app/progress-tracker';
 export type ExerciseCopy = {
   prompt: string;
   feedback?: FeedbackTemplate;
+  cellCorrect?: string;
+  cellWrong?: string;
 };
 
 export type UiCopy = {
@@ -17,6 +19,7 @@ export type UiCopy = {
   atomGroupAria: (atom: string) => string;
   atomSetTrueAria: (atom: string) => string;
   atomSetFalseAria: (atom: string) => string;
+  cellFillAria: (rowNumber: number) => string;
   formulaTreeAria: string;
   formulaDisplayAria: string;
   treeNodeSelectAria: (label: string) => string;
@@ -40,6 +43,16 @@ const FEEDBACK_DEFAULTS_EN: Record<FeedbackTag, string> = {
     '{label} is the main connective of a proper subformula, not of the entire formula.',
   'selected-atom': '{label} is a sentence letter — an atomic formula — not a connective.',
   'selected-operand-not-connective': 'That expression is not a connective.',
+  'reversed-conditional': 'The conditional runs the wrong way.',
+  'reversed-biconditional': 'The biconditional is reversed.',
+  'negation-scope': 'Negation is on the wrong subformula.',
+  'missing-parens': 'Grouping is missing.',
+  'extra-parens': 'Extra parentheses.',
+  'wrong-operator': 'One connective should be different.',
+  'wrong-atom': 'Wrong sentence letter.',
+  'equivalent-but-noncanonical': 'Equivalent but not canonical.',
+  incomplete: 'Formula incomplete.',
+  'unbalanced-parens': 'Unbalanced parentheses.',
 };
 
 /** French: logique propositionnelle (connecteur principal, portée, formule atomique). Independent wording — not a translation of the English strings. */
@@ -52,6 +65,16 @@ const FEEDBACK_DEFAULTS_FR: Record<FeedbackTag, string> = {
   'selected-atom':
     '{label} est une formule atomique (une variable propositionnelle), pas un connecteur.',
   'selected-operand-not-connective': "Cet élément n'est pas un connecteur logique.",
+  'reversed-conditional': "Implication inversée.",
+  'reversed-biconditional': 'Biconditionnelle inversée.',
+  'negation-scope': 'Mauvaise portée de la négation.',
+  'missing-parens': 'Parenthèses manquantes.',
+  'extra-parens': 'Parenthèses en trop.',
+  'wrong-operator': 'Mauvais connecteur.',
+  'wrong-atom': 'Mauvaise variable.',
+  'equivalent-but-noncanonical': 'Équivalent mais non canonique.',
+  incomplete: 'Formule incomplète.',
+  'unbalanced-parens': 'Parenthèses déséquilibrées.',
 };
 
 const FEEDBACK_DEFAULTS: Record<Locale, Record<FeedbackTag, string>> = {
@@ -134,6 +157,13 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
           '→ is the main connective of (Q → R) on the right, but ↔ is the main connective of the entire biconditional.',
       },
     },
+    'scope-012': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '∧ binds P and Q inside the parentheses, but the outer ∧ is the main connective — it joins (P ∧ Q) to R for the whole formula.',
+      },
+    },
     'eval-001': {
       prompt:
         'Tap V or F for each letter. The table row shows how P ∧ Q evaluates under your assignment.',
@@ -170,6 +200,16 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'Each conjunct is evaluated separately. The conjunction is true only when both (P → Q) and R are true.',
     },
+    'eval-010': {
+      prompt:
+        'Set the truth value of P. The live row shows how negation flips it: ¬P is true exactly when P is false.',
+    },
+    'tt-001': { prompt: 'The table is almost complete. Tap T or F to fill the missing entry for P ∧ Q when P is true and Q is false.', cellCorrect: 'Correct — conjunction requires both conjuncts to be true.', cellWrong: 'Under this assignment, P is true and Q is false, so P ∧ Q is false.' },
+    'tt-002': { prompt: 'Fill the blank result for P → Q when P is true and Q is false.', cellCorrect: 'Correct — a material conditional is false only in this case.', cellWrong: 'When the antecedent is true and the consequent is false, P → Q is false.' },
+    'tt-003': { prompt: 'Complete the table: what is P ∨ Q when both P and Q are false?', cellCorrect: 'Correct — disjunction is false only when both disjuncts are false.', cellWrong: 'With neither disjunct true, P ∨ Q is false.' },
+    'tt-004': { prompt: 'Three letters, one blank. Fill the result for (P → Q) ∧ R when P and Q are true and R is false.', cellCorrect: 'Correct — the implication is true, but the conjunction fails because R is false.', cellWrong: 'When P and Q are true, (P → Q) is true; with R false, the whole conjunction is false.' },
+    'tt-005': { prompt: 'Fill the missing biconditional value: P ↔ Q when P is false and Q is true.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
+    'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
   },
   fr: {
     'scope-001': {
@@ -245,6 +285,13 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
           'L\'implication → gouverne (Q → R) à droite, mais l\'équivalence ↔ est le connecteur principal de la biconditionnelle entière.',
       },
     },
+    'scope-012': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'La conjonction ∧ lie P et Q entre parenthèses, mais c\'est la ∧ externe qui est le connecteur principal — elle unit (P ∧ Q) à R pour toute la formule.',
+      },
+    },
     'eval-001': {
       prompt:
         'Toucher V ou F pour chaque variable. La ligne du tableau indique la valeur de P ∧ Q sous cette interprétation.',
@@ -281,6 +328,16 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'Chaque conjoint est évalué séparément. La conjonction n\'est vraie que si (P → Q) et R le sont tous deux.',
     },
+    'eval-010': {
+      prompt:
+        'Fixez la valeur de P. La ligne en direct montre la négation : ¬P est vrai exactement lorsque P est faux.',
+    },
+    'tt-001': { prompt: 'Le tableau est presque complet. Toucher V ou F pour la case manquante de P ∧ Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — une conjonction exige que les deux conjoints soient vrais.', cellWrong: 'Sous cette interprétation, P est vrai et Q est faux, donc P ∧ Q est faux.' },
+    'tt-002': { prompt: 'Complétez la case vide pour P → Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — l\'implication matérielle n\'est fausse que dans ce cas.', cellWrong: 'Quand l\'antécédent est vrai et le conséquent faux, P → Q est faux.' },
+    'tt-003': { prompt: 'Complétez le tableau : quelle est la valeur de P ∨ Q lorsque P et Q sont tous deux faux ?', cellCorrect: 'Exact — une disjonction n\'est fausse que si les deux disjonctes le sont.', cellWrong: 'Aucun disjonct n\'étant vrai, P ∨ Q est faux.' },
+    'tt-004': { prompt: 'Trois variables, une case vide. Donnez le résultat de (P → Q) ∧ R lorsque P et Q sont vrais et R est faux.', cellCorrect: 'Exact — l\'implication est vraie, mais la conjonction échoue car R est faux.', cellWrong: 'Quand P et Q sont vrais, (P → Q) est vrai ; avec R faux, la conjonction entière est fausse.' },
+    'tt-005': { prompt: 'Complétez la biconditionnelle manquante : P ↔ Q lorsque P est faux et Q est vrai.', cellCorrect: 'Exact — une biconditionnelle n\'est vraie que si les deux côtés coïncident.', cellWrong: 'P et Q ont ici des valeurs différentes, donc P ↔ Q est faux.' },
+    'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
   },
 };
 
@@ -296,6 +353,7 @@ const UI: Record<Locale, UiCopy> = {
     atomGroupAria: (atom) => `Truth value for ${atom}`,
     atomSetTrueAria: (atom) => `Set ${atom} to true`,
     atomSetFalseAria: (atom) => `Set ${atom} to false`,
+    cellFillAria: (rowNumber) => `Fill result for row ${rowNumber}`,
     formulaTreeAria: 'Parsing tree of the formula',
     formulaDisplayAria: 'Formula',
     treeNodeSelectAria: (label) => `Select connective ${label}`,
@@ -321,6 +379,7 @@ const UI: Record<Locale, UiCopy> = {
     atomGroupAria: (atom) => `Valeur de vérité de ${atom}`,
     atomSetTrueAria: (atom) => `Mettre ${atom} à vrai (V)`,
     atomSetFalseAria: (atom) => `Mettre ${atom} à faux (F)`,
+    cellFillAria: (rowNumber) => `Remplir le résultat de la ligne ${rowNumber}`,
     formulaTreeAria: 'Arbre de décomposition de la formule',
     formulaDisplayAria: 'Formule',
     treeNodeSelectAria: (label) => `Sélectionner le connecteur ${label}`,
@@ -360,12 +419,20 @@ export function formatAssignmentLine(
   return `${copy.assignment}: ${parts.join(' , ')}`;
 }
 
+export type TranslationUiCopy={atomKeyTitle:string;previewTitle:string;previewAria:string;previewEmpty:string;check:string;compileHint:(c:string)=>string};const TRANSLATION_UI:Record<Locale,TranslationUiCopy>={en:{atomKeyTitle:'Sentence letters',previewTitle:'Your formula',previewAria:'Preview',previewEmpty:'Tap symbols below.',check:'Check',compileHint:(c)=>c==='unbalanced-parens'?'Unbalanced parentheses.':'Keep building.'},fr:{atomKeyTitle:'Variables',previewTitle:'Votre formule',previewAria:'Aperçu',previewEmpty:'Touchez les symboles.',check:'Vérifier',compileHint:(c)=>c==='unbalanced-parens'?'Parenthèses déséquilibrées.':'Continuez.'}};export function translationUi(l:Locale){return TRANSLATION_UI[l];}
 export function getExerciseCopy(locale: Locale, exerciseId: string): ExerciseCopy {
   const copy = EXERCISE_COPY[locale][exerciseId];
   if (!copy) {
     throw new Error(`Missing exercise copy for ${exerciseId} (${locale})`);
   }
   return copy;
+}
+
+export function getCellFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
+  const copy = getExerciseCopy(locale, exerciseId);
+  return correct
+    ? (copy.cellCorrect ?? FEEDBACK_DEFAULTS[locale].correct)
+    : (copy.cellWrong ?? FEEDBACK_DEFAULTS[locale].correct);
 }
 
 export function getFeedbackTemplates(locale: Locale, exerciseId: string): FeedbackTemplate {
@@ -386,6 +453,8 @@ export type ProgressUiCopy = {
   lastSeen: (when: string) => string;
   level0Heading: string;
   level0Status: (done: number, total: number) => string;
+  level1Heading: string;
+  level1Status: (done: number, total: number) => string;
   exercisesHeading: string;
   exercisesStatus: (done: number, unlocked: number) => string;
   reviewDue: (count: number) => string;
@@ -402,6 +471,9 @@ export type ProgressUiCopy = {
   lessonTodo: string;
   exerciseDone: string;
   exerciseLocked: string;
+  exerciseLockedUnit1: string;
+  level0ExercisesHeading: string;
+  level1ExercisesHeading: string;
   syncHeading: string;
   syncHint: string;
   exportProgress: string;
@@ -422,6 +494,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lastSeen: (when) => `Last activity: ${when}`,
     level0Heading: 'Introductory unit',
     level0Status: (done, total) => `${done} of ${total} sections complete`,
+    level1Heading: 'Connectives unit',
+    level1Status: (done, total) => `${done} of ${total} sections complete`,
     exercisesHeading: 'Exercises',
     exercisesStatus: (done, unlocked) => `${done} completed · ${unlocked} unlocked`,
     reviewDue: (count) => `${count} scheduled for review`,
@@ -434,15 +508,22 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     skillLabel: (id) =>
       id === 'practice:evaluate-formula'
         ? 'Evaluating formulas'
-        : id === 'practice:identify-main-connective'
-          ? 'Main connective'
-          : id,
+        : id === 'practice:fill-truth-table-cell'
+          ? 'Truth-table cells'
+          : id === 'practice:translate-en-to-formula'
+            ? 'English to formula'
+            : id === 'practice:identify-main-connective'
+              ? 'Main connective'
+              : id,
     errorLabel: (tag) => FEEDBACK_DEFAULTS_EN[tag].split('.')[0],
     rateLabel: (rate, attempts) => `${Math.round(rate * 100)}% over ${attempts} attempts`,
     lessonDone: 'done',
     lessonTodo: 'remaining',
     exerciseDone: 'done',
     exerciseLocked: 'locked',
+    exerciseLockedUnit1: 'Unit 1',
+    level0ExercisesHeading: 'Unit 0 exercises',
+    level1ExercisesHeading: 'Unit 1 exercises',
     syncHeading: 'Another device',
     syncHint: 'Export on this device, then import the file where you want to continue.',
     exportProgress: 'Export progress',
@@ -461,6 +542,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lastSeen: (when) => `Dernière activité : ${when}`,
     level0Heading: 'Unité d\'introduction',
     level0Status: (done, total) => `${done} section${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}`,
+    level1Heading: 'Unité connecteurs',
+    level1Status: (done, total) => `${done} section${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}`,
     exercisesHeading: 'Exercices',
     exercisesStatus: (done, unlocked) => `${done} réussi${done > 1 ? 's' : ''} · ${unlocked} ouvert${unlocked > 1 ? 's' : ''}`,
     reviewDue: (count) => `${count} à revoir`,
@@ -473,15 +556,22 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     skillLabel: (id) =>
       id === 'practice:evaluate-formula'
         ? 'Évaluation de formules'
-        : id === 'practice:identify-main-connective'
-          ? 'Connecteur principal'
-          : id,
+        : id === 'practice:fill-truth-table-cell'
+          ? 'Cases de table de vérité'
+          : id === 'practice:translate-en-to-formula'
+            ? 'Anglais → formule'
+            : id === 'practice:identify-main-connective'
+              ? 'Connecteur principal'
+              : id,
     errorLabel: (tag) => FEEDBACK_DEFAULTS_FR[tag].split('.')[0],
     rateLabel: (rate, attempts) => `${Math.round(rate * 100)} % sur ${attempts} essai${attempts > 1 ? 's' : ''}`,
     lessonDone: 'fait',
     lessonTodo: 'reste',
     exerciseDone: 'fait',
     exerciseLocked: 'fermé',
+    exerciseLockedUnit1: 'Unité 1',
+    level0ExercisesHeading: 'Exercices — unité 0',
+    level1ExercisesHeading: 'Exercices — unité 1',
     syncHeading: 'Autre appareil',
     syncHint: 'Exportez ici, puis importez le fichier sur l\'appareil où vous voulez reprendre.',
     exportProgress: 'Exporter le parcours',

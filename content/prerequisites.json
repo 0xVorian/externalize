@@ -1,0 +1,376 @@
+{
+  "version": 1,
+  "concepts": [
+    {
+      "id": "proposition",
+      "label": {
+        "en": "Sentence letters",
+        "fr": "Variables propositionnelles"
+      }
+    },
+    {
+      "id": "truth-values",
+      "label": {
+        "en": "Truth values",
+        "fr": "Valeurs de vérité"
+      },
+      "requires": [
+        "proposition"
+      ]
+    },
+    {
+      "id": "conjunction",
+      "label": {
+        "en": "Conjunction (∧)",
+        "fr": "Conjonction (∧)"
+      },
+      "requires": [
+        "proposition",
+        "truth-values"
+      ]
+    },
+    {
+      "id": "negation",
+      "label": {
+        "en": "Negation (¬)",
+        "fr": "Négation (¬)"
+      },
+      "requires": [
+        "proposition",
+        "truth-values"
+      ]
+    },
+    {
+      "id": "disjunction",
+      "label": {
+        "en": "Disjunction (∨)",
+        "fr": "Disjonction (∨)"
+      },
+      "requires": [
+        "negation"
+      ]
+    },
+    {
+      "id": "conditional",
+      "label": {
+        "en": "Conditional (→)",
+        "fr": "Implication (→)"
+      },
+      "requires": [
+        "conjunction",
+        "disjunction"
+      ]
+    },
+    {
+      "id": "biconditional",
+      "label": {
+        "en": "Biconditional (↔)",
+        "fr": "Équivalence (↔)"
+      },
+      "requires": [
+        "conditional"
+      ]
+    },
+    {
+      "id": "scope",
+      "label": {
+        "en": "Scope & main connective",
+        "fr": "Portée et connecteur principal"
+      },
+      "requires": [
+        "conjunction",
+        "negation",
+        "disjunction",
+        "conditional",
+        "biconditional"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "level0-01-letters",
+      "concept": "proposition"
+    },
+    {
+      "id": "level0-02-truth",
+      "concept": "truth-values"
+    },
+    {
+      "id": "level0-03-and",
+      "concept": "conjunction"
+    },
+    {
+      "id": "level0-04-watch",
+      "concept": "conjunction"
+    },
+    {
+      "id": "level0-05-guided",
+      "concept": "conjunction"
+    },
+    {
+      "id": "level1-01-neg",
+      "concept": "negation"
+    },
+    {
+      "id": "level1-02-neg-watch",
+      "concept": "negation"
+    },
+    {
+      "id": "level1-03-neg-guided",
+      "concept": "negation"
+    },
+    {
+      "id": "level1-04-or",
+      "concept": "disjunction"
+    },
+    {
+      "id": "level1-05-or-watch",
+      "concept": "disjunction"
+    },
+    {
+      "id": "level1-06-or-guided",
+      "concept": "disjunction"
+    },
+    {
+      "id": "level1-07-imp",
+      "concept": "conditional"
+    },
+    {
+      "id": "level1-08-imp-watch",
+      "concept": "conditional"
+    },
+    {
+      "id": "level1-09-imp-guided",
+      "concept": "conditional"
+    },
+    {
+      "id": "level1-10-iff",
+      "concept": "biconditional"
+    },
+    {
+      "id": "level1-11-iff-watch",
+      "concept": "biconditional"
+    },
+    {
+      "id": "level1-12-iff-guided",
+      "concept": "biconditional"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "eval-001",
+      "concept": "conjunction",
+      "requiresLessons": [
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "eval-003",
+      "concept": "disjunction",
+      "requiresLessons": [
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "eval-004",
+      "concept": "conditional",
+      "requiresLessons": [
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "eval-005",
+      "concept": "biconditional",
+      "requiresLessons": [
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "tt-001",
+      "concept": "conjunction",
+      "requiresLessons": [
+        "level0-04-watch",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "tt-002",
+      "concept": "conditional",
+      "requiresLessons": [
+        "level1-08-imp-watch",
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "tt-003",
+      "concept": "disjunction",
+      "requiresLessons": [
+        "level1-05-or-watch",
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "tt-004",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "tt-005",
+      "concept": "biconditional",
+      "requiresLessons": [
+        "level1-11-iff-watch",
+        "level1-12-iff-guided"
+      ]
+    },
+    {
+      "id": "scope-003",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-03-neg-guided"
+      ]
+    },
+    {
+      "id": "scope-009",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-03-neg-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "scope-004",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-06-or-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "scope-007",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-06-or-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "eval-002",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-12-iff-guided",
+        "level1-03-neg-guided"
+      ]
+    },
+    {
+      "id": "eval-006",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "eval-007",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-06-or-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "eval-008",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-03-neg-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "eval-009",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "scope-001",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "scope-005",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "scope-006",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level1-03-neg-guided"
+      ]
+    },
+    {
+      "id": "scope-008",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided",
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "scope-010",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "scope-011",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-12-iff-guided",
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "scope-002",
+      "concept": "scope",
+      "requiresLessons": [
+        "level1-12-iff-guided",
+        "level1-03-neg-guided"
+      ]
+    },
+    {
+      "id": "scope-012",
+      "concept": "scope",
+      "requiresLessons": [
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "eval-010",
+      "concept": "negation",
+      "requiresLessons": [
+        "level1-03-neg-guided"
+      ]
+    },
+    {
+      "id": "translate-001",
+      "concept": "translation",
+      "requiresLessons": [
+        "level1-09-imp-guided"
+      ]
+    }
+  ]
+}

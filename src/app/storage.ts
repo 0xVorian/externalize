@@ -3,9 +3,12 @@ import {
   LEVEL_1_LESSONS,
   ALL_LEARN_LESSONS,
   isLevel0Complete,
+  isLevel1Complete,
   isLearnPathComplete,
   firstIncompleteLesson,
   PRACTICE_UNLOCK_ORDER,
+  LEVEL_0_PRACTICE_UNLOCK_ORDER,
+  LEVEL_1_PRACTICE_UNLOCK_ORDER,
 } from './lessons';
 import type { FeedbackTag } from '../../engine';
 import {
@@ -27,9 +30,10 @@ export type SrsEntry = {
 };
 
 export type ProgressStore = {
-  version: 3;
+  version: 4;
   lessonsCompleted: string[];
   level0Complete: boolean;
+  level1Complete: boolean;
   queue: SrsEntry[];
   completed: string[];
   lastExerciseId?: string;
@@ -69,9 +73,10 @@ function defaultResume(): ResumePoint {
 
 function defaultStore(): ProgressStore {
   return {
-    version: 3,
+    version: 4,
     lessonsCompleted: [],
     level0Complete: false,
+    level1Complete: false,
     queue: [],
     completed: [],
     resume: defaultResume(),
@@ -88,15 +93,19 @@ function migrateStore(raw: unknown): ProgressStore {
   }
   const store = raw as Record<string, unknown>;
 
+  if (store.version === 4) {
+    return normalizeV4(store);
+  }
+
   if (store.version === 3) {
-    return normalizeV3(store);
+    return migrateV3ToV4(store);
   }
 
   if (store.version === 2) {
     const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
     const level0Complete = (store.level0Complete as boolean | undefined) ?? false;
     const lastExerciseId = store.lastExerciseId as string | undefined;
-    return {
+    return migrateV3ToV4({
       version: 3,
       lessonsCompleted,
       level0Complete,
@@ -113,7 +122,7 @@ function migrateStore(raw: unknown): ProgressStore {
       exerciseStats: {},
       errorCounts: {},
       lastVisitedAt: nowIso(),
-    };
+    });
   }
 
   if (store.version === 1) {
@@ -123,11 +132,34 @@ function migrateStore(raw: unknown): ProgressStore {
   return defaultStore();
 }
 
-function normalizeV3(store: Record<string, unknown>): ProgressStore {
+function normalizeV4(store: Record<string, unknown>): ProgressStore {
+  const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
   return {
-    version: 3,
-    lessonsCompleted: (store.lessonsCompleted as string[] | undefined) ?? [],
-    level0Complete: (store.level0Complete as boolean | undefined) ?? false,
+    version: 4,
+    lessonsCompleted,
+    level0Complete:
+      (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
+    level1Complete:
+      (store.level1Complete as boolean | undefined) ?? isLevel1Complete(lessonsCompleted),
+    queue: (store.queue as SrsEntry[] | undefined) ?? [],
+    completed: (store.completed as string[] | undefined) ?? [],
+    lastExerciseId: store.lastExerciseId as string | undefined,
+    resume: (store.resume as ResumePoint | undefined) ?? defaultResume(),
+    skills: (store.skills as Record<string, SkillStat> | undefined) ?? {},
+    exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
+    errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
+    lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
+  };
+}
+
+function migrateV3ToV4(store: Record<string, unknown>): ProgressStore {
+  const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
+  return {
+    version: 4,
+    lessonsCompleted,
+    level0Complete:
+      (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
+    level1Complete: isLevel1Complete(lessonsCompleted),
     queue: (store.queue as SrsEntry[] | undefined) ?? [],
     completed: (store.completed as string[] | undefined) ?? [],
     lastExerciseId: store.lastExerciseId as string | undefined,
@@ -215,18 +247,55 @@ export function isPracticeUnlocked(store: ProgressStore): boolean {
   return store.level0Complete;
 }
 
-export function getUnlockedExerciseIds(store: ProgressStore): string[] {
-  if (!store.level0Complete) {
-    return [];
-  }
+export function isLevel1PracticeUnlocked(store: ProgressStore): boolean {
+  return store.level0Complete && isLevel1Complete(store.lessonsCompleted);
+}
+
+export type ExerciseLockReason = 'open' | 'done' | 'sequential' | 'unit0' | 'unit1';
+
+function progressiveUnlock(order: readonly string[], completed: string[]): string[] {
   const unlocked: string[] = [];
-  for (const exerciseId of PRACTICE_UNLOCK_ORDER) {
+  for (const exerciseId of order) {
     unlocked.push(exerciseId);
-    if (!store.completed.includes(exerciseId)) {
+    if (!completed.includes(exerciseId)) {
       break;
     }
   }
   return unlocked;
+}
+
+export function getUnlockedExerciseIds(store: ProgressStore): string[] {
+  if (!store.level0Complete) {
+    return [];
+  }
+  const unit0 = progressiveUnlock(LEVEL_0_PRACTICE_UNLOCK_ORDER, store.completed);
+  if (!isLevel1Complete(store.lessonsCompleted)) {
+    return unit0;
+  }
+  const unit1 = progressiveUnlock(LEVEL_1_PRACTICE_UNLOCK_ORDER, store.completed);
+  return [...unit0, ...unit1];
+}
+
+export function exerciseLockReason(
+  store: ProgressStore,
+  exerciseId: string,
+): ExerciseLockReason {
+  if (store.completed.includes(exerciseId)) {
+    return 'done';
+  }
+  if (getUnlockedExerciseIds(store).includes(exerciseId)) {
+    return 'open';
+  }
+  if ((LEVEL_1_PRACTICE_UNLOCK_ORDER as readonly string[]).includes(exerciseId)) {
+    if (!isLevel1Complete(store.lessonsCompleted)) {
+      return 'unit1';
+    }
+    return 'sequential';
+  }
+  if (!store.level0Complete) {
+    return 'unit0';
+  }
+  return 'sequential';
 }
 
 export function countReviewDue(store: ProgressStore): number {
@@ -253,9 +322,10 @@ export function completeLesson(store: ProgressStore, lessonId: string): Progress
     ? store.lessonsCompleted
     : [...store.lessonsCompleted, lessonId];
   const level0Complete = isLevel0Complete(lessonsCompleted);
+  const level1Complete = isLevel1Complete(lessonsCompleted);
   const learnPathComplete = isLearnPathComplete(lessonsCompleted);
   const nextLesson = firstIncompleteLesson(lessonsCompleted);
-  const nextStore = { ...store, lessonsCompleted, level0Complete };
+  const nextStore = { ...store, lessonsCompleted, level0Complete, level1Complete };
 
   return updateResume(nextStore, {
     mode: learnPathComplete ? 'practice' : 'learn',

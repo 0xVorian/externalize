@@ -35,17 +35,26 @@ export const LEVEL_1_LESSONS: LessonDefinition[] = [
 /** Full learn path: Unit 0 then Unit 1 (Unit 1 gated on level0Complete). */
 export const ALL_LEARN_LESSONS: LessonDefinition[] = [...LEVEL_0_LESSONS, ...LEVEL_1_LESSONS];
 
-export const PRACTICE_UNLOCK_ORDER = [
-  'eval-001',
+/** Unit 0 practice — unlocks after level0Complete. */
+export const LEVEL_0_PRACTICE_UNLOCK_ORDER = ['eval-001', 'scope-012'] as const;
+
+/** Unit 1 practice — unlocks after all 12 Level 1 lessons. */
+export const LEVEL_1_PRACTICE_UNLOCK_ORDER = [
+  'eval-010',
   'eval-003',
   'eval-004',
   'eval-005',
+  'tt-001',
+  'tt-002',
+  'tt-003',
   'scope-003',
   'scope-009',
   'scope-004',
   'scope-007',
   'eval-002',
   'eval-006',
+  'tt-004',
+  'tt-005',
   'eval-007',
   'eval-008',
   'eval-009',
@@ -56,7 +65,21 @@ export const PRACTICE_UNLOCK_ORDER = [
   'scope-010',
   'scope-011',
   'scope-002',
+  'translate-001',
 ] as const;
+
+export const PRACTICE_UNLOCK_ORDER = [
+  ...LEVEL_0_PRACTICE_UNLOCK_ORDER,
+  ...LEVEL_1_PRACTICE_UNLOCK_ORDER,
+] as const;
+
+export type PracticeTier = 'unit0' | 'unit1';
+
+export function practiceTier(exerciseId: string): PracticeTier {
+  return (LEVEL_0_PRACTICE_UNLOCK_ORDER as readonly string[]).includes(exerciseId)
+    ? 'unit0'
+    : 'unit1';
+}
 
 const LESSON_BY_ID = new Map(ALL_LEARN_LESSONS.map((lesson) => [lesson.id, lesson]));
 
@@ -106,4 +129,17 @@ export function firstIncompleteLesson(completed: string[]): LessonDefinition {
     }
   }
   return ALL_LEARN_LESSONS[ALL_LEARN_LESSONS.length - 1];
+}
+
+export function firstIncompleteLessonInUnit(
+  unit: 0 | 1,
+  completed: string[],
+): LessonDefinition {
+  const unitLessons = lessonsForUnit(unit);
+  for (const lesson of unitLessons) {
+    if (!completed.includes(lesson.id)) {
+      return lesson;
+    }
+  }
+  return unitLessons[0];
 }
