@@ -19,6 +19,7 @@ import {
   firstIncompleteLesson,
   nextLessonId,
   getLessonDefinition,
+  isLearnPathComplete,
 } from './app/lessons';
 import {
   createState,
@@ -157,6 +158,7 @@ function render(): void {
     root.innerHTML = renderLessonView(lessonState, {
       practiceUnlocked,
       level0Complete: progress.level0Complete,
+      learnPathComplete: isLearnPathComplete(progress.lessonsCompleted),
     });
     return;
   }
@@ -209,7 +211,7 @@ function completeCurrentLesson(): void {
   persistProgress(completeLesson(progress, lessonState.lesson.id));
   refreshPracticeQueue();
 
-  if (progress.level0Complete) {
+  if (isLearnPathComplete(progress.lessonsCompleted)) {
     mode = 'practice';
     practiceState = loadPracticeState();
     render();

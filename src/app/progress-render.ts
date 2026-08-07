@@ -1,10 +1,11 @@
 import type { Locale } from '../i18n';
 import { progressUi, formatResumeTime, getLessonCopy } from '../i18n';
-import { LEVEL_0_LESSONS, PRACTICE_UNLOCK_ORDER } from './lessons';
+import { LEVEL_0_LESSONS, LEVEL_1_LESSONS, PRACTICE_UNLOCK_ORDER } from './lessons';
 import { buildProgressSummary, type ProgressSummary } from './progress-tracker';
 import type { ProgressStore } from './storage';
 import { countReviewDue, getUnlockedExerciseIds } from './storage';
 import { renderShellHeader } from './shell-render';
+import { learnUi } from '../i18n';
 
 function renderListItem(label: string, status: string, done: boolean): string {
   return `
@@ -16,7 +17,11 @@ function renderListItem(label: string, status: string, done: boolean): string {
 }
 
 export function buildSummaryFromStore(store: ProgressStore): ProgressSummary {
+  const level0Done = LEVEL_0_LESSONS.filter((lesson) =>
+    store.lessonsCompleted.includes(lesson.id),
+  ).length;
   return buildProgressSummary({
+    level0Done,
     level0Total: LEVEL_0_LESSONS.length,
     lessonsCompleted: store.lessonsCompleted,
     exercisesUnlocked: getUnlockedExerciseIds(store),
@@ -47,6 +52,28 @@ export function renderProgressView(
     const done = store.lessonsCompleted.includes(lesson.id);
     return renderListItem(title, done ? copy.lessonDone : copy.lessonTodo, done);
   });
+
+  const level1Items =
+    store.level0Complete
+      ? LEVEL_1_LESSONS.map((lesson) => {
+          const title = getLessonCopy(locale, lesson.id).title;
+          const done = store.lessonsCompleted.includes(lesson.id);
+          return renderListItem(title, done ? copy.lessonDone : copy.lessonTodo, done);
+        }).join('')
+      : '';
+
+  const level1Section =
+    store.level0Complete && level1Items
+      ? `
+      <section class="progress-card">
+        <h2 class="panel-title">${learnUi(locale).level1Title}</h2>
+        <p class="progress-meta">${copy.level0Status(
+          LEVEL_1_LESSONS.filter((l) => store.lessonsCompleted.includes(l.id)).length,
+          LEVEL_1_LESSONS.length,
+        )}</p>
+        <ul class="progress-list">${level1Items}</ul>
+      </section>`
+      : '';
 
   const unlocked = new Set(summary.exercisesUnlocked);
   const exerciseItems = PRACTICE_UNLOCK_ORDER.map((id) => {
@@ -121,6 +148,8 @@ export function renderProgressView(
         <p class="progress-meta">${copy.level0Status(summary.level0Done, summary.level0Total)}</p>
         <ul class="progress-list">${lessonItems.join('')}</ul>
       </section>
+
+      ${level1Section}
 
       <section class="progress-card">
         <h2 class="panel-title">${copy.exercisesHeading}</h2>

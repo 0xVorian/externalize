@@ -67,6 +67,33 @@ describe('storage v3', () => {
       store = completeLesson(store, id);
     }
     expect(store.level0Complete).toBe(true);
+    expect(store.resume.mode).toBe('learn');
+    expect(store.resume.lessonId).toBe('level1-01-neg');
+  });
+
+  it('switches to practice after full learn path', () => {
+    let store = loadProgress();
+    for (const id of [
+      'level0-01-letters',
+      'level0-02-truth',
+      'level0-03-and',
+      'level0-04-watch',
+      'level0-05-guided',
+      'level1-01-neg',
+      'level1-02-neg-watch',
+      'level1-03-neg-guided',
+      'level1-04-or',
+      'level1-05-or-watch',
+      'level1-06-or-guided',
+      'level1-07-imp',
+      'level1-08-imp-watch',
+      'level1-09-imp-guided',
+      'level1-10-iff',
+      'level1-11-iff-watch',
+      'level1-12-iff-guided',
+    ]) {
+      store = completeLesson(store, id);
+    }
     expect(store.resume.mode).toBe('practice');
   });
 

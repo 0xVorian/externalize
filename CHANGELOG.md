@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Level 1 learn path (Unit 1 — Connectives)**: 12 lessons covering ¬, ∨, →, and ↔ — concept cards, truth-table watch lessons, and guided live-row tries
+- Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)
+- Guided lesson hints declare target `atom` + `value`; progression generalized beyond `P ∧ Q`
+- Unit 1 unlocks after Unit 0; learn path continues through Unit 1 before auto-resuming practice
+- Progress tab Unit 1 checklist (visible once Unit 0 is complete)
+- Integration notes: `docs/level1-integration.md`
 - Phase 3 translation prototype design doc ([`docs/phase3-translation.md`](docs/phase3-translation.md)): tap-based symbol palette, builder-vs-typing, AST comparison, feedback taxonomy, drag/tap parity
 - Minimal translation spike stub ([`src/app/translation/`](src/app/translation/)): exercise types, example `translate-001`, `renderSymbolPalette()` HTML renderer
 - Truth-table engine module (`engine/truth-table/`): full table generation, partial-row masking, single-cell validation (locale-agnostic booleans for Phase 4 exercises)
@@ -28,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Learn navigation chains Unit 0 → Unit 1 (`ALL_LEARN_LESSONS`); practice still unlocks after Unit 0
+- End of Unit 0 offers “Continue to Unit 1” instead of jumping straight to exercises
 - Watch lesson for `P ∧ Q` uses a truth table (highlighted row) instead of a parse tree
 - Tree and table truth labels follow locale (`V`/`F` in French, `T`/`F` in English)
 - Practice `eval-001` (`P ∧ Q`) uses live truth-table row instead of parse tree

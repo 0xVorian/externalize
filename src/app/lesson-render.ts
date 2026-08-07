@@ -1,5 +1,5 @@
 import { learnUi, getLessonCopy } from '../i18n';
-import { LEVEL_0_LESSONS } from './lessons';
+import { lessonsForUnit, lessonUnit, ALL_LEARN_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
 import { renderShellHeader } from './shell-render';
@@ -29,7 +29,7 @@ function renderCardLesson(state: LessonState): string {
 
 function renderWatchTruthTable(
   state: LessonState,
-  steps: Array<{ assignment: { P: boolean; Q: boolean } }>,
+  steps: Array<{ assignment: Record<string, boolean> }>,
   formula: string,
 ): string {
   const learn = learnUi(state.locale);
@@ -76,10 +76,14 @@ function renderGuidedLesson(state: LessonState): string {
 export function renderLessonView(state: LessonState, options: {
   practiceUnlocked: boolean;
   level0Complete: boolean;
+  learnPathComplete: boolean;
 }): string {
   const learn = learnUi(state.locale);
   const copy = getLessonCopy(state.locale, state.lesson.id);
-  const lessonIndex = LEVEL_0_LESSONS.findIndex((lesson) => lesson.id === state.lesson.id) + 1;
+  const unit = lessonUnit(state.lesson.id);
+  const unitLessons = lessonsForUnit(unit);
+  const lessonIndex = unitLessons.findIndex((lesson) => lesson.id === state.lesson.id) + 1;
+  const unitTitle = unit === 1 ? learn.level1Title : learn.level0Title;
 
   let body = '';
   if (state.lesson.type === 'card') {
@@ -90,17 +94,19 @@ export function renderLessonView(state: LessonState, options: {
     body = renderGuidedLesson(state);
   }
 
-  const isLast = lessonIndex === LEVEL_0_LESSONS.length;
+  const isLastInUnit = lessonIndex === unitLessons.length;
+  const isLastInPath =
+    ALL_LEARN_LESSONS.findIndex((lesson) => lesson.id === state.lesson.id) ===
+    ALL_LEARN_LESSONS.length - 1;
   const showNext =
     state.lesson.type === 'card' ||
     state.lesson.type === 'watch' ||
     (state.lesson.type === 'guided' && state.complete);
 
   let nextLabel = learn.nextStep;
-  if (state.lesson.type === 'watch' && state.watchStep >= (copy.watchSteps?.length ?? 1) - 1 && !state.complete) {
-    nextLabel = learn.nextStep;
-  }
-  if (options.level0Complete && isLast && state.complete) {
+  if (unit === 0 && isLastInUnit && state.complete && options.level0Complete && !options.learnPathComplete) {
+    nextLabel = learn.continueUnit1;
+  } else if (options.level0Complete && isLastInPath && state.complete) {
     nextLabel = learn.startPractice;
   }
 
@@ -110,8 +116,8 @@ export function renderLessonView(state: LessonState, options: {
         locale: state.locale,
         mode: 'learn',
         practiceUnlocked: options.practiceUnlocked,
-        title: learn.level0Title,
-        meta: `${copy.subtitle ?? copy.title} · ${learn.lessonProgress(lessonIndex, LEVEL_0_LESSONS.length)}`,
+        title: unitTitle,
+        meta: `${copy.subtitle ?? copy.title} · ${learn.lessonProgress(lessonIndex, unitLessons.length)}`,
       })}
 
       ${body}
