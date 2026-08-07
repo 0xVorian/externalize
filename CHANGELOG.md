@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Exercise bank expanded to 20 hand-authored items: 11 main-connective (scope) and 9 evaluate-formula tasks with nested-structure variety and targeted feedback
+- Flat evaluate exercises for `P ∨ Q`, `P → Q`, and `P ↔ Q` use the live truth-table row (same presentation as `P ∧ Q`)
 - Truth-table engine module (`engine/truth-table/`): full table generation, partial-row masking, single-cell validation (locale-agnostic booleans for Phase 4 exercises)
 - **Future work plan** (`docs/future-work-plan.md`): tiered workstreams, agent batch A/B/C plan, and deferred-scope list — separate from the app roadmap
 - **Progress tab**: resume where you left off, lesson/exercise checklist, review-due count
@@ -26,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Watch lesson for `P ∧ Q` uses a truth table (highlighted row) instead of a parse tree
 - Tree and table truth labels follow locale (`V`/`F` in French, `T`/`F` in English)
-- Practice `eval-001` (`P ∧ Q`) uses live truth-table row instead of parse tree
+- Practice flat binary formulas (`P ∧ Q`, `P ∨ Q`, `P → Q`, `P ↔ Q`) route to live truth-table row via explicit formula set
 - Guided Level 0 lesson uses a live truth-table row and toggles (not a parse tree) for `P ∧ Q`
 - New users start in Learn mode instead of practice exercises
 - Progress storage migrated to v2 with lesson completion tracking
