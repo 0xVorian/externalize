@@ -1,4 +1,4 @@
-import { learnUi, getLessonCopy } from '../i18n';
+import { learnUi, getLessonCopy, ui } from '../i18n';
 import { lessonsForUnit, lessonUnit, ALL_LEARN_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
@@ -52,7 +52,7 @@ function renderWatchLesson(state: LessonState): string {
   return `
     <article class="lesson-card">
       <p class="exercise-prompt">${learn.watchPrompt}</p>
-      <p class="formula-display">${formula}</p>
+      <p class="formula-display" aria-label="${ui(state.locale).formulaDisplayAria}">${formula}</p>
       <p class="step-meta">${learn.stepLabel(state.watchStep + 1, steps.length)}</p>
       ${renderWatchTruthTable(state, steps, formula)}
       ${state.message ? `<p class="feedback feedback-info" role="status">${state.message}</p>` : ''}
@@ -65,7 +65,7 @@ function renderGuidedLesson(state: LessonState): string {
   const hint = currentGuidedHint(state);
   return `
     <article class="lesson-card">
-      <p class="formula-display">${formula}</p>
+      <p class="formula-display" aria-label="${ui(state.locale).formulaDisplayAria}">${formula}</p>
       ${renderGuidedToggles(state)}
       ${renderLiveTruthRow(state.locale, formula, state.assignment)}
       ${hint ? `<p class="feedback ${state.complete ? 'feedback-correct' : 'feedback-info'}" role="status">${hint}</p>` : ''}

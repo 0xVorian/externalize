@@ -15,7 +15,12 @@ export type UiCopy = {
   assignmentAria: string;
   assignmentHint: string;
   atomGroupAria: (atom: string) => string;
+  atomSetTrueAria: (atom: string) => string;
+  atomSetFalseAria: (atom: string) => string;
   formulaTreeAria: string;
+  formulaDisplayAria: string;
+  treeNodeSelectAria: (label: string) => string;
+  treeNodeDisplayAria: (label: string, value?: string) => string;
   continue: string;
   nextExercise: string;
   valuesUpdated: string;
@@ -289,7 +294,13 @@ const UI: Record<Locale, UiCopy> = {
     assignmentAria: 'Truth assignment to sentence letters',
     assignmentHint: 'Tap V or F for each letter to set its truth value.',
     atomGroupAria: (atom) => `Truth value for ${atom}`,
+    atomSetTrueAria: (atom) => `Set ${atom} to true`,
+    atomSetFalseAria: (atom) => `Set ${atom} to false`,
     formulaTreeAria: 'Parsing tree of the formula',
+    formulaDisplayAria: 'Formula',
+    treeNodeSelectAria: (label) => `Select connective ${label}`,
+    treeNodeDisplayAria: (label, value) =>
+      value ? `${label}, ${value}` : label,
     continue: 'Continue',
     nextExercise: 'Next exercise',
     valuesUpdated: 'Truth values updated at each subformula.',
@@ -308,7 +319,13 @@ const UI: Record<Locale, UiCopy> = {
     assignmentAria: 'Interprétation (valuation des variables propositionnelles)',
     assignmentHint: 'Toucher V ou F pour fixer la valeur de chaque variable.',
     atomGroupAria: (atom) => `Valeur de vérité de ${atom}`,
+    atomSetTrueAria: (atom) => `Mettre ${atom} à vrai (V)`,
+    atomSetFalseAria: (atom) => `Mettre ${atom} à faux (F)`,
     formulaTreeAria: 'Arbre de décomposition de la formule',
+    formulaDisplayAria: 'Formule',
+    treeNodeSelectAria: (label) => `Sélectionner le connecteur ${label}`,
+    treeNodeDisplayAria: (label, value) =>
+      value ? `${label}, ${value}` : label,
     continue: 'Continuer',
     nextExercise: 'Exercice suivant',
     valuesUpdated: 'Les valeurs de vérité se mettent à jour à chaque sous-formule.',
@@ -391,6 +408,8 @@ export type ProgressUiCopy = {
   importProgress: string;
   importSuccess: string;
   importError: string;
+  progressItemAria: (label: string, status: string) => string;
+  modeProgressAria: string;
 };
 
 const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
@@ -430,6 +449,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     importProgress: 'Import progress',
     importSuccess: 'Progress restored. You can pick up where you left off.',
     importError: 'That file could not be read. Choose an Externalize progress export.',
+    progressItemAria: (label, status) => `${label}, ${status}`,
+    modeProgressAria: 'Progress',
   },
   fr: {
     progress: 'Parcours',
@@ -467,6 +488,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     importProgress: 'Importer un parcours',
     importSuccess: 'Parcours restauré. Vous pouvez reprendre.',
     importError: 'Fichier illisible. Choisissez une exportation Externalize.',
+    progressItemAria: (label, status) => `${label}, ${status}`,
+    modeProgressAria: 'Parcours',
   },
 };
 

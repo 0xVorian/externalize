@@ -28,6 +28,7 @@ export function renderAtomPanel(options: AtomToggleRenderOptions): string {
               data-action="${options.action}"
               data-atom="${atom}"
               data-value="true"
+              aria-label="${copy.atomSetTrueAria(atom)}"
               aria-pressed="${trueActive}"
               ${enabled ? '' : 'disabled'}
             >
@@ -39,6 +40,7 @@ export function renderAtomPanel(options: AtomToggleRenderOptions): string {
               data-action="${options.action}"
               data-atom="${atom}"
               data-value="false"
+              aria-label="${copy.atomSetFalseAria(atom)}"
               aria-pressed="${falseActive}"
               ${enabled ? '' : 'disabled'}
             >
