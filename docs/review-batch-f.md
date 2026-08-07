@@ -50,7 +50,7 @@ Post-merge fix commit: `e6eb90c` (prerequisites JSON, storage v5, FR translate c
 
 Removed after merge: `externalize-ex-gen`, `externalize-tautology`, `externalize-playwright-e2e` (forced), `ext-release-prep` (forced).
 
-Left in place (not Batch F / dirty): `/tmp/externalize-counter`, `/tmp/externalize-truth-table`.
+Removed in post-release housekeeping: `/tmp/externalize-counter`, `/tmp/externalize-truth-table` (forced).
 
 ## Remaining issues
 
