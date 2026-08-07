@@ -1,0 +1,147 @@
+# Technical Decisions
+
+Recorded decisions and rationale from planning conversations. Revisit entries marked **provisional** once the first prototype is running.
+
+## Decided
+
+### Platform: mobile-first, local-first web application
+
+**Decision:** Build as a web app optimized for phone browsers, with local storage; no account required for v1.
+
+**Rationale:**
+
+- Primary use case is short practice sessions on a phone
+- Works without install friction; optional PWA / add-to-home-screen later
+- `localStorage` / IndexedDB sufficient for progress, SRS queue, and mistake history
+- Easier to iterate on UI than a native mobile app
+- Desktop and tablet layouts extend the mobile base, not the other way around
+
+### First canonical logic: classical propositional logic
+
+**Decision:** Standard infix notation with explicit parentheses: `¬`, `∧`, `∨`, `→`, `↔`, sentence letters `P`, `Q`, `R`, …
+
+**Rationale:** Covers the MVP scope. Predicate logic and natural deduction notation deferred until the interaction model is proven.
+
+**Provisional:** Whether to support alternative textbook conventions (e.g. `⊃` vs `→`, Polish notation) — defer until AST + pretty-printer exist.
+
+### Proof system (future)
+
+**Decision:** Fitch-style natural deduction (likely target) — line numbers, indented subproofs, visible scope boxes. Exact rule set TBD.
+
+**Note:** Choose rule details after propositional translation, evaluation, and truth-table interactions feel solid. Proof UI is high complexity.
+
+### Expression representation: AST
+
+**Decision:** All formulas stored and compared as abstract syntax trees.
+
+**Rationale:** Required for scope-aware feedback, equivalence checking, and later proof validation. Enables multiple render targets (Unicode, ASCII, LaTeX) from one structure.
+
+### Equivalence checking
+
+**Decision:** Default to **structural AST equality** (normalized shape). Per-exercise flags may allow:
+
+- commutativity of `∧` / `∨` (operand order ignored)
+- semantic equivalence via exhaustive truth-table comparison (small atom sets only)
+
+Do not treat arbitrary algebraic equivalence as globally accepted on day one.
+
+**Never:** Raw string comparison.
+
+### Content authoring: hand-authored data first
+
+**Decision:** v1 exercises in JSON or YAML files. Template-based generation once patterns emerge from ~20+ hand-authored exercises.
+
+### Progress storage
+
+**Decision:** Local only for v1. Export/import JSON for backup and migration.
+
+No authentication, no server sync, until there is a concrete need.
+
+### Input modalities
+
+**Decision (v1 priority order):**
+
+1. Tap-to-select (primary — scope highlighting, truth-value toggles, multiple choice)
+2. Symbol palette + tap-to-insert (translation and formula building)
+3. Drag-and-drop where it clarifies structure — **only with an equivalent tap path** (required for mobile)
+4. Keyboard shortcuts (desktop enhancement, later)
+
+**Rationale:** Mobile-first rules out hover and mouse-only interactions. Drag-and-drop is pedagogically useful for scope but must never be the only way to complete an exercise.
+
+### Scope visualization
+
+**Decision:** Use indentation, boxes, or connecting lines — not colour alone. On mobile, prefer **vertical tree layout** and collapsible subexpression nodes over wide horizontal formulas.
+
+Colour may reinforce matching subexpressions but must duplicate information structurally or in text.
+
+## Prototype sequencing
+
+### Phase 1 — Engine spike (unchanged)
+
+AST types, parse, render, evaluate, equivalence check, unit tests. No UI beyond dev harness.
+
+### Phase 2 — MVP-0 UI (first interactive prototype)
+
+**Decision:** Prove the core design principle on unambiguous symbolic input before fighting natural-language edge cases.
+
+**Interactions:**
+
+1. **Scope recognition** — given a formula shown as a tree, identify the main connective and its operands (tap to select; scope regions use boxes/indentation, not colour alone)
+2. **Evaluate under an assignment** — flip atom truth values; watch every intermediate node update
+
+Plus a tiny local spaced-repetition queue (a few hard-coded exercises).
+
+**Exit criterion:** Using MVP-0 on a phone for a week feels worth returning to. The tree + visible intermediate values genuinely reduce working-memory load.
+
+**Why before translation:** Translation combines linguistics ambiguity with heavy input UX. Scope and evaluation are mechanically checkable and directly exercise the AST renderer and the "externalize state" hypothesis.
+
+### Phase 3 — Translation prototype (second interactive prototype)
+
+**Decision:** Ordinary language → propositional formula via tap-based symbol palette (with optional drag-to-group on desktop), visible scope, local feedback.
+
+Pair each exercise with a structural check (main connective, scope boundary) and live read-back preview.
+
+**Exit criterion:** Translation feels instructive on a phone, not fiddly; feedback pinpoints errors without full restart.
+
+### Deferred early decisions (ignore for now)
+
+| Defer | Reason |
+|-------|--------|
+| Mobile native app | Web-first covers the use case |
+| User accounts / cloud sync | Local storage sufficient for v1 |
+| Multi-textbook notation modes | One notation keeps feedback precise |
+| Predicate logic, identity | After propositional interaction model works |
+| Full exercise generation engine | Hand-author first |
+| Fancy gamification | Protect the brief's tone |
+| Algebraic equivalence solver | Per-exercise flags + truth tables are enough |
+
+## Open questions
+
+| Question | Current lean | Status |
+|----------|--------------|--------|
+| Web framework | Lightweight (Vite + vanilla TS or small React/Svelte); mobile viewport testing from day one | **Open** — decide at spike |
+| Testing strategy | Unit tests on AST/eval engine; manual phone testing for UI; few automated UI tests initially | **Open** |
+| SRS algorithm | SM-2 or simplified variant keyed on error type | **Open** |
+| Multiple valid translations | Accept semantically equivalent formulas where English is ambiguous; flag non-canonical but valid answers | **Provisional** |
+| PWA manifest | Add when MVP-0 is stable | **Defer** |
+| Accessibility | Screen-reader labels for all symbols; keyboard navigation on desktop | **Required** — details TBD |
+
+## Risks to monitor
+
+1. **Horizontal formulas on narrow screens** — mitigate with vertical tree layout
+2. **Drag-and-drop fatigue** and touch imprecision — tap-first always available
+3. **Translation pattern-matching** without structural understanding — mitigated by scope exercises coming first
+4. **Over-gamification** hiding lack of mastery — keep feedback and concept map honest
+5. **Proof UI complexity** — do not start natural deduction until truth-functional interactions are polished
+
+## Review notes
+
+### Initial planning (2026-08-07)
+
+Strengths identified in the original brief: working-memory constraint as first-class requirement, disciplined MVP scope, feedback-as-repair, content/engine separation, tone framing.
+
+### Sequencing revision (2026-08-07, second review)
+
+External feedback correctly argued that translation as the *first* UI prototype spends early cycles on linguistics and input chrome rather than proving the core loop. MVP-0 (tree + scope + evaluation + tiny SRS) is the cheaper proof of the design principle. Translation remains the second UI prototype and stays early in the learning path.
+
+Mobile-first constraint added: phone browser is the primary target; all interactions must work without hover or mouse precision.

@@ -1,0 +1,42 @@
+---
+description: Semver and Keep a Changelog maintenance for Externalize
+alwaysApply: true
+---
+
+# Versioning & Changelog
+
+Follow [Semantic Versioning](https://semver.org/) and [Keep a Changelog](https://keepachangelog.com/).
+
+## Version format
+
+- Pre-1.0: `0.MINOR.PATCH` — breaking changes may bump MINOR until 1.0.0
+- From 1.0: MAJOR for breaking, MINOR for features, PATCH for fixes
+
+## When to update
+
+On every user-visible or architecturally meaningful change:
+
+1. Add entries under `## [Unreleased]` in `CHANGELOG.md`
+2. Bump version in `package.json` only when cutting a release (not every commit)
+
+## Changelog entries
+
+- Sections: `Added`, `Changed`, `Fixed`, `Removed`, `Deprecated`, `Security`
+- Write for users/learners and contributors — what changed and why it matters
+- One bullet per logical change; link issues/PRs when available
+- Omit empty sections in releases
+
+## Release workflow
+
+When the user asks to release or tag a version:
+
+1. Move `[Unreleased]` items to `## [X.Y.Z] - YYYY-MM-DD`
+2. Add fresh empty `## [Unreleased]` at top
+3. Set `package.json` `"version"` to `X.Y.Z`
+4. Commit: `release: vX.Y.Z`
+
+## Do not
+
+- Skip changelog updates for features, fixes, or breaking changes
+- Use vague entries ("misc updates", "WIP")
+- Let `package.json` version drift from the latest CHANGELOG release
