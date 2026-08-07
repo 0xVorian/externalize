@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Phase 3 translation prototype design doc ([`docs/phase3-translation.md`](docs/phase3-translation.md)): tap-based symbol palette, builder-vs-typing, AST comparison, feedback taxonomy, drag/tap parity
+- Minimal translation spike stub ([`src/app/translation/`](src/app/translation/)): exercise types, example `translate-001`, `renderSymbolPalette()` HTML renderer
 - Truth-table engine module (`engine/truth-table/`): full table generation, partial-row masking, single-cell validation (locale-agnostic booleans for Phase 4 exercises)
 - **Authoring guide** (`docs/authoring.md`): step-by-step instructions for lessons and exercises, worked examples (watch step + scope exercise), i18n/presentation pointers, changelog expectations
 - **Content model** (`docs/content-model.md`) updated to reflect current TypeScript layout (replacing provisional YAML sketch)

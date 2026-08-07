@@ -31,7 +31,7 @@ Tiers reflect **dependency and payoff**, not roadmap phases. Tier 1 should land 
 | Workstream | Outcome | Notes |
 |------------|---------|-------|
 | **Truth-table engine module** | Shared module for watch tables, live rows, partial cells | Extract from ad hoc rules (e.g. `usesLiveTruthRow`); support generalization beyond `P ∧ Q` |
-| **Phase 3 translation design** | Spec + minimal stub | Tap palette, scope visualization, AST compare, local feedback messages; stub UI or engine interface only |
+| **Phase 3 translation design** | Spec + minimal stub | **Done (C5):** [phase3-translation.md](phase3-translation.md), stub in `src/app/translation/` |
 | **Content model examples** | Concrete files matching the draft schema | One file per exercise type; engine validation targets |
 
 ### Tier 3 — Phase 4 polish and decision records
@@ -70,7 +70,7 @@ When running parallel agents (or focused sessions), use three batches with **fiv
 
 | ID | Workstream | Deliverables |
 |----|------------|--------------|
-| **C5** | Phase 3 translation design + minimal stub | Design doc section (palette, scope, compare, feedback); stub types or no-op UI hook |
+| **C5** | Phase 3 translation design + minimal stub | **Done:** [phase3-translation.md](phase3-translation.md) + `src/app/translation/` |
 
 **Gate:** C5 benefits from A2 (sample translation prompts) and B4 (schema examples). It does not require B3 or Tier 3 items.
 
