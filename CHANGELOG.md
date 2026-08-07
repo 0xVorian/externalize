@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README section on installing Externalize to the home screen
 - **`fill-truth-table-cell` practice exercises** (`tt-001`–`tt-005`): partial truth tables with one blank result cell; tap T/F (V/F in French) to submit; engine `validateCell` wires correctness and feedback
 - Partial truth-table renderer for practice (`truth-table-partial` presentation mode)
+- Practice exercises `eval-010` (evaluate `¬P`) and `scope-012` (main connective of `(P ∧ Q) ∧ R`), EN and FR
+- Tiered practice unlock: Unit 0 exercises after introductory unit; Unit 1 bank after all 12 Level 1 lessons
 - **Level 1 learn path (Unit 1 — Connectives)**: 12 lessons covering ¬, ∨, →, and ↔ — concept cards, truth-table watch lessons, and guided live-row tries
 - Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)
 - Guided lesson hints declare target `atom` + `value`; progression generalized beyond `P ∧ Q`
@@ -47,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Learn navigation chains Unit 0 → Unit 1 (`ALL_LEARN_LESSONS`); practice still unlocks after Unit 0
+- Learn navigation chains Unit 0 → Unit 1 (`ALL_LEARN_LESSONS`); practice tab unlocks after Unit 0, Unit 1 exercises after Level 1 complete
 - End of Unit 0 offers “Continue to Unit 1” instead of jumping straight to exercises
 - Watch lesson for `P ∧ Q` uses a truth table (highlighted row) instead of a parse tree
 - Tree and table truth labels follow locale (`V`/`F` in French, `T`/`F` in English)

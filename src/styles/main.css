@@ -309,6 +309,13 @@ button {
   color: var(--muted);
 }
 
+.progress-subheading {
+  margin: 1rem 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
 .progress-item-status {
   color: var(--muted);
   font-size: 0.8rem;

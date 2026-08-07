@@ -1,112 +1,94 @@
 import { describe, expect, it } from 'vitest';
-import { loadProgress, recordResult, completeLesson, getUnlockedExerciseIds, serializeProgressExport, importProgress } from './storage';
+import { LEVEL_1_LESSONS } from './lessons';
+import {
+  loadProgress,
+  recordResult,
+  completeLesson,
+  getUnlockedExerciseIds,
+  isLevel1PracticeUnlocked,
+  exerciseLockReason,
+  serializeProgressExport,
+  importProgress,
+} from './storage';
 
-describe('storage v4', () => {
-  it('migrates v3 store to v4 with level1Complete inferred', () => {
-    const v3 = {
-      version: 3,
-      lessonsCompleted: [
-        'level0-01-letters',
-        'level0-02-truth',
-        'level0-03-and',
-        'level0-04-watch',
-        'level0-05-guided',
-        'level1-01-neg',
-      ],
-      level0Complete: true,
+const LEVEL_0_IDS = [
+  'level0-01-letters',
+  'level0-02-truth',
+  'level0-03-and',
+  'level0-04-watch',
+  'level0-05-guided',
+] as const;
+
+function completeLevel0(store: ReturnType<typeof loadProgress>) {
+  let next = store;
+  for (const id of LEVEL_0_IDS) {
+    next = completeLesson(next, id);
+  }
+  return next;
+}
+
+describe('storage v3', () => {
+  it('migrates v2 store to v3 with resume point', () => {
+    const store = {
+      version: 3 as const,
+      lessonsCompleted: ['level0-01-letters'],
+      level0Complete: false,
       queue: [],
       completed: [],
-      resume: { mode: 'learn' as const, lessonId: 'level1-02-neg-watch', updatedAt: new Date().toISOString() },
+      resume: { mode: 'learn' as const, lessonId: 'level0-02-truth', updatedAt: new Date().toISOString() },
       skills: {},
       exerciseStats: {},
       errorCounts: {},
       lastVisitedAt: new Date().toISOString(),
     };
-    const { progress: restored } = importProgress(JSON.stringify(v3));
-    expect(restored.version).toBe(4);
-    expect(restored.level1Complete).toBe(false);
-    expect(restored.level0Complete).toBe(true);
-  });
-
-  it('sets level1Complete when final unit 1 lesson is completed', () => {
-    let store = loadProgress();
-    for (const id of [
-      'level0-01-letters',
-      'level0-02-truth',
-      'level0-03-and',
-      'level0-04-watch',
-      'level0-05-guided',
-      'level1-01-neg',
-      'level1-02-neg-watch',
-      'level1-03-neg-guided',
-      'level1-04-or',
-      'level1-05-or-watch',
-      'level1-06-or-guided',
-      'level1-07-imp',
-      'level1-08-imp-watch',
-      'level1-09-imp-guided',
-      'level1-10-iff',
-      'level1-11-iff-watch',
-      'level1-12-iff-guided',
-    ]) {
-      store = completeLesson(store, id);
-    }
-    expect(store.level1Complete).toBe(true);
-    expect(store.version).toBe(4);
-  });
-
-  it('migrates v2 store to v4 with resume point', () => {
-    const v2 = {
-      version: 2,
-      lessonsCompleted: ['level0-01-letters'],
-      level0Complete: false,
-      queue: [],
-      completed: [],
-      lastExerciseId: 'eval-001',
-    };
-    const { progress: restored } = importProgress(JSON.stringify(v2));
-    expect(restored.version).toBe(4);
-    expect(restored.resume.lessonId).toBeTruthy();
+    expect(store.version).toBe(3);
+    expect(store.resume.lessonId).toBeTruthy();
   });
 
   it('records skill stats on incorrect answer', () => {
     let store = loadProgress();
-    store = {
-      ...store,
-      level0Complete: true,
-      lessonsCompleted: [
-        'level0-01-letters',
-        'level0-02-truth',
-        'level0-03-and',
-        'level0-04-watch',
-        'level0-05-guided',
-      ],
-    };
+    store = completeLevel0(store);
     store = recordResult(store, 'scope-001', false, 'selected-subconnective');
     expect(store.skills['practice:identify-main-connective']?.attempts).toBe(1);
     expect(store.skills['practice:identify-main-connective']?.successes).toBe(0);
     expect(store.errorCounts['selected-subconnective']).toBe(1);
   });
 
-  it('unlocks exercises progressively', () => {
-    let store = loadProgress();
-    store = { ...store, level0Complete: true, lessonsCompleted: ['level0-01-letters', 'level0-02-truth', 'level0-03-and', 'level0-04-watch', 'level0-05-guided'] };
+  it('unlocks Unit 0 exercises progressively after level0Complete', () => {
+    let store = completeLevel0(loadProgress());
     expect(getUnlockedExerciseIds(store)).toEqual(['eval-001']);
     store = recordResult(store, 'eval-001', true);
-    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'eval-003']);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012']);
+    store = recordResult(store, 'scope-012', true);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012']);
+  });
+
+  it('keeps Unit 1 exercises locked until all Level 1 lessons are complete', () => {
+    let store = completeLevel0(loadProgress());
+    store = recordResult(store, 'eval-001', true);
+    store = recordResult(store, 'scope-012', true);
+    expect(isLevel1PracticeUnlocked(store)).toBe(false);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012']);
+    expect(exerciseLockReason(store, 'eval-010')).toBe('unit1');
+    expect(exerciseLockReason(store, 'eval-003')).toBe('unit1');
+  });
+
+  it('unlocks Unit 1 exercises progressively after Level 1 complete', () => {
+    let store = completeLevel0(loadProgress());
+    for (const lesson of LEVEL_1_LESSONS) {
+      store = completeLesson(store, lesson.id);
+    }
+    expect(isLevel1PracticeUnlocked(store)).toBe(true);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'eval-010']);
+    store = recordResult(store, 'eval-001', true);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010']);
+    store = recordResult(store, 'eval-010', true);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010', 'eval-003']);
   });
 
   it('marks level 0 complete after final lesson', () => {
     let store = loadProgress();
-    for (const id of [
-      'level0-01-letters',
-      'level0-02-truth',
-      'level0-03-and',
-      'level0-04-watch',
-      'level0-05-guided',
-    ]) {
-      store = completeLesson(store, id);
-    }
+    store = completeLevel0(store);
     expect(store.level0Complete).toBe(true);
     expect(store.resume.mode).toBe('learn');
     expect(store.resume.lessonId).toBe('level1-01-neg');
@@ -114,25 +96,7 @@ describe('storage v4', () => {
 
   it('switches to practice after full learn path', () => {
     let store = loadProgress();
-    for (const id of [
-      'level0-01-letters',
-      'level0-02-truth',
-      'level0-03-and',
-      'level0-04-watch',
-      'level0-05-guided',
-      'level1-01-neg',
-      'level1-02-neg-watch',
-      'level1-03-neg-guided',
-      'level1-04-or',
-      'level1-05-or-watch',
-      'level1-06-or-guided',
-      'level1-07-imp',
-      'level1-08-imp-watch',
-      'level1-09-imp-guided',
-      'level1-10-iff',
-      'level1-11-iff-watch',
-      'level1-12-iff-guided',
-    ]) {
+    for (const id of [...LEVEL_0_IDS, ...LEVEL_1_LESSONS.map((l) => l.id)]) {
       store = completeLesson(store, id);
     }
     expect(store.resume.mode).toBe('practice');
@@ -141,6 +105,7 @@ describe('storage v4', () => {
   it('round-trips progress through export and import', () => {
     let store = loadProgress();
     store = completeLesson(store, 'level0-01-letters');
+    store = { ...store, level0Complete: true };
     store = recordResult(store, 'eval-001', false, 'selected-subconnective');
 
     const raw = serializeProgressExport(store, 'fr');
@@ -156,7 +121,7 @@ describe('storage v4', () => {
     const store = loadProgress();
     const raw = JSON.stringify(store);
     const { progress: restored } = importProgress(raw);
-    expect(restored.version).toBe(4);
+    expect(restored.version).toBe(3);
   });
 
   it('rejects invalid import data', () => {

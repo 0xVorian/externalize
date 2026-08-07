@@ -7,6 +7,8 @@ import {
   isLearnPathComplete,
   firstIncompleteLesson,
   PRACTICE_UNLOCK_ORDER,
+  LEVEL_0_PRACTICE_UNLOCK_ORDER,
+  LEVEL_1_PRACTICE_UNLOCK_ORDER,
 } from './lessons';
 import type { FeedbackTag } from '../../engine';
 import {
@@ -245,18 +247,55 @@ export function isPracticeUnlocked(store: ProgressStore): boolean {
   return store.level0Complete;
 }
 
-export function getUnlockedExerciseIds(store: ProgressStore): string[] {
-  if (!store.level0Complete) {
-    return [];
-  }
+export function isLevel1PracticeUnlocked(store: ProgressStore): boolean {
+  return store.level0Complete && isLevel1Complete(store.lessonsCompleted);
+}
+
+export type ExerciseLockReason = 'open' | 'done' | 'sequential' | 'unit0' | 'unit1';
+
+function progressiveUnlock(order: readonly string[], completed: string[]): string[] {
   const unlocked: string[] = [];
-  for (const exerciseId of PRACTICE_UNLOCK_ORDER) {
+  for (const exerciseId of order) {
     unlocked.push(exerciseId);
-    if (!store.completed.includes(exerciseId)) {
+    if (!completed.includes(exerciseId)) {
       break;
     }
   }
   return unlocked;
+}
+
+export function getUnlockedExerciseIds(store: ProgressStore): string[] {
+  if (!store.level0Complete) {
+    return [];
+  }
+  const unit0 = progressiveUnlock(LEVEL_0_PRACTICE_UNLOCK_ORDER, store.completed);
+  if (!isLevel1Complete(store.lessonsCompleted)) {
+    return unit0;
+  }
+  const unit1 = progressiveUnlock(LEVEL_1_PRACTICE_UNLOCK_ORDER, store.completed);
+  return [...unit0, ...unit1];
+}
+
+export function exerciseLockReason(
+  store: ProgressStore,
+  exerciseId: string,
+): ExerciseLockReason {
+  if (store.completed.includes(exerciseId)) {
+    return 'done';
+  }
+  if (getUnlockedExerciseIds(store).includes(exerciseId)) {
+    return 'open';
+  }
+  if ((LEVEL_1_PRACTICE_UNLOCK_ORDER as readonly string[]).includes(exerciseId)) {
+    if (!isLevel1Complete(store.lessonsCompleted)) {
+      return 'unit1';
+    }
+    return 'sequential';
+  }
+  if (!store.level0Complete) {
+    return 'unit0';
+  }
+  return 'sequential';
 }
 
 export function countReviewDue(store: ProgressStore): number {
