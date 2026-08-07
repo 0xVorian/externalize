@@ -219,6 +219,46 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'Set the truth value of P. The live row shows how negation flips it: ¬P is true exactly when P is false.',
     },
+    'eval-011': {
+      prompt:
+        'Both conjuncts are true here. Confirm that P ∧ Q is true only when P and Q are both true.',
+    },
+    'eval-012': {
+      prompt:
+        'When both P and Q are false, the conjunction P ∧ Q is false. Set the letters and read the result row.',
+    },
+    'eval-013': {
+      prompt:
+        'Disjunction is false only when both disjuncts are false. Try P and Q both false and read the outcome.',
+    },
+    'eval-014': {
+      prompt:
+        'With P true and Q false, at least one disjunct is true — so P ∨ Q should come out true.',
+    },
+    'eval-015': {
+      prompt:
+        'When the antecedent P is false, material implication P → Q is true regardless of Q. Check this row.',
+    },
+    'eval-016': {
+      prompt:
+        'A false antecedent makes P → Q true even when Q is true. Toggle P and Q and read the result.',
+    },
+    'eval-017': {
+      prompt:
+        'When P and Q share the same truth value, the biconditional P ↔ Q is true. Both are true here.',
+    },
+    'eval-018': {
+      prompt:
+        'Matching falsity also satisfies a biconditional: when P and Q are both false, P ↔ Q is true.',
+    },
+    'eval-019': {
+      prompt:
+        'P is true, so ¬P must be false. Watch the live row flip the value under negation.',
+    },
+    'eval-020': {
+      prompt:
+        'Negation applies after the disjunction inside the parentheses. Trace how ¬(P ∨ Q) is computed from P and Q.',
+    },
     'tt-001': { prompt: 'The table is almost complete. Tap T or F to fill the missing entry for P ∧ Q when P is true and Q is false.', cellCorrect: 'Correct — conjunction requires both conjuncts to be true.', cellWrong: 'Under this assignment, P is true and Q is false, so P ∧ Q is false.' },
     'tt-002': { prompt: 'Fill the blank result for P → Q when P is true and Q is false.', cellCorrect: 'Correct — a material conditional is false only in this case.', cellWrong: 'When the antecedent is true and the consequent is false, P → Q is false.' },
     'tt-003': { prompt: 'Complete the table: what is P ∨ Q when both P and Q are false?', cellCorrect: 'Correct — disjunction is false only when both disjuncts are false.', cellWrong: 'With neither disjunct true, P ∨ Q is false.' },
@@ -376,6 +416,46 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'eval-010': {
       prompt:
         'Fixez la valeur de P. La ligne en direct montre la négation : ¬P est vrai exactement lorsque P est faux.',
+    },
+    'eval-011': {
+      prompt:
+        'Les deux conjoints sont vrais ici. Vérifiez que P ∧ Q n\'est vrai que lorsque P et Q le sont tous deux.',
+    },
+    'eval-012': {
+      prompt:
+        'Quand P et Q sont tous deux faux, la conjonction P ∧ Q est fausse. Fixez les variables et lisez la ligne résultat.',
+    },
+    'eval-013': {
+      prompt:
+        'Une disjonction n\'est fausse que si les deux disjonctes le sont. Essayez P et Q faux et lisez le résultat.',
+    },
+    'eval-014': {
+      prompt:
+        'Avec P vrai et Q faux, au moins un disjonct est vrai — P ∨ Q doit donc être vrai.',
+    },
+    'eval-015': {
+      prompt:
+        'Quand l\'antécédent P est faux, l\'implication matérielle P → Q est vraie quelle que soit la valeur de Q. Vérifiez cette ligne.',
+    },
+    'eval-016': {
+      prompt:
+        'Un antécédent faux rend P → Q vrai même si Q est vrai. Basculez P et Q et lisez le résultat.',
+    },
+    'eval-017': {
+      prompt:
+        'Quand P et Q ont la même valeur de vérité, la biconditionnelle P ↔ Q est vraie. Ici, les deux sont vrais.',
+    },
+    'eval-018': {
+      prompt:
+        'La falsité concordante satisfait aussi une biconditionnelle : quand P et Q sont tous deux faux, P ↔ Q est vrai.',
+    },
+    'eval-019': {
+      prompt:
+        'P est vrai, donc ¬P doit être faux. Observez la ligne en direct inverser la valeur sous la négation.',
+    },
+    'eval-020': {
+      prompt:
+        'La négation s\'applique après la disjonction entre parenthèses. Suivez le calcul de ¬(P ∨ Q) à partir de P et Q.',
     },
     'tt-001': { prompt: 'Le tableau est presque complet. Toucher V ou F pour la case manquante de P ∧ Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — une conjonction exige que les deux conjoints soient vrais.', cellWrong: 'Sous cette interprétation, P est vrai et Q est faux, donc P ∧ Q est faux.' },
     'tt-002': { prompt: 'Complétez la case vide pour P → Q lorsque P est vrai et Q est faux.', cellCorrect: 'Exact — l\'implication matérielle n\'est fausse que dans ce cas.', cellWrong: 'Quand l\'antécédent est vrai et le conséquent faux, P → Q est faux.' },

@@ -83,7 +83,7 @@ describe('storage v3', () => {
     store = recordResult(store, 'eval-001', true);
     expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010']);
     store = recordResult(store, 'eval-010', true);
-    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010', 'eval-003']);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010', 'eval-019']);
   });
 
   it('marks level 0 complete after final lesson', () => {

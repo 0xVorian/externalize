@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Evaluate-formula expansion** (`eval-011`–`eval-020`): ten new exercises — nine Level 1 flat-binary rows with varied assignments plus one nested `¬(P ∨ Q)` tree eval; template bank, unlock order, prerequisites, and EN/FR prompts
+
 ### Changed
 
 - Ignore Playwright `test-results/` and `playwright-report/`; deduplicate `[0.3.0]` changelog bullets from merge integration
