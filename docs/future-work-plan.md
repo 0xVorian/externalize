@@ -42,7 +42,7 @@ Tiers reflect **dependency and payoff**, not roadmap phases. Tier 1 should land 
 | **2×2 grid view** | Alternate renderer for small atom sets | Optional spatial view for `P ∧ Q`-style patterns; see [presentation](presentation.md) |
 | **Accessibility (a11y)** | Keyboard paths, focus order, screen-reader labels | Tap-first stays primary; no hover-only affordances |
 | **PWA manifest** | Home-screen install, offline shell | Lightweight; no sync requirement |
-| **Predicate / ND decision docs** | Recorded choices before UI work | Extend [decisions](decisions.md): notation, rule set, mobile layout constraints for proofs |
+| **Predicate / ND decision docs** | Recorded choices before UI work | **Predicate prep (done):** [predicate-logic.md](predicate-logic.md); ND still TBD in [decisions](decisions.md) |
 
 ## Agent batch launch plan
 
@@ -94,7 +94,7 @@ These are explicitly out of scope for this plan (also reflected in [roadmap](roa
 | **Heavy gamification** | Achievements, leaderboards, streak mechanics — mastery feedback and concept map first |
 | **React or framework rewrite** | Current stack proves UX; rewrite is churn without new learning outcomes |
 | **Full natural-deduction editor** | Phase 5; needs stable eval/translation patterns and decision docs |
-| **Predicate logic UI** | Phase 6; AST and authoring model must extend cleanly first |
+| **Predicate logic UI** | Phase 6; AST prep in [predicate-logic.md](predicate-logic.md) — implement after Phase 4–5 |
 | **Template-based exercise generation** | Hand-authored JSON until patterns and feedback are proven |
 | **Multiple textbook notation systems** | One canonical Unicode notation per [decisions](decisions.md) |
 
@@ -108,6 +108,7 @@ Revisit this list only after Phase 3 translation feels instructive on a phone an
 | [Presentation](presentation.md) | When to use truth tables vs parse trees; 2×2 grid notes |
 | [Content model](content-model.md) | Exercise schema, concept graph, progress shape |
 | [Technical decisions](decisions.md) | Platform, notation, authoring, open questions |
+| [Predicate logic (Phase 6 prep)](predicate-logic.md) | AST extension, notation, engine impact — design only |
 | [Design principles](design-principles.md) | Non-negotiable UX constraints for all workstreams |
 | [Internationalization](i18n.md) | EN/FR copy conventions for Level 1 and exercises |
 

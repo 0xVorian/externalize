@@ -24,6 +24,14 @@ Recorded decisions and rationale from planning conversations. Revisit entries ma
 
 **Provisional:** Whether to support alternative textbook conventions (e.g. `⊃` vs `→`, Polish notation) — defer until AST + pretty-printer exist.
 
+### Predicate logic (Phase 6 prep)
+
+**Decision (design):** Extend the existing `Formula` AST with `Term`, n-place `pred`, `forall`, and `exists` nodes; single Unicode notation (`∀`, `∃`, `F(x)`); propositional atoms migrate to 0-place predicates. Finite models per exercise for evaluation — no global FOL theorem prover.
+
+**Rationale:** Keeps one comparison path for exercises (AST-first), aligns with Phase 3 palette/builder patterns, and avoids truth-table misuse for quantifiers.
+
+**Details:** [predicate-logic.md](predicate-logic.md). Implementation deferred until Phase 6; open questions (α-equivalence default, quantifier display colon, max arity) marked provisional there.
+
 ### Proof system (future)
 
 **Decision:** Fitch-style natural deduction (likely target) — line numbers, indented subproofs, visible scope boxes. Exact rule set TBD.
@@ -142,7 +150,7 @@ Pair each exercise with a structural check (main connective, scope boundary) and
 | Mobile native app | Web-first covers the use case |
 | User accounts / cloud sync | Local storage sufficient for v1 |
 | Multi-textbook notation modes | One notation keeps feedback precise |
-| Predicate logic, identity | After propositional interaction model works |
+| Predicate logic UI, identity | After propositional interaction model works; AST design in [predicate-logic.md](predicate-logic.md) |
 | Full exercise generation engine | Hand-author first |
 | Fancy gamification | Protect the brief's tone |
 | Algebraic equivalence solver | Per-exercise flags + truth tables are enough |

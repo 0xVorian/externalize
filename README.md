@@ -20,6 +20,7 @@ Start here:
 | [Versioning & changelog](docs/versioning.md) | Semver policy and release workflow |
 | [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |
 | [Presentation](docs/presentation.md) | When to use truth tables vs parse trees, layout rules |
+| [Predicate logic (Phase 6 prep)](docs/predicate-logic.md) | AST extension, notation, engine impact — design only |
 | [Changelog](CHANGELOG.md) | Record of released changes |
 
 ## Status
