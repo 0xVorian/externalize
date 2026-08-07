@@ -73,7 +73,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'eval-001': {
       prompt:
-        'Assign truth values to the sentence letters. The tree shows how each subformula evaluates under your assignment.',
+        'Assign truth values to the sentence letters. The table row updates to show how P ∧ Q evaluates under your assignment.',
     },
     'eval-002': {
       prompt:
@@ -100,7 +100,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'eval-001': {
       prompt:
-        'Fixez une valuation des variables propositionnelles. L\'arbre indique comment chaque sous-formule se comporte sous cette interprétation.',
+        'Fixez une valuation des variables propositionnelles. La ligne du tableau se met à jour selon P ∧ Q sous cette interprétation.',
     },
     'eval-002': {
       prompt:

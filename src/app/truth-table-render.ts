@@ -1,0 +1,63 @@
+import { learnUi, formatTruthValue, type Locale } from '../i18n';
+
+export function conjunctionResult(assignment: { P: boolean; Q: boolean }): boolean {
+  return assignment.P && assignment.Q;
+}
+
+export type TruthTableRow = {
+  assignment: { P: boolean; Q: boolean };
+  active: boolean;
+  srLabel?: string;
+};
+
+export function usesLiveTruthRow(formula: string): boolean {
+  return formula === 'P ∧ Q';
+}
+
+export function renderTruthTable(
+  locale: Locale,
+  formula: string,
+  rows: TruthTableRow[],
+): string {
+  const learn = learnUi(locale);
+  const body = rows
+    .map((row) => {
+      const result = conjunctionResult(row.assignment);
+      return `
+        <tr class="truth-table-row ${row.active ? 'active' : ''}">
+          ${row.srLabel ? `<th scope="row" class="sr-only">${row.srLabel}</th>` : ''}
+          <td>${formatTruthValue(locale, row.assignment.P)}</td>
+          <td>${formatTruthValue(locale, row.assignment.Q)}</td>
+          <td class="result-cell">${formatTruthValue(locale, result)}</td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  return `
+    <div class="truth-table-wrap">
+      <table class="truth-table" aria-label="${learn.truthTableAria(formula)}">
+        <thead>
+          <tr>
+            <th scope="col">P</th>
+            <th scope="col">Q</th>
+            <th scope="col">${formula}</th>
+          </tr>
+        </thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+export function renderLiveTruthRow(
+  locale: Locale,
+  formula: string,
+  assignment: Record<string, boolean>,
+): string {
+  const row = {
+    P: assignment.P ?? false,
+    Q: assignment.Q ?? false,
+  };
+  return renderTruthTable(locale, formula, [{ assignment: row, active: true }]);
+}

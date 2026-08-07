@@ -2,6 +2,7 @@ import type { TreeNode } from '../../engine';
 import { ui, formatTruthValue } from '../i18n';
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
+import { renderLiveTruthRow, usesLiveTruthRow } from './truth-table-render';
 
 function nodeValueClass(kind: TreeNode['kind']): string {
   return kind === 'atom' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
@@ -68,6 +69,22 @@ function renderAtomToggles(state: AppState): string {
   `;
 }
 
+function renderEvaluationBody(state: AppState): string {
+  if (usesLiveTruthRow(state.exercise.formula)) {
+    return `
+      ${renderAtomToggles(state)}
+      ${renderLiveTruthRow(state.locale, state.exercise.formula, state.assignment)}
+    `;
+  }
+
+  return `
+    <section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}">
+      <ul class="tree-root">${renderTreeNode(state.tree, state)}</ul>
+    </section>
+    ${renderAtomToggles(state)}
+  `;
+}
+
 export function renderApp(
   state: AppState,
   queueSize: number,
@@ -97,11 +114,13 @@ export function renderApp(
         <p class="exercise-prompt">${state.prompt}</p>
         <p class="formula-display" aria-label="Formula">${state.exercise.formula}</p>
 
-        <section class="tree-panel" aria-label="${copy.formulaTreeAria}">
+        ${
+          state.exercise.type === 'evaluate-formula'
+            ? renderEvaluationBody(state)
+            : `<section class="tree-panel" aria-label="${copy.formulaTreeAria}">
           <ul class="tree-root">${renderTreeNode(state.tree, state)}</ul>
-        </section>
-
-        ${state.exercise.type === 'evaluate-formula' ? renderAtomToggles(state) : ''}
+        </section>`
+        }
 
         ${
           state.message

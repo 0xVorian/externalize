@@ -1,8 +1,9 @@
-import { learnUi, getLessonCopy, ui, formatTruthValue } from '../i18n';
+import { learnUi, getLessonCopy, ui } from '../i18n';
 import { LEVEL_0_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
 import { renderShellHeader } from './shell-render';
+import { renderLiveTruthRow, renderTruthTable } from './truth-table-render';
 
 function renderGuidedToggles(state: LessonState): string {
   const copy = ui(state.locale);
@@ -47,46 +48,6 @@ function renderCardLesson(state: LessonState): string {
   `;
 }
 
-function conjunctionResult(assignment: { P: boolean; Q: boolean }): boolean {
-  return assignment.P && assignment.Q;
-}
-
-function renderTruthTable(
-  state: LessonState,
-  formula: string,
-  rows: Array<{ assignment: { P: boolean; Q: boolean }; active: boolean; srLabel?: string }>,
-): string {
-  const learn = learnUi(state.locale);
-  const body = rows
-    .map((row) => {
-      const result = conjunctionResult(row.assignment);
-      return `
-        <tr class="truth-table-row ${row.active ? 'active' : ''}">
-          ${row.srLabel ? `<th scope="row" class="sr-only">${row.srLabel}</th>` : ''}
-          <td>${formatTruthValue(state.locale, row.assignment.P)}</td>
-          <td>${formatTruthValue(state.locale, row.assignment.Q)}</td>
-          <td class="result-cell">${formatTruthValue(state.locale, result)}</td>
-        </tr>
-      `;
-    })
-    .join('');
-
-  return `
-    <div class="truth-table-wrap">
-      <table class="truth-table" aria-label="${learn.truthTableAria(formula)}">
-        <thead>
-          <tr>
-            <th scope="col">P</th>
-            <th scope="col">Q</th>
-            <th scope="col">${formula}</th>
-          </tr>
-        </thead>
-        <tbody>${body}</tbody>
-      </table>
-    </div>
-  `;
-}
-
 function renderWatchTruthTable(
   state: LessonState,
   steps: Array<{ assignment: { P: boolean; Q: boolean } }>,
@@ -94,7 +55,7 @@ function renderWatchTruthTable(
 ): string {
   const learn = learnUi(state.locale);
   return renderTruthTable(
-    state,
+    state.locale,
     formula,
     steps.map((step, index) => ({
       assignment: step.assignment,
@@ -102,14 +63,6 @@ function renderWatchTruthTable(
       srLabel: learn.stepLabel(index + 1, steps.length),
     })),
   );
-}
-
-function renderLiveTruthRow(state: LessonState, formula: string): string {
-  const assignment = {
-    P: state.assignment.P ?? false,
-    Q: state.assignment.Q ?? false,
-  };
-  return renderTruthTable(state, formula, [{ assignment, active: true }]);
 }
 
 function renderWatchLesson(state: LessonState): string {
@@ -135,7 +88,7 @@ function renderGuidedLesson(state: LessonState): string {
     <article class="lesson-card">
       <p class="formula-display">${formula}</p>
       ${renderGuidedToggles(state)}
-      ${renderLiveTruthRow(state, formula)}
+      ${renderLiveTruthRow(state.locale, formula, state.assignment)}
       ${hint ? `<p class="feedback ${state.complete ? 'feedback-correct' : 'feedback-info'}" role="status">${hint}</p>` : ''}
     </article>
   `;

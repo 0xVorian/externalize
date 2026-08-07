@@ -42,7 +42,9 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 ## Vertical parse tree (practice)
 
-**Used today:** evaluation exercises (complex formulas), scope-tap exercises.
+**Used today:** evaluation exercise `eval-002` and scope-tap exercises.
+
+**Also `eval-001` (`P ∧ Q`):** uses the same **live single-row table** as the guided lesson — not a tree.
 
 **Not used for Level 0 guided `P ∧ Q`** — see live row above.
 
@@ -68,6 +70,7 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 ## Related files
 
+- `src/app/truth-table-render.ts` — shared watch / guided / eval-001 table
 - `src/app/lesson-render.ts` — watch table, guided live row
 - `src/app/render.ts` — practice tree + toggles
 - `src/i18n/messages.ts` — `formatTruthValue`, `formatAssignmentLine`

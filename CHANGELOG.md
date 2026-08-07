@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Watch lesson for `P ∧ Q` uses a truth table (highlighted row) instead of a parse tree
 - Tree and table truth labels follow locale (`V`/`F` in French, `T`/`F` in English)
+- Practice `eval-001` (`P ∧ Q`) uses live truth-table row instead of parse tree
 - Guided Level 0 lesson uses a live truth-table row and toggles (not a parse tree) for `P ∧ Q`
 - New users start in Learn mode instead of practice exercises
 - Progress storage migrated to v2 with lesson completion tracking
