@@ -60,7 +60,7 @@ export function checkMainConnectiveSelection(
     };
   }
 
-  if (selected.kind === 'atom') {
+  if (selected.kind === 'pred' && selected.children.length === 0) {
     return {
       correct: false,
       tag: 'selected-atom',

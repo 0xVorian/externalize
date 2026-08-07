@@ -8,7 +8,7 @@ import { renderAtomPanel } from './atom-toggles-render';
 import { renderTranslationExerciseBody, renderTranslationActions } from './translation/translation-render';
 
 function nodeValueClass(kind: TreeNode['kind']): string {
-  return kind === 'atom' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
+  return kind === 'pred' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
 }
 
 function renderTreeNode(node: TreeNode, state: AppState): string {

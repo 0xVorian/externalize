@@ -63,7 +63,7 @@ function isReversedBinary(expected: Formula, learner: Formula, kind: 'imp' | 'if
 }
 
 function detectNegationScope(expected: Formula, learner: Formula): boolean {
-  if (expected.kind !== 'not' || expected.operand.kind === 'atom') {
+  if (expected.kind !== 'not' || (expected.operand.kind === 'pred' && expected.operand.args.length === 0)) {
     return false;
   }
   if (learner.kind === 'and' || learner.kind === 'or') {

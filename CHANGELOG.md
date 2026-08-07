@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Predicate logic AST spike**: extend `Formula` with `pred`, `forall`, `exists`, and `Term` types; parser accepts `∀`/`∃`, predicate application `F(x)`, and comma-separated arguments; migrate propositional letters to 0-place `pred`; helpers `collectFreeVariables` and `collectPredicateSymbols`; grammar documented in [`docs/predicate-logic.md`](docs/predicate-logic.md)
 - **Progress concept map graph**: SVG prerequisite diagram on the Progress tab (completed, available, and locked nodes; EN/FR labels from `content/prerequisites.json`)
 - **Predicate logic design prep** ([`docs/predicate-logic.md`](docs/predicate-logic.md)): AST extension sketch (terms, predicates, quantifiers), notation choices, parser/renderer/exercise impact, explicit Phase 6 deferrals; linked from future work plan, decisions, and README
 - **Natural deduction design prep** ([`docs/natural-deduction.md`](docs/natural-deduction.md)): Fitch-style mobile layout constraints, minimal starter rule-set options, fill-one-step vs repair-step patterns, subproof UI at ~320px, Phase 4 dependencies; linked from future work plan and decisions

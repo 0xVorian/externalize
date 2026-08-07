@@ -60,7 +60,7 @@ describe('toVerticalTree', () => {
     expect(tree.id).toBe('root');
     expect(tree.kind).toBe('iff');
     expect(findNodeById(tree, 'root.L')?.kind).toBe('imp');
-    expect(findNodeById(tree, 'root.R.O')?.kind).toBe('atom');
+    expect(findNodeById(tree, 'root.R.O')?.kind).toBe('pred');
     expect(findNodeById(tree, 'root.R.O')?.label).toBe('R');
   });
 

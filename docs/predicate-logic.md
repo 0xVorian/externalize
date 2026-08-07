@@ -301,6 +301,45 @@ Explicit deferrals — revisit only after propositional Phase 4 and Phase 3 tran
 
 Record final choices in [decisions](decisions.md) when implementation starts.
 
+## Implemented grammar (AST spike)
+
+The engine parser now accepts predicate logic surface syntax alongside propositional connectives.
+
+### Tokens
+
+| Token | Lexeme | Notes |
+|-------|--------|-------|
+| `IDENT` | `[A-Za-z][A-Za-z0-9_]*` | Predicate names, bound variables, term names |
+| `FORALL` | `∀` | Universal quantifier |
+| `EXISTS` | `∃` | Existential quantifier |
+| `LPAREN` / `RPAREN` | `(`, `)` | Grouping |
+| `COMMA` | `,` | Separates predicate arguments |
+| Connectives | `¬`, `∧`, `∨`, `→`, `↔` (+ ASCII alternatives) | Unchanged from propositional parser |
+
+`parse('P')` yields `pred('P', [])`. Terms: `a`–`e` → `const`, others → `var`.
+
+### Precedence (lowest to highest)
+
+`↔` < `→` < `∨` < `∧` < quantifiers < `¬` < primary.
+
+### Productions
+
+```text
+Formula   ::= IffExpr
+IffExpr   ::= ImpExpr ('↔' ImpExpr)*
+ImpExpr   ::= OrExpr ('→' OrExpr)*
+OrExpr    ::= AndExpr ('∨' AndExpr)*
+AndExpr   ::= NotExpr ('∧' NotExpr)*
+NotExpr   ::= '¬' NotExpr | QuantExpr
+QuantExpr ::= ('∀' | '∃') IDENT QuantExpr | Primary
+Primary   ::= IDENT '(' TermList ')' | IDENT | '(' Formula ')'
+TermList  ::= ε | Term (',' Term)*
+Term      ::= IDENT
+```
+
+Tests: `engine/parse/predicate.test.ts`.
+
+
 ## Recommended implementation sequence (Phase 6)
 
 1. **AST types + helpers** — `Term`, `Pred`, `ForAll`, `Exists`; `collectFreeVariables`; migrate `atom` → `pred`.
