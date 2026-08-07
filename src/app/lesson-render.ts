@@ -80,7 +80,7 @@ function renderUnitPicker(state: LessonState, unit0Complete: boolean): string {
   const learn = learnUi(state.locale);
   const unit = lessonUnit(state.lesson.id);
   return `
-    <nav class="unit-picker" role="tablist" aria-label="${learn.unitPickerLabel}">
+    <nav class="unit-picker" data-testid="unit-picker" role="tablist" aria-label="${learn.unitPickerLabel}">
       <button type="button" class="unit-button ${unit === 0 ? 'active' : ''}" role="tab" aria-selected="${unit === 0}" data-action="select-unit" data-unit="0">${learn.level0Title}</button>
       <button type="button" class="unit-button ${unit === 1 ? 'active' : ''}" role="tab" aria-selected="${unit === 1}" data-action="select-unit" data-unit="1">${learn.level1Title}</button>
     </nav>
