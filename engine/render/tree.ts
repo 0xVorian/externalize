@@ -9,7 +9,7 @@ function buildTree(formula: Formula, path: string): TreeNode {
   switch (formula.kind) {
     case 'pred':
       if (formula.args.length === 0) return { id: path, kind: 'pred', label: formula.name, children: [] };
-      return { id: path, kind: 'pred', label: formula.name, children: formula.args.map((arg, index) => ({ id: `${path}.A${index}`, kind: arg.kind, label: formatTermLabel(arg), children: [] })) };
+      return { id: path, kind: 'pred', label: formula.name, children: formula.args.map((arg, index) => ({ id: `${path}.A${index}`, kind: 'pred', label: formatTermLabel(arg), children: [] })) };
     case 'not': return { id: path, kind: 'not', label: connectiveLabel('not'), children: [buildTree(formula.operand, `${path}.O`)] };
     case 'forall': return { id: path, kind: 'forall', label: `${connectiveLabel('forall')}${formula.var}`, children: [buildTree(formula.body, `${path}.B`)] };
     case 'exists': return { id: path, kind: 'exists', label: `${connectiveLabel('exists')}${formula.var}`, children: [buildTree(formula.body, `${path}.B`)] };

@@ -70,7 +70,7 @@ export function checkMainConnectiveSelection(
 
   if (selected.id !== tree.id) {
     const label =
-      selected.kind === 'not' ? '¬' : connectiveLabel(selected.kind);
+      selected.kind === 'not' ? '¬' : (selected.kind === 'pred' || selected.kind === 'forall' || selected.kind === 'exists' ? selected.label : connectiveLabel(selected.kind));
     return {
       correct: false,
       tag: 'selected-subconnective',

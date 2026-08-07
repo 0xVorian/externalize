@@ -9,6 +9,8 @@ const CONNECTIVE_ARIA: Record<ConnectiveKind, { en: string; fr: string }> = {
   or: { en: 'Disjunction', fr: 'Disjonction' },
   imp: { en: 'Conditional', fr: 'Implication' },
   iff: { en: 'Biconditional', fr: 'Équivalence' },
+  forall: { en: 'Universal quantifier', fr: 'Quantificateur universel' },
+  exists: { en: 'Existential quantifier', fr: 'Quantificateur existentiel' },
 };
 
 function renderPaletteButton(
