@@ -37,7 +37,7 @@ export function renderTruthTable(
         .map((atom) => `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`)
         .join('');
       return `
-        <tr class="truth-table-row ${row.active ? 'active' : ''}">
+        <tr class="truth-table-row ${row.active ? 'active' : ''}"${row.active ? ' aria-current="step"' : ''}>
           ${row.srLabel ? `<th scope="row" class="sr-only">${row.srLabel}</th>` : ''}
           ${atomCells}
           <td class="result-cell">${formatTruthValue(locale, result)}</td>

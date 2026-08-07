@@ -45,6 +45,8 @@ export type LearnUiCopy = {
   watchPrompt: string;
   stepLabel: (current: number, total: number) => string;
   truthTableAria: (formula: string) => string;
+  modeLearnAria: string;
+  modePracticeAria: string;
 };
 
 const REFERENCE: Record<Locale, ReferenceEntry[]> = {
@@ -143,6 +145,8 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
       'Each row is one assignment. Read the highlighted row, then continue to the next case.',
     stepLabel: (current, total) => `Case ${current} of ${total}`,
     truthTableAria: (formula) => `Truth table for ${formula}`,
+    modeLearnAria: 'Learn',
+    modePracticeAria: 'Exercises',
   },
   fr: {
     learn: 'Cours',
@@ -162,6 +166,8 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
       'Chaque ligne correspond à une interprétation. Lisez la ligne surlignée, puis passez au cas suivant.',
     stepLabel: (current, total) => `Cas ${current} sur ${total}`,
     truthTableAria: (formula) => `Table de vérité de ${formula}`,
+    modeLearnAria: 'Cours',
+    modePracticeAria: 'Exercices',
   },
 };
 

@@ -115,6 +115,18 @@ button {
   color: var(--accent);
 }
 
+.mode-button:not(:disabled):focus-visible,
+.lang-button:focus-visible,
+.node-button:focus-visible,
+.atom-segment:focus-visible,
+.primary:focus-visible,
+.secondary:focus-visible,
+.palette-button:focus-visible,
+.reference-panel summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .mode-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -368,6 +380,11 @@ button {
 
 .tree-node.tappable .node-button {
   cursor: pointer;
+}
+
+.node-readonly.node-button {
+  cursor: default;
+  border-style: dashed;
 }
 
 .tree-node.selected .node-button {

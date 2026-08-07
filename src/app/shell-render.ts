@@ -1,13 +1,14 @@
 import type { Locale } from '../i18n';
-import { learnUi, getReference } from '../i18n';
+import { learnUi, getReference, ui } from '../i18n';
 import { progressUi } from '../i18n';
 
 export type AppMode = 'learn' | 'practice' | 'progress';
 
 export function renderLanguageToggle(locale: Locale): string {
+  const copy = ui(locale);
   const locales = ['en', 'fr'] as const;
   return `
-    <div class="language-toggle" role="group" aria-label="Language">
+    <div class="language-toggle" role="group" aria-label="${copy.languageToggle(locale)}">
       ${locales
         .map(
           (code) => `
@@ -16,6 +17,7 @@ export function renderLanguageToggle(locale: Locale): string {
           class="lang-button ${locale === code ? 'active' : ''}"
           data-action="set-locale"
           data-locale="${code}"
+          aria-label="${locale === code ? copy.languageToggle(code) : copy.switchTo(code)}"
           aria-pressed="${locale === code}"
         >
           ${code.toUpperCase()}
@@ -41,6 +43,7 @@ export function renderModeNav(
         class="mode-button ${mode === 'learn' ? 'active' : ''}"
         data-action="set-mode"
         data-mode="learn"
+        aria-label="${learn.modeLearnAria}"
         aria-pressed="${mode === 'learn'}"
       >
         ${learn.learn}
@@ -50,8 +53,9 @@ export function renderModeNav(
         class="mode-button ${mode === 'practice' ? 'active' : ''}"
         data-action="set-mode"
         data-mode="practice"
+        aria-label="${learn.modePracticeAria}"
         aria-pressed="${mode === 'practice'}"
-        ${practiceUnlocked ? '' : 'disabled'}
+        ${practiceUnlocked ? '' : 'disabled aria-describedby="practice-lock-hint"'}
         title="${practiceUnlocked ? '' : learn.practiceLocked}"
       >
         ${learn.practice}
@@ -61,6 +65,7 @@ export function renderModeNav(
         class="mode-button ${mode === 'progress' ? 'active' : ''}"
         data-action="set-mode"
         data-mode="progress"
+        aria-label="${progress.modeProgressAria}"
         aria-pressed="${mode === 'progress'}"
       >
         ${progress.progress}
