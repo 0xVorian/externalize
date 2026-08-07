@@ -90,6 +90,18 @@ MVP-0 uses `identify-main-connective`, `identify-scope`, and `evaluate-formula` 
 | `evaluate-step` | Choose truth value of highlighted subexpr | Matches evaluation under assignment |
 | `truth-table-cell` | Fill one cell | Matches column computation |
 | `truth-table-column` | Fill entire column | Matches derived column |
+
+### Truth-table exercises (Phase 4 prep)
+
+`engine/truth-table/` generates and validates tables using **locale-agnostic booleans**; the UI maps values via `formatTruthValue()`.
+
+| Helper | Role |
+|--------|------|
+| `generateTruthTable(formula, atoms)` | Full table for watch lessons and answer keys |
+| `maskTruthTableRows(table, hiddenRowIndices)` | Partial table with blank result cells for `truth-table-cell` |
+| `validateCell(formula, assignment, submitted)` | Single-cell check; returns `{ correct, expected }` |
+
+Exercise definitions will supply the `atoms` column list and parsed formula; content files do not store `T`/`F` labels.
 | `find-counterexample` | Set atom truth values | Premises true, conclusion false |
 | `choose-rule` | Pick inference rule | Rule applicable to cited lines |
 | `proof-fill-step` | Supply one proof line | Line valid given scope and citations |
@@ -185,6 +197,7 @@ engine/
   parse/
   eval/
   feedback/
+  truth-table/
 app/
   ...                    # UI shell
 ```
