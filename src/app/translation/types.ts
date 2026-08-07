@@ -1,10 +1,15 @@
-import type { ConnectiveKind, Formula } from '../../../engine';
+import type { ConnectiveKind, Formula, Term } from '../../../engine';
 
 /** Token inserted by palette taps; compiled to Formula — not typed text. */
 export type BuilderToken =
-  | { kind: 'atom'; name: string }
+  | { kind: 'pred'; name: string; args: Term[] }
   | { kind: 'connective'; connective: ConnectiveKind }
   | { kind: 'paren'; side: 'open' | 'close' };
+
+/** 0-place predicate token (propositional sentence letter). */
+export function builderPred(name: string): Extract<BuilderToken, { kind: 'pred' }> {
+  return { kind: 'pred', name, args: [] };
+}
 
 export type TranslationFeedbackTag =
   | 'correct'

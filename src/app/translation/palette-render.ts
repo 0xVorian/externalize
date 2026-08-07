@@ -51,7 +51,7 @@ export function renderSymbolPalette(
       return renderPaletteButton(
         inner,
         'palette-insert',
-        { token: 'atom', value: atom.name },
+        { token: 'pred', value: atom.name },
         aria,
         'palette-atom',
       );

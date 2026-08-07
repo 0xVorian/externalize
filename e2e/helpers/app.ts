@@ -53,7 +53,7 @@ export async function completeGuidedStep(
 
 export async function insertPaletteToken(
   page: Page,
-  token: 'atom' | 'connective' | 'paren',
+  token: 'pred' | 'connective' | 'paren',
   value: string,
 ): Promise<void> {
   await page

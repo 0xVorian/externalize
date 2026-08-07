@@ -47,8 +47,8 @@ export function parsePaletteInsert(
   if (!tokenKind || value === undefined) {
     return null;
   }
-  if (tokenKind === 'atom') {
-    return { kind: 'atom', name: value };
+  if (tokenKind === 'pred' || tokenKind === 'atom') {
+    return { kind: 'pred', name: value, args: [] };
   }
   if (tokenKind === 'connective') {
     return { kind: 'connective', connective: value as ConnectiveKind };

@@ -8,7 +8,7 @@ export type {
   TranslationPrompt,
 } from './types';
 
-export { TRANSLATE_001 } from './types';
+export { TRANSLATE_001, builderPred } from './types';
 export { compileBuilderTokens, compileBuilderState } from './compile';
 export {
   builderInsert,

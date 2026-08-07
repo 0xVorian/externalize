@@ -7,7 +7,7 @@ export type CompileResult =
 
 function tokenToText(token: BuilderToken): string {
   switch (token.kind) {
-    case 'atom':
+    case 'pred':
       return token.name;
     case 'connective':
       return connectiveLabel(token.connective);

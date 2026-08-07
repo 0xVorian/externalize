@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Translation builder tokens use `pred` (0-place) instead of legacy `atom`; palette emits `data-token="pred"` with backward-compatible parsing for `atom`
 - Ignore Playwright `test-results/` and `playwright-report/`; deduplicate `[0.3.0]` changelog bullets from merge integration
 
 ### Fixed

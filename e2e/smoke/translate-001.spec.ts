@@ -10,9 +10,9 @@ test.describe('translate-001 translation exercise', () => {
     await expect(page.locator('.symbol-palette')).toBeVisible();
 
     await insertPaletteToken(page, 'paren', 'open');
-    await insertPaletteToken(page, 'atom', 'P');
+    await insertPaletteToken(page, 'pred', 'P');
     await insertPaletteToken(page, 'connective', 'imp');
-    await insertPaletteToken(page, 'atom', 'Q');
+    await insertPaletteToken(page, 'pred', 'Q');
     await insertPaletteToken(page, 'paren', 'close');
 
     await page.locator('[data-action="check-translation"]').click();
