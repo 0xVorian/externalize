@@ -17,6 +17,7 @@ Start here:
 | [Content model](docs/content-model.md) | How exercises, lessons, and progress will be represented as data |
 | [Versioning & changelog](docs/versioning.md) | Semver policy and release workflow |
 | [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |
+| [Presentation](docs/presentation.md) | When to use truth tables vs parse trees, layout rules |
 | [Changelog](CHANGELOG.md) | Record of released changes |
 
 ## Status

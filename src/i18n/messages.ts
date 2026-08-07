@@ -150,6 +150,25 @@ export function ui(locale: Locale): UiCopy {
   return UI[locale];
 }
 
+export function formatTruthValue(locale: Locale, value: boolean | undefined): string {
+  if (value === undefined) {
+    return '—';
+  }
+  const copy = ui(locale);
+  return value ? copy.trueLabel : copy.falseLabel;
+}
+
+export function formatAssignmentLine(
+  locale: Locale,
+  assignment: Record<string, boolean>,
+): string {
+  const copy = ui(locale);
+  const parts = Object.keys(assignment)
+    .sort()
+    .map((atom) => `${atom} ↦ ${formatTruthValue(locale, assignment[atom])}`);
+  return `${copy.assignment}: ${parts.join(' , ')}`;
+}
+
 export function getExerciseCopy(locale: Locale, exerciseId: string): ExerciseCopy {
   const copy = EXERCISE_COPY[locale][exerciseId];
   if (!copy) {

@@ -42,6 +42,7 @@ export type LearnUiCopy = {
   referenceToggle: string;
   watchPrompt: string;
   stepLabel: (current: number, total: number) => string;
+  truthTableAria: (formula: string) => string;
 };
 
 const REFERENCE: Record<Locale, ReferenceEntry[]> = {
@@ -135,8 +136,9 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     referenceTitle: 'Connectives',
     referenceToggle: 'Connective reference',
     watchPrompt:
-      'Each step fixes a truth assignment. Read how the conjunction evaluates; then continue to the next case.',
+      'Each row is one assignment. Read the highlighted row, then continue to the next case.',
     stepLabel: (current, total) => `Case ${current} of ${total}`,
+    truthTableAria: (formula) => `Truth table for ${formula}`,
   },
   fr: {
     learn: 'Cours',
@@ -151,8 +153,9 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     referenceTitle: 'Connecteurs',
     referenceToggle: 'Référence des connecteurs',
     watchPrompt:
-      'À chaque étape, une interprétation est fixée. Lisez la valeur de la conjonction, puis passez au cas suivant.',
+      'Chaque ligne correspond à une interprétation. Lisez la ligne surlignée, puis passez au cas suivant.',
     stepLabel: (current, total) => `Cas ${current} sur ${total}`,
+    truthTableAria: (formula) => `Table de vérité de ${formula}`,
   },
 };
 
@@ -204,7 +207,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         {
           assignment: { P: true, Q: true },
           explanation:
-            'Both conjuncts are true; therefore the conjunction P ∧ Q evaluates to T. The value appears at the ∧ node.',
+            'Both conjuncts are true; therefore P ∧ Q evaluates to T. The highlighted row shows the result.',
         },
         {
           assignment: { P: true, Q: false },
@@ -282,7 +285,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         {
           assignment: { P: true, Q: true },
           explanation:
-            'Les deux arguments sont vrais : la conjonction P ∧ Q prend la valeur V. La valeur apparaît au niveau du connecteur ∧.',
+            'Les deux arguments sont vrais : P ∧ Q vaut V. La ligne surlignée indique le résultat.',
         },
         {
           assignment: { P: true, Q: false },

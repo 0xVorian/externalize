@@ -110,3 +110,12 @@ English and French are **parallel course materials**, each using that language's
 - **Do not** treat either locale as the "source of truth" for wording
 
 New user-facing strings require both locales in the same change. See `docs/i18n.md`.
+
+## 11. Match presentation to the pedagogical goal
+
+Evaluation and structure can be shown as a **truth table**, a **vertical parse tree**, or (later) other layouts. Pick the shape that externalizes what the learner needs *right now* — not one universal widget.
+
+- **Truth table (rows):** small atom set, all cases shown or stepped through (watch / demo). Example: four rows for `P ∧ Q`.
+- **Parse tree:** one assignment, values propagating through subformulas (guided try, eval exercises) or scope selection (main connective exercises).
+
+Do not use a parse tree when the lesson is only “here are the four truth-table cases”; use a table with a highlighted row instead. See `docs/presentation.md`.

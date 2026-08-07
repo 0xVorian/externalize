@@ -1,18 +1,14 @@
 import type { TreeNode } from '../../engine';
-import { ui } from '../i18n';
+import { ui, formatTruthValue } from '../i18n';
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
 
-function truthLabel(value: boolean | undefined): string {
-  if (value === undefined) {
-    return '—';
-  }
-  return value ? 'T' : 'F';
+function nodeValueClass(kind: TreeNode['kind']): string {
+  return kind === 'atom' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
 }
 
 function formatTruthWord(state: AppState, value: boolean): string {
-  const copy = ui(state.locale);
-  return value ? copy.trueLabel : copy.falseLabel;
+  return formatTruthValue(state.locale, value);
 }
 
 function renderTreeNode(node: TreeNode, state: AppState): string {
@@ -25,9 +21,10 @@ function renderTreeNode(node: TreeNode, state: AppState): string {
     classes.push('tappable');
   }
 
+  const label = formatTruthValue(state.locale, node.value);
   const valueHtml =
     state.exercise.type === 'evaluate-formula'
-      ? `<span class="node-value" aria-label="${ui(state.locale).valueAria(truthLabel(node.value))}">${truthLabel(node.value)}</span>`
+      ? `<span class="${nodeValueClass(node.kind)}" aria-label="${ui(state.locale).valueAria(label)}">${label}</span>`
       : '';
 
   const children = node.children.map((child) => renderTreeNode(child, state)).join('');

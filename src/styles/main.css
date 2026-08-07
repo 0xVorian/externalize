@@ -352,6 +352,10 @@ button {
   border-left: 2px solid var(--border);
 }
 
+.tree-node:has(> .tree-children) > .node-button {
+  margin-left: 1rem;
+}
+
 .tree-node {
   margin: 0.35rem 0;
 }
@@ -380,16 +384,92 @@ button {
 .node-label {
   font-family: "Fira Code", "Cascadia Code", monospace;
   font-size: 1rem;
+  flex: 0 0 1.5rem;
+  text-align: center;
 }
 
 .node-value {
   min-width: 1.5rem;
   padding: 0.1rem 0.45rem;
   border-radius: 999px;
-  background: var(--accent-soft);
   font-family: "Fira Code", "Cascadia Code", monospace;
   font-size: 0.85rem;
   font-weight: 700;
+}
+
+.node-value-computed {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.node-value-assigned {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.assignment-line {
+  margin: 0 0 0.75rem;
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.truth-table-wrap {
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.truth-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.95rem;
+}
+
+.truth-table th,
+.truth-table td {
+  text-align: center;
+  padding: 0.65rem 0.5rem;
+  border: 1px solid var(--border);
+}
+
+.truth-table thead th {
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.truth-table tbody td,
+.truth-table tbody th {
+  background: #fff;
+}
+
+.truth-table-row.active td,
+.truth-table-row.active th {
+  background: var(--accent-soft);
+}
+
+.truth-table-row:not(.active) {
+  opacity: 0.65;
+}
+
+.truth-table-row.active .result-cell {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .atom-panel {

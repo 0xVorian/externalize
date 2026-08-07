@@ -22,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Watch lesson for `P ∧ Q` uses a truth table (highlighted row) instead of a parse tree
+- Tree and table truth labels follow locale (`V`/`F` in French, `T`/`F` in English)
+- Parse-tree parent connective aligns horizontally with child operand rows
 - New users start in Learn mode instead of practice exercises
 - Progress storage migrated to v2 with lesson completion tracking
 - English and French copy rewritten as independent academic prose (not mirror translations)

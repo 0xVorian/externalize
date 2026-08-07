@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISE_DEFINITIONS } from '../app/exercises';
-import { getExerciseCopy, getFeedbackTemplates, ui } from './messages';
+import { getExerciseCopy, getFeedbackTemplates, ui, formatTruthValue, formatAssignmentLine } from './messages';
 
 describe('i18n', () => {
   for (const locale of ['en', 'fr'] as const) {
@@ -16,5 +16,19 @@ describe('i18n', () => {
         expect(getFeedbackTemplates(locale, exercise.id).correct).toBeTruthy();
       }
     });
+
+    it(`uses locale truth labels in ${locale}`, () => {
+      expect(formatTruthValue(locale, true)).toBe(ui(locale).trueLabel);
+      expect(formatTruthValue(locale, false)).toBe(ui(locale).falseLabel);
+    });
   }
+
+  it('formats assignment line with locale labels', () => {
+    expect(formatAssignmentLine('en', { P: true, Q: false })).toBe(
+      'Truth assignment: P ↦ T , Q ↦ F',
+    );
+    expect(formatAssignmentLine('fr', { P: true, Q: false })).toBe(
+      'Interprétation: P ↦ V , Q ↦ F',
+    );
+  });
 });

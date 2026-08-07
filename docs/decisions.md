@@ -68,6 +68,14 @@ No authentication, no server sync, until there is a concrete need.
 
 **Rationale:** Mobile-first rules out hover and mouse-only interactions. Drag-and-drop is pedagogically useful for scope but must never be the only way to complete an exercise.
 
+### Evaluation presentation: truth table vs parse tree
+
+**Decision:** Use **truth-table rows** for watch/demo lessons that enumerate all assignments on a small formula (e.g. four cases of `P ∧ Q`). Use the **vertical parse tree** for guided practice and exercises where one assignment propagates through subformulas, or for scope-tap tasks.
+
+**Rationale:** A tree for `P ∧ Q` alone reads as a misaligned list and hides the 2×2 pattern. Tables match standard logic pedagogy and the card-lesson notation (`T ∧ T ⇒ T`, …). Trees remain essential once propagation or scope matters.
+
+**Details:** Highlight active table row + step label; locale-aware `V`/`F` vs `T`/`F` in all cells; parent connective row aligned with child rows in trees. See `docs/presentation.md`.
+
 ### UI stack: Vite + vanilla TypeScript
 
 **Decision:** Vite for bundling; vanilla TS with structured modules under `src/app/` for MVP-0. No React/Svelte until component complexity justifies it.

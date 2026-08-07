@@ -1,19 +1,18 @@
 import type { TreeNode } from '../../engine';
-import { learnUi, getLessonCopy, ui } from '../i18n';
+import { learnUi, getLessonCopy, ui, formatTruthValue, type Locale } from '../i18n';
 import { LEVEL_0_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
 import { renderShellHeader } from './shell-render';
 
-function truthLabel(value: boolean | undefined): string {
-  if (value === undefined) {
-    return '—';
-  }
-  return value ? 'T' : 'F';
+function nodeValueClass(kind: TreeNode['kind']): string {
+  return kind === 'atom' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
 }
 
-function renderTreeNode(node: TreeNode, locale: ReturnType<typeof ui>): string {
-  const valueHtml = `<span class="node-value" aria-label="${locale.valueAria(truthLabel(node.value))}">${truthLabel(node.value)}</span>`;
+function renderTreeNode(node: TreeNode, locale: Locale): string {
+  const copy = ui(locale);
+  const label = formatTruthValue(locale, node.value);
+  const valueHtml = `<span class="${nodeValueClass(node.kind)}" aria-label="${copy.valueAria(label)}">${label}</span>`;
   const children = node.children.map((child) => renderTreeNode(child, locale)).join('');
   return `
     <li class="tree-node kind-${node.kind}">
@@ -69,6 +68,47 @@ function renderCardLesson(state: LessonState): string {
   `;
 }
 
+function conjunctionResult(assignment: { P: boolean; Q: boolean }): boolean {
+  return assignment.P && assignment.Q;
+}
+
+function renderWatchTruthTable(
+  state: LessonState,
+  steps: Array<{ assignment: { P: boolean; Q: boolean } }>,
+  formula: string,
+): string {
+  const learn = learnUi(state.locale);
+  const rows = steps
+    .map((step, index) => {
+      const active = index === state.watchStep;
+      const result = conjunctionResult(step.assignment);
+      return `
+        <tr class="truth-table-row ${active ? 'active' : ''}">
+          <th scope="row" class="sr-only">${learn.stepLabel(index + 1, steps.length)}</th>
+          <td>${formatTruthValue(state.locale, step.assignment.P)}</td>
+          <td>${formatTruthValue(state.locale, step.assignment.Q)}</td>
+          <td class="result-cell">${formatTruthValue(state.locale, result)}</td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  return `
+    <div class="truth-table-wrap">
+      <table class="truth-table" aria-label="${learn.truthTableAria(formula)}">
+        <thead>
+          <tr>
+            <th scope="col">P</th>
+            <th scope="col">Q</th>
+            <th scope="col">${formula}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
 function renderWatchLesson(state: LessonState): string {
   const learn = learnUi(state.locale);
   const copy = getLessonCopy(state.locale, state.lesson.id);
@@ -79,9 +119,7 @@ function renderWatchLesson(state: LessonState): string {
       <p class="exercise-prompt">${learn.watchPrompt}</p>
       <p class="formula-display">${formula}</p>
       <p class="step-meta">${learn.stepLabel(state.watchStep + 1, steps.length)}</p>
-      <section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}">
-        <ul class="tree-root">${renderTreeNode(state.tree, ui(state.locale))}</ul>
-      </section>
+      ${renderWatchTruthTable(state, steps, formula)}
       ${state.message ? `<p class="feedback feedback-info" role="status">${state.message}</p>` : ''}
     </article>
   `;
@@ -94,7 +132,7 @@ function renderGuidedLesson(state: LessonState): string {
     <article class="lesson-card">
       <p class="formula-display">${formula}</p>
       <section class="tree-panel" aria-label="${ui(state.locale).formulaTreeAria}">
-        <ul class="tree-root">${renderTreeNode(state.tree, ui(state.locale))}</ul>
+        <ul class="tree-root">${renderTreeNode(state.tree, state.locale)}</ul>
       </section>
       ${renderGuidedToggles(state)}
       ${hint ? `<p class="feedback ${state.complete ? 'feedback-correct' : 'feedback-info'}" role="status">${hint}</p>` : ''}

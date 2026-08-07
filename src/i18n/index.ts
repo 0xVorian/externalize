@@ -8,6 +8,8 @@ export {
   getExerciseCopy,
   getFeedbackTemplates,
   getFeedbackDefaults,
+  formatTruthValue,
+  formatAssignmentLine,
 } from './messages';
 export type { ExerciseCopy, UiCopy, ProgressUiCopy } from './messages';
 export {
