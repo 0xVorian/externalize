@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Playwright smoke tests: onboarding skip/finish (`e2e/smoke/onboarding.spec.ts`), `counter-001` find-counterexample (`e2e/smoke/counter-001.spec.ts`), `translate-002` try-again flow (`e2e/smoke/translate-002.spec.ts`)
 - GitHub Actions CI (`.github/workflows/ci.yml`): `npm test` and `npm run build` on push/PR to `master`; Playwright Chromium smoke tests in a follow-up job
 
 ### Changed
