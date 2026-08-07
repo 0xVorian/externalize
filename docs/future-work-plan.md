@@ -43,6 +43,7 @@ Tiers reflect **dependency and payoff**, not roadmap phases. Tier 1 should land 
 | **Accessibility (a11y)** | Keyboard paths, focus order, screen-reader labels | Tap-first stays primary; no hover-only affordances |
 | **PWA manifest** | Home-screen install, offline shell | Lightweight; no sync requirement |
 | **Predicate / ND decision docs** | Recorded choices before UI work | **Predicate prep (done):** [predicate-logic.md](predicate-logic.md); ND still TBD in [decisions](decisions.md) |
+| **Predicate / ND decision docs** | Recorded choices before UI work | **ND prep (done):** [natural-deduction.md](natural-deduction.md); predicate logic still TBD; finalize rule set in [decisions](decisions.md) when Phase 5 starts |
 
 ## Agent batch launch plan
 
@@ -109,6 +110,7 @@ Revisit this list only after Phase 3 translation feels instructive on a phone an
 | [Content model](content-model.md) | Exercise schema, concept graph, progress shape |
 | [Technical decisions](decisions.md) | Platform, notation, authoring, open questions |
 | [Predicate logic (Phase 6 prep)](predicate-logic.md) | AST extension, notation, engine impact — design only |
+| [Natural deduction (Phase 5 prep)](natural-deduction.md) | Fitch mobile layout, rule-set options, fill/repair exercise patterns |
 | [Design principles](design-principles.md) | Non-negotiable UX constraints for all workstreams |
 | [Internationalization](i18n.md) | EN/FR copy conventions for Level 1 and exercises |
 
