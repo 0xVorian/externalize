@@ -74,7 +74,7 @@ function defaultResume(): ResumePoint {
 
 function defaultStore(): ProgressStore {
   return {
-    version: 4,
+    version: 5,
     lessonsCompleted: [],
     level0Complete: false,
     level1Complete: false,

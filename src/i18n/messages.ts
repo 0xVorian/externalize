@@ -482,6 +482,15 @@ export type ProgressUiCopy = {
   importError: string;
   progressItemAria: (label: string, status: string) => string;
   modeProgressAria: string;
+  whatNextTitle: string;
+  whatNextWeakestSkill: (skill: string, rate: number) => string;
+  whatNextNextExercise: (exerciseId: string) => string;
+  whatNextReviewDue: (count: number) => string;
+  whatNextResumeLesson: (lesson: string) => string;
+  whatNextResumePractice: string;
+  whatNextResumeProgress: string;
+  whatNextPracticeSkill: string;
+  whatNextStartExercise: string;
 };
 
 const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
@@ -532,6 +541,15 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     importError: 'That file could not be read. Choose an Externalize progress export.',
     progressItemAria: (label, status) => `${label}, ${status}`,
     modeProgressAria: 'Progress',
+    whatNextTitle: 'What next?',
+    whatNextWeakestSkill: (skill, rate) => `${skill} is at ${rate}% — a few targeted exercises should help.`,
+    whatNextNextExercise: (id) => `Next up: ${id}.`,
+    whatNextReviewDue: (count) => `${count} exercise${count === 1 ? '' : 's'} scheduled for review.`,
+    whatNextResumeLesson: (lesson) => `Continue the course at “${lesson}”.`,
+    whatNextResumePractice: 'Pick up your last exercise session.',
+    whatNextResumeProgress: 'Start or continue the introductory unit.',
+    whatNextPracticeSkill: 'Practice this skill',
+    whatNextStartExercise: 'Start exercise',
   },
   fr: {
     progress: 'Parcours',
@@ -580,6 +598,15 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     importError: 'Fichier illisible. Choisissez une exportation Externalize.',
     progressItemAria: (label, status) => `${label}, ${status}`,
     modeProgressAria: 'Parcours',
+    whatNextTitle: 'Et ensuite ?',
+    whatNextWeakestSkill: (skill, rate) => `${skill} : ${rate} % — quelques exercices ciblés devraient aider.`,
+    whatNextNextExercise: (id) => `Prochain exercice : ${id}.`,
+    whatNextReviewDue: (count) => `${count} exercice${count > 1 ? 's' : ''} à revoir.`,
+    whatNextResumeLesson: (lesson) => `Reprendre le cours à « ${lesson} ».`,
+    whatNextResumePractice: "Reprendre la dernière session d'exercices.",
+    whatNextResumeProgress: "Commencer ou poursuivre l'unité d'introduction.",
+    whatNextPracticeSkill: 'Travailler cette compétence',
+    whatNextStartExercise: "Commencer l'exercice",
   },
 };
 
