@@ -43,6 +43,8 @@ Goal: validate the core UX on a phone — externalized scope, visible evaluation
 
 Goal: ordinary language ↔ symbols, now that the tree renderer and feedback loop are proven.
 
+**Design:** [phase3-translation.md](phase3-translation.md) (palette, AST comparison, feedback taxonomy, engine integration). Spike stub: `src/app/translation/`.
+
 - [ ] Tap-based symbol palette (mobile primary)
 - [ ] Optional drag-to-group on desktop, with tap equivalent
 - [ ] Visual scope on built formula
