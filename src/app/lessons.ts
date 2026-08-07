@@ -37,9 +37,24 @@ export const ALL_LEARN_LESSONS: LessonDefinition[] = [...LEVEL_0_LESSONS, ...LEV
 
 export const PRACTICE_UNLOCK_ORDER = [
   'eval-001',
-  'eval-002',
+  'eval-003',
+  'eval-004',
+  'eval-005',
   'scope-003',
+  'scope-009',
+  'scope-004',
+  'scope-007',
+  'eval-002',
+  'eval-006',
+  'eval-007',
+  'eval-008',
+  'eval-009',
   'scope-001',
+  'scope-005',
+  'scope-006',
+  'scope-008',
+  'scope-010',
+  'scope-011',
   'scope-002',
 ] as const;
 

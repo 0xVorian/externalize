@@ -73,6 +73,62 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
           '∧ falls within the scope of ¬. The main connective applies to the entire well-formed formula.',
       },
     },
+    'scope-004': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '∧ combines Q and R on the right, but ∨ is the main connective — it joins the left disjunct to the whole right-hand subformula.',
+      },
+    },
+    'scope-005': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '∨ is the main connective of (P ∨ Q), yet the entire formula is a material conditional. → has the outermost scope.',
+      },
+    },
+    'scope-006': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '→ structures (P → Q) inside the parentheses, but ¬ applies to that entire subformula. The main connective governs the whole expression.',
+      },
+    },
+    'scope-007': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '∧ is the main connective of (P ∧ Q), not of the full formula. ∨ links that conjunction to R at the top level.',
+      },
+    },
+    'scope-008': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '∨ is the main connective of (Q ∨ R) in the consequent, but → is the main connective of the entire conditional.',
+      },
+    },
+    'scope-009': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '¬ applies only to P. ∧ is the main connective — it conjoins ¬P with Q across the full formula.',
+      },
+    },
+    'scope-010': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          'The inner → forms (P → Q), but the outer → is the main connective — it takes that subformula as its antecedent.',
+      },
+    },
+    'scope-011': {
+      prompt: 'Select the main connective of the formula.',
+      feedback: {
+        'selected-subconnective':
+          '→ is the main connective of (Q → R) on the right, but ↔ is the main connective of the entire biconditional.',
+      },
+    },
     'eval-001': {
       prompt:
         'Tap V or F for each letter. The table row shows how P ∧ Q evaluates under your assignment.',
@@ -80,6 +136,34 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'eval-002': {
       prompt:
         'Change the assignment and observe how truth values propagate from the letters through each subformula.',
+    },
+    'eval-003': {
+      prompt:
+        'Set P and Q, then read the result column: disjunction is true when at least one disjunct is true.',
+    },
+    'eval-004': {
+      prompt:
+        'Assign truth values to P and Q. Material implication P → Q is false only when P is true and Q is false.',
+    },
+    'eval-005': {
+      prompt:
+        'Toggle P and Q. The biconditional P ↔ Q is true exactly when both sides share the same truth value.',
+    },
+    'eval-006': {
+      prompt:
+        'With three letters, trace how the disjunction (P ∨ Q) feeds the conditional before R is evaluated.',
+    },
+    'eval-007': {
+      prompt:
+        'Watch how the value of (Q ∨ R) propagates upward before P ∧ … is computed.',
+    },
+    'eval-008': {
+      prompt:
+        'Negation applies after the conjunction inside the parentheses is evaluated. Follow the tree from the atoms outward.',
+    },
+    'eval-009': {
+      prompt:
+        'Each conjunct is evaluated separately. The conjunction is true only when both (P → Q) and R are true.',
     },
   },
   fr: {
@@ -100,6 +184,62 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
           'La conjonction ∧ est dans la portée de la négation ¬ : le connecteur principal s\'applique à la formule bien formée dans son ensemble.',
       },
     },
+    'scope-004': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'La conjonction ∧ lie Q et R à droite, mais la disjonction ∨ est le connecteur principal : elle unit le membre gauche à toute la sous-formule de droite.',
+      },
+    },
+    'scope-005': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'La disjonction ∨ gouverne (P ∨ Q), mais la formule entière est une implication matérielle : c\'est → qui a la portée externe.',
+      },
+    },
+    'scope-006': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'L\'implication → structure (P → Q) entre parenthèses, mais la négation ¬ s\'applique à cette sous-formule entière. Le connecteur principal porte sur l\'expression globale.',
+      },
+    },
+    'scope-007': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'La conjonction ∧ est le connecteur principal de (P ∧ Q), pas de la formule complète. La disjonction ∨ relie cette conjonction à R au niveau supérieur.',
+      },
+    },
+    'scope-008': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'La disjonction ∨ gouverne (Q ∨ R) dans le conséquent, mais l\'implication → est le connecteur principal de la conditionnelle entière.',
+      },
+    },
+    'scope-009': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'La négation ¬ ne porte que sur P. C\'est la conjonction ∧ qui est le connecteur principal — elle assemble ¬P et Q sur toute la formule.',
+      },
+    },
+    'scope-010': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'L\'implication interne → forme (P → Q), mais l\'implication externe → est le connecteur principal : elle prend cette sous-formule comme antécédent.',
+      },
+    },
+    'scope-011': {
+      prompt: 'Indiquez le connecteur principal de la formule.',
+      feedback: {
+        'selected-subconnective':
+          'L\'implication → gouverne (Q → R) à droite, mais l\'équivalence ↔ est le connecteur principal de la biconditionnelle entière.',
+      },
+    },
     'eval-001': {
       prompt:
         'Toucher V ou F pour chaque variable. La ligne du tableau indique la valeur de P ∧ Q sous cette interprétation.',
@@ -107,6 +247,34 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'eval-002': {
       prompt:
         'Modifiez la valuation et suivez la propagation des valeurs de vérité à travers les sous-formules.',
+    },
+    'eval-003': {
+      prompt:
+        'Fixez P et Q, puis lisez la colonne résultat : une disjonction est vraie dès qu\'au moins un disjonct est vrai.',
+    },
+    'eval-004': {
+      prompt:
+        'Attribuez des valeurs à P et Q. L\'implication matérielle P → Q est fausse seulement lorsque P est vrai et Q est faux.',
+    },
+    'eval-005': {
+      prompt:
+        'Basculez P et Q. La biconditionnelle P ↔ Q est vraie exactement quand les deux côtés ont la même valeur de vérité.',
+    },
+    'eval-006': {
+      prompt:
+        'Avec trois variables, suivez comment la disjonction (P ∨ Q) alimente la conditionnelle avant l\'évaluation de R.',
+    },
+    'eval-007': {
+      prompt:
+        'Observez comment la valeur de (Q ∨ R) remonte dans l\'arbre avant le calcul de P ∧ …',
+    },
+    'eval-008': {
+      prompt:
+        'La négation s\'applique après l\'évaluation de la conjonction entre parenthèses. Remontez l\'arbre depuis les variables.',
+    },
+    'eval-009': {
+      prompt:
+        'Chaque conjoint est évalué séparément. La conjonction n\'est vraie que si (P → Q) et R le sont tous deux.',
     },
   },
 };
