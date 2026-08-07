@@ -80,7 +80,8 @@ npm test
 | `type` | Learner action | Typical presentation |
 |--------|----------------|----------------------|
 | `identify-main-connective` | Tap the main connective in the tree | `tree-scope` |
-| `evaluate-formula` | Set atom truth values; read computed nodes | `truth-table-live` (flat `P ∧ Q` only) or `tree-eval` |
+| `evaluate-formula` | Set atom truth values; read computed nodes | `truth-table-live` (flat formulas) or `tree-eval` |
+| `fill-truth-table-cell` | Fill one masked cell in a partial truth table | `truth-table-partial` |
 
 ### Step 2 — Register in `src/app/exercises.ts`
 
@@ -103,7 +104,18 @@ For evaluation exercises, set `initialAssignment` so the first screen is meaning
 },
 ```
 
-**ID convention:** `scope-NNN` or `eval-NNN`.
+**ID convention:** `scope-NNN`, `eval-NNN`, or `tt-NNN`.
+
+For fill-truth-table exercises, set `hiddenRowIndex` (0-based row in the full table):
+
+```typescript
+{
+  id: 'tt-006',
+  type: 'fill-truth-table-cell',
+  formula: 'P ∨ Q',
+  hiddenRowIndex: 3,
+},
+```
 
 ### Step 3 — Add unlock order (if gated)
 
@@ -136,7 +148,7 @@ Add to `PRESENTATION` in `src/app/presentation.test.ts`:
 'eval-003': 'tree-eval',   // not truth-table-live unless formula is exactly 'P ∧ Q'
 ```
 
-**Auto-routing note:** `usesLiveTruthRow()` returns true only for the exact string `P ∧ Q`. New flat formulas do not automatically get a live table — choose `tree-eval` or extend the renderer.
+**Auto-routing note:** `usesLiveTruthRow()` returns true for flat formulas (`P ∧ Q`, `¬P`, `P ∨ Q`, `P → Q`, `P ↔ Q`). Nested formulas use `tree-eval`; fill-truth-table exercises use `truth-table-partial`.
 
 ### Step 6 — Verify
 
@@ -148,7 +160,69 @@ npm test
 
 ---
 
-## 3. Internationalization
+## 3. Exercise template generator (scope, eval, fill-truth-table)
+
+For bulk additions of the three structural patterns (~28 exercises today), use the generator instead of hand-typing every field. It **prints snippets for review** — it does not overwrite `src/app/exercises.ts`.
+
+### Template bank
+
+Edit `content/exercise-templates.json`:
+
+| Key | Pattern | Fields |
+|-----|---------|--------|
+| `scope` | Main connective | `formula` |
+| `eval` | Evaluate under one assignment | `formula`, `initialAssignment` |
+| `fillTruthTable` | Mask one table cell | `formula`, `hiddenRowIndex` |
+
+Optional explicit `id` on any entry (e.g. `"id": "scope-013"`) overrides auto-numbering for that row.
+
+Schema: `tools/exercise-generator/exercise-templates.schema.json`.
+
+### Generate snippets
+
+```bash
+npm run generate:exercises
+```
+
+Outputs TypeScript lines to paste into `EXERCISE_DEFINITIONS`, plus commented `PRESENTATION` hints.
+
+Common flags:
+
+| Flag | Purpose |
+|------|---------|
+| `--json` | JSON array instead of TypeScript |
+| `--both` | TypeScript then JSON |
+| `--pattern=scope` | One pattern only (repeatable) |
+| `--start-scope=N` | First auto `scope-NNN` index (same for `--start-eval`, `--start-tt`) |
+| `--diff` | Compare templates to current `exercises.ts` |
+| `--unlock-hint` | Append suggested `PRACTICE_UNLOCK_ORDER` lines |
+| `--templates=PATH` | Alternate template file |
+
+Examples:
+
+```bash
+# New scope exercises starting at scope-013
+npm run generate:exercises -- --pattern=scope --start-scope=13
+
+# Check whether templates match the shipped bank
+npm run generate:exercises -- --diff
+
+# JSON for external tooling
+npm run generate:exercises -- --json --pattern=eval
+```
+
+### After generating
+
+1. Paste reviewed definitions into `src/app/exercises.ts`.
+2. Add EN/FR copy in `src/i18n/messages.ts` (prompts still hand-authored).
+3. Register `PRESENTATION` entries and update unlock order in `src/app/lessons.ts`.
+4. Run `npm test`.
+
+The generator validates formulas (parser), assignment atoms, and `hiddenRowIndex` bounds via the truth-table engine.
+
+---
+
+## 4. Internationalization
 
 Full policy: **[docs/i18n.md](i18n.md)**
 
@@ -163,7 +237,7 @@ Summary for authors:
 
 ---
 
-## 4. Presentation
+## 5. Presentation
 
 Full inventory and layout rules: **[docs/presentation.md](presentation.md)**
 
@@ -179,7 +253,7 @@ When adding content, update `PRESENTATION` in `presentation.test.ts` and the inv
 
 ---
 
-## 5. Worked examples
+## 6. Worked examples
 
 ### Example A — Watch lesson step (`P ∧ Q`)
 
@@ -330,7 +404,7 @@ Open the exercise on a ~320px viewport. Confirm tap targets on the tree align wi
 
 ---
 
-## 6. Changelog and versioning
+## 7. Changelog and versioning
 
 Full policy: **[docs/versioning.md](versioning.md)**
 

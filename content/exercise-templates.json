@@ -1,0 +1,36 @@
+{
+  "$schema": "../tools/exercise-generator/exercise-templates.schema.json",
+  "scope": [
+    { "formula": "(P → Q) ∧ R" },
+    { "formula": "(P → Q) ↔ ¬R" },
+    { "formula": "¬(P ∧ Q)" },
+    { "formula": "P ∨ (Q ∧ R)" },
+    { "formula": "(P ∨ Q) → R" },
+    { "formula": "¬(P → Q)" },
+    { "formula": "(P ∧ Q) ∨ R" },
+    { "formula": "P → (Q ∨ R)" },
+    { "formula": "¬P ∧ Q" },
+    { "formula": "(P → Q) → R" },
+    { "formula": "P ↔ (Q → R)" },
+    { "formula": "(P ∧ Q) ∧ R" }
+  ],
+  "eval": [
+    { "formula": "P ∧ Q", "initialAssignment": { "P": true, "Q": false } },
+    { "formula": "(P → Q) ↔ ¬R", "initialAssignment": { "P": true, "Q": false, "R": true } },
+    { "formula": "P ∨ Q", "initialAssignment": { "P": false, "Q": true } },
+    { "formula": "P → Q", "initialAssignment": { "P": true, "Q": false } },
+    { "formula": "P ↔ Q", "initialAssignment": { "P": true, "Q": false } },
+    { "formula": "(P ∨ Q) → R", "initialAssignment": { "P": false, "Q": false, "R": true } },
+    { "formula": "P ∧ (Q ∨ R)", "initialAssignment": { "P": true, "Q": false, "R": true } },
+    { "formula": "¬(P ∧ Q)", "initialAssignment": { "P": true, "Q": true } },
+    { "formula": "(P → Q) ∧ R", "initialAssignment": { "P": true, "Q": false, "R": true } },
+    { "formula": "¬P", "initialAssignment": { "P": false } }
+  ],
+  "fillTruthTable": [
+    { "formula": "P ∧ Q", "hiddenRowIndex": 2 },
+    { "formula": "P → Q", "hiddenRowIndex": 2 },
+    { "formula": "P ∨ Q", "hiddenRowIndex": 0 },
+    { "formula": "(P → Q) ∧ R", "hiddenRowIndex": 6 },
+    { "formula": "P ↔ Q", "hiddenRowIndex": 1 }
+  ]
+}
