@@ -492,7 +492,6 @@ export function getCellFeedback(locale: Locale, exerciseId: string, correct: boo
     : (copy.cellWrong ?? FEEDBACK_DEFAULTS[locale].correct);
 }
 
-<<<<<<< HEAD
 export function getCounterFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
   const copy = getExerciseCopy(locale, exerciseId);
   return correct
@@ -500,13 +499,10 @@ export function getCounterFeedback(locale: Locale, exerciseId: string, correct: 
     : (copy.counterWrong ?? FEEDBACK_DEFAULTS[locale]['counterexample-miss']);
 }
 
-=======
 export function getTautologyFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
   return getCellFeedback(locale, exerciseId, correct);
 }
 
-
->>>>>>> feature/validity-tautology-challenges
 export function getFeedbackTemplates(locale: Locale, exerciseId: string): FeedbackTemplate {
   const exerciseFeedback = EXERCISE_COPY[locale][exerciseId]?.feedback ?? {};
   return { ...FEEDBACK_DEFAULTS[locale], ...exerciseFeedback };

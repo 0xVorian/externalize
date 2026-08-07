@@ -1,6 +1,5 @@
 import type { Assignment, FeedbackTemplate } from '../../engine';
 
-<<<<<<< HEAD
 export type ExerciseType =
   | 'identify-main-connective'
   | 'evaluate-formula'
