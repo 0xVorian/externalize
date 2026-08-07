@@ -1,4 +1,5 @@
 import type { Formula } from '../ast/types';
+import { collectAtoms } from '../ast/types';
 import { equivalent, type EquivalenceOptions } from '../equiv/equivalent';
 
 export type TranslationFeedbackTag =
@@ -87,24 +88,36 @@ function detectMissingParens(expected: Formula, learner: Formula): boolean {
   return false;
 }
 
+
+function detectWrongAtom(expected: Formula, learner: Formula): boolean {
+  const expectedAtoms = collectAtoms(expected);
+  const learnerAtoms = collectAtoms(learner);
+  if (expectedAtoms.size !== learnerAtoms.size) {
+    return true;
+  }
+  for (const atom of expectedAtoms) {
+    if (!learnerAtoms.has(atom)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function classifyTranslation(
   expected: Formula,
   learner: Formula,
   options: EquivalenceOptions = {},
 ): TranslationFeedbackResult {
-  if (equivalent(expected, learner, options)) {
+  const structuralOptions: EquivalenceOptions = {
+    allowCommutativeAnd: options.allowCommutativeAnd,
+    allowCommutativeOr: options.allowCommutativeOr,
+  };
+
+  if (equivalent(expected, learner, structuralOptions)) {
     return {
       correct: true,
       tag: 'correct',
       message: resolveTranslationFeedback('correct'),
-    };
-  }
-
-  if (options.allowSemantic && equivalent(expected, learner, { ...options, allowSemantic: true })) {
-    return {
-      correct: false,
-      tag: 'equivalent-but-noncanonical',
-      message: resolveTranslationFeedback('equivalent-but-noncanonical'),
     };
   }
 
@@ -137,6 +150,22 @@ export function classifyTranslation(
       correct: false,
       tag: 'missing-parens',
       message: resolveTranslationFeedback('missing-parens'),
+    };
+  }
+
+  if (detectWrongAtom(expected, learner)) {
+    return {
+      correct: false,
+      tag: 'wrong-atom',
+      message: resolveTranslationFeedback('wrong-atom'),
+    };
+  }
+
+  if (options.allowSemantic && equivalent(expected, learner, { ...options, allowSemantic: true })) {
+    return {
+      correct: true,
+      tag: 'equivalent-but-noncanonical',
+      message: resolveTranslationFeedback('equivalent-but-noncanonical'),
     };
   }
 
