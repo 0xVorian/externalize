@@ -219,12 +219,6 @@ button {
   cursor: default;
 }
 
-.atom-toggle.disabled,
-.atom-toggle:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
 .exercise-card {
   margin-top: 1rem;
 }
@@ -476,31 +470,70 @@ button {
   margin-bottom: 1rem;
 }
 
-.atom-toggles {
+.atom-panel-hint {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.atom-rows {
   display: grid;
   gap: 0.5rem;
 }
 
-.atom-toggle {
+.atom-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  min-height: var(--tap-min);
-  padding: 0.65rem 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  background: #fff;
-  cursor: pointer;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.atom-toggle.true {
+.atom-row.disabled {
+  opacity: 0.45;
+}
+
+.atom-segments {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  flex: 1;
+  max-width: 9rem;
+}
+
+.atom-segment {
+  min-height: var(--tap-min);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.atom-segment.active.true {
   border-color: var(--accent);
   background: var(--accent-soft);
+  color: var(--accent);
 }
 
-.atom-name,
-.atom-value {
+.atom-segment.active.false {
+  border-color: var(--text);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.atom-segment:disabled {
+  cursor: not-allowed;
+}
+
+.atom-name {
   font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  min-width: 1.5rem;
 }
 
 .feedback {
@@ -565,7 +598,7 @@ button {
   }
 
   .node-button,
-  .atom-toggle,
+  .atom-segment,
   .secondary,
   .mode-button {
     background: #171412;

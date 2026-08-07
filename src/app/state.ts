@@ -69,6 +69,10 @@ export function selectNode(state: AppState, nodeId: string): AppState {
 }
 
 export function toggleAtom(state: AppState, atom: string): AppState {
+  return setAtomValue(state, atom, !state.assignment[atom]);
+}
+
+export function setAtomValue(state: AppState, atom: string, value: boolean): AppState {
   if (state.exercise.type !== 'evaluate-formula') {
     return state;
   }
@@ -76,7 +80,7 @@ export function toggleAtom(state: AppState, atom: string): AppState {
   const formula = parse(state.exercise.formula);
   const assignment = {
     ...state.assignment,
-    [atom]: !state.assignment[atom],
+    [atom]: value,
   };
   const { tree } = evaluateWithNodes(formula, assignment);
 

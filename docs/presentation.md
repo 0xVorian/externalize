@@ -56,6 +56,7 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 - Columns: atom assignments + result column (formula header, e.g. `P ∧ Q`).
 - Step counter (“Case 1 of 4”) plus row highlight — redundant on purpose (orientation + focus).
 - Locale-aware truth labels in cells (`T`/`F` EN, `V`/`F` FR) via `formatTruthValue()`.
+- **Interpretation controls:** each letter has explicit **V / F segment buttons** (not a single opaque row); hint text under the panel title explains tap-to-set.
 
 **Authoring:** `watchSteps` in `src/i18n/lessons.ts` — each step is `{ assignment, explanation }`. Result column is computed (`P && Q` for this lesson); do not duplicate in copy.
 
@@ -105,7 +106,7 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 ## Related files
 
-- `src/app/truth-table-render.ts` — shared watch / guided / eval-001 table
+- `src/app/atom-toggles-render.ts` — shared V/F segment controls
 - `src/app/lesson-render.ts` — watch table, guided live row
 - `src/app/render.ts` — practice tree + toggles
 - `src/i18n/messages.ts` — `formatTruthValue`, `formatAssignmentLine`

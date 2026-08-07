@@ -1,39 +1,18 @@
-import { learnUi, getLessonCopy, ui } from '../i18n';
+import { learnUi, getLessonCopy } from '../i18n';
 import { LEVEL_0_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
 import { renderShellHeader } from './shell-render';
 import { renderLiveTruthRow, renderTruthTable } from './truth-table-render';
+import { renderAtomPanel } from './atom-toggles-render';
 
 function renderGuidedToggles(state: LessonState): string {
-  const copy = ui(state.locale);
-  const atoms = ['P', 'Q'] as const;
-  return `
-    <section class="atom-panel" aria-label="${copy.assignmentAria}">
-      <h2 class="panel-title">${copy.assignment}</h2>
-      <div class="atom-toggles">
-        ${atoms
-          .map((atom) => {
-            const enabled = isGuidedAtomEnabled(state, atom);
-            const value = state.assignment[atom] ?? false;
-            return `
-          <button
-            type="button"
-            class="atom-toggle ${value ? 'true' : 'false'} ${enabled ? '' : 'disabled'}"
-            data-action="guided-toggle"
-            data-atom="${atom}"
-            aria-pressed="${value}"
-            ${enabled ? '' : 'disabled'}
-          >
-            <span class="atom-name">${atom}</span>
-            <span class="atom-value">${value ? copy.trueLabel : copy.falseLabel}</span>
-          </button>
-        `;
-          })
-          .join('')}
-      </div>
-    </section>
-  `;
+  return renderAtomPanel({
+    locale: state.locale,
+    assignment: state.assignment,
+    action: 'set-atom-value',
+    isAtomEnabled: (atom) => isGuidedAtomEnabled(state, atom),
+  });
 }
 
 function renderCardLesson(state: LessonState): string {

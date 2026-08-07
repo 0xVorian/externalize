@@ -13,6 +13,8 @@ export type UiCopy = {
   queueMeta: (count: number) => string;
   assignment: string;
   assignmentAria: string;
+  assignmentHint: string;
+  atomGroupAria: (atom: string) => string;
   formulaTreeAria: string;
   continue: string;
   nextExercise: string;
@@ -73,7 +75,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'eval-001': {
       prompt:
-        'Assign truth values to the sentence letters. The table row updates to show how P ∧ Q evaluates under your assignment.',
+        'Tap V or F for each letter. The table row shows how P ∧ Q evaluates under your assignment.',
     },
     'eval-002': {
       prompt:
@@ -100,7 +102,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'eval-001': {
       prompt:
-        'Fixez une valuation des variables propositionnelles. La ligne du tableau se met à jour selon P ∧ Q sous cette interprétation.',
+        'Toucher V ou F pour chaque variable. La ligne du tableau indique la valeur de P ∧ Q sous cette interprétation.',
     },
     'eval-002': {
       prompt:
@@ -117,6 +119,8 @@ const UI: Record<Locale, UiCopy> = {
       `${count} exercise${count === 1 ? '' : 's'} scheduled for review`,
     assignment: 'Truth assignment',
     assignmentAria: 'Truth assignment to sentence letters',
+    assignmentHint: 'Tap V or F for each letter to set its truth value.',
+    atomGroupAria: (atom) => `Truth value for ${atom}`,
     formulaTreeAria: 'Parsing tree of the formula',
     continue: 'Continue',
     nextExercise: 'Next exercise',
@@ -134,6 +138,8 @@ const UI: Record<Locale, UiCopy> = {
       `${count} exercice${count === 1 ? '' : 's'} à revoir`,
     assignment: 'Interprétation',
     assignmentAria: 'Interprétation (valuation des variables propositionnelles)',
+    assignmentHint: 'Toucher V ou F pour fixer la valeur de chaque variable.',
+    atomGroupAria: (atom) => `Valeur de vérité de ${atom}`,
     formulaTreeAria: 'Arbre de décomposition de la formule',
     continue: 'Continuer',
     nextExercise: 'Exercice suivant',

@@ -7,6 +7,7 @@ describe('i18n', () => {
     it(`provides UI copy for ${locale}`, () => {
       expect(ui(locale).practice).toBeTruthy();
       expect(ui(locale).continue).toBeTruthy();
+      expect(ui(locale).assignmentHint).toBeTruthy();
     });
 
     it(`provides exercise copy for every definition in ${locale}`, () => {

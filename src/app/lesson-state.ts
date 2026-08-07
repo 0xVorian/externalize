@@ -154,13 +154,17 @@ export function initWatchLesson(state: LessonState): LessonState {
 }
 
 export function toggleGuidedAtom(state: LessonState, atom: string): LessonState {
+  return setGuidedAtom(state, atom, !state.assignment[atom]);
+}
+
+export function setGuidedAtom(state: LessonState, atom: string, value: boolean): LessonState {
   if (state.lesson.type !== 'guided' || !state.lesson.formula || state.complete) {
     return state;
   }
 
   const copy = getLessonCopy(state.locale, state.lesson.id);
   const steps = copy.guidedSteps ?? [];
-  const assignment = { ...state.assignment, [atom]: !state.assignment[atom] };
+  const assignment = { ...state.assignment, [atom]: value };
   const { tree } = evaluateWithNodes(parse(state.lesson.formula), assignment);
 
   let guidedStep = state.guidedStep;

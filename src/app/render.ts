@@ -3,13 +3,10 @@ import { ui, formatTruthValue } from '../i18n';
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
 import { renderLiveTruthRow, usesLiveTruthRow } from './truth-table-render';
+import { renderAtomPanel } from './atom-toggles-render';
 
 function nodeValueClass(kind: TreeNode['kind']): string {
   return kind === 'atom' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
-}
-
-function formatTruthWord(state: AppState, value: boolean): string {
-  return formatTruthValue(state.locale, value);
 }
 
 function renderTreeNode(node: TreeNode, state: AppState): string {
@@ -42,31 +39,11 @@ function renderTreeNode(node: TreeNode, state: AppState): string {
 }
 
 function renderAtomToggles(state: AppState): string {
-  const copy = ui(state.locale);
-  const atoms = Object.keys(state.assignment).sort();
-  return `
-    <section class="atom-panel" aria-label="${copy.assignmentAria}">
-      <h2 class="panel-title">${copy.assignment}</h2>
-      <div class="atom-toggles">
-        ${atoms
-          .map(
-            (atom) => `
-          <button
-            type="button"
-            class="atom-toggle ${state.assignment[atom] ? 'true' : 'false'}"
-            data-action="toggle-atom"
-            data-atom="${atom}"
-            aria-pressed="${state.assignment[atom]}"
-          >
-            <span class="atom-name">${atom}</span>
-            <span class="atom-value">${formatTruthWord(state, state.assignment[atom])}</span>
-          </button>
-        `,
-          )
-          .join('')}
-      </div>
-    </section>
-  `;
+  return renderAtomPanel({
+    locale: state.locale,
+    assignment: state.assignment,
+    action: 'set-atom-value',
+  });
 }
 
 function renderEvaluationBody(state: AppState): string {

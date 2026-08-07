@@ -182,6 +182,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Classical propositional logic assumes bivalence: each statement is true (T) or false (F), not both.',
           'A truth assignment specifies, for each sentence letter, which truth value it receives.',
+          'On exercises, tap V or F next to each letter to set its value; the table or tree updates immediately.',
           'Evaluating a formula means computing its truth value from the assignment, using the rules for each connective.',
         ],
         example: 'Assignment:  P ↦ T ,  Q ↦ F',
@@ -229,8 +230,8 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Guided evaluation: P ∧ Q',
       subtitle: 'Fix an assignment yourself.',
       guidedSteps: [
-        { kind: 'hint', text: 'Assign T to P (select P below).' },
-        { kind: 'hint', text: 'Good. Now assign F to Q.' },
+        { kind: 'hint', text: 'Tap T for P.' },
+        { kind: 'hint', text: 'Good. Now tap F for Q.' },
         {
           kind: 'done',
           text: 'Under P ↦ T and Q ↦ F, the conjunction P ∧ Q evaluates to F. Confirm the result column.',
@@ -260,6 +261,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'En logique classique, toute proposition est vraie (V) ou fausse (F) — principe de bivalence.',
           'Une interprétation (ou valuation) attribue à chaque variable propositionnelle une valeur de vérité.',
+          'Aux exercices, toucher V ou F à côté de chaque variable ; le tableau ou l\'arbre se met à jour aussitôt.',
           'Évaluer une formule, c\'est calculer sa valeur à partir de cette interprétation et des règles des connecteurs.',
         ],
         example: 'Interprétation :  P ↦ V ,  Q ↦ F',
@@ -307,8 +309,8 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'À vous : évaluer P ∧ Q',
       subtitle: 'Construisez une interprétation pas à pas.',
       guidedSteps: [
-        { kind: 'hint', text: 'Attribuez V à P (sélectionnez P ci-dessous).' },
-        { kind: 'hint', text: 'Très bien. Attribuez maintenant F à Q.' },
+        { kind: 'hint', text: 'Toucher V pour P.' },
+        { kind: 'hint', text: 'Très bien. Toucher F pour Q.' },
         {
           kind: 'done',
           text: 'Sous P ↦ V et Q ↦ F, la conjonction P ∧ Q est F. Vérifiez la colonne résultat.',

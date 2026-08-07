@@ -23,14 +23,15 @@ import {
 import {
   createState,
   selectNode,
-  toggleAtom,
+  setAtomValue,
   applyLocale,
   type AppState,
 } from './app/state';
 import {
   createLessonState,
   advanceWatchStep,
-  toggleGuidedAtom,
+  setGuidedAtom,
+  isGuidedAtomEnabled,
   applyLessonLocale,
   lessonResumeSnapshot,
   type LessonState,
@@ -338,16 +339,30 @@ root.addEventListener('click', (event) => {
     return;
   }
 
-  if (mode === 'learn') {
-    if (action === 'guided-toggle') {
-      const atom = button.dataset.atom;
-      if (!atom) {
+  if (action === 'set-atom-value') {
+    const atom = button.dataset.atom;
+    const value = button.dataset.value === 'true';
+    if (!atom) {
+      return;
+    }
+    if (mode === 'learn') {
+      if (!isGuidedAtomEnabled(lessonState, atom)) {
         return;
       }
-      lessonState = toggleGuidedAtom(lessonState, atom);
+      lessonState = setGuidedAtom(lessonState, atom, value);
       persistLessonResume();
       render();
+      return;
     }
+    if (mode === 'practice') {
+      practiceState = setAtomValue(ensurePracticeState(), atom, value);
+      render();
+      return;
+    }
+    return;
+  }
+
+  if (mode === 'learn') {
     return;
   }
 
@@ -376,16 +391,6 @@ root.addEventListener('click', (event) => {
       );
       refreshPracticeQueue();
     }
-    render();
-    return;
-  }
-
-  if (action === 'toggle-atom') {
-    const atom = button.dataset.atom;
-    if (!atom) {
-      return;
-    }
-    practiceState = toggleAtom(ensurePracticeState(), atom);
     render();
     return;
   }
