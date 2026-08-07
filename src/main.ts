@@ -40,6 +40,9 @@ import {
   checkTranslation,
   tryAgainTranslation,
   checkCounterexample,
+  selectProofRule,
+  toggleProofCitation,
+  checkProofStep,
   type AppState,
 } from './app/state';
 import {
@@ -489,6 +492,30 @@ root.addEventListener('click', (event) => {
   }
   if (action === 'palette-undo') {
     practiceState = paletteUndo(ensurePracticeState());
+    render();
+    return;
+  }
+  if (action === 'proof-select-rule') {
+    if (button.dataset.rule === 'mp') {
+      practiceState = selectProofRule(ensurePracticeState(), 'mp');
+      render();
+    }
+    return;
+  }
+  if (action === 'proof-toggle-cite') {
+    const line = Number(button.dataset.line);
+    if (Number.isInteger(line) && line > 0) {
+      practiceState = toggleProofCitation(ensurePracticeState(), line);
+      render();
+    }
+    return;
+  }
+  if (action === 'check-proof') {
+    practiceState = checkProofStep(ensurePracticeState());
+    if (practiceState.phase === 'answered' && practiceState.feedback) {
+      persistProgress(recordResult(progress, practiceState.exercise.id, practiceState.feedback.correct, practiceState.feedback.correct ? undefined : practiceState.feedback.tag));
+      refreshPracticeQueue();
+    }
     render();
     return;
   }

@@ -6,6 +6,7 @@ import { renderLiveTruthRow, renderPartialTruthTable, renderCompleteTruthTable, 
 import { cellSubmissionCorrect, tautologySubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
 import { renderTranslationExerciseBody, renderTranslationActions } from './translation/translation-render';
+import { renderProofExerciseBody, renderProofActions } from './proof/proof-render';
 
 function showsEvaluatedTree(type: AppState['exercise']['type']): boolean {
   return type === 'evaluate-formula' || type === 'find-counterexample';
@@ -93,6 +94,9 @@ function renderExerciseBody(state: AppState): string {
     return renderFillTruthTableBody(state);
   }
   if (state.exercise.type === 'classify-tautology') return renderTautologyBody(state);
+  if (state.exercise.type === 'proof-fill-step') {
+    return renderProofExerciseBody(state);
+  }
   return renderScopeBody(state);
 }
 
@@ -124,7 +128,7 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
           : '';
 
   const formulaLine =
-    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology'
+    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology' || state.exercise.type === 'proof-fill-step'
       ? ''
       : `<p class="formula-display" aria-label="${copy.formulaDisplayAria}">${state.exercise.formula}</p>`;
 
@@ -149,6 +153,7 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
           ${state.exercise.type === 'evaluate-formula' ? `<button type="button" class="secondary" data-action="next">${copy.nextExercise}</button>` : ''}
           ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state) : ''}
           ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state) : ''}
+          ${state.exercise.type === 'proof-fill-step' ? renderProofActions(state) : ''}
         </div>
       </article>
     </main>

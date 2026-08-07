@@ -1,8 +1,9 @@
 import type { ScopeFeedbackTag } from './scope';
 import type { TranslationFeedbackTag } from './translation';
 import type { CounterexampleFeedbackTag } from './counterexample';
+import type { ProofFeedbackTag } from './proof';
 
-export type FeedbackTag = ScopeFeedbackTag | TranslationFeedbackTag | CounterexampleFeedbackTag;
+export type FeedbackTag = ScopeFeedbackTag | TranslationFeedbackTag | CounterexampleFeedbackTag | ProofFeedbackTag;
 export type FeedbackTemplate = Partial<Record<FeedbackTag, string>>;
 export type FeedbackResult = { correct: boolean; tag: FeedbackTag; message: string };
 export { resolveFeedback, checkMainConnectiveSelection, expectedMainConnectiveNodeId } from './scope';
@@ -10,3 +11,5 @@ export type { TranslationFeedbackTag, TranslationFeedbackTemplate, TranslationFe
 export { classifyTranslation, resolveTranslationFeedback } from './translation';
 export type { CounterexampleFeedbackTag, CounterexampleFeedbackTemplate } from './counterexample';
 export { resolveCounterexampleFeedback } from './counterexample';
+export type { ProofFeedbackTag } from './proof';
+export { resolveProofFeedback } from './proof';

@@ -15,8 +15,9 @@ export {
   formatTruthValue,
   formatAssignmentLine,
   translationUi,
+  proofUi,
 } from './messages';
-export type { ExerciseCopy, UiCopy, ProgressUiCopy, TranslationUiCopy, OnboardingUiCopy } from './messages';
+export type { ExerciseCopy, UiCopy, ProgressUiCopy, TranslationUiCopy, OnboardingUiCopy, ProofUiCopy } from './messages';
 export {
   learnUi,
   getLessonCopy,

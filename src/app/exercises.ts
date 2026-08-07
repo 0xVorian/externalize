@@ -1,12 +1,14 @@
 import type { Assignment, FeedbackTemplate } from '../../engine';
 
+<<<<<<< HEAD
 export type ExerciseType =
   | 'identify-main-connective'
   | 'evaluate-formula'
   | 'fill-truth-table-cell'
   | 'find-counterexample'
   | 'classify-tautology'
-  | 'translate-en-to-formula';
+  | 'translate-en-to-formula'
+  | 'proof-fill-step';
 
 export type ExerciseDefinition = {
   id: string;
@@ -60,6 +62,7 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'translate-004', type: 'translate-en-to-formula' },
   { id: 'translate-005', type: 'translate-en-to-formula' },
   { id: 'translate-006', type: 'translate-en-to-formula' },
+  { id: 'nd-001', type: 'proof-fill-step' },
 ];
 
 export function getExerciseDefinition(id: string): ExerciseDefinition | undefined {

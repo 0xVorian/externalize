@@ -481,5 +481,13 @@
         "level1-06-or-guided"
       ]
     }
+  ],
+    {
+      "id": "nd-001",
+      "concept": "natural-deduction",
+      "requiresLessons": [
+        "level1-09-imp-guided"
+      ]
+    }
   ]
 }
