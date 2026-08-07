@@ -1,29 +1,14 @@
 import type { Assignment, FeedbackTemplate } from '../../engine';
 
-export type ExerciseType =
-  | 'identify-main-connective'
-  | 'evaluate-formula'
-  | 'translate-en-to-formula';
+export type ExerciseType = 'identify-main-connective' | 'evaluate-formula' | 'fill-truth-table-cell' | 'translate-en-to-formula';
 
-export type ScopeExercise = {
+export type ExerciseDefinition = {
   id: string;
-  type: 'identify-main-connective';
-  formula: string;
-};
-
-export type EvaluateExercise = {
-  id: string;
-  type: 'evaluate-formula';
-  formula: string;
+  type: ExerciseType;
+  formula?: string;
   initialAssignment?: Assignment;
+  hiddenRowIndex?: number;
 };
-
-export type TranslateExercise = {
-  id: string;
-  type: 'translate-en-to-formula';
-};
-
-export type ExerciseDefinition = ScopeExercise | EvaluateExercise | TranslateExercise;
 
 export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'scope-001', type: 'identify-main-connective', formula: '(P → Q) ∧ R' },
@@ -37,6 +22,7 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'scope-009', type: 'identify-main-connective', formula: '¬P ∧ Q' },
   { id: 'scope-010', type: 'identify-main-connective', formula: '(P → Q) → R' },
   { id: 'scope-011', type: 'identify-main-connective', formula: 'P ↔ (Q → R)' },
+  { id: 'scope-012', type: 'identify-main-connective', formula: '(P ∧ Q) ∧ R' },
   { id: 'eval-001', type: 'evaluate-formula', formula: 'P ∧ Q', initialAssignment: { P: true, Q: false } },
   { id: 'eval-002', type: 'evaluate-formula', formula: '(P → Q) ↔ ¬R', initialAssignment: { P: true, Q: false, R: true } },
   { id: 'eval-003', type: 'evaluate-formula', formula: 'P ∨ Q', initialAssignment: { P: false, Q: true } },
@@ -46,6 +32,12 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'eval-007', type: 'evaluate-formula', formula: 'P ∧ (Q ∨ R)', initialAssignment: { P: true, Q: false, R: true } },
   { id: 'eval-008', type: 'evaluate-formula', formula: '¬(P ∧ Q)', initialAssignment: { P: true, Q: true } },
   { id: 'eval-009', type: 'evaluate-formula', formula: '(P → Q) ∧ R', initialAssignment: { P: true, Q: false, R: true } },
+  { id: 'eval-010', type: 'evaluate-formula', formula: '¬P', initialAssignment: { P: false } },
+  { id: 'tt-001', type: 'fill-truth-table-cell', formula: 'P ∧ Q', hiddenRowIndex: 2 },
+  { id: 'tt-002', type: 'fill-truth-table-cell', formula: 'P → Q', hiddenRowIndex: 2 },
+  { id: 'tt-003', type: 'fill-truth-table-cell', formula: 'P ∨ Q', hiddenRowIndex: 0 },
+  { id: 'tt-004', type: 'fill-truth-table-cell', formula: '(P → Q) ∧ R', hiddenRowIndex: 6 },
+  { id: 'tt-005', type: 'fill-truth-table-cell', formula: 'P ↔ Q', hiddenRowIndex: 1 },
   { id: 'translate-001', type: 'translate-en-to-formula' },
 ];
 

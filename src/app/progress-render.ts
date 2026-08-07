@@ -48,9 +48,14 @@ export function buildSummaryFromStore(store: ProgressStore): ProgressSummary {
   const level0Done = LEVEL_0_LESSONS.filter((lesson) =>
     store.lessonsCompleted.includes(lesson.id),
   ).length;
+  const level1Done = LEVEL_1_LESSONS.filter((lesson) =>
+    store.lessonsCompleted.includes(lesson.id),
+  ).length;
   return buildProgressSummary({
     level0Done,
     level0Total: LEVEL_0_LESSONS.length,
+    level1Done,
+    level1Total: LEVEL_1_LESSONS.length,
     lessonsCompleted: store.lessonsCompleted,
     exercisesUnlocked: getUnlockedExerciseIds(store),
     exercisesCompleted: store.completed,

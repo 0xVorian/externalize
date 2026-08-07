@@ -121,7 +121,7 @@ describe('storage v3', () => {
     const store = loadProgress();
     const raw = JSON.stringify(store);
     const { progress: restored } = importProgress(raw);
-    expect(restored.version).toBe(3);
+    expect(restored.version).toBe(4);
   });
 
   it('rejects invalid import data', () => {

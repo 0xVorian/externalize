@@ -350,6 +350,27 @@
         "level1-12-iff-guided",
         "level1-03-neg-guided"
       ]
+    },
+    {
+      "id": "scope-012",
+      "concept": "scope",
+      "requiresLessons": [
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "eval-010",
+      "concept": "negation",
+      "requiresLessons": [
+        "level1-03-neg-guided"
+      ]
+    },
+    {
+      "id": "translate-001",
+      "concept": "translation",
+      "requiresLessons": [
+        "level1-09-imp-guided"
+      ]
     }
   ]
 }
