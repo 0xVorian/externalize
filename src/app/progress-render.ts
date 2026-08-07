@@ -6,6 +6,7 @@ import {
   LEVEL_2_LESSONS,
   LEVEL_0_PRACTICE_UNLOCK_ORDER,
   LEVEL_1_PRACTICE_UNLOCK_ORDER,
+  LEVEL_2_PRACTICE_UNLOCK_ORDER,
 } from './lessons';
 import { buildProgressSummary, type ProgressSummary } from './progress-tracker';
 import type { ProgressStore } from './storage';
@@ -46,7 +47,9 @@ function renderExerciseTier(
         ? copy.exerciseDone
         : reason === 'unit1'
           ? copy.exerciseLockedUnit1
-          : locked
+          : reason === 'unit2'
+            ? copy.exerciseLockedUnit2
+            : locked
             ? copy.exerciseLocked
             : copy.lessonTodo;
       return renderListItem(locale, id, status, done);
@@ -150,6 +153,9 @@ export function renderProgressView(
   const unit1ExerciseItems = practiceUnlocked
     ? renderExerciseTier(locale, store, copy, LEVEL_1_PRACTICE_UNLOCK_ORDER)
     : '';
+  const unit2ExerciseItems = practiceUnlocked
+    ? renderExerciseTier(locale, store, copy, LEVEL_2_PRACTICE_UNLOCK_ORDER)
+    : '';
 
   const struggleItems =
     summary.struggles.length === 0
@@ -188,6 +194,8 @@ export function renderProgressView(
         <ul class="progress-list">${unit0ExerciseItems}</ul>
         <h3 class="progress-subheading">${copy.level1ExercisesHeading}</h3>
         <ul class="progress-list">${unit1ExerciseItems}</ul>
+        <h3 class="progress-subheading">${copy.level2ExercisesHeading}</h3>
+        <ul class="progress-list">${unit2ExerciseItems}</ul>
       </section>`
     : '';
 

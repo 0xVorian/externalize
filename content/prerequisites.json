@@ -12,7 +12,7 @@
       "id": "truth-values",
       "label": {
         "en": "Truth values",
-        "fr": "Valeurs de vérité"
+        "fr": "Valeurs de v\u00e9rit\u00e9"
       },
       "requires": [
         "proposition"
@@ -21,8 +21,8 @@
     {
       "id": "conjunction",
       "label": {
-        "en": "Conjunction (∧)",
-        "fr": "Conjonction (∧)"
+        "en": "Conjunction (\u2227)",
+        "fr": "Conjonction (\u2227)"
       },
       "requires": [
         "proposition",
@@ -32,8 +32,8 @@
     {
       "id": "negation",
       "label": {
-        "en": "Negation (¬)",
-        "fr": "Négation (¬)"
+        "en": "Negation (\u00ac)",
+        "fr": "N\u00e9gation (\u00ac)"
       },
       "requires": [
         "proposition",
@@ -43,8 +43,8 @@
     {
       "id": "disjunction",
       "label": {
-        "en": "Disjunction (∨)",
-        "fr": "Disjonction (∨)"
+        "en": "Disjunction (\u2228)",
+        "fr": "Disjonction (\u2228)"
       },
       "requires": [
         "negation"
@@ -53,8 +53,8 @@
     {
       "id": "conditional",
       "label": {
-        "en": "Conditional (→)",
-        "fr": "Implication (→)"
+        "en": "Conditional (\u2192)",
+        "fr": "Implication (\u2192)"
       },
       "requires": [
         "conjunction",
@@ -64,8 +64,8 @@
     {
       "id": "biconditional",
       "label": {
-        "en": "Biconditional (↔)",
-        "fr": "Équivalence (↔)"
+        "en": "Biconditional (\u2194)",
+        "fr": "\u00c9quivalence (\u2194)"
       },
       "requires": [
         "conditional"
@@ -75,7 +75,7 @@
       "id": "scope",
       "label": {
         "en": "Scope & main connective",
-        "fr": "Portée et connecteur principal"
+        "fr": "Port\u00e9e et connecteur principal"
       },
       "requires": [
         "conjunction",
@@ -83,6 +83,37 @@
         "disjunction",
         "conditional",
         "biconditional"
+      ]
+    },
+    {
+      "id": "double-negation",
+      "label": {
+        "en": "Double negation",
+        "fr": "Double n\u00e9gation"
+      },
+      "requires": [
+        "negation"
+      ]
+    },
+    {
+      "id": "precedence",
+      "label": {
+        "en": "Connective precedence",
+        "fr": "Priorit\u00e9 des connecteurs"
+      },
+      "requires": [
+        "scope"
+      ]
+    },
+    {
+      "id": "demorgan",
+      "label": {
+        "en": "De Morgan's laws",
+        "fr": "Lois de De Morgan"
+      },
+      "requires": [
+        "negation",
+        "scope"
       ]
     }
   ],
@@ -154,6 +185,38 @@
     {
       "id": "level1-12-iff-guided",
       "concept": "biconditional"
+    },
+    {
+      "id": "level2-01-nesting",
+      "concept": "scope"
+    },
+    {
+      "id": "level2-02-double-neg",
+      "concept": "double-negation"
+    },
+    {
+      "id": "level2-03-double-neg-watch",
+      "concept": "double-negation"
+    },
+    {
+      "id": "level2-04-double-neg-guided",
+      "concept": "double-negation"
+    },
+    {
+      "id": "level2-05-precedence",
+      "concept": "precedence"
+    },
+    {
+      "id": "level2-06-demorgan",
+      "concept": "demorgan"
+    },
+    {
+      "id": "level2-07-demorgan-watch",
+      "concept": "demorgan"
+    },
+    {
+      "id": "level2-08-demorgan-guided",
+      "concept": "demorgan"
     }
   ],
   "exercises": [
@@ -486,6 +549,48 @@
       "concept": "natural-deduction",
       "requiresLessons": [
         "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "eval-011",
+      "concept": "double-negation",
+      "requiresLessons": [
+        "level2-04-double-neg-guided"
+      ]
+    },
+    {
+      "id": "scope-013",
+      "concept": "precedence",
+      "requiresLessons": [
+        "level2-05-precedence"
+      ]
+    },
+    {
+      "id": "eval-012",
+      "concept": "demorgan",
+      "requiresLessons": [
+        "level2-07-demorgan-watch"
+      ]
+    },
+    {
+      "id": "counter-005",
+      "concept": "demorgan",
+      "requiresLessons": [
+        "level2-08-demorgan-guided"
+      ]
+    },
+    {
+      "id": "scope-014",
+      "concept": "demorgan",
+      "requiresLessons": [
+        "level2-06-demorgan"
+      ]
+    },
+    {
+      "id": "tt-006",
+      "concept": "demorgan",
+      "requiresLessons": [
+        "level2-07-demorgan-watch"
       ]
     }
   ]

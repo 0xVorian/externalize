@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Translation feedback semantic equivalence: `classifyTranslation` accepts logically equivalent formulas via `engine/equiv/equivalent.ts` when `acceptEquivalent` is set; specific mistake tags (reversed conditional, negation scope, missing parens, wrong atom) are checked before semantic acceptance
 - **Level 2 guided lesson** `level2-09-de-morgan-guided`: live truth row for `¬P ∧ ¬Q`, contrasting the de Morgan equivalent with `¬(P ∨ Q)` under the same assignment
-
+- **Level 2 practice tier** (`eval-011`, `scope-013`, `eval-012`, `counter-005`, `scope-014`, `tt-006`): six exercises on double negation, connective precedence, and de Morgan's laws; unlocks sequentially after all Unit 2 lessons (`level2Complete`); progress UI adds Unit 2 exercise subsection
 ### Changed
 
 - Translation builder tokens use `pred` (0-place) instead of legacy `atom`; palette emits `data-token="pred"` with backward-compatible parsing for `atom`
@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Level 2 practice tier** (`eval-011`, `scope-013`, `eval-012`, `counter-005`, `scope-014`, `tt-006`): six exercises on double negation, connective precedence, and de Morgan's laws; unlocks sequentially after all Unit 2 lessons (`level2Complete`); progress UI adds Unit 2 exercise subsection
 - **Natural deduction prototype** (`nd-001`, `proof-fill-step`): Fitch-style fill-one-step exercise with modus ponens rule selection and line citation
 - **Predicate logic AST spike**: extend `Formula` with `pred`, `forall`, `exists`, and `Term` types; parser accepts `∀`/`∃`, predicate application `F(x)`, and comma-separated arguments; migrate propositional letters to 0-place `pred`; helpers `collectFreeVariables` and `collectPredicateSymbols`; grammar documented in [`docs/predicate-logic.md`](docs/predicate-logic.md)
 - **Progress concept map graph**: SVG prerequisite diagram on the Progress tab (completed, available, and locked nodes; EN/FR labels from `content/prerequisites.json`)
@@ -92,6 +93,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Level 2 practice tier** (`eval-011`, `scope-013`, `eval-012`, `counter-005`, `scope-014`, `tt-006`): six exercises on double negation, connective precedence, and de Morgan's laws; unlocks sequentially after all Unit 2 lessons (`level2Complete`); progress UI adds Unit 2 exercise subsection
 - MVP-0 mobile UI: vertical formula tree, main-connective tap exercises, evaluation toggles
 - Feedback module (`engine/feedback/`) with tagged scope-selection messages
 - Path-based tree node IDs (`root`, `root.L`, `root.R`, `root.O`) stable across re-renders
@@ -108,6 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Level 2 practice tier** (`eval-011`, `scope-013`, `eval-012`, `counter-005`, `scope-014`, `tt-006`): six exercises on double negation, connective precedence, and de Morgan's laws; unlocks sequentially after all Unit 2 lessons (`level2Complete`); progress UI adds Unit 2 exercise subsection
 - Project documentation: vision brief, design principles, technical decisions, roadmap, content model
 - Phase 1 propositional logic engine (AST, parser, evaluator, equivalence)
 - Mobile-first design constraint and MVP-0 sequencing

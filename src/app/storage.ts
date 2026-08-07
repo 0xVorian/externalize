@@ -11,6 +11,7 @@ import {
   PRACTICE_UNLOCK_ORDER,
   LEVEL_0_PRACTICE_UNLOCK_ORDER,
   LEVEL_1_PRACTICE_UNLOCK_ORDER,
+  LEVEL_2_PRACTICE_UNLOCK_ORDER,
 } from './lessons';
 import type { FeedbackTag } from '../../engine';
 import {
@@ -272,7 +273,16 @@ export function isLevel1PracticeUnlocked(store: ProgressStore): boolean {
   return store.level0Complete && isLevel1Complete(store.lessonsCompleted);
 }
 
-export type ExerciseLockReason = 'open' | 'done' | 'sequential' | 'unit0' | 'unit1';
+
+export function isLevel2PracticeUnlocked(store: ProgressStore): boolean {
+  return (
+    store.level0Complete &&
+    isLevel1Complete(store.lessonsCompleted) &&
+    isLevel2Complete(store.lessonsCompleted)
+  );
+}
+
+export type ExerciseLockReason = 'open' | 'done' | 'sequential' | 'unit0' | 'unit1' | 'unit2';
 
 function progressiveUnlock(order: readonly string[], completed: string[]): string[] {
   const unlocked: string[] = [];
@@ -294,7 +304,11 @@ export function getUnlockedExerciseIds(store: ProgressStore): string[] {
     return unit0;
   }
   const unit1 = progressiveUnlock(LEVEL_1_PRACTICE_UNLOCK_ORDER, store.completed);
-  return [...unit0, ...unit1];
+  if (!isLevel2Complete(store.lessonsCompleted)) {
+    return [...unit0, ...unit1];
+  }
+  const unit2 = progressiveUnlock(LEVEL_2_PRACTICE_UNLOCK_ORDER, store.completed);
+  return [...unit0, ...unit1, ...unit2];
 }
 
 export function exerciseLockReason(
@@ -310,6 +324,12 @@ export function exerciseLockReason(
   if ((LEVEL_1_PRACTICE_UNLOCK_ORDER as readonly string[]).includes(exerciseId)) {
     if (!isLevel1Complete(store.lessonsCompleted)) {
       return 'unit1';
+    }
+    return 'sequential';
+  }
+  if ((LEVEL_2_PRACTICE_UNLOCK_ORDER as readonly string[]).includes(exerciseId)) {
+    if (!isLevel2Complete(store.lessonsCompleted)) {
+      return 'unit2';
     }
     return 'sequential';
   }

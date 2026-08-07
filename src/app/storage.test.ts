@@ -6,6 +6,7 @@ import {
   completeLesson,
   getUnlockedExerciseIds,
   isLevel1PracticeUnlocked,
+  isLevel2PracticeUnlocked,
   exerciseLockReason,
   serializeProgressExport,
   importProgress,
@@ -84,6 +85,32 @@ describe('storage v3', () => {
     expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010']);
     store = recordResult(store, 'eval-010', true);
     expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010', 'eval-003']);
+  });
+
+
+  it('keeps Unit 2 exercises locked until all Level 2 lessons are complete', () => {
+    let store = completeLevel0(loadProgress());
+    for (const lesson of LEVEL_1_LESSONS) {
+      store = completeLesson(store, lesson.id);
+    }
+    for (const id of ['eval-001', 'scope-012', 'eval-010', 'eval-003', 'eval-004', 'eval-005', 'tt-001', 'counter-001', 'tt-002', 'counter-002', 'tt-003', 'counter-003', 'scope-003', 'scope-009', 'scope-004', 'scope-007', 'eval-002', 'eval-006', 'tt-004', 'tt-005', 'counter-004', 'val-001', 'val-002', 'val-003', 'val-004', 'val-005', 'eval-007', 'eval-008', 'eval-009', 'scope-001', 'scope-005', 'scope-006', 'scope-008', 'scope-010', 'scope-011', 'scope-002', 'translate-001', 'translate-002', 'translate-003', 'translate-004', 'translate-005', 'translate-006', 'nd-001']) {
+      store = recordResult(store, id, true);
+    }
+    expect(isLevel2PracticeUnlocked(store)).toBe(false);
+    expect(exerciseLockReason(store, 'eval-011')).toBe('unit2');
+  });
+
+  it('unlocks Unit 2 exercises progressively after Level 2 complete', () => {
+    let store = completeLevel0(loadProgress());
+    for (const lesson of [...LEVEL_1_LESSONS, ...LEVEL_2_LESSONS]) {
+      store = completeLesson(store, lesson.id);
+    }
+    expect(isLevel2PracticeUnlocked(store)).toBe(true);
+    const base = getUnlockedExerciseIds(store);
+    expect(base).toContain('eval-011');
+    expect(base).not.toContain('scope-013');
+    store = recordResult(store, 'eval-011', true);
+    expect(getUnlockedExerciseIds(store)).toContain('scope-013');
   });
 
   it('marks level 0 complete after final lesson', () => {

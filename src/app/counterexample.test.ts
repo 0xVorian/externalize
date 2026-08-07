@@ -6,12 +6,13 @@ import { checkCounterexample, createState, setAtomValue } from './state';
 describe('find-counterexample exercises', () => {
   const counterExercises = EXERCISE_DEFINITIONS.filter((exercise) => exercise.type === 'find-counterexample');
 
-  it('defines four counterexample exercises', () => {
+  it('defines five counterexample exercises', () => {
     expect(counterExercises.map((exercise) => exercise.id)).toEqual([
       'counter-001',
       'counter-002',
       'counter-003',
       'counter-004',
+      'counter-005',
     ]);
   });
 
