@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Authoring guide** (`docs/authoring.md`): step-by-step instructions for lessons and exercises, worked examples (watch step + scope exercise), i18n/presentation pointers, changelog expectations
+- **Content model** (`docs/content-model.md`) updated to reflect current TypeScript layout (replacing provisional YAML sketch)
 - **Future work plan** (`docs/future-work-plan.md`): tiered workstreams, agent batch A/B/C plan, and deferred-scope list — separate from the app roadmap
 - **Progress tab**: resume where you left off, lesson/exercise checklist, review-due count
 - Skill tracking: surfaces what feels easy vs. what you struggle with (from attempt history)

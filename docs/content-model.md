@@ -1,18 +1,112 @@
 # Content Model
 
-Sketch of how lessons, exercises, and progress will be represented. **Provisional** — refine when the first prototype exists.
+How lessons, exercises, and progress are represented in the codebase today.
 
 ## Design goals
 
-- Content authors edit JSON/YAML, not TypeScript
-- Engine validates schema and runs exercises
-- Same AST format for expected answers, learner input, and feedback templates
-- Skill tags drive spaced repetition independently of lesson grouping
+- **Separation:** language-neutral structure in `src/app/`, locale copy in `src/i18n/`
+- Engine validates formulas and runs exercises; UI renders from AST + assignment
+- Skill tags and error tags drive spaced repetition (see progress record below)
 - Exercise UIs must be completable on a phone browser (tap-first; no hover-only steps)
+
+Future direction: YAML/JSON authoring under `content/` may replace hand-edited TypeScript arrays. Until then, follow [Authoring guide](authoring.md).
+
+## File layout (current)
+
+```
+src/app/
+  lessons.ts           — LEVEL_0_LESSONS, PRACTICE_UNLOCK_ORDER
+  exercises.ts         — EXERCISE_DEFINITIONS
+  presentation.test.ts — presentation inventory (must stay in sync)
+  lesson-render.ts     — card, watch table, guided live row
+  render.ts            — practice tree + toggles
+  truth-table-render.ts
+  storage.ts           — progress persistence
+
+src/i18n/
+  lessons.ts           — lesson copy, learn UI, reference panel
+  messages.ts          — exercise prompts, feedback, practice UI
+  locale.ts            — preference load/save
+  *.test.ts            — parity checks for both locales
+
+engine/
+  ast/ parse/ eval/ feedback/   — language-neutral logic
+```
+
+## Lesson schema
+
+Defined in `src/app/lessons.ts`:
+
+```typescript
+type LessonType = 'card' | 'watch' | 'guided';
+
+type LessonDefinition = {
+  id: string;
+  type: LessonType;
+  formula?: string;   // required for watch and guided
+};
+```
+
+Copy shape in `src/i18n/lessons.ts`:
+
+| Field | Used by | Purpose |
+|-------|---------|---------|
+| `title`, `subtitle` | All | Lesson header |
+| `card.title`, `card.body[]`, `card.example?` | `card` | Prose lesson |
+| `watchSteps[]` with `{ assignment, explanation }` | `watch` | Truth-table walkthrough |
+| `guidedSteps[]` with `{ kind: 'hint' \| 'done', text }` | `guided` | Step-by-step learner try |
+
+Level 0 lessons live in `LEVEL_0_LESSONS`. Level 1 will add a parallel array when connective lessons ship.
+
+## Exercise schema
+
+Defined in `src/app/exercises.ts`:
+
+```typescript
+type ExerciseType = 'identify-main-connective' | 'evaluate-formula';
+
+type ExerciseDefinition = {
+  id: string;
+  type: ExerciseType;
+  formula: string;
+  initialAssignment?: Assignment;   // evaluate-formula only
+};
+```
+
+Copy in `src/i18n/messages.ts`:
+
+```typescript
+type ExerciseCopy = {
+  prompt: string;
+  feedback?: FeedbackTemplate;   // overrides per-tag defaults
+};
+```
+
+### Exercise types (implemented)
+
+| `type` | Learner action | Engine checks |
+|--------|----------------|---------------|
+| `identify-main-connective` | Tap the main operator in the tree | Selected node matches root connective |
+| `evaluate-formula` | Toggle atom values; read computed nodes | All node values match evaluation |
+
+Planned types (translation, truth-table fill, counterexample, proof steps) are listed in the roadmap — not yet in `ExerciseType`.
+
+### Gated unlock
+
+`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines which exercises become available after Level 0 completion, and in what order. IDs not in this list are unreachable in the practice tab.
+
+## Presentation routing
+
+Presentation mode is **not** stored on the lesson/exercise definition. It is inferred from type + formula and recorded in:
+
+- `src/app/presentation.test.ts` — `PRESENTATION` map (enforced by tests)
+- `docs/presentation.md` — human-readable inventory
+
+Modes: `card`, `truth-table-multi`, `truth-table-live`, `tree-eval`, `tree-scope`.
 
 ## Concept graph (illustrative)
 
-Concepts are nodes; edges are prerequisites.
+Concepts are nodes; edges are prerequisites. Not yet encoded as data — skill tags on exercises approximate this.
 
 ```
 proposition          → (none)
@@ -22,171 +116,63 @@ disjunction          → proposition, negation
 conditional          → proposition, negation, conjunction, disjunction
 biconditional        → conditional
 scope-and-parens     → all connectives
-translate-en-to-sym  → scope-and-parens
-translate-sym-to-en  → scope-and-parens
-evaluate             → scope-and-parens
-truth-table          → evaluate
-validity-counterex   → truth-table
 ```
 
-The visible concept map renders from this graph plus per-user mastery scores.
+## Progress record (local storage)
 
-## Exercise schema (draft)
-
-```yaml
-id: translate-001
-type: translate-en-to-formula
-skill: translate-en-to-formula
-concepts: [conditional, scope-and-parens]
-
-prompt:
-  english: "If it rains, then the game is cancelled."
-  atoms:
-    P: "It rains."
-    Q: "The game is cancelled."
-
-expected:
-  # Canonical answer; engine compares via AST
-  formula: "(P → Q)"
-
-  # Optional: accept any semantically equivalent formula
-  acceptEquivalent: false
-
-palette:
-  atoms: [P, Q]
-  connectives: [¬, ∧, ∨, →, ↔]
-  includeParentheses: true
-
-structuralCheck:
-  type: main-connective
-  expected: →
-
-feedback:
-  reversed-conditional:
-    message: "The antecedent and consequent appear reversed. 'If A, then B' becomes (A → B), not (B → A)."
-  negation-scope:
-    message: "Negation applies only to the nearest expression."
-  missing-parens:
-    message: "Parentheses are needed here to show which subformula the connective governs."
-
-hints:
-  - "Identify the two simple statements first."
-  - "'If … then …' maps to a conditional."
-  - "The condition after 'if' is the antecedent (left side of →)."
-```
-
-## Exercise types (engine interface)
-
-MVP-0 uses `identify-main-connective`, `identify-scope`, and `evaluate-formula` first. Translation types follow in Phase 3.
-
-| `type` | Learner action | Engine checks |
-|--------|----------------|---------------|
-| `identify-main-connective` | Tap the main operator in the tree | Selected node matches root connective |
-| `identify-scope` | Tap subexpression boundaries | Selected region matches expected scope |
-| `evaluate-formula` | Toggle atom values; read computed nodes | All node values match evaluation |
-| `recognize-operator` | Multiple choice | Selected option |
-| `translate-en-to-formula` | Build AST from palette | AST equality (or semantic equivalence) |
-| `translate-formula-to-en` | Select or compose English | Match against allowed paraphrases |
-| `evaluate-step` | Choose truth value of highlighted subexpr | Matches evaluation under assignment |
-| `truth-table-cell` | Fill one cell | Matches column computation |
-| `truth-table-column` | Fill entire column | Matches derived column |
-| `find-counterexample` | Set atom truth values | Premises true, conclusion false |
-| `choose-rule` | Pick inference rule | Rule applicable to cited lines |
-| `proof-fill-step` | Supply one proof line | Line valid given scope and citations |
-| `proof-repair` | Explain or fix invalid step | Identifies specific rule violation |
-| `compare-equivalence` | Yes/no or select equivalent | Semantic equivalence |
-
-## Progress record (local storage, draft)
+Stored in browser `localStorage` (see `src/app/storage.ts`). Version 3 includes resume point, lesson completion, per-skill stats, and SRS queue.
 
 ```typescript
 interface ProgressRecord {
-  version: 1;
-  lastSession: string; // ISO date
-
-  concepts: Record<string, {
-    mastery: number;       // 0–1, derived from retrieval success
-    lastReviewed: string;
-    nextReview: string;
-  }>;
-
-  skills: Record<string, {
-    attempts: number;
-    errors: number;
-    recentErrorTags: string[]; // e.g. "reversed-conditional"
-  }>;
-
-  srsQueue: Array<{
-    exerciseId: string;
-    due: string;
-    interval: number;
-    ease: number;
-  }>;
+  version: 3;
+  lastSession: string;
+  completedLessons: string[];
+  completedExercises: string[];
+  resume: ResumePoint;
+  skills: Record<string, { attempts: number; successes: number }>;
+  errorCounts: Record<FeedbackTag, number>;
+  srsQueue: Array<{ exerciseId: string; due: string; interval: number; ease: number }>;
 }
 ```
 
 Spaced repetition schedules by **demonstrated error tags**, not mere completion.
 
-## Feedback tag taxonomy (starter set)
+## Feedback tag taxonomy
 
-Propositional logic v1:
+Engine tags (propositional logic v1):
 
-- `reversed-conditional`
-- `reversed-biconditional`
-- `negation-scope`
-- `missing-parens`
-- `extra-parens` (cosmetic — warn, don't fail, if equivalent)
+- `correct`
 - `wrong-main-connective`
-- `wrong-operator`
-- `wrong-atom`
-- `assignment-premise-false`
-- `assignment-conclusion-true` (counterexample incomplete)
-- `equivalent-but-noncanonical` (informational)
+- `selected-subconnective`
+- `selected-atom`
+- `selected-operand-not-connective`
 
-Predicate logic and proof tags added in later phases.
+Defaults in `src/i18n/messages.ts`; per-exercise overrides in `EXERCISE_COPY[id].feedback`.
 
-## MVP-0 exercise example (draft)
+Future tags (from original sketch): `reversed-conditional`, `negation-scope`, `missing-parens`, etc. — added when translation and proof exercise types land.
 
-```yaml
-id: scope-001
-type: identify-main-connective
-skill: recognize-operator
-concepts: [conditional, scope-and-parens]
+## Example: scope exercise (as shipped)
 
-display:
-  formula: "(P → Q) ∧ R"
-  layout: vertical-tree   # mobile-first renderer
+**Definition** (`exercises.ts`):
 
-expected:
-  mainConnective: ∧
-  # learner taps the ∧ node at the root
-
-feedback:
-  selected-conditional:
-    message: "→ is the main connective of (P → Q), but not of the whole formula. The outer operator binds last."
-  selected-atom:
-    message: "P is an operand, not a connective."
+```typescript
+{ id: 'scope-001', type: 'identify-main-connective', formula: '(P → Q) ∧ R' }
 ```
 
-## File layout (planned)
+**Copy** (`messages.ts`, English):
 
-```
-content/
-  concepts.yaml          # concept graph
-  lessons/
-    01-atoms.yaml
-    02-negation.yaml
-    ...
-  exercises/
-    translate/
-      001.yaml
-      ...
-engine/
-  ast/
-  parse/
-  eval/
-  feedback/
-app/
-  ...                    # UI shell
+```typescript
+'scope-001': {
+  prompt: 'Select the main connective of the formula.',
+  feedback: {
+    'selected-subconnective':
+      '→ is the main connective of (P → Q), but the formula as a whole is a conjunction. The outermost connective has widest scope.',
+  },
+},
 ```
 
-Exact directory names may change at implementation time; the separation of `content/` and `engine/` will not.
+**Presentation:** `tree-scope` in `presentation.test.ts`.
+
+## Adding content
+
+See **[Authoring guide](authoring.md)** for step-by-step instructions, worked examples, and the pre-PR checklist.
