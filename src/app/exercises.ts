@@ -1,6 +1,11 @@
 import type { Assignment, FeedbackTemplate } from '../../engine';
 
-export type ExerciseType = 'identify-main-connective' | 'evaluate-formula' | 'fill-truth-table-cell' | 'translate-en-to-formula';
+export type ExerciseType =
+  | 'identify-main-connective'
+  | 'evaluate-formula'
+  | 'fill-truth-table-cell'
+  | 'find-counterexample'
+  | 'translate-en-to-formula';
 
 export type ExerciseDefinition = {
   id: string;
@@ -8,6 +13,7 @@ export type ExerciseDefinition = {
   formula?: string;
   initialAssignment?: Assignment;
   hiddenRowIndex?: number;
+  targetValue?: boolean;
 };
 
 export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
@@ -38,6 +44,10 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'tt-003', type: 'fill-truth-table-cell', formula: 'P ∨ Q', hiddenRowIndex: 0 },
   { id: 'tt-004', type: 'fill-truth-table-cell', formula: '(P → Q) ∧ R', hiddenRowIndex: 6 },
   { id: 'tt-005', type: 'fill-truth-table-cell', formula: 'P ↔ Q', hiddenRowIndex: 1 },
+  { id: 'counter-001', type: 'find-counterexample', formula: 'P ∧ Q', targetValue: false, initialAssignment: { P: true, Q: true } },
+  { id: 'counter-002', type: 'find-counterexample', formula: 'P → Q', targetValue: false, initialAssignment: { P: false, Q: true } },
+  { id: 'counter-003', type: 'find-counterexample', formula: 'P ∨ Q', targetValue: false, initialAssignment: { P: true, Q: false } },
+  { id: 'counter-004', type: 'find-counterexample', formula: 'P ↔ Q', targetValue: false, initialAssignment: { P: true, Q: true } },
   { id: 'translate-001', type: 'translate-en-to-formula' },
 ];
 

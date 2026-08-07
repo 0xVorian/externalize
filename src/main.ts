@@ -36,6 +36,7 @@ import {
   paletteBackspace,
   paletteUndo,
   checkTranslation,
+  checkCounterexample,
   type AppState,
 } from './app/state';
 import {
@@ -273,6 +274,16 @@ function advancePractice(): void {
   } else if (state.exercise.type === 'fill-truth-table-cell') {
     persistProgress(recordResult(progress, state.exercise.id, cellSubmissionCorrect(state) ?? false));
     refreshPracticeQueue();
+  } else if (state.exercise.type === 'find-counterexample' && state.feedback) {
+    persistProgress(
+      recordResult(
+        progress,
+        state.exercise.id,
+        state.feedback.correct,
+        state.feedback.correct ? undefined : state.feedback.tag,
+      ),
+    );
+    refreshPracticeQueue();
   } else if (state.feedback) {
     persistProgress(
       recordResult(progress, state.exercise.id, state.feedback.correct, state.feedback.tag),
@@ -462,6 +473,23 @@ root.addEventListener('click', (event) => {
   }
   if (action === 'check-translation') {
     practiceState = checkTranslation(ensurePracticeState());
+    if (practiceState.phase === 'answered' && practiceState.feedback) {
+      persistProgress(
+        recordResult(
+          progress,
+          practiceState.exercise.id,
+          practiceState.feedback.correct,
+          practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
+        ),
+      );
+      refreshPracticeQueue();
+    }
+    render();
+    return;
+  }
+
+  if (action === 'check-counterexample') {
+    practiceState = checkCounterexample(ensurePracticeState());
     if (practiceState.phase === 'answered' && practiceState.feedback) {
       persistProgress(
         recordResult(

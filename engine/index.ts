@@ -49,6 +49,8 @@ export {
   maskTruthTableRows,
   expectedCellValue,
   validateCell,
+  validateCounterexample,
+  hasAssignmentForValue,
 } from './truth-table';
 export type {
   TruthTable,
@@ -56,4 +58,5 @@ export type {
   PartialTruthTable,
   PartialTruthTableRow,
   CellValidation,
+  CounterexampleValidation,
 } from './truth-table';

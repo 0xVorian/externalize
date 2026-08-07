@@ -8,6 +8,7 @@ export {
   resumeContinueLabel,
   getExerciseCopy,
   getCellFeedback,
+  getCounterFeedback,
   getFeedbackTemplates,
   getFeedbackDefaults,
   formatTruthValue,

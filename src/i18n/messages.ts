@@ -7,6 +7,8 @@ export type ExerciseCopy = {
   feedback?: FeedbackTemplate;
   cellCorrect?: string;
   cellWrong?: string;
+  counterCorrect?: string;
+  counterWrong?: string;
 };
 
 export type UiCopy = {
@@ -26,6 +28,7 @@ export type UiCopy = {
   treeNodeDisplayAria: (label: string, value?: string) => string;
   continue: string;
   nextExercise: string;
+  checkCounterexample: string;
   valuesUpdated: string;
   trueLabel: string;
   falseLabel: string;
@@ -52,6 +55,7 @@ const FEEDBACK_DEFAULTS_EN: Record<FeedbackTag, string> = {
   'wrong-atom': 'Wrong sentence letter.',
   'equivalent-but-noncanonical': 'Equivalent but not canonical.',
   incomplete: 'Formula incomplete.',
+  'counterexample-miss': 'This assignment does not match the target truth value.',
   'unbalanced-parens': 'Unbalanced parentheses.',
 };
 
@@ -74,6 +78,7 @@ const FEEDBACK_DEFAULTS_FR: Record<FeedbackTag, string> = {
   'wrong-atom': 'Mauvaise variable.',
   'equivalent-but-noncanonical': 'Équivalent mais non canonique.',
   incomplete: 'Formule incomplète.',
+  'counterexample-miss': "Cette interprétation ne correspond pas à la valeur de vérité demandée.",
   'unbalanced-parens': 'Parenthèses déséquilibrées.',
 };
 
@@ -209,6 +214,10 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-003': { prompt: 'Complete the table: what is P ∨ Q when both P and Q are false?', cellCorrect: 'Correct — disjunction is false only when both disjuncts are false.', cellWrong: 'With neither disjunct true, P ∨ Q is false.' },
     'tt-004': { prompt: 'Three letters, one blank. Fill the result for (P → Q) ∧ R when P and Q are true and R is false.', cellCorrect: 'Correct — the implication is true, but the conjunction fails because R is false.', cellWrong: 'When P and Q are true, (P → Q) is true; with R false, the whole conjunction is false.' },
     'tt-005': { prompt: 'Fill the missing biconditional value: P ↔ Q when P is false and Q is true.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
+    'counter-001': { prompt: 'Find a truth assignment that makes P ∧ Q false. Toggle P and Q, then check.', counterCorrect: 'Correct — at least one conjunct is false.', counterWrong: 'Both conjuncts are still true.' },
+    'counter-002': { prompt: 'Find an assignment where P → Q is false.', counterCorrect: 'Correct — true antecedent, false consequent.', counterWrong: 'This assignment still makes P → Q true.' },
+    'counter-003': { prompt: 'Find an assignment that makes P ∨ Q false.', counterCorrect: 'Correct — both disjuncts false.', counterWrong: 'At least one disjunct is still true.' },
+    'counter-004': { prompt: 'Find an assignment where P ↔ Q is false.', counterCorrect: 'Correct — P and Q differ.', counterWrong: 'P and Q still match.' },
     'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
   },
   fr: {
@@ -337,6 +346,10 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-003': { prompt: 'Complétez le tableau : quelle est la valeur de P ∨ Q lorsque P et Q sont tous deux faux ?', cellCorrect: 'Exact — une disjonction n\'est fausse que si les deux disjonctes le sont.', cellWrong: 'Aucun disjonct n\'étant vrai, P ∨ Q est faux.' },
     'tt-004': { prompt: 'Trois variables, une case vide. Donnez le résultat de (P → Q) ∧ R lorsque P et Q sont vrais et R est faux.', cellCorrect: 'Exact — l\'implication est vraie, mais la conjonction échoue car R est faux.', cellWrong: 'Quand P et Q sont vrais, (P → Q) est vrai ; avec R faux, la conjonction entière est fausse.' },
     'tt-005': { prompt: 'Complétez la biconditionnelle manquante : P ↔ Q lorsque P est faux et Q est vrai.', cellCorrect: 'Exact — une biconditionnelle n\'est vraie que si les deux côtés coïncident.', cellWrong: 'P et Q ont ici des valeurs différentes, donc P ↔ Q est faux.' },
+    'counter-001': { prompt: 'Trouvez une interprétation qui rend P ∧ Q faux.', counterCorrect: 'Exact — au moins un conjoint est faux.', counterWrong: 'Les deux conjoints sont encore vrais.' },
+    'counter-002': { prompt: 'Trouvez une interprétation où P → Q est faux.', counterCorrect: 'Exact — antécédent vrai, conséquent faux.', counterWrong: 'P → Q reste vrai.' },
+    'counter-003': { prompt: 'Trouvez une interprétation qui rend P ∨ Q faux.', counterCorrect: 'Exact — les deux disjonctes sont faux.', counterWrong: 'Au moins un disjonct est encore vrai.' },
+    'counter-004': { prompt: 'Trouvez une interprétation où P ↔ Q est faux.', counterCorrect: 'Exact — P et Q diffèrent.', counterWrong: 'P et Q ont encore la même valeur.' },
     'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
   },
 };
@@ -361,6 +374,7 @@ const UI: Record<Locale, UiCopy> = {
       value ? `${label}, ${value}` : label,
     continue: 'Continue',
     nextExercise: 'Next exercise',
+    checkCounterexample: 'Check assignment',
     valuesUpdated: 'Truth values updated at each subformula.',
     trueLabel: 'T',
     falseLabel: 'F',
@@ -387,6 +401,7 @@ const UI: Record<Locale, UiCopy> = {
       value ? `${label}, ${value}` : label,
     continue: 'Continuer',
     nextExercise: 'Exercice suivant',
+    checkCounterexample: 'Vérifier l\'interprétation',
     valuesUpdated: 'Les valeurs de vérité se mettent à jour à chaque sous-formule.',
     trueLabel: 'V',
     falseLabel: 'F',
@@ -433,6 +448,13 @@ export function getCellFeedback(locale: Locale, exerciseId: string, correct: boo
   return correct
     ? (copy.cellCorrect ?? FEEDBACK_DEFAULTS[locale].correct)
     : (copy.cellWrong ?? FEEDBACK_DEFAULTS[locale].correct);
+}
+
+export function getCounterFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
+  const copy = getExerciseCopy(locale, exerciseId);
+  return correct
+    ? (copy.counterCorrect ?? FEEDBACK_DEFAULTS[locale].correct)
+    : (copy.counterWrong ?? FEEDBACK_DEFAULTS[locale]['counterexample-miss']);
 }
 
 export function getFeedbackTemplates(locale: Locale, exerciseId: string): FeedbackTemplate {

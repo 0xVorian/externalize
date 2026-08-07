@@ -371,6 +371,38 @@
       "requiresLessons": [
         "level1-09-imp-guided"
       ]
+    },
+    {
+      "id": "counter-001",
+      "concept": "conjunction",
+      "requiresLessons": [
+        "level0-04-watch",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "counter-002",
+      "concept": "conditional",
+      "requiresLessons": [
+        "level1-08-imp-watch",
+        "level1-09-imp-guided"
+      ]
+    },
+    {
+      "id": "counter-003",
+      "concept": "disjunction",
+      "requiresLessons": [
+        "level1-05-or-watch",
+        "level1-06-or-guided"
+      ]
+    },
+    {
+      "id": "counter-004",
+      "concept": "biconditional",
+      "requiresLessons": [
+        "level1-11-iff-watch",
+        "level1-12-iff-guided"
+      ]
     }
   ]
 }
