@@ -9,13 +9,16 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "generate:exercises": "tsx tools/exercise-generator/cli.ts"
+    "generate:exercises": "tsx tools/exercise-generator/cli.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "devDependencies": {
     "tsx": "^4.20.5",
     "@types/node": "^24.3.0",
     "typescript": "~5.9.3",
     "vite": "^7.1.7",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@playwright/test": "^1.52.0"
   }
 }

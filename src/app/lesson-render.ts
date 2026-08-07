@@ -88,7 +88,7 @@ function renderUnitPicker(
       ? `<button type="button" class="unit-button ${unit === 2 ? 'active' : ''}" role="tab" aria-selected="${unit === 2}" data-action="select-unit" data-unit="2">${learn.level2Title}</button>`
       : '';
   return `
-    <nav class="unit-picker" role="tablist" aria-label="${learn.unitPickerLabel}">
+    <nav class="unit-picker" data-testid="unit-picker" role="tablist" aria-label="${learn.unitPickerLabel}">
       <button type="button" class="unit-button ${unit === 0 ? 'active' : ''}" role="tab" aria-selected="${unit === 0}" data-action="select-unit" data-unit="0">${learn.level0Title}</button>
       <button type="button" class="unit-button ${unit === 1 ? 'active' : ''}" role="tab" aria-selected="${unit === 1}" data-action="select-unit" data-unit="1">${learn.level1Title}</button>
       ${unit2Button}

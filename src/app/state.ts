@@ -9,13 +9,10 @@ import {
   generateTruthTable,
   maskTruthTableRows,
   validateCell,
-<<<<<<< HEAD
   validateCounterexample,
   validateTautologyAnswer,
-=======
   parseProofLines,
   validateProofFillStep,
->>>>>>> feature/nd-fill-one-step
   type TreeNode,
   type ProofLine,
   type RuleId,

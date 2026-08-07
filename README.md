@@ -19,6 +19,7 @@ Start here:
 | [Authoring guide](docs/authoring.md) | How to add lessons and exercises (worked examples, checklist) |
 | [Versioning & changelog](docs/versioning.md) | Semver policy and release workflow |
 | [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |
+| [Testing](docs/testing.md) | Vitest unit tests and Playwright smoke suite |
 | [Presentation](docs/presentation.md) | When to use truth tables vs parse trees, layout rules |
 | [Predicate logic (Phase 6 prep)](docs/predicate-logic.md) | AST extension, notation, engine impact — design only |
 | [Changelog](CHANGELOG.md) | Record of released changes |
@@ -32,10 +33,13 @@ Start here:
 
 ```bash
 npm install
-npm test          # run engine unit tests
+npm test          # Vitest unit tests
+npm run test:e2e  # Playwright smoke tests (build + preview)
 npm run dev       # dev server (mobile-friendly viewport)
-npm run build          # typecheck + production build
+npm run build     # typecheck + production build
 ```
+
+See [Testing](docs/testing.md) for dev-server e2e mode, CI notes, and smoke coverage.
 
 ## Deploy (Cloudflare Pages)
 
