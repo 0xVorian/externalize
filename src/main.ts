@@ -21,13 +21,7 @@ import {
   getLessonDefinition,
   isLearnPathComplete,
 } from './app/lessons';
-import {
-  createState,
-  selectNode,
-  setAtomValue,
-  applyLocale,
-  type AppState,
-} from './app/state';
+import { createState, selectNode, setAtomValue, submitCellValue, applyLocale, cellSubmissionCorrect, type AppState } from './app/state';
 import {
   createLessonState,
   advanceWatchStep,
@@ -245,6 +239,9 @@ function advancePractice(): void {
   if (state.exercise.type === 'evaluate-formula') {
     persistProgress(recordResult(progress, state.exercise.id, true));
     refreshPracticeQueue();
+  } else if (state.exercise.type === 'fill-truth-table-cell') {
+    persistProgress(recordResult(progress, state.exercise.id, cellSubmissionCorrect(state) ?? false));
+    refreshPracticeQueue();
   } else if (state.feedback) {
     persistProgress(
       recordResult(progress, state.exercise.id, state.feedback.correct, state.feedback.tag),
@@ -391,6 +388,17 @@ root.addEventListener('click', (event) => {
           practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
         ),
       );
+      refreshPracticeQueue();
+    }
+    render();
+    return;
+  }
+
+  if (action === 'submit-cell-value') {
+    const value = button.dataset.value === 'true';
+    practiceState = submitCellValue(ensurePracticeState(), value);
+    if (practiceState.phase === 'answered') {
+      persistProgress(recordResult(progress, practiceState.exercise.id, cellSubmissionCorrect(practiceState) ?? false));
       refreshPracticeQueue();
     }
     render();

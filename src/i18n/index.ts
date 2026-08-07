@@ -6,6 +6,7 @@ export {
   formatResumeTime,
   resumeContinueLabel,
   getExerciseCopy,
+  getCellFeedback,
   getFeedbackTemplates,
   getFeedbackDefaults,
   formatTruthValue,

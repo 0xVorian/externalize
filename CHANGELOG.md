@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`fill-truth-table-cell` practice exercises** (`tt-001`–`tt-005`): partial truth tables with one blank result cell; tap T/F (V/F in French) to submit; engine `validateCell` wires correctness and feedback
+- Partial truth-table renderer for practice (`truth-table-partial` presentation mode)
 - **Level 1 learn path (Unit 1 — Connectives)**: 12 lessons covering ¬, ∨, →, and ↔ — concept cards, truth-table watch lessons, and guided live-row tries
 - Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)
 - Guided lesson hints declare target `atom` + `value`; progression generalized beyond `P ∧ Q`
