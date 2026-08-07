@@ -468,6 +468,18 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     'level2-06-demorgan': { title: "De Morgan's laws", subtitle: 'Negating a compound formula.', card: { title: 'Distributing negation over ∧ and ∨', body: ['Negating a conjunction flips to a disjunction of negations: ¬(P ∧ Q) is equivalent to ¬P ∨ ¬Q.', 'Negating a disjunction flips to a conjunction of negations: ¬(P ∨ Q) is equivalent to ¬P ∧ ¬Q.', 'These rewrites preserve truth on every assignment and are central when translating natural-language denials or simplifying formulas.'], example: '¬(P ∧ Q)  ⇔  ¬P ∨ ¬Q\n¬(P ∨ Q)  ⇔  ¬P ∧ ¬Q' } },
     'level2-07-demorgan-watch': { title: 'Worked cases: ¬(P ∧ Q)', subtitle: 'Evaluate the negated conjunction row by row.', watchSteps: [{ assignment: { P: true, Q: true }, explanation: 'P ∧ Q is true, so its negation ¬(P ∧ Q) evaluates to F.' }, { assignment: { P: true, Q: false }, explanation: 'The conjunction is false (Q is false), so negating it yields T.' }, { assignment: { P: false, Q: true }, explanation: 'Again P ∧ Q is false, so ¬(P ∧ Q) is T.' }, { assignment: { P: false, Q: false }, explanation: 'Both conjuncts false — the conjunction is false — so the negation is T.' }] },
     'level2-08-demorgan-guided': { title: 'Guided evaluation: ¬(P ∨ Q)', subtitle: 'Build an assignment and read the negated disjunction.', guidedSteps: [{ kind: 'hint', text: 'Tap T for P.', atom: 'P', value: true }, { kind: 'hint', text: 'Now tap F for Q.', atom: 'Q', value: false }, { kind: 'done', text: 'P ∨ Q is true (P is true), so ¬(P ∨ Q) evaluates to F.' }] },
+    'level2-09-de-morgan-guided': {
+      title: 'Guided evaluation: ¬P ∧ ¬Q',
+      subtitle: 'Evaluate the de Morgan equivalent and compare with ¬(P ∨ Q).',
+      guidedSteps: [
+        { kind: 'hint', text: 'Tap T for P.', atom: 'P', value: true },
+        { kind: 'hint', text: 'Now tap F for Q.', atom: 'Q', value: false },
+        {
+          kind: 'done',
+          text: '¬P is F and ¬Q is T, so ¬P ∧ ¬Q is F — the same value as ¬(P ∨ Q) under this assignment (de Morgan\'s law).',
+        },
+      ],
+    },
 
   },
   fr: {
@@ -739,6 +751,18 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     'level2-06-demorgan': { title: 'Lois de De Morgan', subtitle: 'Nier une formule composée.', card: { title: 'Distribuer la négation sur ∧ et ∨', body: ['Nier une conjonction donne une disjonction de négations : ¬(P ∧ Q) équivaut à ¬P ∨ ¬Q.', 'Nier une disjonction donne une conjonction de négations : ¬(P ∨ Q) équivaut à ¬P ∧ ¬Q.', 'Ces réécritures préservent la vérité sur toute interprétation et servent à traduire une négation en langue naturelle ou à simplifier une formule.'], example: '¬(P ∧ Q)  ⇔  ¬P ∨ ¬Q\n¬(P ∨ Q)  ⇔  ¬P ∧ ¬Q' } },
     'level2-07-demorgan-watch': { title: 'Cas typiques : ¬(P ∧ Q)', subtitle: 'Évaluer la conjonction niée ligne par ligne.', watchSteps: [{ assignment: { P: true, Q: true }, explanation: 'P ∧ Q est vrai, donc sa négation ¬(P ∧ Q) vaut F.' }, { assignment: { P: true, Q: false }, explanation: 'La conjonction est fausse (Q est faux), donc la nier donne V.' }, { assignment: { P: false, Q: true }, explanation: 'Encore P ∧ Q est faux, donc ¬(P ∧ Q) vaut V.' }, { assignment: { P: false, Q: false }, explanation: 'Les deux conjoints faux — la conjonction est fausse — donc la négation vaut V.' }] },
     'level2-08-demorgan-guided': { title: 'À vous : évaluer ¬(P ∨ Q)', subtitle: 'Construisez une interprétation et lisez la disjonction niée.', guidedSteps: [{ kind: 'hint', text: 'Toucher V pour P.', atom: 'P', value: true }, { kind: 'hint', text: 'Toucher F pour Q.', atom: 'Q', value: false }, { kind: 'done', text: 'P ∨ Q est vrai (P est vrai), donc ¬(P ∨ Q) vaut F.' }] },
+    'level2-09-de-morgan-guided': {
+      title: 'À vous : évaluer ¬P ∧ ¬Q',
+      subtitle: 'Évaluez la forme de De Morgan et comparez avec ¬(P ∨ Q).',
+      guidedSteps: [
+        { kind: 'hint', text: 'Toucher V pour P.', atom: 'P', value: true },
+        { kind: 'hint', text: 'Toucher F pour Q.', atom: 'Q', value: false },
+        {
+          kind: 'done',
+          text: '¬P vaut F et ¬Q vaut V, donc ¬P ∧ ¬Q vaut F — comme ¬(P ∨ Q) sous cette interprétation (loi de De Morgan).',
+        },
+      ],
+    },
 
   },
 };

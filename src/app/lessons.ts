@@ -41,6 +41,7 @@ export const LEVEL_2_LESSONS: LessonDefinition[] = [
   { id: 'level2-06-demorgan', type: 'card', unit: 2 },
   { id: 'level2-07-demorgan-watch', type: 'watch', formula: '¬(P ∧ Q)', unit: 2 },
   { id: 'level2-08-demorgan-guided', type: 'guided', formula: '¬(P ∨ Q)', unit: 2 },
+  { id: 'level2-09-de-morgan-guided', type: 'guided', formula: '¬P ∧ ¬Q', unit: 2 },
 ];
 
 /** Full learn path: Unit 0, then Unit 1 (gated on level0Complete), then Unit 2 (gated on level1Complete). */

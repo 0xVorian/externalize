@@ -29,6 +29,7 @@ const PRESENTATION: Record<string, string> = {
   'level2-06-demorgan': 'card',
   'level2-07-demorgan-watch': 'truth-table-multi',
   'level2-08-demorgan-guided': 'truth-table-live',
+  'level2-09-de-morgan-guided': 'truth-table-live',
   'eval-001': 'truth-table-live',
   'eval-002': 'tree-eval',
   'eval-003': 'truth-table-live',
