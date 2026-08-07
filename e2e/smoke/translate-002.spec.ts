@@ -4,18 +4,18 @@ import { gotoWithProgress, insertPaletteToken, modeButton } from '../helpers/app
 
 async function buildConjunctionWithoutNegation(page: Page): Promise<void> {
   await insertPaletteToken(page, 'paren', 'open');
-  await insertPaletteToken(page, 'atom', 'P');
+  await insertPaletteToken(page, 'pred', 'P');
   await insertPaletteToken(page, 'connective', 'and');
-  await insertPaletteToken(page, 'atom', 'Q');
+  await insertPaletteToken(page, 'pred', 'Q');
   await insertPaletteToken(page, 'paren', 'close');
 }
 
 async function buildNegatedConjunction(page: Page): Promise<void> {
   await insertPaletteToken(page, 'connective', 'not');
   await insertPaletteToken(page, 'paren', 'open');
-  await insertPaletteToken(page, 'atom', 'P');
+  await insertPaletteToken(page, 'pred', 'P');
   await insertPaletteToken(page, 'connective', 'and');
-  await insertPaletteToken(page, 'atom', 'Q');
+  await insertPaletteToken(page, 'pred', 'Q');
   await insertPaletteToken(page, 'paren', 'close');
 }
 
