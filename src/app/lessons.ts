@@ -5,15 +5,35 @@ export type LessonDefinition = {
   type: LessonType;
   /** Formula for watch/guided lessons */
   formula?: string;
+  /** Unit index: 0 = introductory syntax, 1 = connectives beyond ∧ */
+  unit: 0 | 1;
 };
 
 export const LEVEL_0_LESSONS: LessonDefinition[] = [
-  { id: 'level0-01-letters', type: 'card' },
-  { id: 'level0-02-truth', type: 'card' },
-  { id: 'level0-03-and', type: 'card' },
-  { id: 'level0-04-watch', type: 'watch', formula: 'P ∧ Q' },
-  { id: 'level0-05-guided', type: 'guided', formula: 'P ∧ Q' },
+  { id: 'level0-01-letters', type: 'card', unit: 0 },
+  { id: 'level0-02-truth', type: 'card', unit: 0 },
+  { id: 'level0-03-and', type: 'card', unit: 0 },
+  { id: 'level0-04-watch', type: 'watch', formula: 'P ∧ Q', unit: 0 },
+  { id: 'level0-05-guided', type: 'guided', formula: 'P ∧ Q', unit: 0 },
 ];
+
+export const LEVEL_1_LESSONS: LessonDefinition[] = [
+  { id: 'level1-01-neg', type: 'card', unit: 1 },
+  { id: 'level1-02-neg-watch', type: 'watch', formula: '¬P', unit: 1 },
+  { id: 'level1-03-neg-guided', type: 'guided', formula: '¬P', unit: 1 },
+  { id: 'level1-04-or', type: 'card', unit: 1 },
+  { id: 'level1-05-or-watch', type: 'watch', formula: 'P ∨ Q', unit: 1 },
+  { id: 'level1-06-or-guided', type: 'guided', formula: 'P ∨ Q', unit: 1 },
+  { id: 'level1-07-imp', type: 'card', unit: 1 },
+  { id: 'level1-08-imp-watch', type: 'watch', formula: 'P → Q', unit: 1 },
+  { id: 'level1-09-imp-guided', type: 'guided', formula: 'P → Q', unit: 1 },
+  { id: 'level1-10-iff', type: 'card', unit: 1 },
+  { id: 'level1-11-iff-watch', type: 'watch', formula: 'P ↔ Q', unit: 1 },
+  { id: 'level1-12-iff-guided', type: 'guided', formula: 'P ↔ Q', unit: 1 },
+];
+
+/** Full learn path: Unit 0 then Unit 1 (Unit 1 gated on level0Complete). */
+export const ALL_LEARN_LESSONS: LessonDefinition[] = [...LEVEL_0_LESSONS, ...LEVEL_1_LESSONS];
 
 export const PRACTICE_UNLOCK_ORDER = [
   'eval-001',
@@ -23,16 +43,38 @@ export const PRACTICE_UNLOCK_ORDER = [
   'scope-002',
 ] as const;
 
+const LESSON_BY_ID = new Map(ALL_LEARN_LESSONS.map((lesson) => [lesson.id, lesson]));
+
 export function getLessonDefinition(id: string): LessonDefinition | undefined {
-  return LEVEL_0_LESSONS.find((lesson) => lesson.id === id);
+  return LESSON_BY_ID.get(id);
+}
+
+export function lessonsForUnit(unit: 0 | 1): LessonDefinition[] {
+  return unit === 0 ? LEVEL_0_LESSONS : LEVEL_1_LESSONS;
+}
+
+export function lessonUnit(lessonId: string): 0 | 1 {
+  return getLessonDefinition(lessonId)?.unit ?? 0;
+}
+
+export function isLevel0Complete(completed: string[]): boolean {
+  return LEVEL_0_LESSONS.every((lesson) => completed.includes(lesson.id));
+}
+
+export function isLevel1Complete(completed: string[]): boolean {
+  return LEVEL_1_LESSONS.every((lesson) => completed.includes(lesson.id));
+}
+
+export function isLearnPathComplete(completed: string[]): boolean {
+  return ALL_LEARN_LESSONS.every((lesson) => completed.includes(lesson.id));
 }
 
 export function nextLessonId(currentId: string): string | null {
-  const index = LEVEL_0_LESSONS.findIndex((lesson) => lesson.id === currentId);
-  if (index < 0 || index >= LEVEL_0_LESSONS.length - 1) {
+  const index = ALL_LEARN_LESSONS.findIndex((lesson) => lesson.id === currentId);
+  if (index < 0 || index >= ALL_LEARN_LESSONS.length - 1) {
     return null;
   }
-  return LEVEL_0_LESSONS[index + 1].id;
+  return ALL_LEARN_LESSONS[index + 1].id;
 }
 
 export function firstIncompleteLesson(completed: string[]): LessonDefinition {
@@ -41,5 +83,12 @@ export function firstIncompleteLesson(completed: string[]): LessonDefinition {
       return lesson;
     }
   }
-  return LEVEL_0_LESSONS[LEVEL_0_LESSONS.length - 1];
+  if (isLevel0Complete(completed)) {
+    for (const lesson of LEVEL_1_LESSONS) {
+      if (!completed.includes(lesson.id)) {
+        return lesson;
+      }
+    }
+  }
+  return ALL_LEARN_LESSONS[ALL_LEARN_LESSONS.length - 1];
 }

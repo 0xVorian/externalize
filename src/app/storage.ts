@@ -1,4 +1,12 @@
-import { LEVEL_0_LESSONS, PRACTICE_UNLOCK_ORDER } from './lessons';
+import {
+  LEVEL_0_LESSONS,
+  LEVEL_1_LESSONS,
+  ALL_LEARN_LESSONS,
+  isLevel0Complete,
+  isLearnPathComplete,
+  firstIncompleteLesson,
+  PRACTICE_UNLOCK_ORDER,
+} from './lessons';
 import type { FeedbackTag } from '../../engine';
 import {
   type SkillStat,
@@ -132,12 +140,7 @@ function normalizeV3(store: Record<string, unknown>): ProgressStore {
 }
 
 function firstIncompleteLessonId(completed: string[]): string {
-  for (const lesson of LEVEL_0_LESSONS) {
-    if (!completed.includes(lesson.id)) {
-      return lesson.id;
-    }
-  }
-  return LEVEL_0_LESSONS[LEVEL_0_LESSONS.length - 1].id;
+  return firstIncompleteLesson(completed).id;
 }
 
 export function loadProgress(): ProgressStore {
@@ -249,14 +252,15 @@ export function completeLesson(store: ProgressStore, lessonId: string): Progress
   const lessonsCompleted = store.lessonsCompleted.includes(lessonId)
     ? store.lessonsCompleted
     : [...store.lessonsCompleted, lessonId];
-  const level0Complete = LEVEL_0_LESSONS.every((lesson) => lessonsCompleted.includes(lesson.id));
-  const nextLesson = LEVEL_0_LESSONS.find((lesson) => !lessonsCompleted.includes(lesson.id));
+  const level0Complete = isLevel0Complete(lessonsCompleted);
+  const learnPathComplete = isLearnPathComplete(lessonsCompleted);
+  const nextLesson = firstIncompleteLesson(lessonsCompleted);
   const nextStore = { ...store, lessonsCompleted, level0Complete };
 
   return updateResume(nextStore, {
-    mode: level0Complete ? 'practice' : 'learn',
-    lessonId: nextLesson?.id ?? lessonId,
-    exerciseId: level0Complete ? getUnlockedExerciseIds(nextStore)[0] : undefined,
+    mode: learnPathComplete ? 'practice' : 'learn',
+    lessonId: nextLesson.id,
+    exerciseId: learnPathComplete ? getUnlockedExerciseIds(nextStore)[0] : undefined,
   });
 }
 
@@ -383,4 +387,4 @@ export function pickResumeExerciseId(store: ProgressStore): string | null {
   return pickNextExerciseId(store, pool);
 }
 
-export { LEVEL_0_LESSONS, PRACTICE_UNLOCK_ORDER };
+export { LEVEL_0_LESSONS, LEVEL_1_LESSONS, ALL_LEARN_LESSONS, PRACTICE_UNLOCK_ORDER };

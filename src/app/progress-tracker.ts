@@ -77,6 +77,7 @@ export function successRate(stat: SkillStat): number {
 }
 
 export function buildProgressSummary(input: {
+  level0Done: number;
   level0Total: number;
   lessonsCompleted: string[];
   exercisesUnlocked: string[];
@@ -112,7 +113,7 @@ export function buildProgressSummary(input: {
     .slice(0, 5);
 
   return {
-    level0Done: input.lessonsCompleted.length,
+    level0Done: input.level0Done,
     level0Total: input.level0Total,
     lessonsCompleted: input.lessonsCompleted,
     exercisesUnlocked: input.exercisesUnlocked,
