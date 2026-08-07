@@ -16,10 +16,12 @@ export const STORAGE_KEY = 'externalize-progress-v1';
 
 export function emptyProgress(): ProgressStore {
   return {
-    version: 4,
+    version: 5,
     lessonsCompleted: [],
     level0Complete: false,
     level1Complete: false,
+    level2Complete: false,
+    onboardingComplete: true,
     queue: [],
     completed: [],
     resume: {

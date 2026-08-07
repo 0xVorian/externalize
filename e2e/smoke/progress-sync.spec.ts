@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { completeLesson, serializeProgressExport } from '../../src/app/storage';
 import { emptyProgress, STORAGE_KEY } from '../helpers/progress';
-import { modeButton } from '../helpers/app';
+import { modeButton, skipOnboarding } from '../helpers/app';
 
 test.describe('Progress export/import', () => {
   test('round-trips progress through export and file import', async ({ page }) => {
@@ -13,7 +13,7 @@ test.describe('Progress export/import', () => {
     store = completeLesson(store, 'level0-02-truth');
 
     await page.goto('/');
-    await page.waitForSelector('main.app');
+    await skipOnboarding(page);
     await page.evaluate(
       ({ key, data }) => {
         localStorage.setItem(key, JSON.stringify(data));
@@ -21,7 +21,7 @@ test.describe('Progress export/import', () => {
       { key: STORAGE_KEY, data: store },
     );
     await page.reload();
-    await page.waitForSelector('main.app');
+    await skipOnboarding(page);
 
     await modeButton(page, 'progress').click();
 
@@ -33,7 +33,7 @@ test.describe('Progress export/import', () => {
 
     await page.evaluate((key) => localStorage.removeItem(key), STORAGE_KEY);
     await page.reload();
-    await page.waitForSelector('main.app');
+    await skipOnboarding(page);
 
     await modeButton(page, 'progress').click();
     await expect(page.locator('.progress-item.done')).toHaveCount(0);

@@ -480,8 +480,7 @@
         "level1-03-neg-guided",
         "level1-06-or-guided"
       ]
-    }
-  ],
+    },
     {
       "id": "nd-001",
       "concept": "natural-deduction",

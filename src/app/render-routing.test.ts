@@ -57,7 +57,7 @@ describe('practice presentation routing', () => {
       ...state,
       builder: {
         ...state.builder,
-        formula: { kind: 'imp', left: { kind: 'atom', name: 'Q' }, right: { kind: 'atom', name: 'P' } },
+        formula: { kind: 'imp', left: { kind: 'pred', name: 'Q', args: [] }, right: { kind: 'pred', name: 'P', args: [] } },
       },
     };
     state = checkTranslation(state);

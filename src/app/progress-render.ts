@@ -130,7 +130,7 @@ export function renderProgressView(
       ? LEVEL_2_LESSONS.map((lesson) => {
           const title = getLessonCopy(locale, lesson.id).title;
           const done = store.lessonsCompleted.includes(lesson.id);
-          return renderListItem(title, done ? copy.lessonDone : copy.lessonTodo, done);
+          return renderListItem(locale, title, done ? copy.lessonDone : copy.lessonTodo, done);
         }).join('')
       : '';
 

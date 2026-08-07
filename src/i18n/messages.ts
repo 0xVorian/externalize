@@ -392,6 +392,26 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'counter-003': { prompt: 'Trouvez une interprétation qui rend P ∨ Q faux.', counterCorrect: 'Exact — les deux disjonctes sont faux.', counterWrong: 'Au moins un disjonct est encore vrai.' },
     'counter-004': { prompt: 'Trouvez une interprétation où P ↔ Q est faux.', counterCorrect: 'Exact — P et Q diffèrent.', counterWrong: 'P et Q ont encore la même valeur.' },
     'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
+    'translate-002': {
+      prompt: 'Il n\'est pas le cas que la porte soit ouverte et l\'alarme activée. Construisez la formule.',
+      feedback: { 'negation-scope': 'La négation doit porter sur toute la conjonction : ¬(P ∧ Q), pas ¬P ∧ Q.' },
+    },
+    'translate-003': {
+      prompt: 'S\'il pleut, le match est annulé, et le terrain est fermé. Construisez la formule.',
+      feedback: { 'missing-parens': 'Regroupez d\'abord la conditionnelle : (P → Q) avant de la conjonction avec R.' },
+    },
+    'translate-004': {
+      prompt: 'Si l\'alarme sonne, alors il y a de la fumée. Construisez la formule.',
+      feedback: { 'reversed-conditional': 'L\'alarme correspond à P — elle précède la flèche de la conditionnelle.' },
+    },
+    'translate-005': {
+      prompt: 'La porte est verrouillée si et seulement si la clé manque. Construisez la formule.',
+      feedback: { 'wrong-main-connective': '« Si et seulement si » exige ↔, pas →.' },
+    },
+    'translate-006': {
+      prompt: 'Il n\'est pas le cas que la porte soit ouverte ou que la fenêtre soit ouverte. Construisez la formule.',
+      feedback: { 'negation-scope': 'La négation s\'applique à toute la disjonction : ¬(P ∨ Q), pas ¬P ∨ Q.' },
+    },
     'nd-001': { prompt: 'Complétez la démonstration : choisissez le modus ponens et citez les lignes qui justifient Q.', feedback: { correct: 'Exact — de P → Q et P on obtient Q par élimination de → (modus ponens).', incomplete: 'Sélectionnez →E (modus ponens), puis touchez les lignes de prémisses à citer.', 'wrong-rule-for-premises': '→E exige une implication et son antécédent parmi les lignes citées.', 'wrong-citation': 'Citez l\'implication et l\'antécédent correspondant (lignes 1 et 2).', 'conclusion-does-not-follow': 'Cette combinaison ne produit pas Q à cette ligne.' } },
   },
 };

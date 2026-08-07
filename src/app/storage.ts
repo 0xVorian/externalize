@@ -150,7 +150,7 @@ function normalizeV5(store: Record<string, unknown>): ProgressStore {
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
     errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
     lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
-    onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? true,
+    onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? false,
   };
 }
 
@@ -172,14 +172,10 @@ function migrateV4ToV5(store: Record<string, unknown>): ProgressStore {
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
     errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
     lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
-    onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? false,
+    onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? true,
   };
 }
 
-function migrateV4ToV5(store: Record<string, unknown>): ProgressStore {
-  const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
-  return { version:5, lessonsCompleted, level0Complete:(store.level0Complete as boolean|undefined)??isLevel0Complete(lessonsCompleted), level1Complete:(store.level1Complete as boolean|undefined)??isLevel1Complete(lessonsCompleted), queue:(store.queue as SrsEntry[]|undefined)??[], completed:(store.completed as string[]|undefined)??[], lastExerciseId: store.lastExerciseId as string|undefined, resume:(store.resume as ResumePoint|undefined)??defaultResume(), skills:(store.skills as Record<string,SkillStat>|undefined)??{}, exerciseStats:(store.exerciseStats as Record<string,ExerciseStat>|undefined)??{}, errorCounts:(store.errorCounts as Partial<Record<FeedbackTag,number>>|undefined)??{}, lastVisitedAt:(store.lastVisitedAt as string|undefined)??nowIso(), onboardingComplete:true };
-}
 
 function migrateV3ToV4(store: Record<string, unknown>): ProgressStore {
   const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];

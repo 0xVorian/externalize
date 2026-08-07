@@ -16,7 +16,10 @@ describe('exercise template generator', () => {
     const result = generateExercises(loadExerciseTemplates());
     const generated = result.exercises;
     const existing = EXERCISE_DEFINITIONS.filter(
-      (exercise) => exercise.type !== 'translate-en-to-formula',
+      (exercise) =>
+        exercise.type === 'identify-main-connective' ||
+        exercise.type === 'evaluate-formula' ||
+        exercise.type === 'fill-truth-table-cell',
     );
 
     expect(generated).toHaveLength(existing.length);

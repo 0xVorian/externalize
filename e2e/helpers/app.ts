@@ -1,5 +1,13 @@
 import type { Page } from '@playwright/test';
 import type { ProgressStore } from '../../src/app/storage';
+
+export async function skipOnboarding(page: Page): Promise<void> {
+  const overlay = page.locator('.onboarding-overlay');
+  if (await overlay.count()) {
+    await page.locator('[data-action="onboarding-skip"]').click();
+  }
+  await page.waitForSelector('main.app');
+}
 import { STORAGE_KEY } from './progress';
 
 export async function gotoFresh(page: Page): Promise<void> {
@@ -7,7 +15,7 @@ export async function gotoFresh(page: Page): Promise<void> {
     localStorage.clear();
   });
   await page.goto('/');
-  await page.waitForSelector('main.app');
+  await skipOnboarding(page);
 }
 
 export async function gotoWithProgress(page: Page, store: ProgressStore): Promise<void> {
@@ -18,7 +26,7 @@ export async function gotoWithProgress(page: Page, store: ProgressStore): Promis
     { key: STORAGE_KEY, data: store },
   );
   await page.goto('/');
-  await page.waitForSelector('main.app');
+  await skipOnboarding(page);
 }
 
 export function lessonNext(page: Page) {

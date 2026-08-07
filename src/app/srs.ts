@@ -34,6 +34,9 @@ export const SRS_SKILL_PROFILES: Record<SkillId, SrsSkillProfile> = {
   'practice:evaluate-formula': { ...DEFAULT_PROFILE, intervalScale: 0.85 },
   'practice:fill-truth-table-cell': { ...DEFAULT_PROFILE, intervalScale: 0.5 },
   'practice:translate-en-to-formula': { ...DEFAULT_PROFILE, intervalScale: 0.5 },
+  'practice:find-counterexample': { ...DEFAULT_PROFILE, intervalScale: 0.55 },
+  'practice:classify-tautology': { ...DEFAULT_PROFILE, intervalScale: 0.55 },
+  'practice:proof-fill-step': { ...DEFAULT_PROFILE, intervalScale: 0.75 },
 };
 
 export function srsProfileForSkill(skillId: SkillId): SrsSkillProfile {
