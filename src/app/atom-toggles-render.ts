@@ -5,6 +5,7 @@ export type AtomToggleRenderOptions = {
   assignment: Record<string, boolean>;
   action: string;
   isAtomEnabled?: (atom: string) => boolean;
+  disabled?: boolean;
 };
 
 export function renderAtomPanel(options: AtomToggleRenderOptions): string {
@@ -14,7 +15,7 @@ export function renderAtomPanel(options: AtomToggleRenderOptions): string {
 
   const rows = atoms
     .map((atom) => {
-      const enabled = isEnabled(atom);
+      const enabled = !options.disabled && isEnabled(atom);
       const value = options.assignment[atom] ?? false;
       const trueActive = value;
       const falseActive = !value;

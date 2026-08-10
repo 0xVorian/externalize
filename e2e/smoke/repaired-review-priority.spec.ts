@@ -13,7 +13,6 @@ test('routes Continue to a due repaired review before a newly unlocked exercise'
 
   await page.locator('[data-action="select-evaluation-prediction"][data-value="true"]').click();
   await page.locator('[data-action="check-evaluation"]').click();
-  await page.locator('[data-action="try-again"]').click();
   await page.locator('[data-action="select-evaluation-prediction"][data-value="false"]').click();
   await page.locator('[data-action="check-evaluation"]').click();
   await page.locator('[data-action="next"]').click();

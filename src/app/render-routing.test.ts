@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISE_DEFINITIONS } from './exercises';
 import { renderApp } from './render';
-import { createState, checkTranslation, tryAgainTranslation } from './state';
+import { createState, checkTranslation } from './state';
 import { getTranslationExerciseConfig } from './translation';
 import { usesLiveTruthRow } from './truth-table-render';
 
@@ -50,7 +50,7 @@ describe('practice presentation routing', () => {
     }
   });
 
-  it('shows try again after incorrect translation check', () => {
+  it('keeps incorrect translation feedback visible for in-place repair', () => {
     const exercise = EXERCISE_DEFINITIONS.find((candidate) => candidate.id === 'translate-004')!;
     let state = createState('en', exercise);
     state = {
@@ -62,10 +62,11 @@ describe('practice presentation routing', () => {
     };
     state = checkTranslation(state);
     expect(state.feedback?.tag).toBe('reversed-conditional');
-    expect(renderApp(state, 0, true)).toContain('data-action="try-again"');
-    state = tryAgainTranslation(state);
-    expect(state.phase).toBe('ready');
-    expect(state.feedback).toBeNull();
+    expect(state.phase).toBe('answered');
+    const html = renderApp(state, 0, true);
+    expect(html).not.toContain('data-action="try-again"');
+    expect(html).toContain('data-action="check-translation"');
+    expect(html).toContain('feedback-wrong');
   });
 
   it('renders French-authored atom glosses in translation practice', () => {

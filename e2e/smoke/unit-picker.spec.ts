@@ -7,17 +7,17 @@ test.describe('Unit picker navigation', () => {
     await gotoWithProgress(page, progressAfterLevel0());
 
     await expect(page.locator('.unit-picker')).toBeVisible();
-    await expect(unitTab(page, 1)).toHaveAttribute('aria-selected', 'true');
+    await expect(unitTab(page, 1)).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('h1')).toContainText('Unit 1 — Connectives');
     await expect(page.locator('.lesson-card-title')).toContainText('¬P — truth-functional not');
 
     await unitTab(page, 0).click();
-    await expect(unitTab(page, 0)).toHaveAttribute('aria-selected', 'true');
+    await expect(unitTab(page, 0)).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('h1')).toContainText('Unit 0 — Propositional syntax');
     await expect(page.locator('.lesson-card-title')).toContainText('Letters stand for statements');
 
     await unitTab(page, 1).click();
-    await expect(unitTab(page, 1)).toHaveAttribute('aria-selected', 'true');
+    await expect(unitTab(page, 1)).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('h1')).toContainText('Unit 1 — Connectives');
   });
 });

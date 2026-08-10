@@ -24,6 +24,11 @@ test.describe('Progress export/import', () => {
     await skipOnboarding(page);
 
     await modeButton(page, 'progress').click();
+    await page
+      .locator('.progress-disclosure')
+      .filter({ has: page.locator('[data-action="export-progress"]') })
+      .locator('summary')
+      .click();
 
     const downloadPromise = page.waitForEvent('download');
     await page.locator('[data-action="export-progress"]').click();
@@ -36,6 +41,11 @@ test.describe('Progress export/import', () => {
     await skipOnboarding(page);
 
     await modeButton(page, 'progress').click();
+    await page
+      .locator('.progress-disclosure')
+      .filter({ has: page.locator('[data-action="import-progress"]') })
+      .locator('summary')
+      .click();
     await expect(page.locator('.progress-item.done')).toHaveCount(0);
 
     const exportJson = serializeProgressExport(store, 'en');

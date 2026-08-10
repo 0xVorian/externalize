@@ -20,7 +20,7 @@ async function buildNegatedConjunction(page: Page): Promise<void> {
 }
 
 test.describe('translate-002 translation exercise', () => {
-  test('shows try again on a wrong check, then accepts the corrected formula', async ({ page }) => {
+  test('keeps feedback visible while the learner repairs the same attempt', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('translate-002'));
     await modeButton(page, 'practice').click();
 
@@ -30,15 +30,12 @@ test.describe('translate-002 translation exercise', () => {
     await page.locator('[data-action="check-translation"]').click();
 
     await expect(page.locator('.feedback-wrong')).toBeVisible();
-    await expect(page.locator('[data-action="try-again"]')).toBeVisible();
-
-    await page.locator('[data-action="try-again"]').click();
-    await expect(page.locator('.feedback-wrong')).toHaveCount(0);
     await expect(page.locator('[data-action="check-translation"]')).toBeVisible();
 
     for (let i = 0; i < 5; i += 1) {
       await page.locator('[data-action="palette-backspace"]').click();
     }
+    await expect(page.locator('.feedback-wrong')).toBeVisible();
 
     await buildNegatedConjunction(page);
     await page.locator('[data-action="check-translation"]').click();

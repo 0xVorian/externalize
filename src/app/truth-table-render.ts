@@ -99,42 +99,40 @@ export function renderWatchGrid(
   const [rowAtom, colAtom] = atoms;
   const rowValues = [true, false];
   const colValues = [true, false];
-  const cells = rowValues
+  const rows = rowValues
     .map((rowVal) => {
-      const rowCells = colValues
+      const cells = colValues
         .map((colVal) => {
           const assignment: Assignment = { [rowAtom]: rowVal, [colAtom]: colVal };
           const active = assignmentsMatch(assignment, activeAssignment, atoms);
           const result = evaluateFormula(formula, assignment);
           return `
-            <div class="watch-grid-cell ${active ? 'active' : ''}"${active ? ' aria-current="true"' : ''}>
+            <td class="watch-grid-cell ${active ? 'active' : ''}"${active ? ' aria-current="true"' : ''}>
               <span class="watch-grid-value">${formatTruthValue(locale, result)}</span>
-            </div>
+            </td>
           `;
         })
         .join('');
-      return `<div class="watch-grid-row">${rowCells}</div>`;
+      return `
+        <tr class="watch-grid-row">
+          <th scope="row" class="watch-grid-row-label">${rowAtom} = ${formatTruthValue(locale, rowVal)}</th>
+          ${cells}
+        </tr>
+      `;
     })
     .join('');
 
   return `
     <div class="watch-grid-wrap">
-      <div class="watch-grid" role="grid" aria-label="${learn.watchGridAria(formula)}">
-        <div class="watch-grid-corner"></div>
-        <div class="watch-grid-col-labels">
-          <span class="watch-grid-col-label">${colAtom}</span>
-          <span class="watch-grid-col-label">${formatTruthValue(locale, true)}</span>
-          <span class="watch-grid-col-label">${formatTruthValue(locale, false)}</span>
-        </div>
-        <div class="watch-grid-body">
-          <div class="watch-grid-row-labels">
-            <span class="watch-grid-row-label">${rowAtom}</span>
-            <span class="watch-grid-row-label">${formatTruthValue(locale, true)}</span>
-            <span class="watch-grid-row-label">${formatTruthValue(locale, false)}</span>
-          </div>
-          <div class="watch-grid-cells">${cells}</div>
-        </div>
-      </div>
+      <table class="watch-grid" aria-label="${learn.watchGridAria(formula)}">
+        <thead>
+          <tr>
+            <th class="watch-grid-corner" scope="col">${rowAtom} ↓ / ${colAtom} →</th>
+            ${colValues.map((value) => `<th scope="col" class="watch-grid-col-label">${colAtom} = ${formatTruthValue(locale, value)}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
     </div>
   `;
 }
@@ -146,10 +144,8 @@ function renderBlankResultCell(
   answered: boolean,
 ): string {
   const copy = ui(locale);
-  if (answered && submitted !== null) {
-    return `<td class="result-cell">${formatTruthValue(locale, submitted)}</td>`;
-  }
-  return `<td class="result-cell blank-cell"><div class="cell-segments" role="group" aria-label="${copy.cellFillAria(rowIndex + 1)}"><button type="button" class="cell-segment true" data-action="submit-cell-value" data-value="true">${copy.trueLabel}</button><button type="button" class="cell-segment false" data-action="submit-cell-value" data-value="false">${copy.falseLabel}</button></div></td>`;
+  const disabled = answered ? ' disabled' : '';
+  return `<td class="result-cell blank-cell"><div class="cell-segments" role="group" aria-label="${copy.cellFillAria(rowIndex + 1)}"><button type="button" class="cell-segment true${submitted === true ? ' selected' : ''}" data-action="submit-cell-value" data-value="true" aria-pressed="${submitted === true}"${disabled}>${copy.trueLabel}</button><button type="button" class="cell-segment false${submitted === false ? ' selected' : ''}" data-action="submit-cell-value" data-value="false" aria-pressed="${submitted === false}"${disabled}>${copy.falseLabel}</button></div></td>`;
 }
 
 export function renderPartialTruthTable(

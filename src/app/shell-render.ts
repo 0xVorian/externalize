@@ -55,7 +55,7 @@ export function renderModeNav(
         data-mode="practice"
         aria-label="${learn.modePracticeAria}"
         aria-pressed="${mode === 'practice'}"
-        ${practiceUnlocked ? '' : 'disabled aria-describedby="practice-lock-hint"'}
+        ${practiceUnlocked ? '' : 'disabled'}
         title="${practiceUnlocked ? '' : learn.practiceLocked}"
       >
         ${learn.practice}
@@ -108,7 +108,7 @@ export function renderShellHeader(options: {
   meta?: string;
   referenceOpen?: boolean;
 }): string {
-  const { locale, mode, practiceUnlocked, title, meta, referenceOpen = true } = options;
+  const { locale, mode, practiceUnlocked, title, meta, referenceOpen = false } = options;
   return `
     <header class="app-header">
       <div class="header-row">

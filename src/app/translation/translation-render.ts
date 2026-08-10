@@ -40,16 +40,13 @@ export function renderTranslationExerciseBody(state: AppState): string {
     ? renderTreeList(toVerticalTree(state.builder.formula), ui(state.locale).formulaTreeAria)
     : '';
 
-  return `${renderAtomKey(state.locale, atoms)}<section class="translation-preview" aria-label="${t.previewAria}"><h2 class="panel-title">${t.previewTitle}</h2><p class="built-formula" aria-live="polite">${previewLine}</p>${treeHtml}</section>${renderSymbolPalette(state.locale, config.palette, atoms)}`;
+  return `${renderAtomKey(state.locale, atoms)}<section class="translation-preview" aria-label="${t.previewAria}"><h2 class="panel-title">${t.previewTitle}</h2><p class="built-formula" aria-live="polite">${previewLine}</p>${treeHtml}</section>${renderSymbolPalette(state.locale, config.palette, atoms, state.attempt.status === 'finalized')}`;
 }
 
 export function renderTranslationActions(state: AppState): string {
   const copy = ui(state.locale);
-  if (state.phase === 'answered') {
-    if (state.attempt.status === 'finalized') {
-      return `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
-    }
-    return `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>`;
+  if (state.attempt.status === 'finalized') {
+    return `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
   }
   return `<button type="button" class="primary" data-action="check-translation">${translationUi(state.locale).check}</button>`;
 }

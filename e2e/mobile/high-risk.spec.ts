@@ -26,7 +26,8 @@ test('evaluation prediction remains usable', async ({ page }) => {
   await expect(page.locator('.evaluation-prediction')).toBeVisible();
   await page.locator('[data-action="select-evaluation-prediction"][data-value="true"]').click();
   await page.locator('[data-action="check-evaluation"]').click();
-  await expect(page.locator('[data-action="try-again"]')).toBeVisible();
+  await expect(page.locator('.feedback-wrong')).toBeVisible();
+  await expect(page.locator('[data-action="select-evaluation-prediction"][data-value="false"]')).toBeVisible();
   await expectNoPageOverflow(page);
 });
 
@@ -35,7 +36,7 @@ test('scope tree repair remains tappable', async ({ page }) => {
   await modeButton(page, 'practice').click();
   const nodes = page.locator('[data-action="select-node"]');
   await nodes.nth(1).click();
-  await page.locator('[data-action="try-again"]').click();
+  await expect(page.locator('.feedback-wrong')).toBeVisible();
   await nodes.first().click();
   await expect(page.locator('.feedback-correct')).toBeVisible();
   await expectNoPageOverflow(page);

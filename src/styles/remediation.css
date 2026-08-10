@@ -1,0 +1,285 @@
+/* v0.3.3 bounded UI/UX remediation. Keep this as a restrained override layer. */
+
+.language-toggle .lang-button {
+  min-height: var(--tap-min);
+}
+
+/* Scope selection belongs only to the chosen node, never its descendants. */
+.tree-node.selected > .tree-children .node-button {
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.tree-node.selected > .node-button {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.tree-node .node-button:disabled,
+.palette-button:disabled,
+.proof-rule-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.unit-picker {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+}
+
+.unit-button {
+  min-width: 0;
+  min-height: var(--tap-min);
+  padding: 0.55rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.unit-button.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.exercise-family {
+  margin: 0 0 0.35rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.watch-grid-wrap {
+  width: 100%;
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+.watch-grid {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0.35rem;
+  font-family: "Fira Code", "Cascadia Code", monospace;
+}
+
+.watch-grid th,
+.watch-grid-cell {
+  min-width: 0;
+  padding: 0.55rem 0.35rem;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: var(--surface);
+}
+
+.watch-grid-corner,
+.watch-grid-col-label,
+.watch-grid-row-label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.watch-grid-cell {
+  font-size: 1rem;
+  font-weight: 700;
+  opacity: 0.55;
+}
+
+.watch-grid-cell.active {
+  opacity: 1;
+  border-width: 2px;
+  border-color: var(--accent);
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 1px;
+  font-weight: 800;
+}
+
+.prediction-panel {
+  margin-top: 0.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.prediction-label {
+  margin: 0 0 0.45rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.cell-segments {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.cell-segment {
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-weight: 700;
+}
+
+.cell-segment.selected {
+  border-width: 2px;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 -3px 0 currentColor;
+}
+
+.cell-segment:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.blank-cell .cell-segments {
+  min-width: 6.25rem;
+}
+
+.atom-key {
+  margin-bottom: 1rem;
+}
+
+.atom-key-list {
+  list-style: none;
+  margin: 0.45rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.atom-key-list li {
+  display: grid;
+  grid-template-columns: minmax(1.75rem, auto) minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: baseline;
+}
+
+.atom-key-letter,
+.palette-symbol {
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-weight: 700;
+}
+
+.atom-key-gloss,
+.palette-gloss {
+  min-width: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.palette-atom {
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 100%;
+  text-align: left;
+}
+
+.palette-gloss {
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.progress-disclosure {
+  padding: 0;
+  overflow: hidden;
+}
+
+.progress-disclosure > summary {
+  min-height: var(--tap-min);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+}
+
+.progress-summary-meta {
+  max-width: 13rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.progress-disclosure-body {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.progress-disclosure-body > :first-child {
+  margin-top: 0.75rem;
+}
+
+.progress-overview .progress-meta:last-child {
+  margin-bottom: 0;
+}
+
+.unit-button:focus-visible,
+.cell-segment:focus-visible,
+.proof-rule-btn:focus-visible,
+.proof-cite-chip:focus-visible,
+.progress-disclosure > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 340px) {
+  .unit-picker {
+    gap: 0.35rem;
+  }
+
+  .unit-button {
+    padding-inline: 0.25rem;
+    font-size: 0.76rem;
+  }
+
+  .watch-grid {
+    border-spacing: 0.2rem;
+  }
+
+  .watch-grid th,
+  .watch-grid-cell {
+    padding-inline: 0.2rem;
+  }
+
+  .progress-disclosure > summary {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  .progress-summary-meta {
+    max-width: none;
+    text-align: left;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .unit-button,
+  .cell-segment,
+  .proof-rule-btn,
+  .proof-cite-chip {
+    background: #171412;
+  }
+}
