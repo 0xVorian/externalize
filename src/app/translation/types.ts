@@ -91,7 +91,7 @@ export const TRANSLATE_002: TranslationExerciseConfig = {
 
 export const TRANSLATE_003: TranslationExerciseConfig = {
   id: 'translate-003',
-  expected: { formula: '(P → Q) ∧ R' },
+  expected: { formula: '(P → Q) ∧ R', acceptCommutativeAnd: true },
   palette: {
     atoms: [
       { name: 'P' },

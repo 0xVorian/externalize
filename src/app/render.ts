@@ -13,6 +13,13 @@ function showsEvaluatedTree(type: AppState['exercise']['type']): boolean {
   return type === 'evaluate-formula' || type === 'find-counterexample';
 }
 
+function hidesAssessmentRoot(state: AppState, node: TreeNode): boolean {
+  if (state.phase !== 'ready' || node.id !== state.tree.id) {
+    return false;
+  }
+  return state.exercise.type === 'evaluate-formula' || state.exercise.type === 'find-counterexample';
+}
+
 function nodeValueClass(kind: TreeNode['kind']): string {
   return kind === 'pred' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
 }
@@ -24,13 +31,9 @@ function renderTreeNode(node: TreeNode, state: AppState, focusNodeId?: string): 
   const classes = ['tree-node', `kind-${node.kind}`];
   if (selected) classes.push('selected');
   if (isTappable) classes.push('tappable');
-  const hideAssessmentRoot =
-    state.exercise.type === 'evaluate-formula' &&
-    state.phase === 'ready' &&
-    node.id === state.tree.id;
   const truthLabel = formatTruthValue(
     state.locale,
-    hideAssessmentRoot ? undefined : node.value,
+    hidesAssessmentRoot(state, node) ? undefined : node.value,
   );
   const valueHtml = showsEvaluatedTree(state.exercise.type)
       ? `<span class="${nodeValueClass(node.kind)}" aria-label="${copy.valueAria(truthLabel)}">${truthLabel}</span>`
@@ -87,7 +90,7 @@ function renderCounterexampleBody(state: AppState): string {
     return '';
   }
   if (usesLiveTruthRow(state.exercise.formula!)) {
-    return `${renderAtomToggles(state)}${renderLiveTruthRow(state.locale, state.exercise.formula!, state.assignment)}`;
+    return `${renderAtomToggles(state)}${renderLiveTruthRow(state.locale, state.exercise.formula!, state.assignment, { hideResult: state.phase === 'ready' })}`;
   }
   return renderTreePanel(state, renderAtomToggles(state));
 }

@@ -51,7 +51,7 @@ test.describe('evaluate-formula attempt lifecycle', () => {
 
     await page.locator('[data-action="next"]').click();
     const afterContinue = await storedProgress(page);
-    expect(afterContinue.resume.exerciseId).toBe('scope-012');
+    expect(afterContinue.resume.exerciseId).toBe('eval-001');
     expect(afterContinue.exerciseStats['eval-001']).toEqual(progress.exerciseStats['eval-001']);
     expect(afterContinue.queue.find((entry) => entry.exerciseId === 'eval-001')).toEqual(
       progress.queue.find((entry) => entry.exerciseId === 'eval-001'),

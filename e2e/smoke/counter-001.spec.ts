@@ -8,9 +8,12 @@ test.describe('counter-001 find-counterexample exercise', () => {
     await modeButton(page, 'practice').click();
 
     await expect(page.locator('.truth-table')).toBeVisible();
+    await expect(page.locator('.result-cell')).toHaveText('—');
     await expect(page.locator('[data-action="check-counterexample"]')).toBeVisible();
 
     await completeGuidedStep(page, 'Q', false);
+
+    await expect(page.locator('.result-cell')).toHaveText('—');
 
     await page.locator('[data-action="check-counterexample"]').click();
 

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-08-10
+
+### Fixed
+
+- Accept commutative conjunction operand order in `translate-003` via `acceptCommutativeAnd`
+- Hide counterexample assessed root truth value before Check, matching evaluate-formula assessment boundaries
+- Replace misleading `⊃` gloss in lesson 0.1 with explicit `Let P = …` / `Soit P = …` notation
+- Remove untaught `scope-012` from Unit 0 practice; gate now uses `eval-011` transfer on conjunction
+- Move `scope-012` to Unit 2 practice after nesting is taught
+- Unified `selectNextExerciseId` policy so immediately due repaired reviews are not starved by new frontier exercises
+
 ## [0.3.2] - 2026-08-10
 
 ### Added

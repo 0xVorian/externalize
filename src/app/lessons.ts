@@ -52,7 +52,7 @@ export const ALL_LEARN_LESSONS: LessonDefinition[] = [
 ];
 
 /** Unit 0 practice — unlocks after level0Complete. */
-export const LEVEL_0_PRACTICE_UNLOCK_ORDER = ['eval-001', 'scope-012'] as const;
+export const LEVEL_0_PRACTICE_UNLOCK_ORDER = ['eval-001', 'eval-011'] as const;
 
 /** Unit 1 practice — unlocks after all 12 Level 1 lessons. */
 export const LEVEL_1_PRACTICE_UNLOCK_ORDER = [
@@ -69,7 +69,6 @@ export const LEVEL_1_PRACTICE_UNLOCK_ORDER = [
   'eval-018',
   'tt-001',
   'counter-001',
-  'eval-011',
   'eval-012',
   'tt-002',
   'counter-002',
@@ -113,6 +112,7 @@ export const LEVEL_1_PRACTICE_UNLOCK_ORDER = [
 /** Unit 2 practice — unlocks after all 8 Level 2 lessons. */
 export const LEVEL_2_PRACTICE_UNLOCK_ORDER = [
   'eval-021',
+  'scope-012',
   'scope-013',
   'eval-022',
   'counter-005',

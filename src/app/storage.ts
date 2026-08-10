@@ -460,6 +460,53 @@ export function pickNextExerciseId(store: ProgressStore, fallbackIds: string[]):
   return fallbackIds[0];
 }
 
+function dueUnlockedEntries(store: ProgressStore, pool: string[]): SrsEntry[] {
+  const allowed = new Set(pool);
+  const now = Date.now();
+  return store.queue
+    .filter(
+      (entry) => allowed.has(entry.exerciseId) && new Date(entry.due).getTime() <= now,
+    )
+    .sort((a, b) => new Date(a.due).getTime() - new Date(b.due).getTime());
+}
+
+function isDueRepairedReview(store: ProgressStore, exerciseId: string): boolean {
+  return (
+    store.passed.includes(exerciseId) &&
+    (store.exerciseStats[exerciseId]?.repairedPasses ?? 0) > 0
+  );
+}
+
+/** Authoritative next-exercise policy for Continue, What next?, and resume. */
+export function selectNextExerciseId(store: ProgressStore): string {
+  const pool = getUnlockedExerciseIds(store);
+  if (pool.length === 0) {
+    throw new Error('No practice exercises unlocked');
+  }
+
+  const due = dueUnlockedEntries(store, pool);
+
+  const repairedDue = due.filter((entry) => isDueRepairedReview(store, entry.exerciseId));
+  if (repairedDue.length > 0) {
+    return repairedDue[0]!.exerciseId;
+  }
+
+  const firstUnpassed = pool.find((exerciseId) => !store.passed.includes(exerciseId));
+  if (firstUnpassed) {
+    return firstUnpassed;
+  }
+
+  if (due.length > 0) {
+    return due[0]!.exerciseId;
+  }
+
+  if (store.resume.exerciseId && pool.includes(store.resume.exerciseId)) {
+    return store.resume.exerciseId;
+  }
+
+  return pickNextExerciseId(store, pool);
+}
+
 export function beginPracticeAttempt(
   store: ProgressStore,
   exerciseId: string,
@@ -629,10 +676,11 @@ export function pickResumeExerciseId(store: ProgressStore): string | null {
   if (pool.length === 0) {
     return null;
   }
-  if (store.resume.exerciseId && pool.includes(store.resume.exerciseId)) {
-    return store.resume.exerciseId;
+  try {
+    return selectNextExerciseId(store);
+  } catch {
+    return null;
   }
-  return pickNextExerciseId(store, pool);
 }
 
 export {

@@ -15,7 +15,8 @@ const EXERCISES = {
   },
   'translate-003': {
     expected: '(P → Q) ∧ R',
-    accept: ['(P → Q) ∧ R'],
+    options: { allowCommutativeAnd: true },
+    accept: ['(P → Q) ∧ R', 'R ∧ (P → Q)'],
     reject: [{ learner: 'P → Q ∧ R', tag: 'missing-parens' as const }],
   },
   'translate-004': {
@@ -109,16 +110,17 @@ describe('classifyTranslation', () => {
 
   describe.each(Object.entries(EXERCISES))('%s', (_id, spec) => {
     const expected = parse(spec.expected);
+    const options = 'options' in spec ? spec.options : {};
 
     it.each(spec.accept)('accepts %s', (learnerText) => {
-      const result = classifyTranslation(expected, parse(learnerText));
+      const result = classifyTranslation(expected, parse(learnerText), options);
       expect(result.correct).toBe(true);
       expect(result.tag).toBe('correct');
     });
 
     for (const { learner, tag } of spec.reject) {
       it(`rejects ${learner} as ${tag}`, () => {
-        const result = classifyTranslation(expected, parse(learner));
+        const result = classifyTranslation(expected, parse(learner), options);
         expect(result.correct).toBe(false);
         expect(result.tag).toBe(tag);
       });
