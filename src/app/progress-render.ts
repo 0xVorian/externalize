@@ -97,11 +97,12 @@ function renderDisclosure(
   summary: string,
   body: string,
   labelledBy?: string,
+  open = false,
 ): string {
   return `
-    <details class="progress-card progress-disclosure"${labelledBy ? ` aria-labelledby="${labelledBy}"` : ''}>
+    <details class="progress-card progress-disclosure"${labelledBy ? ` aria-labelledby="${labelledBy}"` : ''}${open ? ' open' : ''}>
       <summary>
-        <span class="panel-title"${labelledBy ? ` id="${labelledBy}"` : ''}>${title}</span>
+        <span class="panel-title" role="heading" aria-level="2"${labelledBy ? ` id="${labelledBy}"` : ''}>${title}</span>
         <span class="progress-summary-meta">${summary}</span>
       </summary>
       <div class="progress-disclosure-body">${body}</div>
@@ -266,6 +267,8 @@ export function renderProgressView(
           <button type="button" class="secondary" data-action="import-progress">${copy.importProgress}</button>
         </div>
         `,
+        undefined,
+        Boolean(options.importNotice),
       )}
 
       ${renderDisclosure(
