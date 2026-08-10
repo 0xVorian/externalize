@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Translation skill label is locale-neutral (`Prose to formula` / `Énoncé → formule`); skill id `practice:translate-prose-to-formula`
+- Translation skill label is locale-neutral (`Prose to formula` / `Énoncé → formule`) while retaining the persisted `practice:translate-en-to-formula` skill id for backward compatibility
 - Conservative `negation-scope` translation feedback only when the learner AST contains misplaced negation
 - French lesson copy uses proper *vérité-fonctionnel* terminology instead of calqued *truth-fonctionnel*
 - French progress UI labels the translation skill as *Énoncé → formule* (locale-neutral)
@@ -111,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Generalized lesson truth-table renderer (engine-backed; supports single-atom `¬P` and binary connectives)
 - Unit 1 unlocks after Unit 0; learn path continues through Unit 1 before auto-resuming practice
 - Progress tab Unit 1 checklist (visible once Unit 0 is complete)
-- Flat evaluate exercises for `P ∨ Q`, `P → Q`, and `P ↔ Q` use the live truth-table row (same presentation as `P ∧ Q`)
+- Flat evaluate exercises for `P ∨ Q`, `P → Q`, and `P ↔ Q`) use the live truth-table row (same presentation as `P ∧ Q`)
 - Phase 3 translation prototype design doc ([`docs/phase3-translation.md`](docs/phase3-translation.md)): tap-based symbol palette, builder-vs-typing, AST comparison, feedback taxonomy, drag/tap parity
 - Minimal translation spike stub ([`src/app/translation/`](src/app/translation/)): exercise types, example `translate-001`, `renderSymbolPalette()` HTML renderer
 - **Tautology validity challenges** (`classify-tautology`): five exercises (`val-001`–`val-005`) with read-only full truth tables and Yes/No tautology judgment; engine classifies formulas with ≤3 atoms via finite truth-table check
