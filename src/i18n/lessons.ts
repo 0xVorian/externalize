@@ -221,7 +221,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Classical propositional logic assumes bivalence: each statement is true (T) or false (F), not both.',
           'A truth assignment specifies, for each sentence letter, which truth value it receives.',
-          'On exercises, tap V or F next to each letter to set its value; the table or tree updates immediately.',
+          'On exercises, tap T or F next to each letter to set its value; the table or tree updates immediately.',
           'Evaluating a formula means computing its truth value from the assignment, using the rules for each connective.',
         ],
         example: 'Assignment:  P ↦ T ,  Q ↦ F',

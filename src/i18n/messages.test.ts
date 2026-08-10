@@ -32,4 +32,23 @@ describe('i18n', () => {
       'Interprétation: P ↦ V , Q ↦ F',
     );
   });
+
+  it('uses T/F instructions in English and V/F in French', () => {
+    expect(ui('en').assignmentHint).toContain('T or F');
+    expect(ui('en').assignmentHint).not.toContain('V or F');
+    expect(ui('fr').assignmentHint).toContain('V ou F');
+  });
+
+  it('authors translation atom glosses in each locale', () => {
+    expect(getExerciseCopy('en', 'translate-003').atoms).toEqual({
+      P: 'It rains.',
+      Q: 'The game is cancelled.',
+      R: 'The field is closed.',
+    });
+    expect(getExerciseCopy('fr', 'translate-003').atoms).toEqual({
+      P: 'Il pleut.',
+      Q: 'Le match est annulé.',
+      R: 'Le terrain est fermé.',
+    });
+  });
 });

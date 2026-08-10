@@ -1,11 +1,14 @@
 import {
   completeLesson,
+  beginPracticeAttempt,
+  clearPracticeDraft,
   getUnlockedExerciseIds,
-  recordResult,
+  recordCheckedPracticeState,
   seedQueue,
   updateResume,
   type ProgressStore,
 } from '../../src/app/storage';
+import { recordAttemptCheck } from '../../src/app/practice-attempt';
 import {
   LEVEL_0_LESSONS,
   LEVEL_1_LESSONS,
@@ -16,14 +19,16 @@ export const STORAGE_KEY = 'externalize-progress-v1';
 
 export function emptyProgress(): ProgressStore {
   return {
-    version: 5,
+    version: 6,
     lessonsCompleted: [],
     level0Complete: false,
     level1Complete: false,
     level2Complete: false,
     onboardingComplete: true,
     queue: [],
-    completed: [],
+    attempted: [],
+    passed: [],
+    practiceDrafts: {},
     resume: {
       mode: 'learn',
       lessonId: LEVEL_0_LESSONS[0]!.id,
@@ -34,6 +39,17 @@ export function emptyProgress(): ProgressStore {
     errorCounts: {},
     lastVisitedAt: new Date().toISOString(),
   };
+}
+
+function passExercise(store: ProgressStore, exerciseId: string): ProgressStore {
+  const started = beginPracticeAttempt(clearPracticeDraft(store), exerciseId);
+  const draft = started.practiceDraft!;
+  return recordCheckedPracticeState(started, {
+    ...draft,
+    phase: 'answered',
+    feedbackTag: 'correct',
+    attempt: recordAttemptCheck(draft.attempt, true),
+  });
 }
 
 export function progressAfterLevel0(): ProgressStore {
@@ -57,7 +73,7 @@ export function progressReadyForExercise(exerciseId: string): ProgressStore {
     if (id === exerciseId) {
       break;
     }
-    store = recordResult(store, id, true);
+    store = passExercise(store, id);
   }
 
   store = seedQueue(store, getUnlockedExerciseIds(store));

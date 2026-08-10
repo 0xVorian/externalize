@@ -5,7 +5,6 @@ import { equivalent, type EquivalenceOptions } from '../equiv/equivalent';
 export type TranslationFeedbackTag =
   | 'correct'
   | 'reversed-conditional'
-  | 'reversed-biconditional'
   | 'negation-scope'
   | 'missing-parens'
   | 'extra-parens'
@@ -28,8 +27,6 @@ const DEFAULT_TEMPLATES: Record<TranslationFeedbackTag, string> = {
   correct: 'Correct.',
   'reversed-conditional':
     'The conditional runs the wrong way: the antecedent and consequent are swapped.',
-  'reversed-biconditional':
-    'The biconditional is reversed — both sides are present, but their roles are swapped.',
   'negation-scope':
     'Negation is attached to the wrong subformula. Check what the ¬ applies to.',
   'missing-parens':
@@ -113,7 +110,10 @@ export function classifyTranslation(
     allowCommutativeOr: options.allowCommutativeOr,
   };
 
-  if (equivalent(expected, learner, structuralOptions)) {
+  if (
+    equivalent(expected, learner, structuralOptions) ||
+    isReversedBinary(expected, learner, 'iff')
+  ) {
     return {
       correct: true,
       tag: 'correct',
@@ -126,14 +126,6 @@ export function classifyTranslation(
       correct: false,
       tag: 'reversed-conditional',
       message: resolveTranslationFeedback('reversed-conditional'),
-    };
-  }
-
-  if (isReversedBinary(expected, learner, 'iff')) {
-    return {
-      correct: false,
-      tag: 'reversed-biconditional',
-      message: resolveTranslationFeedback('reversed-biconditional'),
     };
   }
 

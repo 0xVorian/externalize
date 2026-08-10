@@ -82,7 +82,7 @@ export function isConceptCompleted(store: ProgressStore, conceptId: string): boo
   }
   const exercises = exercisesForConcept(conceptId);
   if (exercises.length > 0) {
-    return exercises.every((id) => store.completed.includes(id));
+    return exercises.every((id) => store.passed.includes(id));
   }
   return prerequisitesMet(store, conceptId);
 }

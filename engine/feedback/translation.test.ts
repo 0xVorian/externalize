@@ -25,8 +25,8 @@ const EXERCISES = {
   },
   'translate-005': {
     expected: '(P ↔ Q)',
-    accept: ['(P ↔ Q)'],
-    reject: [{ learner: '(Q ↔ P)', tag: 'reversed-biconditional' as const }],
+    accept: ['(P ↔ Q)', '(Q ↔ P)'],
+    reject: [],
   },
   'translate-006': {
     expected: '¬(P ∨ Q)',
@@ -51,6 +51,12 @@ describe('classifyTranslation', () => {
     const result = classifyTranslation(parse('(P → Q)'), parse('(Q → P)'));
     expect(result.correct).toBe(false);
     expect(result.tag).toBe('reversed-conditional');
+  });
+
+  it('accepts swapped biconditional operands', () => {
+    const result = classifyTranslation(parse('(P ↔ Q)'), parse('(Q ↔ P)'));
+    expect(result.correct).toBe(true);
+    expect(result.tag).toBe('correct');
   });
 
   it('detects negation scope errors', () => {

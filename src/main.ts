@@ -3,10 +3,12 @@ import { getExerciseDefinition } from './app/exercises';
 import {
   loadProgress,
   saveProgress,
-  seedQueue,
   pickNextExerciseId,
   pickResumeExerciseId,
-  recordResult,
+  beginPracticeAttempt,
+  persistPracticeDraft,
+  recordCheckedPracticeState,
+  clearPracticeDraft,
   completeLesson,
   isPracticeUnlocked,
   getUnlockedExerciseIds,
@@ -32,17 +34,18 @@ import {
   submitCellValue,
   submitTautologyAnswer,
   applyLocale,
-  cellSubmissionCorrect,
-  tautologySubmissionCorrect,
   paletteInsertToken,
   paletteBackspace,
   paletteUndo,
   checkTranslation,
-  tryAgainTranslation,
   checkCounterexample,
   selectProofRule,
   toggleProofCitation,
   checkProofStep,
+  selectEvaluationPrediction,
+  checkEvaluation,
+  tryAgainPractice,
+  practiceDraftSnapshot,
   type AppState,
 } from './app/state';
 import {
@@ -61,6 +64,8 @@ import { renderProgressView } from './app/progress-render';
 import { renderOnboarding } from './app/onboarding-render';
 import type { AppMode } from './app/shell-render';
 import { loadLocale, saveLocale, progressUi, type Locale } from './i18n';
+import { getProofExerciseConfig } from './app/proof/exercise-config';
+import type { RuleId } from '../engine';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) {
@@ -137,12 +142,7 @@ function unlockedExerciseIds(): string[] {
   return getUnlockedExerciseIds(progress);
 }
 
-function refreshPracticeQueue(): void {
-  persistProgress(seedQueue(progress, unlockedExerciseIds()));
-}
-
 function loadPracticeState(exerciseId?: string): AppState {
-  refreshPracticeQueue();
   const pool = unlockedExerciseIds();
   if (pool.length === 0) {
     throw new Error('No practice exercises unlocked');
@@ -152,8 +152,29 @@ function loadPracticeState(exerciseId?: string): AppState {
   if (!exercise) {
     throw new Error(`Unknown exercise: ${id}`);
   }
-  persistProgress(updateResume(progress, { mode: 'practice', exerciseId: id }));
-  return createState(locale, exercise);
+  const withAttempt = beginPracticeAttempt(progress, id);
+  persistProgress(updateResume(withAttempt, { mode: 'practice', exerciseId: id }));
+  return createState(locale, exercise, progress.practiceDraft);
+}
+
+function persistPracticeState(): void {
+  if (!practiceState) return;
+  persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(practiceState)));
+}
+
+function commitCheckedPracticeState(nextState: AppState): void {
+  practiceState = nextState;
+  const nextProgress = recordCheckedPracticeState(
+    progress,
+    practiceDraftSnapshot(nextState),
+  );
+  persistProgress(nextProgress);
+  if (progress.practiceDraft?.attempt.id === nextState.attempt.id) {
+    practiceState = {
+      ...nextState,
+      attempt: progress.practiceDraft.attempt,
+    };
+  }
 }
 
 function ensurePracticeState(): AppState {
@@ -222,7 +243,18 @@ function setMode(nextMode: AppMode): void {
 }
 
 function finishOnboarding(): void { persistProgress(completeOnboarding(progress)); onboardingStep = 0; render(); }
-function startPracticeExercise(exerciseId: string): void { if (!isPracticeUnlocked(progress)) return; mode = 'practice'; practiceState = loadPracticeState(exerciseId); render(); }
+function startPracticeExercise(exerciseId: string): void {
+  if (!isPracticeUnlocked(progress)) return;
+  if (
+    progress.practiceDraft?.attempt.exerciseId === exerciseId &&
+    progress.practiceDraft.attempt.status === 'finalized'
+  ) {
+    persistProgress(clearPracticeDraft(progress));
+  }
+  mode = 'practice';
+  practiceState = loadPracticeState(exerciseId);
+  render();
+}
 function continueFromResume(): void {
   const target = progress.resume.mode;
   if (target === 'practice' && !progress.level0Complete) {
@@ -246,7 +278,6 @@ function switchLearnUnit(unit: 0 | 1 | 2): void {
 
 function completeCurrentLesson(): void {
   persistProgress(completeLesson(progress, lessonState.lesson.id));
-  refreshPracticeQueue();
 
   if (isLearnPathComplete(progress.lessonsCompleted)) {
     mode = 'practice';
@@ -279,32 +310,15 @@ function handleLessonNext(): void {
 
 function advancePractice(): void {
   const state = ensurePracticeState();
-  if (state.exercise.type === 'evaluate-formula') {
-    persistProgress(recordResult(progress, state.exercise.id, true));
-    refreshPracticeQueue();
-  } else if (state.exercise.type === 'fill-truth-table-cell') {
-    persistProgress(recordResult(progress, state.exercise.id, cellSubmissionCorrect(state) ?? false));
-    refreshPracticeQueue();
-  } else if (state.exercise.type === 'find-counterexample' && state.feedback) {
-    persistProgress(
-      recordResult(
-        progress,
-        state.exercise.id,
-        state.feedback.correct,
-        state.feedback.correct ? undefined : state.feedback.tag,
-      ),
-    );
-  } else if (state.exercise.type === 'classify-tautology') {
-    persistProgress(recordResult(progress, state.exercise.id, tautologySubmissionCorrect(state) ?? false));
-    refreshPracticeQueue();
-  } else if (state.feedback) {
-    persistProgress(
-      recordResult(progress, state.exercise.id, state.feedback.correct, state.feedback.tag),
-    );
-    refreshPracticeQueue();
+  if (state.attempt.status !== 'finalized') {
+    return;
   }
-
-  practiceState = loadPracticeState();
+  const pool = unlockedExerciseIds();
+  const nextId =
+    pool.find((exerciseId) => !progress.passed.includes(exerciseId)) ??
+    pickNextExerciseId(progress, pool);
+  persistProgress(clearPracticeDraft(progress));
+  practiceState = loadPracticeState(nextId);
   render();
 }
 
@@ -419,6 +433,7 @@ root.addEventListener('click', (event) => {
     }
     if (mode === 'practice') {
       practiceState = setAtomValue(ensurePracticeState(), atom, value);
+      persistPracticeState();
       render();
       return;
     }
@@ -443,62 +458,64 @@ root.addEventListener('click', (event) => {
     if (!nodeId) {
       return;
     }
-    practiceState = selectNode(ensurePracticeState(), nodeId);
-    if (practiceState.phase === 'answered' && practiceState.feedback) {
-      persistProgress(
-        recordResult(
-          progress,
-          practiceState.exercise.id,
-          practiceState.feedback.correct,
-          practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
-        ),
-      );
-      refreshPracticeQueue();
-    }
+    commitCheckedPracticeState(selectNode(ensurePracticeState(), nodeId));
     render();
     return;
   }
 
   if (action === 'submit-tautology-answer') {
     const value = button.dataset.value === 'true';
-    practiceState = submitTautologyAnswer(ensurePracticeState(), value);
-    if (practiceState.phase === 'answered') {
-      persistProgress(recordResult(progress, practiceState.exercise.id, tautologySubmissionCorrect(practiceState) ?? false));
-      refreshPracticeQueue();
-    }
+    commitCheckedPracticeState(submitTautologyAnswer(ensurePracticeState(), value));
     render();
     return;
   }
 
   if (action === 'submit-cell-value') {
     const value = button.dataset.value === 'true';
-    practiceState = submitCellValue(ensurePracticeState(), value);
-    if (practiceState.phase === 'answered') {
-      persistProgress(recordResult(progress, practiceState.exercise.id, cellSubmissionCorrect(practiceState) ?? false));
-      refreshPracticeQueue();
-    }
+    commitCheckedPracticeState(submitCellValue(ensurePracticeState(), value));
+    render();
+    return;
+  }
+
+  if (action === 'select-evaluation-prediction') {
+    const value = button.dataset.value === 'true';
+    practiceState = selectEvaluationPrediction(ensurePracticeState(), value);
+    persistPracticeState();
+    render();
+    return;
+  }
+
+  if (action === 'check-evaluation') {
+    commitCheckedPracticeState(checkEvaluation(ensurePracticeState()));
     render();
     return;
   }
 
   if (action === 'palette-insert') {
     practiceState = paletteInsertToken(ensurePracticeState(), button.dataset.token, button.dataset.value);
+    persistPracticeState();
     render();
     return;
   }
   if (action === 'palette-backspace') {
     practiceState = paletteBackspace(ensurePracticeState());
+    persistPracticeState();
     render();
     return;
   }
   if (action === 'palette-undo') {
     practiceState = paletteUndo(ensurePracticeState());
+    persistPracticeState();
     render();
     return;
   }
   if (action === 'proof-select-rule') {
-    if (button.dataset.rule === 'mp') {
-      practiceState = selectProofRule(ensurePracticeState(), 'mp');
+    const state = ensurePracticeState();
+    const config = getProofExerciseConfig(state.exercise.id);
+    const rule = button.dataset.rule as RuleId | undefined;
+    if (config && rule && config.allowedRules.includes(rule)) {
+      practiceState = selectProofRule(state, rule);
+      persistPracticeState();
       render();
     }
     return;
@@ -507,48 +524,31 @@ root.addEventListener('click', (event) => {
     const line = Number(button.dataset.line);
     if (Number.isInteger(line) && line > 0) {
       practiceState = toggleProofCitation(ensurePracticeState(), line);
+      persistPracticeState();
       render();
     }
     return;
   }
   if (action === 'check-proof') {
-    practiceState = checkProofStep(ensurePracticeState());
-    if (practiceState.phase === 'answered' && practiceState.feedback) {
-      persistProgress(recordResult(progress, practiceState.exercise.id, practiceState.feedback.correct, practiceState.feedback.correct ? undefined : practiceState.feedback.tag));
-      refreshPracticeQueue();
-    }
+    commitCheckedPracticeState(checkProofStep(ensurePracticeState()));
     render();
     return;
   }
   if (action === 'check-translation') {
-    practiceState = checkTranslation(ensurePracticeState());
-    if (practiceState.phase === 'answered' && practiceState.feedback?.correct) {
-      persistProgress(recordResult(progress, practiceState.exercise.id, true));
-      refreshPracticeQueue();
-    }
+    commitCheckedPracticeState(checkTranslation(ensurePracticeState()));
     render();
     return;
   }
 
   if (action === 'try-again') {
-    practiceState = tryAgainTranslation(ensurePracticeState());
+    practiceState = tryAgainPractice(ensurePracticeState());
+    persistPracticeState();
     render();
     return;
   }
 
   if (action === 'check-counterexample') {
-    practiceState = checkCounterexample(ensurePracticeState());
-    if (practiceState.phase === 'answered' && practiceState.feedback) {
-      persistProgress(
-        recordResult(
-          progress,
-          practiceState.exercise.id,
-          practiceState.feedback.correct,
-          practiceState.feedback.correct ? undefined : practiceState.feedback.tag,
-        ),
-      );
-      refreshPracticeQueue();
-    }
+    commitCheckedPracticeState(checkCounterexample(ensurePracticeState()));
     render();
     return;
   }

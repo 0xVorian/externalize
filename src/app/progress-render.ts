@@ -15,6 +15,7 @@ import { renderShellHeader } from './shell-render';
 import { learnUi } from '../i18n';
 import { renderConceptMap } from './concept-map-render';
 import { computeWhatNext } from './what-next';
+import { exerciseLabel } from './exercise-label';
 
 function renderListItem(
   locale: Locale,
@@ -40,11 +41,14 @@ function renderExerciseTier(
   const unlocked = new Set(getUnlockedExerciseIds(store));
   return order
     .map((id) => {
-      const done = store.completed.includes(id);
+      const done = store.passed.includes(id);
+      const attempted = store.attempted.includes(id);
       const reason = exerciseLockReason(store, id);
       const locked = !unlocked.has(id);
       const status = done
         ? copy.exerciseDone
+        : attempted
+          ? copy.exerciseAttempted
         : reason === 'unit1'
           ? copy.exerciseLockedUnit1
           : reason === 'unit2'
@@ -52,7 +56,7 @@ function renderExerciseTier(
             : locked
             ? copy.exerciseLocked
             : copy.lessonTodo;
-      return renderListItem(locale, id, status, done);
+      return renderListItem(locale, exerciseLabel(locale, id), status, done);
     })
     .join('');
 }
@@ -76,7 +80,7 @@ export function buildSummaryFromStore(store: ProgressStore): ProgressSummary {
     level2Total: LEVEL_2_LESSONS.length,
     lessonsCompleted: store.lessonsCompleted,
     exercisesUnlocked: getUnlockedExerciseIds(store),
-    exercisesCompleted: store.completed,
+    exercisesCompleted: store.passed,
     reviewDue: countReviewDue(store),
     resume: store.resume,
     skills: store.skills,
@@ -188,7 +192,7 @@ export function renderProgressView(
     ? `
       <section class="progress-card" aria-labelledby="progress-exercises-heading">
         <h2 class="panel-title" id="progress-exercises-heading">${copy.exercisesHeading}</h2>
-        <p class="progress-meta">${copy.exercisesStatus(store.completed.length, summary.exercisesUnlocked.length)}</p>
+        <p class="progress-meta">${copy.exercisesStatus(store.passed.length, summary.exercisesUnlocked.length)}</p>
         ${summary.reviewDue > 0 ? `<p class="progress-meta review-due">${copy.reviewDue(summary.reviewDue)}</p>` : ''}
         <h3 class="progress-subheading">${copy.level0ExercisesHeading}</h3>
         <ul class="progress-list">${unit0ExerciseItems}</ul>

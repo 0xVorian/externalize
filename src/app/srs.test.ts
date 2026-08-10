@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { SRS_SKILL_PROFILES, createSrsEntry, nextSrsEntryAfterResult, srsProfileForExerciseId, srsProfileForSkill } from './srs';
-import { loadProgress, recordResult, seedQueue } from './storage';
+import { beginPracticeAttempt, loadProgress, recordCheckedPracticeState, seedQueue } from './storage';
+import { recordAttemptCheck } from './practice-attempt';
 
 describe('srs per-skill profiles', () => {
   it('uses baseline intervals for scope exercises', () => {
@@ -33,7 +34,14 @@ describe('srs per-skill profiles', () => {
     expect(store.queue.find((item) => item.exerciseId === 'scope-001')?.ease).toBe(SRS_SKILL_PROFILES['practice:identify-main-connective'].defaultEase);
   });
   it('creates new queue entries through recordResult using skill profile', () => {
-    let store = recordResult(loadProgress(), 'tt-001', true);
+    let store = beginPracticeAttempt(loadProgress(), 'tt-001');
+    const draft = store.practiceDraft!;
+    store = recordCheckedPracticeState(store, {
+      ...draft,
+      phase: 'answered',
+      feedbackTag: 'correct',
+      attempt: recordAttemptCheck(draft.attempt, true),
+    });
     const entry = store.queue.find((item) => item.exerciseId === 'tt-001');
     expect(entry?.intervalDays).toBe(1);
     expect(entry?.ease).toBe(createSrsEntry('tt-001').ease);

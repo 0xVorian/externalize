@@ -1,5 +1,5 @@
 import { format, toVerticalTree, type TreeNode } from '../../../engine';
-import { translationUi, ui } from '../../i18n';
+import { getExerciseCopy, translationUi, ui } from '../../i18n';
 import type { AppState } from '../state';
 import { getTranslationExerciseConfig } from './exercise-config';
 import { renderSymbolPalette } from './palette-render';
@@ -29,6 +29,7 @@ export function renderTranslationExerciseBody(state: AppState): string {
     return '';
   }
   const t = translationUi(state.locale);
+  const atoms = getExerciseCopy(state.locale, state.exercise.id).atoms ?? {};
   const previewLine = state.builder.formula
     ? format(state.builder.formula)
     : state.builder.compileError
@@ -39,16 +40,16 @@ export function renderTranslationExerciseBody(state: AppState): string {
     ? renderTreeList(toVerticalTree(state.builder.formula), ui(state.locale).formulaTreeAria)
     : '';
 
-  return `${renderAtomKey(state.locale, config.prompt.atoms)}<section class="translation-preview" aria-label="${t.previewAria}"><h2 class="panel-title">${t.previewTitle}</h2><p class="built-formula" aria-live="polite">${previewLine}</p>${treeHtml}</section>${renderSymbolPalette(state.locale, config.palette)}`;
+  return `${renderAtomKey(state.locale, atoms)}<section class="translation-preview" aria-label="${t.previewAria}"><h2 class="panel-title">${t.previewTitle}</h2><p class="built-formula" aria-live="polite">${previewLine}</p>${treeHtml}</section>${renderSymbolPalette(state.locale, config.palette, atoms)}`;
 }
 
 export function renderTranslationActions(state: AppState): string {
   const copy = ui(state.locale);
   if (state.phase === 'answered') {
-    if (state.feedback?.correct) {
+    if (state.attempt.status === 'finalized') {
       return `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
     }
-    return `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button><button type="button" class="secondary" data-action="next">${copy.continue}</button>`;
+    return `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>`;
   }
   return `<button type="button" class="primary" data-action="check-translation">${translationUi(state.locale).check}</button>`;
 }

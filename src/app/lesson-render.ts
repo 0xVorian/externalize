@@ -3,7 +3,7 @@ import { lessonsForUnit, lessonUnit, ALL_LEARN_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
 import { renderShellHeader } from './shell-render';
-import { renderLiveTruthRow, renderTruthTable } from './truth-table-render';
+import { renderLiveTruthRow, renderTruthTable, renderWatchGrid, usesWatchGrid } from './truth-table-render';
 import { renderAtomPanel } from './atom-toggles-render';
 
 function renderGuidedToggles(state: LessonState): string {
@@ -49,12 +49,16 @@ function renderWatchLesson(state: LessonState): string {
   const copy = getLessonCopy(state.locale, state.lesson.id);
   const steps = copy.watchSteps ?? [];
   const formula = state.lesson.formula ?? 'P ∧ Q';
+  const grid = usesWatchGrid(formula);
+  const presentation = grid
+    ? renderWatchGrid(state.locale, formula, steps[state.watchStep]?.assignment ?? {})
+    : renderWatchTruthTable(state, steps, formula);
   return `
     <article class="lesson-card">
-      <p class="exercise-prompt">${learn.watchPrompt}</p>
+      <p class="exercise-prompt">${grid ? learn.watchGridPrompt : learn.watchPrompt}</p>
       <p class="formula-display" aria-label="${ui(state.locale).formulaDisplayAria}">${formula}</p>
       <p class="step-meta">${learn.stepLabel(state.watchStep + 1, steps.length)}</p>
-      ${renderWatchTruthTable(state, steps, formula)}
+      ${presentation}
       ${state.message ? `<p class="feedback feedback-info" role="status">${state.message}</p>` : ''}
     </article>
   `;

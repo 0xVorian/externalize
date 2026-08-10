@@ -24,7 +24,14 @@ function renderTreeNode(node: TreeNode, state: AppState, focusNodeId?: string): 
   const classes = ['tree-node', `kind-${node.kind}`];
   if (selected) classes.push('selected');
   if (isTappable) classes.push('tappable');
-  const truthLabel = formatTruthValue(state.locale, node.value);
+  const hideAssessmentRoot =
+    state.exercise.type === 'evaluate-formula' &&
+    state.phase === 'ready' &&
+    node.id === state.tree.id;
+  const truthLabel = formatTruthValue(
+    state.locale,
+    hideAssessmentRoot ? undefined : node.value,
+  );
   const valueHtml = showsEvaluatedTree(state.exercise.type)
       ? `<span class="${nodeValueClass(node.kind)}" aria-label="${copy.valueAria(truthLabel)}">${truthLabel}</span>`
       : '';
@@ -67,10 +74,12 @@ function renderEvaluationBody(state: AppState): string {
   if (state.exercise.type !== 'evaluate-formula') {
     return '';
   }
-  if (usesLiveTruthRow(state.exercise.formula!)) {
-    return `${renderAtomToggles(state)}${renderLiveTruthRow(state.locale, state.exercise.formula!, state.assignment)}`;
-  }
-  return renderTreePanel(state, renderAtomToggles(state));
+  const copy = ui(state.locale);
+  const choices = `<div class="cell-segments evaluation-prediction" role="group" aria-label="${copy.evaluationChoiceAria}"><button type="button" class="cell-segment true${state.prediction === true ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="true" aria-pressed="${state.prediction === true}">${copy.trueLabel}</button><button type="button" class="cell-segment false${state.prediction === false ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="false" aria-pressed="${state.prediction === false}">${copy.falseLabel}</button></div>`;
+  const visualization = usesLiveTruthRow(state.exercise.formula!)
+    ? `${renderAtomToggles(state)}${renderLiveTruthRow(state.locale, state.exercise.formula!, state.assignment, { hideResult: state.phase === 'ready' })}`
+    : renderTreePanel(state, renderAtomToggles(state));
+  return `${visualization}${choices}`;
 }
 
 function renderCounterexampleBody(state: AppState): string {
@@ -109,8 +118,11 @@ function renderExerciseBody(state: AppState): string {
 
 function renderCounterexampleActions(state: AppState): string {
   const copy = ui(state.locale);
-  if (state.phase === 'answered' && state.feedback?.correct) {
+  if (state.attempt.status === 'finalized') {
     return `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
+  }
+  if (state.phase === 'answered') {
+    return `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>`;
   }
   if (state.phase === 'ready') {
     return `<button type="button" class="primary" data-action="check-counterexample">${copy.checkCounterexample}</button>`;
@@ -155,9 +167,11 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
         ${renderExerciseBody(state)}
         ${state.message ? `<p class="feedback ${feedbackClass}" role="status">${state.message}</p>` : ''}
         <div class="actions">
-          ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
-          ${(state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology') && state.phase === 'answered' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
-          ${state.exercise.type === 'evaluate-formula' ? `<button type="button" class="secondary" data-action="next">${copy.nextExercise}</button>` : ''}
+          ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' ? `<button type="button" class="primary" data-action="${state.attempt.status === 'finalized' ? 'next' : 'try-again'}">${state.attempt.status === 'finalized' ? copy.continue : copy.tryAgain}</button>` : ''}
+          ${(state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology') && state.phase === 'answered' ? `<button type="button" class="primary" data-action="${state.attempt.status === 'finalized' ? 'next' : 'try-again'}">${state.attempt.status === 'finalized' ? copy.continue : copy.tryAgain}</button>` : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.attempt.status === 'finalized' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.phase === 'answered' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>` : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' ? `<button type="button" class="primary" data-action="check-evaluation"${state.prediction === null ? ' disabled' : ''}>${copy.checkEvaluation}</button>` : ''}
           ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state) : ''}
           ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state) : ''}
           ${state.exercise.type === 'proof-fill-step' ? renderProofActions(state) : ''}

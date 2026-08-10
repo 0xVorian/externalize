@@ -40,14 +40,16 @@ function renderPaletteButton(
 export function renderSymbolPalette(
   locale: Locale,
   config: TranslationPaletteConfig,
+  glosses: Record<string, string> = {},
 ): string {
   const atomButtons = config.atoms
     .map((atom) => {
-      const gloss = atom.gloss
-        ? `<span class="palette-gloss">${atom.gloss}</span>`
+      const atomGloss = glosses[atom.name];
+      const gloss = atomGloss
+        ? `<span class="palette-gloss">${atomGloss}</span>`
         : '';
       const inner = `<span class="palette-symbol">${atom.name}</span>${gloss}`;
-      const aria = atom.gloss ? `${atom.name}: ${atom.gloss}` : atom.name;
+      const aria = atomGloss ? `${atom.name}: ${atomGloss}` : atom.name;
       return renderPaletteButton(
         inner,
         'palette-insert',

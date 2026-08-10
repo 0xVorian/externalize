@@ -10,6 +10,10 @@ export function createBuilderReducerState(): BuilderReducerState {
   return { tokens: [], past: [] };
 }
 
+export function restoreBuilderReducerState(tokens: BuilderToken[]): BuilderReducerState {
+  return { ...withCompiled(tokens), past: [] };
+}
+
 function withCompiled(tokens: BuilderToken[]): FormulaBuilderState {
   return { tokens, ...compileBuilderState(tokens) };
 }

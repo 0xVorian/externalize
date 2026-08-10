@@ -7,11 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-08-10
+
 ### Added
+
+- Explicit T/F or V/F prediction and checking for evaluate-formula practice, with the assessed root hidden until the learner checks an answer
+- Targeted Playwright coverage at desktop, 320px, and 390px for the repaired practice, proof, translation, watch-grid, locale, and persistence boundaries
 
 ### Changed
 
+- Progress storage v6 separates attempted exposure from passed exercises; sequential practice now unlocks only after a correct pass
+- One persisted exercise session now owns all checked answers and repairs, then finalizes learning statistics and SRS exactly once; repaired passes remain due for immediate review
+- Practice repairs now stay within one attempt across scope, evaluation, truth-table, tautology, counterexample, translation, and proof exercises
+- Practice drafts preserve assignments, translation tokens, and proof selections across reloads; Progress uses localized exercise descriptions instead of raw IDs
+
 ### Fixed
+
+- Accept swapped biconditional operands in translation grading while retaining directional reversed-conditional feedback
+- Clarify the independently authored English and French `translate-003` prompts so `(P → Q) ∧ R` is the unambiguous target
+- Route every configured proof `RuleId` through the rendered UI, making `nd-002` conjunction elimination completable
+- Use English T/F instructions, French-authored translation atom glosses, and the intended 2×2 watch grid in actual lessons
 
 ## [0.3.1] - 2026-08-07
 

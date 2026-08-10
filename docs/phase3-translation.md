@@ -98,7 +98,7 @@ Run a **feedback classifier** on the pair `(expected, learner)` that returns a `
 | Tag | Detection sketch | Example |
 |-----|------------------|---------|
 | `reversed-conditional` | Learner has `imp(B, A)` where expected is `imp(A, B)` and atoms/connective multiset matches swap | "If it rains…" → `Q → P` instead of `P → Q` |
-| `reversed-biconditional` | Same pattern for `iff` | |
+| Biconditional operand order | `P ↔ Q` and `Q ↔ P` are both accepted | Classical biconditional is symmetric |
 | `negation-scope` | Expected `not(and(P,Q))`, learner `and(not(P), Q)` with ¬ misplaced | `¬P ∧ Q` vs `¬(P ∧ Q)` |
 | `missing-parens` | Learner AST differs by association / missing grouping | `(P → Q) ∧ R` built as `P → Q ∧ R` |
 | `wrong-main-connective` | Root connective kind differs | Used `∧` where `→` is outermost |

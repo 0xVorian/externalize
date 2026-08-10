@@ -5,7 +5,6 @@ export type {
   TranslationExpected,
   TranslationFeedbackTag,
   TranslationPaletteConfig,
-  TranslationPrompt,
 } from './types';
 
 export { TRANSLATE_001, builderPred } from './types';
@@ -16,6 +15,7 @@ export {
   builderUndo,
   parsePaletteInsert,
   createBuilderReducerState,
+  restoreBuilderReducerState,
   type BuilderReducerState,
 } from './builder-state';
 export { renderSymbolPalette } from './palette-render';

@@ -26,8 +26,11 @@ Start here:
 
 ## Status
 
-**Phase:** Level 0 learn path + gated practice  
-**Next step:** Complete Level 0 on your phone, then try the unlocked practice tab
+**Implemented:** Three propositional-logic learning units; sequential graded practice for evaluation, scope, truth tables, counterexamples, tautologies, translation, and introductory proof steps; local progress, SRS, and export/import.
+
+**Experimental:** The small natural-deduction exercise set and predicate-logic AST/parser spike. Predicate-logic curriculum remains design-only.
+
+**Current focus:** Sustained personal use and validation of the repaired attempt/progress semantics.
 
 ## Development
 
@@ -69,4 +72,4 @@ Requires HTTPS (or `localhost` during development). After install, the app opens
 
 ## Success criterion
 
-The project succeeds if it makes symbolic reasoning easier to practise regularly and reduces the amount of state the learner must retain mentally. A small application that reliably teaches propositional and predicate logic to its creator is sufficient; it does not need to become a commercial platform.
+The project succeeds if it makes symbolic reasoning easier to practise regularly and reduces the amount of state the learner must retain mentally. A small application that reliably supports its creator's propositional-logic practice is sufficient; it does not need to become a commercial platform. Predicate-logic teaching remains future work.
