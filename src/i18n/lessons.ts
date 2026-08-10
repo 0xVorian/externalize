@@ -210,7 +210,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
           'Example: P might translate “It is snowing.” Q might translate “The lecture is cancelled.” The logic concerns how statements combine, not their subject matter.',
           'Using letters lets us display form clearly: the same pattern (P ∧ Q) can represent countless pairs of statements.',
         ],
-        example: 'P  ⊃  “It is snowing.”',
+        example: 'Let P = “It is snowing.”',
       },
     },
     'level0-02-truth': {
@@ -493,7 +493,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
           'Exemple : P pourrait se lire « Il neige. » et Q « Le cours est annulé. » La logique étudie les combinaisons de propositions, indépendamment de leur thème.',
           'Les symboles rendent la forme visible : un même schéma (P ∧ Q) peut instancier des paires de propositions très différentes.',
         ],
-        example: 'P  ⊃  « Il neige. »',
+        example: 'Soit P = « Il neige. »',
       },
     },
     'level0-02-truth': {

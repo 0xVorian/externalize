@@ -3,8 +3,7 @@ import { getExerciseDefinition } from './app/exercises';
 import {
   loadProgress,
   saveProgress,
-  pickNextExerciseId,
-  pickResumeExerciseId,
+  selectNextExerciseId,
   beginPracticeAttempt,
   persistPracticeDraft,
   recordCheckedPracticeState,
@@ -147,7 +146,12 @@ function loadPracticeState(exerciseId?: string): AppState {
   if (pool.length === 0) {
     throw new Error('No practice exercises unlocked');
   }
-  const id = exerciseId ?? pickResumeExerciseId(progress) ?? pickNextExerciseId(progress, pool);
+  const id =
+    exerciseId ??
+    (progress.resume.exerciseId && pool.includes(progress.resume.exerciseId)
+      ? progress.resume.exerciseId
+      : undefined) ??
+    selectNextExerciseId(progress);
   const exercise = getExerciseDefinition(id);
   if (!exercise) {
     throw new Error(`Unknown exercise: ${id}`);
@@ -313,10 +317,7 @@ function advancePractice(): void {
   if (state.attempt.status !== 'finalized') {
     return;
   }
-  const pool = unlockedExerciseIds();
-  const nextId =
-    pool.find((exerciseId) => !progress.passed.includes(exerciseId)) ??
-    pickNextExerciseId(progress, pool);
+  const nextId = selectNextExerciseId(progress);
   persistProgress(clearPracticeDraft(progress));
   practiceState = loadPracticeState(nextId);
   render();

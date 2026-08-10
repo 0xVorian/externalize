@@ -95,17 +95,17 @@ describe('storage v3', () => {
     let store = completeLevel0(loadProgress());
     expect(getUnlockedExerciseIds(store)).toEqual(['eval-001']);
     store = completeAttempt(store, 'eval-001');
-    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012']);
-    store = completeAttempt(store, 'scope-012');
-    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012']);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'eval-011']);
+    store = completeAttempt(store, 'eval-011');
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'eval-011']);
   });
 
   it('keeps Unit 1 exercises locked until all Level 1 lessons are complete', () => {
     let store = completeLevel0(loadProgress());
     store = completeAttempt(store, 'eval-001');
-    store = completeAttempt(store, 'scope-012');
+    store = completeAttempt(store, 'eval-011');
     expect(isLevel1PracticeUnlocked(store)).toBe(false);
-    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012']);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'eval-011']);
     expect(exerciseLockReason(store, 'eval-010')).toBe('unit1');
     expect(exerciseLockReason(store, 'eval-003')).toBe('unit1');
   });
@@ -118,9 +118,9 @@ describe('storage v3', () => {
     expect(isLevel1PracticeUnlocked(store)).toBe(true);
     expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'eval-010']);
     store = completeAttempt(store, 'eval-001');
-    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010']);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'eval-011', 'eval-010']);
     store = completeAttempt(store, 'eval-010');
-    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'scope-012', 'eval-010', 'eval-019']);
+    expect(getUnlockedExerciseIds(store)).toEqual(['eval-001', 'eval-011', 'eval-010', 'eval-019']);
   });
 
 
@@ -129,7 +129,7 @@ describe('storage v3', () => {
     for (const lesson of LEVEL_1_LESSONS) {
       store = completeLesson(store, lesson.id);
     }
-    for (const id of ['eval-001', 'scope-012', 'eval-010', 'eval-003', 'eval-004', 'eval-005', 'tt-001', 'counter-001', 'tt-002', 'counter-002', 'tt-003', 'counter-003', 'scope-003', 'scope-009', 'scope-004', 'scope-007', 'eval-002', 'eval-006', 'tt-004', 'tt-005', 'counter-004', 'val-001', 'val-002', 'val-003', 'val-004', 'val-005', 'eval-007', 'eval-008', 'eval-009', 'scope-001', 'scope-005', 'scope-006', 'scope-008', 'scope-010', 'scope-011', 'scope-002', 'translate-001', 'translate-002', 'translate-003', 'translate-004', 'translate-005', 'translate-006', 'nd-001']) {
+    for (const id of ['eval-001', 'eval-011', 'eval-010', 'eval-003', 'eval-004', 'eval-005', 'tt-001', 'counter-001', 'tt-002', 'counter-002', 'tt-003', 'counter-003', 'scope-003', 'scope-009', 'scope-004', 'scope-007', 'eval-002', 'eval-006', 'tt-004', 'tt-005', 'counter-004', 'val-001', 'val-002', 'val-003', 'val-004', 'val-005', 'eval-007', 'eval-008', 'eval-009', 'scope-001', 'scope-005', 'scope-006', 'scope-008', 'scope-010', 'scope-011', 'scope-002', 'translate-001', 'translate-002', 'translate-003', 'translate-004', 'translate-005', 'translate-006', 'nd-001']) {
       store = completeAttempt(store, id);
     }
     expect(isLevel2PracticeUnlocked(store)).toBe(false);
@@ -144,9 +144,9 @@ describe('storage v3', () => {
     expect(isLevel2PracticeUnlocked(store)).toBe(true);
     const base = getUnlockedExerciseIds(store);
     expect(base).toContain('eval-021');
-    expect(base).not.toContain('scope-013');
+    expect(base).not.toContain('scope-012');
     store = completeAttempt(store, 'eval-021');
-    expect(getUnlockedExerciseIds(store)).toContain('scope-013');
+    expect(getUnlockedExerciseIds(store)).toContain('scope-012');
   });
 
   it('marks level 0 complete after final lesson', () => {

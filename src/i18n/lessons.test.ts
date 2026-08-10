@@ -92,6 +92,13 @@ describe('lesson i18n', () => {
     });
   }
 
+  it('does not use ⊃ as a sentence-letter gloss in lesson 0.1', () => {
+    for (const locale of ['en', 'fr'] as const) {
+      const example = getLessonCopy(locale, 'level0-01-letters').card?.example ?? '';
+      expect(example).not.toContain('⊃');
+    }
+  });
+
   it('covers every learn-path lesson in both locales', () => {
     for (const lesson of ALL_LEARN_LESSONS) {
       expect(() => getLessonCopy('en', lesson.id)).not.toThrow();

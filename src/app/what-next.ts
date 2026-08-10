@@ -5,7 +5,7 @@ import { firstIncompleteLesson } from './lessons';
 import type { ProgressSummary } from './progress-tracker';
 import { skillForExercise } from './progress-tracker';
 import type { ProgressStore } from './storage';
-import { countReviewDue, getUnlockedExerciseIds, isPracticeUnlocked } from './storage';
+import { countReviewDue, getUnlockedExerciseIds, isPracticeUnlocked, selectNextExerciseId } from './storage';
 import { exerciseLabel } from './exercise-label';
 
 export type WhatNextKind = 'resume' | 'weakest-skill' | 'next-exercise';
@@ -20,11 +20,6 @@ function pickExerciseForSkill(store: ProgressStore, skillId: string): string | u
   list.sort((a, b) => (store.exerciseStats[a.id]?.attempts ? store.exerciseStats[a.id].successes / store.exerciseStats[a.id].attempts : 0) - (store.exerciseStats[b.id]?.attempts ? store.exerciseStats[b.id].successes / store.exerciseStats[b.id].attempts : 0));
   return list[0]?.id;
 }
-function pickPreferredExercise(store: ProgressStore, incomplete: string[]): string {
-  const now = Date.now();
-  const due = store.queue.filter((e) => incomplete.includes(e.exerciseId) && new Date(e.due).getTime() <= now).sort((a,b)=>new Date(a.due).getTime()-new Date(b.due).getTime());
-  return due.length ? due[0].exerciseId : incomplete[0];
-}
 export function computeWhatNext(locale: Locale, store: ProgressStore, summary: ProgressSummary): WhatNextSuggestion {
   const copy = progressUi(locale);
   if (isPracticeUnlocked(store) && summary.struggles.length) {
@@ -32,8 +27,17 @@ export function computeWhatNext(locale: Locale, store: ProgressStore, summary: P
     if (ex) return { kind:'weakest-skill', title:copy.whatNextTitle, detail:copy.whatNextWeakestSkill(copy.skillLabel(w.id), Math.round(w.rate*100)), buttonLabel:copy.whatNextPracticeSkill, action:'practice-exercise', exerciseId:ex };
   }
   if (isPracticeUnlocked(store)) {
-    const inc = getUnlockedExerciseIds(store).filter((id)=>!store.passed.includes(id));
-    if (inc.length) { const rd=countReviewDue(store), ex=pickPreferredExercise(store,inc); return { kind:'next-exercise', title:copy.whatNextTitle, detail: rd>0?copy.whatNextReviewDue(rd):copy.whatNextNextExercise(exerciseLabel(locale, ex)), buttonLabel:copy.whatNextStartExercise, action:'practice-exercise', exerciseId:ex }; }
+    try {
+      const ex = selectNextExerciseId(store);
+      const rd = countReviewDue(store);
+      const hasNew = getUnlockedExerciseIds(store).some((id) => !store.passed.includes(id));
+      const detail = rd > 0 && !hasNew
+        ? copy.whatNextReviewDue(rd)
+        : copy.whatNextNextExercise(exerciseLabel(locale, ex));
+      return { kind:'next-exercise', title:copy.whatNextTitle, detail, buttonLabel:copy.whatNextStartExercise, action:'practice-exercise', exerciseId:ex };
+    } catch {
+      // No unlocked exercises yet — fall through to resume.
+    }
   }
   const r = store.resume;
   if (r.mode==='learn') { const lid=r.lessonId??firstIncompleteLesson(store.lessonsCompleted).id; return { kind:'resume', title:copy.whatNextTitle, detail:copy.whatNextResumeLesson(getLessonCopy(locale,lid).title), buttonLabel:copy.continueLearn, action:'continue-resume' }; }
