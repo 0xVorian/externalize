@@ -138,6 +138,12 @@ function placeholderTree(): TreeNode {
   return toVerticalTree(parse('P'));
 }
 
+function practicePrompt(locale: Locale, exercise: ExerciseDefinition): string {
+  return exercise.type === 'evaluate-formula'
+    ? getAssessmentPrompt(locale, exercise.id, exercise.type)
+    : getExerciseCopy(locale, exercise.id).prompt;
+}
+
 function feedbackMessage(
   state: AppState,
   tag: PracticeErrorTag,
@@ -224,29 +230,42 @@ function hydrateDraft(state: AppState, draft?: PracticeDraft): AppState {
   if (!draft || draft.attempt.exerciseId !== state.exercise.id) {
     return state;
   }
+  const learnerValues =
+    state.exercise.type === 'evaluate-formula' ? (draft.learnerValues ?? {}) : state.learnerValues;
+  const scaffoldIncomplete =
+    state.exercise.type === 'evaluate-formula' &&
+    !allScaffoldNodesResolved(state.scaffoldNodeIds, learnerValues);
   let next: AppState = {
     ...state,
     attempt: draft.attempt,
-    phase: draft.phase,
-    prediction: draft.prediction ?? null,
+    phase: scaffoldIncomplete ? 'ready' : draft.phase,
+    prediction: scaffoldIncomplete ? null : (draft.prediction ?? null),
     selectedNodeId: draft.selectedNodeId ?? null,
     submittedCell: draft.submittedCell ?? null,
     proofRule: draft.proofRule ?? null,
     proofCites: draft.proofCites ?? [],
     proofDerivedFormula: draft.proofDerivedFormula ?? null,
+    hintVisible: draft.hintVisible ?? false,
+    learnerValues,
+    activeLearnerNodeId:
+      state.exercise.type === 'evaluate-formula'
+        ? nextPendingScaffoldNode(state.scaffoldNodeIds, learnerValues)
+        : state.activeLearnerNodeId,
   };
   if (draft.assignment && (state.exercise.type === 'evaluate-formula' || state.exercise.type === 'find-counterexample')) {
-    const formula = parse(state.exercise.formula!);
     next = {
       ...next,
       assignment: draft.assignment,
-      tree: evaluateWithNodes(formula, draft.assignment).tree,
+      tree:
+        state.exercise.type === 'evaluate-formula'
+          ? rebuildEvaluationTree(state.exercise, draft.assignment, learnerValues, state.scaffoldNodeIds)
+          : evaluateWithNodes(parse(state.exercise.formula!), draft.assignment).tree,
     };
   }
   if (draft.builderTokens && state.exercise.type === 'translate-en-to-formula') {
     next = { ...next, builder: restoreBuilderReducerState(draft.builderTokens) };
   }
-  return restoreDraftFeedback(next, draft.feedbackTag);
+  return restoreDraftFeedback(next, scaffoldIncomplete ? undefined : draft.feedbackTag);
 }
 
 export function createState(
@@ -255,7 +274,7 @@ export function createState(
   draft?: PracticeDraft,
   scaffoldLevel = 0,
 ): AppState {
-  const prompt = getAssessmentPrompt(locale, exercise.id, exercise.type);
+  const prompt = practicePrompt(locale, exercise);
   const scaffold = evaluationScaffoldState(exercise.id, scaffoldLevel);
   const attempt =
     draft?.attempt.exerciseId === exercise.id
@@ -547,6 +566,7 @@ export function selectLearnerNodeValue(state: AppState, nodeId: string, value: b
     );
     return {
       ...state,
+      attempt: recordAttemptCheck(state.attempt, false, 'incorrect-intermediate'),
       feedback: { correct: false, tag: 'incorrect-intermediate', message },
       message,
     };
@@ -577,6 +597,7 @@ export function checkEvaluation(state: AppState): AppState {
     state.exercise.type !== 'evaluate-formula' ||
     !canEditCheckedExercise(state) ||
     state.prediction === null ||
+    state.tree.value === undefined ||
     !allScaffoldNodesResolved(state.scaffoldNodeIds, state.learnerValues)
   ) {
     return state;
@@ -624,10 +645,11 @@ export function setAtomValue(state: AppState, atom: string, value: boolean): App
   }
 
   const assignment = { ...state.assignment, [atom]: value };
+  const learnerValues = state.exercise.type === 'evaluate-formula' ? {} : state.learnerValues;
   const tree = rebuildEvaluationTree(
     state.exercise,
     assignment,
-    {},
+    learnerValues,
     state.scaffoldNodeIds,
   );
   const repairing = isRepairing(state);
@@ -636,10 +658,11 @@ export function setAtomValue(state: AppState, atom: string, value: boolean): App
     ...state,
     assignment,
     tree,
-    learnerValues: repairing ? state.learnerValues : {},
-    activeLearnerNodeId: repairing
-      ? state.activeLearnerNodeId
-      : nextPendingScaffoldNode(state.scaffoldNodeIds, {}),
+    learnerValues,
+    activeLearnerNodeId:
+      state.exercise.type === 'evaluate-formula'
+        ? nextPendingScaffoldNode(state.scaffoldNodeIds, learnerValues)
+        : state.activeLearnerNodeId,
     phase: repairing ? 'answered' : 'ready',
     prediction: state.exercise.type === 'evaluate-formula' ? null : state.prediction,
     message: repairing
@@ -697,7 +720,7 @@ export function checkProofStep(state: AppState): AppState {
 }
 
 export function applyLocale(state: AppState, locale: Locale): AppState {
-  const prompt = getAssessmentPrompt(locale, state.exercise.id, state.exercise.type);
+  const prompt = practicePrompt(locale, state.exercise);
   const next: AppState = { ...state, locale, prompt };
 
   if (state.phase === 'answered' && state.selectedNodeId && state.exercise.type === 'identify-main-connective') {
@@ -797,12 +820,16 @@ export function practiceDraftSnapshot(state: AppState): PracticeDraft {
     proofCites: state.proofCites,
     proofDerivedFormula: state.proofDerivedFormula,
     feedbackTag: state.feedback?.tag,
+    hintVisible: state.hintVisible,
   };
   if (
     state.exercise.type === 'evaluate-formula' ||
     state.exercise.type === 'find-counterexample'
   ) {
     draft.assignment = state.assignment;
+  }
+  if (state.exercise.type === 'evaluate-formula') {
+    draft.learnerValues = state.learnerValues;
   }
   if (state.exercise.type === 'translate-en-to-formula') {
     draft.builderTokens = state.builder.tokens;
