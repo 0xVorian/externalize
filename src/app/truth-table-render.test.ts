@@ -68,8 +68,8 @@ describe('truth-table-render', () => {
       const html = renderWatchGrid('en', 'P ∧ Q', { P: true, Q: true });
       expect(html).toContain('watch-grid');
       expect(html).toContain('watch-grid-cell active');
-      expect(html).toContain('watch-grid-row-label">P</span>');
-      expect(html).toContain('watch-grid-col-label">Q</span>');
+      expect(html).toContain('watch-grid-row-label">P = T</th>');
+      expect(html).toContain('watch-grid-col-label">Q = T</th>');
     });
 
     it('highlights the cell matching the active assignment', () => {
