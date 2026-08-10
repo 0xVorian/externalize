@@ -45,9 +45,21 @@ function nodeValueClass(state: AppState, node: TreeNode): string {
   return node.kind === 'pred' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
 }
 
+function treeNodeFormulaLabel(node: TreeNode): string {
+  if (node.kind === 'pred') {
+    return node.label;
+  }
+  if (node.kind === 'not') {
+    return `${node.label}${node.children[0] ? treeNodeFormulaLabel(node.children[0]) : ''}`;
+  }
+  const left = node.children[0] ? treeNodeFormulaLabel(node.children[0]) : '';
+  const right = node.children[1] ? treeNodeFormulaLabel(node.children[1]) : '';
+  return `(${left} ${node.label} ${right})`;
+}
+
 function renderLearnerNodeInput(state: AppState, node: TreeNode): string {
   const copy = ui(state.locale);
-  return `<div class="cell-segments learner-node-input" role="group" aria-label="${copy.evaluationChoiceAria}">
+  return `<div class="cell-segments learner-node-input" role="group" aria-label="${treeNodeFormulaLabel(node)}">
     <button type="button" class="cell-segment true" data-action="select-learner-node-value" data-node-id="${node.id}" data-value="true">${copy.trueLabel}</button>
     <button type="button" class="cell-segment false" data-action="select-learner-node-value" data-node-id="${node.id}" data-value="false">${copy.falseLabel}</button>
   </div>`;
@@ -189,6 +201,12 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
       ? ''
       : `<p class="formula-display" aria-label="${copy.formulaDisplayAria}">${state.exercise.formula}</p>`;
 
+  const evaluationNeedsReset =
+    state.exercise.type === 'evaluate-formula' &&
+    state.phase === 'answered' &&
+    state.attempt.status !== 'finalized' &&
+    state.activeLearnerNodeId !== null;
+
   return `
     <main class="app" lang="${state.locale}">
       ${renderShellHeader({
@@ -212,9 +230,9 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
           ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>` : ''}
           ${(state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology') && state.phase === 'answered' ? `<button type="button" class="primary" data-action="${state.attempt.status === 'finalized' ? 'next' : 'try-again'}">${state.attempt.status === 'finalized' ? copy.continue : copy.tryAgain}</button>` : ''}
           ${state.exercise.type === 'evaluate-formula' && state.attempt.status === 'finalized' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
-          ${state.exercise.type === 'evaluate-formula' && state.phase === 'answered' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>` : ''}
+          ${evaluationNeedsReset ? `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>` : ''}
           ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' && getExerciseHint(state.locale, state.exercise.id) && !state.hintVisible ? `<button type="button" class="secondary" data-action="show-hint">${copy.showHint}</button>` : ''}
-          ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="check-evaluation"${state.prediction === null || (state.scaffoldNodeIds.length > 0 && state.activeLearnerNodeId !== null) ? ' disabled' : ''}>${copy.checkEvaluation}</button>` : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.attempt.status !== 'finalized' && !evaluationNeedsReset ? `<button type="button" class="primary" data-action="check-evaluation"${state.prediction === null || (state.scaffoldNodeIds.length > 0 && state.activeLearnerNodeId !== null) ? ' disabled' : ''}>${copy.checkEvaluation}</button>` : ''}
           ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state) : ''}
           ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state) : ''}
           ${state.exercise.type === 'proof-fill-step' ? renderProofActions(state) : ''}
