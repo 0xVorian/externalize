@@ -1,5 +1,5 @@
 import type { TreeNode } from '../../engine';
-import { ui, progressUi, formatTruthValue } from '../i18n';
+import { getExerciseHint, ui, progressUi, formatTruthValue } from '../i18n';
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
 import { renderLiveTruthRow, renderPartialTruthTable, renderCompleteTruthTable, renderTautologyChoice, usesLiveTruthRow } from './truth-table-render';
@@ -21,8 +21,36 @@ function hidesAssessmentRoot(state: AppState, node: TreeNode): boolean {
   return state.exercise.type === 'evaluate-formula' || state.exercise.type === 'find-counterexample';
 }
 
-function nodeValueClass(kind: TreeNode['kind']): string {
-  return kind === 'pred' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
+function displayNodeValue(state: AppState, node: TreeNode): boolean | undefined {
+  if (hidesAssessmentRoot(state, node)) {
+    return undefined;
+  }
+  if (state.learnerValues[node.id] !== undefined) {
+    return state.learnerValues[node.id];
+  }
+  if (
+    state.exercise.type === 'evaluate-formula' &&
+    state.scaffoldNodeIds.includes(node.id) &&
+    state.phase === 'ready'
+  ) {
+    return undefined;
+  }
+  return node.value;
+}
+
+function nodeValueClass(state: AppState, node: TreeNode): string {
+  if (state.learnerValues[node.id] !== undefined) {
+    return 'node-value node-value-learner';
+  }
+  return node.kind === 'pred' ? 'node-value node-value-assigned' : 'node-value node-value-computed';
+}
+
+function renderLearnerNodeInput(state: AppState, node: TreeNode): string {
+  const copy = ui(state.locale);
+  return `<div class="cell-segments learner-node-input" role="group" aria-label="${copy.evaluationChoiceAria}">
+    <button type="button" class="cell-segment true" data-action="select-learner-node-value" data-node-id="${node.id}" data-value="true">${copy.trueLabel}</button>
+    <button type="button" class="cell-segment false" data-action="select-learner-node-value" data-node-id="${node.id}" data-value="false">${copy.falseLabel}</button>
+  </div>`;
 }
 
 function renderTreeNode(node: TreeNode, state: AppState, focusNodeId?: string): string {
@@ -33,18 +61,21 @@ function renderTreeNode(node: TreeNode, state: AppState, focusNodeId?: string): 
   const classes = ['tree-node', `kind-${node.kind}`];
   if (selected) classes.push('selected');
   if (isSelectable) classes.push('tappable');
-  const truthLabel = formatTruthValue(
-    state.locale,
-    hidesAssessmentRoot(state, node) ? undefined : node.value,
-  );
+  const truthLabel = formatTruthValue(state.locale, displayNodeValue(state, node));
+  const isLearnerInput =
+    state.exercise.type === 'evaluate-formula' &&
+    state.phase === 'ready' &&
+    state.activeLearnerNodeId === node.id;
   const valueHtml = showsEvaluatedTree(state.exercise.type)
-      ? `<span class="${nodeValueClass(node.kind)}" aria-label="${copy.valueAria(truthLabel)}">${truthLabel}</span>`
-      : '';
+    ? isLearnerInput
+      ? renderLearnerNodeInput(state, node)
+      : `<span class="${nodeValueClass(state, node)}" aria-label="${copy.valueAria(truthLabel)}">${truthLabel}</span>`
+    : '';
   const nodeContent = `<span class="node-label">${node.label}</span>${valueHtml}`;
   const hasChildren = node.children.length > 0;
   const tabIndexAttr = isSelectable ? ` tabindex="${node.id === focusNodeId ? '0' : '-1'}"` : '';
   const nodeInner = isTappable
-    ? `<button type="button" class="node-button" data-action="select-node" data-node-id="${node.id}"${tabIndexAttr} aria-pressed="${selected}" aria-label="${copy.treeNodeSelectAria(node.label)}"${isSelectable ? '' : ' disabled'}>${nodeContent}</button>`
+    ? `<button type="button" class="node-button" data-action="select-node" data-node-id="${node.id}"${tabIndexAttr} aria-pressed="${selected}" aria-label="${node.kind === 'pred' ? copy.treeNodeSelectAtomAria(node.label) : copy.treeNodeSelectConnectiveAria(node.label)}"${isSelectable ? '' : ' disabled'}>${nodeContent}</button>`
     : `<div class="node-button node-readonly" aria-label="${copy.treeNodeDisplayAria(node.label, showsEvaluatedTree(state.exercise.type) ? truthLabel : undefined)}">${nodeContent}</div>`;
   const children = node.children.map((c) => renderTreeNode(c, state, focusNodeId)).join('');
   return `<li class="${classes.join(' ')}" role="treeitem" data-node-id="${node.id}"${hasChildren ? ' aria-expanded="true"' : ''}${selected ? ' aria-selected="true"' : ''}>${nodeInner}${children ? `<ul class="tree-children" role="group">${children}</ul>` : ''}</li>`;
@@ -85,7 +116,9 @@ function renderEvaluationBody(state: AppState): string {
     return '';
   }
   const copy = ui(state.locale);
-  const choices = `<section class="prediction-panel" aria-label="${copy.evaluationChoiceAria}"><p class="prediction-label">${copy.evaluationChoiceAria}</p><div class="cell-segments evaluation-prediction" role="group"><button type="button" class="cell-segment true${state.prediction === true ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="true" aria-pressed="${state.prediction === true}"${state.attempt.status === 'finalized' ? ' disabled' : ''}>${copy.trueLabel}</button><button type="button" class="cell-segment false${state.prediction === false ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="false" aria-pressed="${state.prediction === false}"${state.attempt.status === 'finalized' ? ' disabled' : ''}>${copy.falseLabel}</button></div></section>`;
+  const scaffoldBlocksPrediction = state.scaffoldNodeIds.length > 0 && state.activeLearnerNodeId !== null;
+  const predictionDisabled = state.attempt.status === 'finalized' || scaffoldBlocksPrediction ? ' disabled' : '';
+  const choices = `<section class="prediction-panel" aria-label="${copy.evaluationChoiceAria}"><p class="prediction-label">${copy.evaluationChoiceAria}</p><div class="cell-segments evaluation-prediction" role="group"><button type="button" class="cell-segment true${state.prediction === true ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="true" aria-pressed="${state.prediction === true}"${predictionDisabled}>${copy.trueLabel}</button><button type="button" class="cell-segment false${state.prediction === false ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="false" aria-pressed="${state.prediction === false}"${predictionDisabled}>${copy.falseLabel}</button></div></section>`;
   const visualization = usesLiveTruthRow(state.exercise.formula!)
     ? `${renderAtomToggles(state)}${renderLiveTruthRow(state.locale, state.exercise.formula!, state.assignment, { hideResult: state.phase === 'ready' })}`
     : renderTreePanel(state, renderAtomToggles(state));
@@ -169,14 +202,19 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
       <article class="exercise-card">
         <p class="exercise-family">${familyLabel}</p>
         <p class="exercise-prompt">${state.prompt}</p>
+        ${state.hintVisible && getExerciseHint(state.locale, state.exercise.id) ? `<aside class="exercise-hint" role="note"><strong>${copy.hintHeading}</strong> ${getExerciseHint(state.locale, state.exercise.id)}</aside>` : ''}
         ${formulaLine}
         ${renderExerciseBody(state)}
         ${state.message ? `<p class="feedback ${feedbackClass}" role="status">${state.message}</p>` : ''}
         <div class="actions">
           ${state.exercise.type === 'identify-main-connective' && state.attempt.status === 'finalized' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
+          ${state.exercise.type === 'identify-main-connective' && state.phase === 'ready' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="check-scope"${state.selectedNodeId === null ? ' disabled' : ''}>${copy.checkScope}</button>` : ''}
+          ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>` : ''}
           ${(state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology') && state.phase === 'answered' ? `<button type="button" class="primary" data-action="${state.attempt.status === 'finalized' ? 'next' : 'try-again'}">${state.attempt.status === 'finalized' ? copy.continue : copy.tryAgain}</button>` : ''}
           ${state.exercise.type === 'evaluate-formula' && state.attempt.status === 'finalized' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
-          ${state.exercise.type === 'evaluate-formula' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="check-evaluation"${state.prediction === null ? ' disabled' : ''}>${copy.checkEvaluation}</button>` : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.phase === 'answered' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>` : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' && getExerciseHint(state.locale, state.exercise.id) && !state.hintVisible ? `<button type="button" class="secondary" data-action="show-hint">${copy.showHint}</button>` : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="check-evaluation"${state.prediction === null || (state.scaffoldNodeIds.length > 0 && state.activeLearnerNodeId !== null) ? ' disabled' : ''}>${copy.checkEvaluation}</button>` : ''}
           ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state) : ''}
           ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state) : ''}
           ${state.exercise.type === 'proof-fill-step' ? renderProofActions(state) : ''}

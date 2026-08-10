@@ -94,6 +94,8 @@ Copy in `src/i18n/messages.ts`:
 ```typescript
 type ExerciseCopy = {
   prompt: string;
+  assessmentPrompt?: string;   // neutral graded instruction (evaluate-formula uses this)
+  hint?: string;               // optional support, not shown until requested or after error
   atoms?: Record<string, string>; // locale-authored translation glosses
   feedback?: FeedbackTemplate;   // overrides per-tag defaults
 };

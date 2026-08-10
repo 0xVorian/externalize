@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISE_DEFINITIONS } from '../app/exercises';
-import { getExerciseCopy, getFeedbackTemplates, ui, formatTruthValue, formatAssignmentLine } from './messages';
+import { getExerciseCopy, getFeedbackTemplates, getCellFeedback, ui, formatTruthValue, formatAssignmentLine } from './messages';
 
 describe('i18n', () => {
   for (const locale of ['en', 'fr'] as const) {
@@ -50,5 +50,20 @@ describe('i18n', () => {
       Q: 'Le match est annulé.',
       R: 'Le terrain est fermé.',
     });
+  });
+
+  it('uses wrong fallback for missing cellWrong', () => {
+    expect(getCellFeedback('en', 'scope-001', false)).not.toContain('Correct');
+    expect(getCellFeedback('fr', 'scope-001', false)).not.toContain('Exact');
+  });
+
+  it('provides assessmentPrompt for every evaluate-formula exercise in both locales', () => {
+    const evalExercises = EXERCISE_DEFINITIONS.filter((e) => e.type === 'evaluate-formula');
+    for (const locale of ['en', 'fr'] as const) {
+      for (const exercise of evalExercises) {
+        const copy = getExerciseCopy(locale, exercise.id);
+        expect(copy.assessmentPrompt?.length).toBeGreaterThan(0);
+      }
+    }
   });
 });

@@ -21,7 +21,9 @@ import {
   recordSkillAttempt,
   skillForExercise,
 } from './progress-tracker';
+import { flattenUnit1Clusters, UNIT_1_PRACTICE_CLUSTERS, UNIT_1_CLUSTER_ORDER } from './practice-clusters';
 import { getExerciseDefinition } from './exercises';
+import { hasEvaluationScaffold, maxScaffoldLevel } from './evaluation-scaffold';
 import type { Locale } from '../i18n';
 import { type SrsEntry, createSrsEntry, nextSrsEntryAfterResult } from './srs';
 import {
@@ -351,7 +353,9 @@ export function getUnlockedExerciseIds(store: ProgressStore): string[] {
   if (!isLevel1Complete(store.lessonsCompleted)) {
     return unit0;
   }
-  const unit1 = progressiveUnlock(LEVEL_1_PRACTICE_UNLOCK_ORDER, store.passed);
+  const unit1 = UNIT_1_CLUSTER_ORDER.flatMap((clusterKey) =>
+    progressiveUnlock(UNIT_1_PRACTICE_CLUSTERS[clusterKey], store.passed),
+  );
   if (!isLevel2Complete(store.lessonsCompleted)) {
     return [...unit0, ...unit1];
   }
@@ -587,6 +591,11 @@ export function finalizePracticeAttempt(
   };
   const cleanPass = attempt.firstCheckedCorrect === true;
   const repairedPass = !cleanPass;
+  const currentScaffoldLevel = prevExercise.scaffoldLevel ?? 0;
+  const nextScaffoldLevel =
+    cleanPass && hasEvaluationScaffold(exerciseId)
+      ? Math.min(currentScaffoldLevel + 1, maxScaffoldLevel(exerciseId))
+      : currentScaffoldLevel;
 
   const errorCounts = { ...store.errorCounts };
   for (const errorTag of attempt.errorTags) {
@@ -633,6 +642,7 @@ export function finalizePracticeAttempt(
           repairedPasses: prevExercise.repairedPasses + (repairedPass ? 1 : 0),
           lastErrorTag:
             attempt.errorTags.at(-1) ?? prevExercise.lastErrorTag,
+          scaffoldLevel: nextScaffoldLevel,
         },
       },
       errorCounts,

@@ -4,6 +4,7 @@ import type { BuilderToken } from './translation';
 export type PracticeErrorTag =
   | FeedbackTag
   | 'incorrect-evaluation'
+  | 'incorrect-intermediate'
   | 'incorrect-truth-table-cell'
   | 'incorrect-tautology';
 

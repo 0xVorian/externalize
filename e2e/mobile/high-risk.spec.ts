@@ -36,8 +36,11 @@ test('scope tree repair remains tappable', async ({ page }) => {
   await modeButton(page, 'practice').click();
   const nodes = page.locator('[data-action="select-node"]');
   await nodes.nth(1).click();
+  await page.locator('[data-action="check-scope"]').click();
   await expect(page.locator('.feedback-wrong')).toBeVisible();
+  await page.locator('[data-action="try-again"]').click();
   await nodes.first().click();
+  await page.locator('[data-action="check-scope"]').click();
   await expect(page.locator('.feedback-correct')).toBeVisible();
   await expectNoPageOverflow(page);
 });

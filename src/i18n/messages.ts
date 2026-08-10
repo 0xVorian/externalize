@@ -1,9 +1,11 @@
-import type { FeedbackTag, FeedbackTemplate } from '../../engine';
+import type { FeedbackTag, FeedbackTemplate, EvaluationFeedbackResult } from '../../engine';
 import type { Locale } from './locale';
 import type { ResumePoint } from '../app/progress-tracker';
 
 export type ExerciseCopy = {
   prompt: string;
+  assessmentPrompt?: string;
+  hint?: string;
   atoms?: Record<string, string>;
   feedback?: FeedbackTemplate;
   cellCorrect?: string;
@@ -25,12 +27,16 @@ export type UiCopy = {
   cellFillAria: (rowNumber: number) => string;
   formulaTreeAria: string;
   formulaDisplayAria: string;
-  treeNodeSelectAria: (label: string) => string;
+  treeNodeSelectConnectiveAria: (label: string) => string;
+  treeNodeSelectAtomAria: (label: string) => string;
   treeNodeDisplayAria: (label: string, value?: string) => string;
   continue: string;
   tryAgain: string;
   nextExercise: string;
+  checkScope: string;
   checkEvaluation: string;
+  showHint: string;
+  hintHeading: string;
   evaluationChoiceAria: string;
   evaluationPracticePrompt: string;
   evaluationCorrect: string;
@@ -99,6 +105,11 @@ const FEEDBACK_DEFAULTS_FR: Record<FeedbackTag, string> = {
 const FEEDBACK_DEFAULTS: Record<Locale, Record<FeedbackTag, string>> = {
   en: FEEDBACK_DEFAULTS_EN,
   fr: FEEDBACK_DEFAULTS_FR,
+};
+
+const CELL_WRONG_DEFAULTS: Record<Locale, string> = {
+  en: 'That value is not correct for this row.',
+  fr: 'Cette valeur est incorrecte pour cette ligne.',
 };
 
 const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
@@ -186,90 +197,148 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'eval-001': {
       prompt:
         'Tap T or F for each letter. The table row shows how P ∧ Q evaluates under your assignment.',
+      assessmentPrompt:
+        'Tap T or F for each letter, follow the visible intermediate values, then predict the truth value at the root.',
     },
     'eval-002': {
       prompt:
         'Change the assignment and observe how truth values propagate from the letters through each subformula.',
+      assessmentPrompt:
+        'Set the sentence letters, follow the visible intermediate values in the tree, then predict the truth value at the root.',
     },
     'eval-003': {
       prompt:
         'Set P and Q, then read the result column: disjunction is true when at least one disjunct is true.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'Disjunction is true when at least one disjunct is true.',
     },
     'eval-004': {
       prompt:
         'Assign truth values to P and Q. Material implication P → Q is false only when P is true and Q is false.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'Material implication P → Q is false only when P is true and Q is false.',
     },
     'eval-005': {
       prompt:
         'Toggle P and Q. The biconditional P ↔ Q is true exactly when both sides share the same truth value.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'A biconditional is true exactly when both sides share the same truth value.',
     },
     'eval-006': {
       prompt:
         'With three letters, trace how the disjunction (P ∨ Q) feeds the conditional before R is evaluated.',
+      assessmentPrompt:
+        'Set the sentence letters, follow the visible intermediate values in the tree, then predict the truth value at the root.',
     },
     'eval-007': {
       prompt:
         'Watch how the value of (Q ∨ R) propagates upward before P ∧ … is computed.',
+      assessmentPrompt:
+        'Set the sentence letters, follow the visible intermediate values in the tree, then predict the truth value at the root.',
     },
     'eval-008': {
       prompt:
         'Negation applies after the conjunction inside the parentheses is evaluated. Follow the tree from the atoms outward.',
+      assessmentPrompt:
+        'Set the sentence letters, follow the visible intermediate values in the tree, then predict the truth value at the root.',
     },
     'eval-009': {
       prompt:
         'Each conjunct is evaluated separately. The conjunction is true only when both (P → Q) and R are true.',
+      assessmentPrompt:
+        'Set the sentence letters, follow the visible intermediate values in the tree, then predict the truth value at the root.',
+      hint: 'A conjunction is true only when both conjuncts are true.',
     },
     'eval-010': {
       prompt:
         'Set the truth value of P. The live row shows how negation flips it: ¬P is true exactly when P is false.',
+      assessmentPrompt:
+        'Set P, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'Negation flips the truth value: ¬P is true exactly when P is false.',
     },
     'eval-011': {
       prompt:
         'Both conjuncts are true here. Confirm that P ∧ Q is true only when P and Q are both true.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'A conjunction is true only when both conjuncts are true.',
     },
     'eval-012': {
       prompt:
         'When both P and Q are false, the conjunction P ∧ Q is false. Set the letters and read the result row.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'When both conjuncts are false, the conjunction is false.',
     },
     'eval-013': {
       prompt:
         'Disjunction is false only when both disjuncts are false. Try P and Q both false and read the outcome.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'Disjunction is false only when both disjuncts are false.',
     },
     'eval-014': {
       prompt:
         'With P true and Q false, at least one disjunct is true — so P ∨ Q should come out true.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'Disjunction is true when at least one disjunct is true.',
     },
     'eval-015': {
       prompt:
         'When the antecedent P is false, material implication P → Q is true regardless of Q. Check this row.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'When the antecedent is false, material implication is true regardless of the consequent.',
     },
     'eval-016': {
       prompt:
         'A false antecedent makes P → Q true even when Q is true. Toggle P and Q and read the result.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'When the antecedent is false, material implication is true regardless of the consequent.',
     },
     'eval-017': {
       prompt:
         'When P and Q share the same truth value, the biconditional P ↔ Q is true. Both are true here.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'A biconditional is true when both sides share the same truth value.',
     },
     'eval-018': {
       prompt:
         'Matching falsity also satisfies a biconditional: when P and Q are both false, P ↔ Q is true.',
+      assessmentPrompt:
+        'Set P and Q, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'A biconditional is true when both sides share the same truth value.',
     },
     'eval-019': {
       prompt:
         'P is true, so ¬P must be false. Watch the live row flip the value under negation.',
+      assessmentPrompt:
+        'Set P, follow the visible intermediate values, then predict the truth value at the root.',
+      hint: 'Negation flips the truth value: ¬P is true exactly when P is false.',
     },
     'eval-020': {
       prompt:
         'Negation applies after the disjunction inside the parentheses. Trace how ¬(P ∨ Q) is computed from P and Q.',
+      assessmentPrompt:
+        'Set the sentence letters, follow the visible intermediate values in the tree, then predict the truth value at the root.',
     },
     'eval-021': {
       prompt:
         'Double negation restores the original value: ¬¬P matches P. Set P and read the doubly negated result on the tree.',
+      assessmentPrompt:
+        'Set P, follow the visible intermediate values in the tree, then predict the truth value at the root.',
     },
     'eval-022': {
       prompt:
         'Evaluate the negated disjunction: first find P ∨ Q, then apply the outer negation.',
+      assessmentPrompt:
+        'Set the sentence letters, follow the visible intermediate values in the tree, then predict the truth value at the root.',
     },
     'scope-013': {
       prompt: 'Select the main connective. Without parentheses, → binds less tightly than ∨.',
@@ -304,6 +373,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', atoms: { P: 'It rains.', Q: 'The game is cancelled.' }, feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
     'translate-002': {
       prompt: 'It is not the case that both the gate is open and the alarm is on. Build the formula.',
+      assessmentPrompt: 'Translate the sentence into a formula that preserves its connective structure (not merely any equivalent formula).',
       atoms: { P: 'The gate is open.', Q: 'The alarm is on.' },
       feedback: { 'negation-scope': 'Negation must cover the whole conjunction: ¬(P ∧ Q), not ¬P ∧ Q.' },
     },
@@ -324,6 +394,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'translate-006': {
       prompt: 'It is not the case that the gate is open or the window is open. Build the formula.',
+      assessmentPrompt: 'Translate the sentence into a formula that preserves its connective structure (not merely any equivalent formula).',
       atoms: { P: 'The gate is open.', Q: 'The window is open.' },
       feedback: { 'negation-scope': 'Negation applies to the whole disjunction: ¬(P ∨ Q), not ¬P ∨ Q.' },
     },
@@ -414,90 +485,148 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'eval-001': {
       prompt:
         'Toucher V ou F pour chaque variable. La ligne du tableau indique la valeur de P ∧ Q sous cette interprétation.',
+      assessmentPrompt:
+        'Fixez une interprétation, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
     },
     'eval-002': {
       prompt:
         'Modifiez la valuation et suivez la propagation des valeurs de vérité à travers les sous-formules.',
+      assessmentPrompt:
+        'Fixez une interprétation, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
     },
     'eval-003': {
       prompt:
         'Fixez P et Q, puis lisez la colonne résultat : une disjonction est vraie dès qu\'au moins un disjonct est vrai.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Une disjonction est vraie dès qu\'au moins un disjonct est vrai.',
     },
     'eval-004': {
       prompt:
         'Attribuez des valeurs à P et Q. L\'implication matérielle P → Q est fausse seulement lorsque P est vrai et Q est faux.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'L\'implication matérielle P → Q est fausse seulement lorsque P est vrai et Q est faux.',
     },
     'eval-005': {
       prompt:
         'Basculez P et Q. La biconditionnelle P ↔ Q est vraie exactement quand les deux côtés ont la même valeur de vérité.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Une biconditionnelle est vraie exactement quand les deux côtés ont la même valeur de vérité.',
     },
     'eval-006': {
       prompt:
         'Avec trois variables, suivez comment la disjonction (P ∨ Q) alimente la conditionnelle avant l\'évaluation de R.',
+      assessmentPrompt:
+        'Fixez une interprétation, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
     },
     'eval-007': {
       prompt:
         'Observez comment la valeur de (Q ∨ R) remonte dans l\'arbre avant le calcul de P ∧ …',
+      assessmentPrompt:
+        'Fixez une interprétation, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
     },
     'eval-008': {
       prompt:
         'La négation s\'applique après l\'évaluation de la conjonction entre parenthèses. Remontez l\'arbre depuis les variables.',
+      assessmentPrompt:
+        'Fixez une interprétation, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
     },
     'eval-009': {
       prompt:
         'Chaque conjoint est évalué séparément. La conjonction n\'est vraie que si (P → Q) et R le sont tous deux.',
+      assessmentPrompt:
+        'Fixez une interprétation, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
+      hint: 'Une conjonction n\'est vraie que si ses deux conjoints le sont.',
     },
     'eval-010': {
       prompt:
         'Fixez la valeur de P. La ligne en direct montre la négation : ¬P est vrai exactement lorsque P est faux.',
+      assessmentPrompt:
+        'Fixez P, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'La négation inverse la valeur : ¬P est vrai exactement lorsque P est faux.',
     },
     'eval-011': {
       prompt:
         'Les deux conjoints sont vrais ici. Vérifiez que P ∧ Q n\'est vrai que lorsque P et Q le sont tous deux.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Une conjonction n\'est vraie que si ses deux conjoints le sont.',
     },
     'eval-012': {
       prompt:
         'Quand P et Q sont tous deux faux, la conjonction P ∧ Q est fausse. Fixez les variables et lisez la ligne résultat.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Quand les deux conjoints sont faux, la conjonction est fausse.',
     },
     'eval-013': {
       prompt:
         'Une disjonction n\'est fausse que si les deux disjonctes le sont. Essayez P et Q faux et lisez le résultat.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Une disjonction n\'est fausse que si les deux disjonctes le sont.',
     },
     'eval-014': {
       prompt:
         'Avec P vrai et Q faux, au moins un disjonct est vrai — P ∨ Q doit donc être vrai.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Une disjonction est vraie dès qu\'au moins un disjonct est vrai.',
     },
     'eval-015': {
       prompt:
         'Quand l\'antécédent P est faux, l\'implication matérielle P → Q est vraie quelle que soit la valeur de Q. Vérifiez cette ligne.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Quand l\'antécédent est faux, l\'implication matérielle est vraie quelle que soit la valeur du conséquent.',
     },
     'eval-016': {
       prompt:
         'Un antécédent faux rend P → Q vrai même si Q est vrai. Basculez P et Q et lisez le résultat.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Quand l\'antécédent est faux, l\'implication matérielle est vraie quelle que soit la valeur du conséquent.',
     },
     'eval-017': {
       prompt:
         'Quand P et Q ont la même valeur de vérité, la biconditionnelle P ↔ Q est vraie. Ici, les deux sont vrais.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Une biconditionnelle est vraie quand les deux côtés ont la même valeur de vérité.',
     },
     'eval-018': {
       prompt:
         'La falsité concordante satisfait aussi une biconditionnelle : quand P et Q sont tous deux faux, P ↔ Q est vrai.',
+      assessmentPrompt:
+        'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'Une biconditionnelle est vraie quand les deux côtés ont la même valeur de vérité.',
     },
     'eval-019': {
       prompt:
         'P est vrai, donc ¬P doit être faux. Observez la ligne en direct inverser la valeur sous la négation.',
+      assessmentPrompt:
+        'Fixez P, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
+      hint: 'La négation inverse la valeur : ¬P est vrai exactement lorsque P est faux.',
     },
     'eval-020': {
       prompt:
         'La négation s\'applique après la disjonction entre parenthèses. Suivez le calcul de ¬(P ∨ Q) à partir de P et Q.',
+      assessmentPrompt:
+        'Fixez une interprétation, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
     },
     'eval-021': {
       prompt:
         "La double négation restitue la valeur initiale : ¬¬P équivaut à P. Fixez P et lisez le résultat doublement nié sur l'arbre.",
+      assessmentPrompt:
+        'Fixez P, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
     },
     'eval-022': {
       prompt:
         "Évaluez la disjonction niée : calculez d'abord P ∨ Q, puis appliquez la négation extérieure.",
+      assessmentPrompt:
+        'Fixez une interprétation, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
     },
     'scope-013': {
       prompt: 'Indiquez le connecteur principal. Sans parenthèses, → lie moins fort que ∨.',
@@ -532,6 +661,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', atoms: { P: 'Il pleut.', Q: 'Le match est annulé.' }, feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
     'translate-002': {
       prompt: 'Il n\'est pas le cas que la porte soit ouverte et l\'alarme activée. Construisez la formule.',
+      assessmentPrompt: 'Traduisez l\'énoncé en une formule qui respecte sa structure de connecteurs (pas seulement une formule équivalente).',
       atoms: { P: 'La porte est ouverte.', Q: 'L\'alarme est activée.' },
       feedback: { 'negation-scope': 'La négation doit porter sur toute la conjonction : ¬(P ∧ Q), pas ¬P ∧ Q.' },
     },
@@ -552,6 +682,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'translate-006': {
       prompt: 'Il n\'est pas le cas que la porte soit ouverte ou que la fenêtre soit ouverte. Construisez la formule.',
+      assessmentPrompt: 'Traduisez l\'énoncé en une formule qui respecte sa structure de connecteurs (pas seulement une formule équivalente).',
       atoms: { P: 'La porte est ouverte.', Q: 'La fenêtre est ouverte.' },
       feedback: { 'negation-scope': 'La négation s\'applique à toute la disjonction : ¬(P ∨ Q), pas ¬P ∨ Q.' },
     },
@@ -575,13 +706,17 @@ const UI: Record<Locale, UiCopy> = {
     cellFillAria: (rowNumber) => `Fill result for row ${rowNumber}`,
     formulaTreeAria: 'Parsing tree of the formula',
     formulaDisplayAria: 'Formula',
-    treeNodeSelectAria: (label) => `Select connective ${label}`,
+    treeNodeSelectConnectiveAria: (label) => `Select connective ${label}`,
+    treeNodeSelectAtomAria: (label) => `Select sentence letter ${label}`,
     treeNodeDisplayAria: (label, value) =>
       value ? `${label}, ${value}` : label,
     continue: 'Continue',
     tryAgain: 'Try again',
     nextExercise: 'Next exercise',
+    checkScope: 'Check selection',
     checkEvaluation: 'Check prediction',
+    showHint: 'Show hint',
+    hintHeading: 'Hint',
     evaluationChoiceAria: 'Predict the truth value of the whole formula',
     evaluationPracticePrompt: 'Set the sentence letters, follow the visible intermediate values, then predict the truth value at the root.',
     evaluationCorrect: 'Correct — the root has the truth value you predicted.',
@@ -611,13 +746,17 @@ const UI: Record<Locale, UiCopy> = {
     cellFillAria: (rowNumber) => `Remplir le résultat de la ligne ${rowNumber}`,
     formulaTreeAria: 'Arbre de décomposition de la formule',
     formulaDisplayAria: 'Formule',
-    treeNodeSelectAria: (label) => `Sélectionner le connecteur ${label}`,
+    treeNodeSelectConnectiveAria: (label) => `Sélectionner le connecteur ${label}`,
+    treeNodeSelectAtomAria: (label) => `Sélectionner la variable ${label}`,
     treeNodeDisplayAria: (label, value) =>
       value ? `${label}, ${value}` : label,
     continue: 'Continuer',
     tryAgain: 'Réessayer',
     nextExercise: 'Exercice suivant',
+    checkScope: 'Vérifier la sélection',
     checkEvaluation: 'Vérifier la prédiction',
+    showHint: 'Afficher un indice',
+    hintHeading: 'Indice',
     evaluationChoiceAria: 'Prédire la valeur de vérité de la formule entière',
     evaluationPracticePrompt: 'Fixez une interprétation, suivez le calcul des sous-formules visibles, puis prédisez la valeur au connecteur principal.',
     evaluationCorrect: 'Exact — la racine a bien la valeur prédite.',
@@ -667,11 +806,82 @@ export function getExerciseCopy(locale: Locale, exerciseId: string): ExerciseCop
   return copy;
 }
 
+export function getAssessmentPrompt(
+  locale: Locale,
+  exerciseId: string,
+  exerciseType: string,
+): string {
+  const copy = getExerciseCopy(locale, exerciseId);
+  if (exerciseType === 'evaluate-formula') {
+    return copy.assessmentPrompt ?? ui(locale).evaluationPracticePrompt;
+  }
+  return copy.assessmentPrompt ?? copy.prompt;
+}
+
+export function getExerciseHint(locale: Locale, exerciseId: string): string | undefined {
+  return getExerciseCopy(locale, exerciseId).hint;
+}
+
+function formatChildValue(locale: Locale, label: string, value: boolean): string {
+  return `${label} is ${formatTruthValue(locale, value)}`;
+}
+
+function formatChildValueFr(label: string, value: boolean): string {
+  return `${label} est ${formatTruthValue('fr', value)}`;
+}
+
+const EVAL_RULE_COPY = {
+  en: {
+    and: (parts: string[]) =>
+      `${parts.join(' and ')}. A conjunction is true only when both conjuncts are true, so the whole formula is `,
+    or: (parts: string[]) =>
+      `${parts.join(' and ')}. A disjunction is true when at least one disjunct is true, so the whole formula is `,
+    imp: (parts: string[]) =>
+      `${parts.join(' and ')}. A material conditional is false only when the antecedent is true and the consequent is false, so the whole formula is `,
+    iff: (parts: string[]) =>
+      `${parts.join(' and ')}. A biconditional is true when both sides have the same truth value, so the whole formula is `,
+    not: (parts: string[]) =>
+      `${parts[0] ?? ''}. Negation flips the truth value, so the whole formula is `,
+    pred: () => 'The sentence letter already fixes the truth value, so the whole formula is ',
+  },
+  fr: {
+    and: (parts: string[]) =>
+      `${parts.join(' et ')}. Une conjonction n'est vraie que si les deux conjoints le sont, donc la formule entière est `,
+    or: (parts: string[]) =>
+      `${parts.join(' et ')}. Une disjonction est vraie dès qu'au moins un disjonct est vrai, donc la formule entière est `,
+    imp: (parts: string[]) =>
+      `${parts.join(' et ')}. Une implication matérielle n'est fausse que si l'antécédent est vrai et le conséquent faux, donc la formule entière est `,
+    iff: (parts: string[]) =>
+      `${parts.join(' et ')}. Une biconditionnelle est vraie quand les deux côtés ont la même valeur, donc la formule entière est `,
+    not: (parts: string[]) =>
+      `${parts[0] ?? ''}. La négation inverse la valeur, donc la formule entière est `,
+    pred: () => 'La variable propositionnelle fixe déjà la valeur, donc la formule entière est ',
+  },
+} as const;
+
+export function formatEvaluationFeedback(locale: Locale, result: EvaluationFeedbackResult): string {
+  if (result.correct) {
+    return ui(locale).evaluationCorrect;
+  }
+  const parts =
+    locale === 'fr'
+      ? result.childParts.map((part) => formatChildValueFr(part.label, part.value))
+      : result.childParts.map((part) => formatChildValue(locale, part.label, part.value));
+  const rules = EVAL_RULE_COPY[locale];
+  const rule =
+    result.connectiveKind === 'and' || result.connectiveKind === 'or' ||
+    result.connectiveKind === 'imp' || result.connectiveKind === 'iff' ||
+    result.connectiveKind === 'not' || result.connectiveKind === 'pred'
+      ? rules[result.connectiveKind](parts)
+      : `${parts.join(locale === 'fr' ? ' et ' : ' and ')}. `;
+  return `${rule}${formatTruthValue(locale, result.rootValue)}.`;
+}
+
 export function getCellFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
   const copy = getExerciseCopy(locale, exerciseId);
   return correct
     ? (copy.cellCorrect ?? FEEDBACK_DEFAULTS[locale].correct)
-    : (copy.cellWrong ?? FEEDBACK_DEFAULTS[locale].correct);
+    : (copy.cellWrong ?? CELL_WRONG_DEFAULTS[locale]);
 }
 
 export function getCounterFeedback(locale: Locale, exerciseId: string, correct: boolean): string {
@@ -774,8 +984,10 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
           ? 'Truth-table cells'
           : id === 'practice:classify-tautology'
             ? 'Tautology check'
-          : id === 'practice:translate-en-to-formula'
-            ? 'English to formula'
+          : id === 'practice:translate-prose-to-formula'
+            ? 'Prose to formula'
+            : id === 'practice:translate-en-to-formula'
+              ? 'Prose to formula'
             : id === 'practice:find-counterexample'
               ? 'Counterexamples'
               : id === 'practice:proof-fill-step'
@@ -786,7 +998,9 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     errorLabel: (tag) =>
       tag === 'incorrect-evaluation'
         ? 'Incorrect formula prediction'
-        : tag === 'incorrect-truth-table-cell'
+        : tag === 'incorrect-intermediate'
+          ? 'Incorrect intermediate value'
+          : tag === 'incorrect-truth-table-cell'
           ? 'Incorrect truth-table value'
           : tag === 'incorrect-tautology'
             ? 'Incorrect tautology classification'
@@ -845,8 +1059,10 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
         ? 'Évaluation de formules'
         : id === 'practice:fill-truth-table-cell'
           ? 'Cases de table de vérité'
-          : id === 'practice:translate-en-to-formula'
-            ? 'Anglais → formule'
+          : id === 'practice:translate-prose-to-formula'
+            ? 'Énoncé → formule'
+            : id === 'practice:translate-en-to-formula'
+              ? 'Énoncé → formule'
             : id === 'practice:classify-tautology'
               ? 'Reconnaissance des tautologies'
               : id === 'practice:find-counterexample'
@@ -859,7 +1075,9 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     errorLabel: (tag) =>
       tag === 'incorrect-evaluation'
         ? 'Prédiction incorrecte'
-        : tag === 'incorrect-truth-table-cell'
+        : tag === 'incorrect-intermediate'
+          ? 'Valeur intermédiaire incorrecte'
+          : tag === 'incorrect-truth-table-cell'
           ? 'Valeur incorrecte dans la table'
           : tag === 'incorrect-tautology'
             ? 'Classement incorrect de la tautologie'

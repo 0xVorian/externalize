@@ -34,7 +34,7 @@ const EXERCISES = {
     accept: ['¬(P ∨ Q)'],
     reject: [
       { learner: '¬P ∨ Q', tag: 'negation-scope' as const },
-      { learner: 'P ∨ Q', tag: 'negation-scope' as const },
+      { learner: 'P ∨ Q', tag: 'wrong-main-connective' as const },
     ],
   },
 } as const;

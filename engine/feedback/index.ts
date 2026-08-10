@@ -13,3 +13,5 @@ export type { CounterexampleFeedbackTag, CounterexampleFeedbackTemplate } from '
 export { resolveCounterexampleFeedback } from './counterexample';
 export type { ProofFeedbackTag } from './proof';
 export { resolveProofFeedback } from './proof';
+export { buildEvaluationFeedback } from './evaluation';
+export type { EvaluationFeedbackResult } from './evaluation';

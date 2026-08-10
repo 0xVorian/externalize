@@ -9,6 +9,7 @@ test('repairs a scope error inside one attempt', async ({ page }) => {
 
   const nodes = page.locator('[data-action="select-node"]');
   await nodes.nth(1).click();
+  await page.locator('[data-action="check-scope"]').click();
   await expect(page.locator('.feedback-wrong')).toBeVisible();
   await expect(page.locator('[data-action="next"]')).toHaveCount(0);
 
@@ -21,6 +22,7 @@ test('repairs a scope error inside one attempt', async ({ page }) => {
   expect(wrong.passed).not.toContain('scope-001');
 
   await nodes.first().click();
+  await page.locator('[data-action="check-scope"]').click();
   await expect(page.locator('.feedback-correct')).toBeVisible();
 
   const repaired = await page.evaluate(

@@ -11,6 +11,9 @@
   --wrong-text: #8a2f28;
   --correct-soft: #e7f3ea;
   --correct-text: #245c31;
+  --table-surface: var(--surface);
+  --table-surface-active: var(--accent-soft);
+  --control-surface: var(--surface);
   --tap-min: 44px;
   font-family: "Segoe UI", system-ui, sans-serif;
   line-height: 1.45;
@@ -400,6 +403,15 @@ button {
   gap: 0.35rem;
 }
 
+.concept-map-status-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+
 .concept-map-swatch {
   width: 0.85rem;
   height: 0.85rem;
@@ -509,6 +521,17 @@ button {
   font-weight: 700;
 }
 
+.node-value-learner {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.learner-node-input {
+  margin-top: 0.35rem;
+}
+
 .node-value-computed {
   background: var(--accent-soft);
   color: var(--accent);
@@ -555,12 +578,12 @@ button {
 
 .truth-table tbody td,
 .truth-table tbody th {
-  background: #fff;
+  background: var(--table-surface);
 }
 
 .truth-table-row.active td,
 .truth-table-row.active th {
-  background: var(--accent-soft);
+  background: var(--table-surface-active);
 }
 
 .truth-table-row:not(.active) {
@@ -570,7 +593,7 @@ button {
 .truth-table-static .truth-table-row { opacity: 1; }
 .tautology-choice { margin-top: 0.75rem; }
 .tautology-segments { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-.tautology-segment { min-height: var(--tap-min); padding: 0.65rem 0.75rem; border: 1px solid var(--border); border-radius: 0.65rem; background: #fff; color: var(--text); cursor: pointer; font-size: 0.9rem; font-weight: 600; line-height: 1.3; }
+.tautology-segment { min-height: var(--tap-min); padding: 0.65rem 0.75rem; border: 1px solid var(--border); border-radius: 0.65rem; background: var(--control-surface); color: var(--text); cursor: pointer; font-size: 0.9rem; font-weight: 600; line-height: 1.3; }
 .tautology-segment:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .truth-table-row.active .result-cell {
@@ -629,7 +652,7 @@ button {
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 0.65rem;
-  background: #fff;
+  background: var(--control-surface);
   color: var(--muted);
   cursor: pointer;
   font-family: "Fira Code", "Cascadia Code", monospace;
@@ -658,6 +681,24 @@ button {
   font-size: 1rem;
   font-weight: 600;
   min-width: 1.5rem;
+}
+
+.exercise-hint {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: var(--accent-soft);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.exercise-hint strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
 }
 
 .feedback {
@@ -702,8 +743,88 @@ button {
 }
 
 .secondary {
-  background: #fff;
+  background: var(--control-surface);
   color: var(--text);
+}
+
+.watch-grid-wrap {
+  margin: 0.75rem 0;
+}
+
+.watch-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+
+.watch-grid-corner {
+  min-width: 2rem;
+}
+
+.watch-grid-col-labels,
+.watch-grid-row-labels {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.watch-grid-col-labels {
+  grid-template-columns: repeat(3, minmax(2.5rem, 1fr));
+}
+
+.watch-grid-row-labels {
+  grid-template-rows: repeat(3, minmax(var(--tap-min), 1fr));
+}
+
+.watch-grid-col-label,
+.watch-grid-row-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.watch-grid-body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem;
+}
+
+.watch-grid-cells {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.watch-grid-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(2.75rem, 1fr));
+  gap: 0.35rem;
+}
+
+.watch-grid-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tap-min);
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--control-surface);
+}
+
+.watch-grid-cell.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.watch-grid-value {
+  font-family: "Fira Code", "Cascadia Code", monospace;
+  font-size: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -724,8 +845,16 @@ button {
   .node-button,
   .atom-segment,
   .secondary,
-  .mode-button {
+  .mode-button,
+  .tautology-segment,
+  .proof-rule-btn,
+  .proof-cite-chip,
+  .watch-grid-cell {
     background: #171412;
+  }
+
+  .watch-grid-cell.active {
+    background: var(--accent-soft);
   }
 }
 
@@ -743,6 +872,6 @@ button {
 .proof-just { font-size: 0.8rem; color: var(--muted); text-align: right; }
 .proof-palette { margin-top: 1rem; }
 .proof-rule-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.proof-rule-btn, .proof-cite-chip { min-width: var(--tap-min); min-height: var(--tap-min); padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 0.65rem; background: #fff; cursor: pointer; font-size: 0.9rem; }
+.proof-rule-btn, .proof-cite-chip { min-width: var(--tap-min); min-height: var(--tap-min); padding: 0.5rem 0.75rem; border: 1px solid var(--border); border-radius: 0.65rem; background: var(--control-surface); cursor: pointer; font-size: 0.9rem; }
 .proof-rule-btn.selected, .proof-cite-chip.selected { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .proof-hint { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--muted); }

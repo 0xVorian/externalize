@@ -13,6 +13,7 @@ import {
   checkCounterexample,
   checkEvaluation,
   checkProofStep,
+  checkScope,
   checkTranslation,
   createState,
   paletteInsertToken,
@@ -67,7 +68,7 @@ function formula(kind: 'imp', left: string, right: string): Formula {
 }
 
 const cleanChecks: Array<[string, (state: AppState) => AppState]> = [
-  ['identify-main-connective', (state) => selectNode(state, state.tree.id)],
+  ['identify-main-connective', (state) => checkScope(selectNode(state, state.tree.id))],
   ['evaluate-formula', (state) => checkEvaluation(selectEvaluationPrediction(state, false))],
   ['fill-truth-table-cell', (state) => submitCellValue(state, false)],
   ['find-counterexample', (state) => checkCounterexample(setAtomValue(state, 'Q', false))],
@@ -102,8 +103,8 @@ const repairedChecks: Array<[
 ]> = [
   [
     'identify-main-connective',
-    (state) => selectNode(state, state.tree.children[0]!.id),
-    (state) => selectNode(state, state.tree.id),
+    (state) => checkScope(selectNode(state, state.tree.children[0]!.id)),
+    (state) => checkScope(selectNode(state, state.tree.id)),
   ],
   [
     'evaluate-formula',

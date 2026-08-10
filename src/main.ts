@@ -29,6 +29,7 @@ import {
 import {
   createState,
   selectNode,
+  checkScope,
   setAtomValue,
   submitCellValue,
   submitTautologyAnswer,
@@ -42,7 +43,9 @@ import {
   toggleProofCitation,
   checkProofStep,
   selectEvaluationPrediction,
+  selectLearnerNodeValue,
   checkEvaluation,
+  showHint,
   tryAgainPractice,
   practiceDraftSnapshot,
   type AppState,
@@ -158,7 +161,8 @@ function loadPracticeState(exerciseId?: string): AppState {
   }
   const withAttempt = beginPracticeAttempt(progress, id);
   persistProgress(updateResume(withAttempt, { mode: 'practice', exerciseId: id }));
-  return createState(locale, exercise, progress.practiceDraft);
+  const scaffoldLevel = withAttempt.exerciseStats[id]?.scaffoldLevel ?? 0;
+  return createState(locale, exercise, withAttempt.practiceDraft, scaffoldLevel);
 }
 
 function persistPracticeState(): void {
@@ -459,7 +463,14 @@ root.addEventListener('click', (event) => {
     if (!nodeId) {
       return;
     }
-    commitCheckedPracticeState(selectNode(ensurePracticeState(), nodeId));
+    practiceState = selectNode(ensurePracticeState(), nodeId);
+    persistPracticeState();
+    render();
+    return;
+  }
+
+  if (action === 'check-scope') {
+    commitCheckedPracticeState(checkScope(ensurePracticeState()));
     render();
     return;
   }
@@ -486,8 +497,27 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'select-learner-node-value') {
+    const nodeId = button.dataset.nodeId;
+    if (!nodeId) {
+      return;
+    }
+    const value = button.dataset.value === 'true';
+    practiceState = selectLearnerNodeValue(ensurePracticeState(), nodeId, value);
+    persistPracticeState();
+    render();
+    return;
+  }
+
   if (action === 'check-evaluation') {
     commitCheckedPracticeState(checkEvaluation(ensurePracticeState()));
+    render();
+    return;
+  }
+
+  if (action === 'show-hint') {
+    practiceState = showHint(ensurePracticeState());
+    persistPracticeState();
     render();
     return;
   }
