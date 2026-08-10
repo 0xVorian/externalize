@@ -1,6 +1,5 @@
 import type { Assignment, Formula, TreeNode } from '../ast/types';
 import { connectiveLabel } from '../render/display';
-import type { EvaluationResult } from './evaluate';
 import { evaluateWithNodes } from './evaluate';
 
 function combine(kind: 'and' | 'or' | 'imp' | 'iff', left: boolean, right: boolean): boolean {
@@ -100,12 +99,11 @@ export function evaluateWithLearnerOverlay(
   assignment: Assignment,
   learnerValues: Record<string, boolean>,
   scaffoldNodeIds: string[],
-): EvaluationResult {
+): { root: boolean | undefined; values: Map<string, boolean>; tree: TreeNode } {
   const values = new Map<string, boolean>();
   const scaffoldIds = new Set(scaffoldNodeIds);
   const tree = buildLearnerAwareTree(formula, assignment, 'root', values, learnerValues, scaffoldIds);
-  const root = values.get('root');
-  return { root: root ?? false, values, tree };
+  return { root: values.get('root'), values, tree };
 }
 
 export function expectedNodeValue(
