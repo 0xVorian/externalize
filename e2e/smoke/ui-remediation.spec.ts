@@ -42,6 +42,33 @@ test('scope uses select-check and repairs inside one attempt', async ({ page }) 
   await expect(page.locator('.tree-node.selected')).toHaveCount(1);
 });
 
+test('wrong scaffold values are recorded as attempted checks immediately', async ({ page }) => {
+  const base = progressReadyForExercise('eval-007');
+  const store = {
+    ...base,
+    exerciseStats: {
+      ...base.exerciseStats,
+      'eval-007': {
+        attempts: 1,
+        successes: 1,
+        repairedPasses: 0,
+        scaffoldLevel: 1,
+      },
+    },
+  };
+  await gotoWithProgress(page, store);
+  await modeButton(page, 'practice').click();
+
+  await page.locator('[data-action="select-learner-node-value"][data-value="false"]').click();
+
+  const saved = await page.evaluate(
+    (key) => JSON.parse(localStorage.getItem(key)!),
+    STORAGE_KEY,
+  );
+  expect(saved.practiceDraft.attempt.checkedAnswers).toBe(1);
+  expect(saved.attempted).toContain('eval-007');
+});
+
 test('evaluation and truth-table answer controls meet the mobile target size', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 760 });
   await gotoWithProgress(page, progressReadyForExercise('eval-001'));
