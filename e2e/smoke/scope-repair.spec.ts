@@ -20,7 +20,6 @@ test('repairs a scope error inside one attempt', async ({ page }) => {
   expect(wrong.attempted).toContain('scope-001');
   expect(wrong.passed).not.toContain('scope-001');
 
-  await page.locator('[data-action="try-again"]').click();
   await nodes.first().click();
   await expect(page.locator('.feedback-correct')).toBeVisible();
 
