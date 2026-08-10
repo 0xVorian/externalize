@@ -33,6 +33,8 @@ export type PracticeDraft = {
   proofCites?: number[];
   proofDerivedFormula?: string | null;
   feedbackTag?: PracticeErrorTag;
+  hintVisible?: boolean;
+  learnerValues?: Record<string, boolean>;
 };
 
 let fallbackAttemptSequence = 0;
