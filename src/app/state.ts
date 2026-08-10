@@ -144,6 +144,17 @@ function practicePrompt(locale: Locale, exercise: ExerciseDefinition): string {
     : getExerciseCopy(locale, exercise.id).prompt;
 }
 
+function formatIntermediateEvaluationFeedback(
+  locale: Locale,
+  node: TreeNode,
+  prediction: boolean,
+): string {
+  const message = formatEvaluationFeedback(locale, buildEvaluationFeedback(node, prediction));
+  return locale === 'fr'
+    ? message.replace('la formule entière est', 'cette sous-formule est')
+    : message.replace('the whole formula is', 'this subformula is');
+}
+
 function feedbackMessage(
   state: AppState,
   tag: PracticeErrorTag,
@@ -232,9 +243,13 @@ function hydrateDraft(state: AppState, draft?: PracticeDraft): AppState {
   }
   const learnerValues =
     state.exercise.type === 'evaluate-formula' ? (draft.learnerValues ?? {}) : state.learnerValues;
+  const scaffoldNodeIds =
+    state.exercise.type === 'evaluate-formula' && draft.attempt.status === 'finalized'
+      ? []
+      : state.scaffoldNodeIds;
   const scaffoldIncomplete =
     state.exercise.type === 'evaluate-formula' &&
-    !allScaffoldNodesResolved(state.scaffoldNodeIds, learnerValues);
+    !allScaffoldNodesResolved(scaffoldNodeIds, learnerValues);
   let next: AppState = {
     ...state,
     attempt: draft.attempt,
@@ -247,9 +262,10 @@ function hydrateDraft(state: AppState, draft?: PracticeDraft): AppState {
     proofDerivedFormula: draft.proofDerivedFormula ?? null,
     hintVisible: draft.hintVisible ?? false,
     learnerValues,
+    scaffoldNodeIds,
     activeLearnerNodeId:
       state.exercise.type === 'evaluate-formula'
-        ? nextPendingScaffoldNode(state.scaffoldNodeIds, learnerValues)
+        ? nextPendingScaffoldNode(scaffoldNodeIds, learnerValues)
         : state.activeLearnerNodeId,
   };
   if (draft.assignment && (state.exercise.type === 'evaluate-formula' || state.exercise.type === 'find-counterexample')) {
@@ -258,7 +274,7 @@ function hydrateDraft(state: AppState, draft?: PracticeDraft): AppState {
       assignment: draft.assignment,
       tree:
         state.exercise.type === 'evaluate-formula'
-          ? rebuildEvaluationTree(state.exercise, draft.assignment, learnerValues, state.scaffoldNodeIds)
+          ? rebuildEvaluationTree(state.exercise, draft.assignment, learnerValues, scaffoldNodeIds)
           : evaluateWithNodes(parse(state.exercise.formula!), draft.assignment).tree,
     };
   }
@@ -549,6 +565,7 @@ export function selectLearnerNodeValue(state: AppState, nodeId: string, value: b
   if (
     state.exercise.type !== 'evaluate-formula' ||
     state.phase === 'answered' ||
+    state.attempt.status === 'finalized' ||
     !state.scaffoldNodeIds.includes(nodeId) ||
     state.learnerValues[nodeId] !== undefined
   ) {
@@ -560,9 +577,10 @@ export function selectLearnerNodeValue(state: AppState, nodeId: string, value: b
   const subNode = findNodeById(state.tree, nodeId);
   if (value !== expected) {
     const explanationNode = subNode ? { ...subNode, value: expected } : state.tree;
-    const message = formatEvaluationFeedback(
+    const message = formatIntermediateEvaluationFeedback(
       state.locale,
-      buildEvaluationFeedback(explanationNode, value),
+      explanationNode,
+      value,
     );
     return {
       ...state,
