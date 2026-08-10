@@ -21,7 +21,7 @@ import {
   recordSkillAttempt,
   skillForExercise,
 } from './progress-tracker';
-import { flattenUnit1Clusters, UNIT_1_PRACTICE_CLUSTERS, UNIT_1_CLUSTER_ORDER } from './practice-clusters';
+import { UNIT_1_PRACTICE_CLUSTERS, UNIT_1_CLUSTER_ORDER } from './practice-clusters';
 import { getExerciseDefinition } from './exercises';
 import { hasEvaluationScaffold, maxScaffoldLevel } from './evaluation-scaffold';
 import type { Locale } from '../i18n';
