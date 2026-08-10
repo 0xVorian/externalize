@@ -529,7 +529,10 @@ export function checkCounterexample(state: AppState): AppState {
 
 export function selectProofRule(state: AppState, rule: RuleId): AppState {
   if (state.exercise.type !== 'proof-fill-step' || !canEditCheckedExercise(state)) return state;
-  return editableUpdate(state, { proofRule: state.proofRule === rule ? null : rule });
+  return editableUpdate(state, {
+    proofRule: state.proofRule === rule ? null : rule,
+    proofDerivedFormula: null,
+  });
 }
 
 export function toggleProofCitation(state: AppState, lineNumber: number): AppState {
@@ -537,7 +540,7 @@ export function toggleProofCitation(state: AppState, lineNumber: number): AppSta
   const cites = state.proofCites.includes(lineNumber)
     ? state.proofCites.filter((n) => n !== lineNumber)
     : [...state.proofCites, lineNumber];
-  return editableUpdate(state, { proofCites: cites });
+  return editableUpdate(state, { proofCites: cites, proofDerivedFormula: null });
 }
 
 export function checkProofStep(state: AppState): AppState {
