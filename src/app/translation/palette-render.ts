@@ -19,6 +19,7 @@ function renderPaletteButton(
   payload: Record<string, string>,
   ariaLabel: string,
   extraClass = '',
+  disabled = false,
 ): string {
   const dataAttrs = Object.entries(payload)
     .map(([key, value]) => `data-${key}="${value}"`)
@@ -30,6 +31,7 @@ function renderPaletteButton(
       data-action="${action}"
       ${dataAttrs}
       aria-label="${ariaLabel}"
+      ${disabled ? 'disabled' : ''}
     >
       ${innerHtml}
     </button>
@@ -41,6 +43,7 @@ export function renderSymbolPalette(
   locale: Locale,
   config: TranslationPaletteConfig,
   glosses: Record<string, string> = {},
+  disabled = false,
 ): string {
   const atomButtons = config.atoms
     .map((atom) => {
@@ -56,6 +59,7 @@ export function renderSymbolPalette(
         { token: 'pred', value: atom.name },
         aria,
         'palette-atom',
+        disabled,
       );
     })
     .join('');
@@ -70,20 +74,21 @@ export function renderSymbolPalette(
         { token: 'connective', value: kind },
         aria,
         'palette-connective',
+        disabled,
       );
     })
     .join('');
 
   const parenButtons = config.includeParentheses
     ? `
-      ${renderPaletteButton('(', 'palette-insert', { token: 'paren', value: 'open' }, locale === 'fr' ? 'Parenthèse ouvrante' : 'Open parenthesis', 'palette-paren')}
-      ${renderPaletteButton(')', 'palette-insert', { token: 'paren', value: 'close' }, locale === 'fr' ? 'Parenthèse fermante' : 'Close parenthesis', 'palette-paren')}
+      ${renderPaletteButton('(', 'palette-insert', { token: 'paren', value: 'open' }, locale === 'fr' ? 'Parenthèse ouvrante' : 'Open parenthesis', 'palette-paren', disabled)}
+      ${renderPaletteButton(')', 'palette-insert', { token: 'paren', value: 'close' }, locale === 'fr' ? 'Parenthèse fermante' : 'Close parenthesis', 'palette-paren', disabled)}
     `
     : '';
 
   const editButtons = `
-    ${renderPaletteButton('⌫', 'palette-backspace', {}, locale === 'fr' ? 'Effacer le dernier symbole' : 'Delete last symbol', 'palette-edit')}
-    ${renderPaletteButton('↶', 'palette-undo', {}, locale === 'fr' ? 'Annuler' : 'Undo', 'palette-edit')}
+    ${renderPaletteButton('⌫', 'palette-backspace', {}, locale === 'fr' ? 'Effacer le dernier symbole' : 'Delete last symbol', 'palette-edit', disabled)}
+    ${renderPaletteButton('↶', 'palette-undo', {}, locale === 'fr' ? 'Annuler' : 'Undo', 'palette-edit', disabled)}
   `;
 
   const title = locale === 'fr' ? 'Symboles' : 'Symbols';

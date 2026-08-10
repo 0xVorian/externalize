@@ -300,9 +300,11 @@ function renderConceptGraph(locale: Locale, store: ProgressStore): string {
 export function renderConceptMap(locale: Locale, store: ProgressStore): string {
   const copy = CONCEPT_MAP_UI[locale];
   return `
-    <section class="progress-card concept-map-card">
-      <h2 class="panel-title">${copy.heading}</h2>
-      <p class="progress-meta">${copy.hint}</p>
-      ${renderConceptGraph(locale, store)}
-    </section>`;
+    <details class="progress-card progress-disclosure concept-map-card">
+      <summary>
+        <span class="panel-title">${copy.heading}</span>
+        <span class="progress-summary-meta">${copy.hint}</span>
+      </summary>
+      <div class="progress-disclosure-body">${renderConceptGraph(locale, store)}</div>
+    </details>`;
 }

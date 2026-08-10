@@ -92,6 +92,23 @@ export type ProgressViewOptions = {
   importNotice?: { kind: 'success' | 'error'; message: string };
 };
 
+function renderDisclosure(
+  title: string,
+  summary: string,
+  body: string,
+  labelledBy?: string,
+): string {
+  return `
+    <details class="progress-card progress-disclosure"${labelledBy ? ` aria-labelledby="${labelledBy}"` : ''}>
+      <summary>
+        <span class="panel-title"${labelledBy ? ` id="${labelledBy}"` : ''}>${title}</span>
+        <span class="progress-summary-meta">${summary}</span>
+      </summary>
+      <div class="progress-disclosure-body">${body}</div>
+    </details>
+  `;
+}
+
 export function renderProgressView(
   locale: Locale,
   store: ProgressStore,
@@ -102,6 +119,13 @@ export function renderProgressView(
   const summary = buildSummaryFromStore(store);
   const resume = store.resume;
   const suggestion = computeWhatNext(locale, store, summary);
+  const learn = learnUi(locale);
+  const currentUnit =
+    !store.level0Complete
+      ? { title: learn.level0Title, done: summary.level0Done, total: summary.level0Total }
+      : !store.level1Complete
+        ? { title: learn.level1Title, done: summary.level1Done, total: summary.level1Total }
+        : { title: learn.level2Title, done: summary.level2Done, total: summary.level2Total };
 
   const lessonItems = LEVEL_0_LESSONS.map((lesson) => {
     const title = getLessonCopy(locale, lesson.id).title;
@@ -120,17 +144,16 @@ export function renderProgressView(
 
   const level1Section =
     store.level0Complete && level1Items
-      ? `
-      <section class="progress-card" aria-labelledby="progress-level1-heading">
-        <h2 class="panel-title" id="progress-level1-heading">${learnUi(locale).level1Title}</h2>
-        <p class="progress-meta">${copy.level0Status(
+      ? renderDisclosure(
+        learn.level1Title,
+        copy.level0Status(
           LEVEL_1_LESSONS.filter((l) => store.lessonsCompleted.includes(l.id)).length,
           LEVEL_1_LESSONS.length,
-        )}</p>
-        <ul class="progress-list">${level1Items}</ul>
-      </section>`
+        ),
+        `<ul class="progress-list">${level1Items}</ul>`,
+        'progress-level1-heading',
+      )
       : '';
-
 
   const level2Items =
     store.level1Complete
@@ -143,12 +166,11 @@ export function renderProgressView(
 
   const level2Section =
     store.level1Complete && level2Items
-      ? `
-      <section class="progress-card">
-        <h2 class="panel-title">${learnUi(locale).level2Title}</h2>
-        <p class="progress-meta">${copy.level0Status(summary.level2Done, summary.level2Total)}</p>
-        <ul class="progress-list">${level2Items}</ul>
-      </section>`
+      ? renderDisclosure(
+        learn.level2Title,
+        copy.level0Status(summary.level2Done, summary.level2Total),
+        `<ul class="progress-list">${level2Items}</ul>`,
+      )
       : '';
 
   const unit0ExerciseItems = practiceUnlocked
@@ -189,10 +211,10 @@ export function renderProgressView(
           .join('')}</ul>`;
 
   const exerciseSection = practiceUnlocked
-    ? `
-      <section class="progress-card" aria-labelledby="progress-exercises-heading">
-        <h2 class="panel-title" id="progress-exercises-heading">${copy.exercisesHeading}</h2>
-        <p class="progress-meta">${copy.exercisesStatus(store.passed.length, summary.exercisesUnlocked.length)}</p>
+    ? renderDisclosure(
+      copy.exercisesHeading,
+      copy.exercisesStatus(store.passed.length, summary.exercisesUnlocked.length),
+      `
         ${summary.reviewDue > 0 ? `<p class="progress-meta review-due">${copy.reviewDue(summary.reviewDue)}</p>` : ''}
         <h3 class="progress-subheading">${copy.level0ExercisesHeading}</h3>
         <ul class="progress-list">${unit0ExerciseItems}</ul>
@@ -200,7 +222,9 @@ export function renderProgressView(
         <ul class="progress-list">${unit1ExerciseItems}</ul>
         <h3 class="progress-subheading">${copy.level2ExercisesHeading}</h3>
         <ul class="progress-list">${unit2ExerciseItems}</ul>
-      </section>`
+      `,
+      'progress-exercises-heading',
+    )
     : '';
 
   return `
@@ -221,9 +245,17 @@ export function renderProgressView(
         <button type="button" class="primary" data-action="${suggestion.action}" ${suggestion.exerciseId ? `data-exercise-id="${suggestion.exerciseId}"` : ''}>${suggestion.buttonLabel}</button>
       </section>
 
-      <section class="progress-card">
-        <h2 class="panel-title">${copy.syncHeading}</h2>
-        <p class="progress-meta">${copy.syncHint}</p>
+      <section class="progress-card progress-overview" aria-labelledby="progress-overview-heading">
+        <h2 class="panel-title" id="progress-overview-heading">${currentUnit.title}</h2>
+        <p class="progress-meta">${copy.level0Status(currentUnit.done, currentUnit.total)}</p>
+        ${practiceUnlocked ? `<p class="progress-meta">${copy.exercisesStatus(store.passed.length, summary.exercisesUnlocked.length)}</p>` : ''}
+        ${summary.reviewDue > 0 ? `<p class="progress-meta review-due">${copy.reviewDue(summary.reviewDue)}</p>` : ''}
+      </section>
+
+      ${renderDisclosure(
+        copy.syncHeading,
+        copy.syncHint,
+        `
         ${
           options.importNotice
             ? `<p class="progress-notice progress-notice-${options.importNotice.kind}" role="status">${options.importNotice.message}</p>`
@@ -233,13 +265,15 @@ export function renderProgressView(
           <button type="button" class="secondary" data-action="export-progress">${copy.exportProgress}</button>
           <button type="button" class="secondary" data-action="import-progress">${copy.importProgress}</button>
         </div>
-      </section>
+        `,
+      )}
 
-      <section class="progress-card" aria-labelledby="progress-level0-heading">
-        <h2 class="panel-title" id="progress-level0-heading">${copy.level0Heading}</h2>
-        <p class="progress-meta">${copy.level0Status(summary.level0Done, summary.level0Total)}</p>
-        <ul class="progress-list">${lessonItems.join('')}</ul>
-      </section>
+      ${renderDisclosure(
+        copy.level0Heading,
+        copy.level0Status(summary.level0Done, summary.level0Total),
+        `<ul class="progress-list">${lessonItems.join('')}</ul>`,
+        'progress-level0-heading',
+      )}
 
       ${level1Section}
 
@@ -249,20 +283,9 @@ export function renderProgressView(
 
       ${renderConceptMap(locale, store)}
 
-      <section class="progress-card">
-        <h2 class="panel-title">${copy.strugglesHeading}</h2>
-        ${struggleItems}
-      </section>
-
-      <section class="progress-card">
-        <h2 class="panel-title">${copy.comfortableHeading}</h2>
-        ${comfortableItems}
-      </section>
-
-      <section class="progress-card">
-        <h2 class="panel-title">${copy.errorsHeading}</h2>
-        ${errorItems}
-      </section>
+      ${renderDisclosure(copy.strugglesHeading, summary.struggles.length ? `${summary.struggles.length}` : copy.strugglesEmpty, struggleItems)}
+      ${renderDisclosure(copy.comfortableHeading, summary.comfortable.length ? `${summary.comfortable.length}` : copy.comfortableEmpty, comfortableItems)}
+      ${renderDisclosure(copy.errorsHeading, summary.frequentErrors.length ? `${summary.frequentErrors.length}` : copy.errorsEmpty, errorItems)}
     </main>
   `;
 }

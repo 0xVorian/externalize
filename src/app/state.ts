@@ -69,6 +69,29 @@ export type AppState = {
   proofDerivedFormula: string | null;
 };
 
+function isRepairing(state: AppState): boolean {
+  return (
+    state.phase === 'answered' &&
+    state.feedback?.correct === false &&
+    state.attempt.status !== 'finalized'
+  );
+}
+
+function canEditCheckedExercise(state: AppState): boolean {
+  return state.phase === 'ready' || isRepairing(state);
+}
+
+function editableUpdate(state: AppState, updates: Partial<AppState>): AppState {
+  const repairing = isRepairing(state);
+  return {
+    ...state,
+    ...updates,
+    phase: repairing ? 'answered' : state.phase,
+    feedback: repairing ? state.feedback : null,
+    message: repairing ? state.message : null,
+  };
+}
+
 function placeholderTree(): TreeNode {
   return toVerticalTree(parse('P'));
 }
@@ -115,7 +138,7 @@ function restoreDraftFeedback(
   state: AppState,
   tag?: PracticeErrorTag,
 ): AppState {
-  if (!tag || state.phase !== 'answered' || state.attempt.lastCheckCorrect === null) {
+  if (!tag || state.attempt.lastCheckCorrect === null) {
     return state;
   }
   const correct = state.attempt.lastCheckCorrect;
@@ -277,7 +300,7 @@ export function createState(
 }
 
 export function selectNode(state: AppState, nodeId: string): AppState {
-  if (state.exercise.type !== 'identify-main-connective' || state.phase === 'answered') {
+  if (state.exercise.type !== 'identify-main-connective' || !canEditCheckedExercise(state)) {
     return state;
   }
 
@@ -340,37 +363,32 @@ export function paletteInsertToken(
   tokenKind: string | undefined,
   value: string | undefined,
 ): AppState {
-  if (state.exercise.type !== 'translate-en-to-formula' || state.phase === 'answered') {
+  if (state.exercise.type !== 'translate-en-to-formula' || !canEditCheckedExercise(state)) {
     return state;
   }
   const token = parsePaletteInsert(tokenKind, value);
   if (!token) {
     return state;
   }
-  return {
-    ...state,
-    builder: builderInsert(state.builder, token),
-    feedback: null,
-    message: null,
-  };
+  return editableUpdate(state, { builder: builderInsert(state.builder, token) });
 }
 
 export function paletteBackspace(state: AppState): AppState {
-  if (state.exercise.type !== 'translate-en-to-formula' || state.phase === 'answered') {
+  if (state.exercise.type !== 'translate-en-to-formula' || !canEditCheckedExercise(state)) {
     return state;
   }
-  return { ...state, builder: builderBackspace(state.builder), feedback: null, message: null };
+  return editableUpdate(state, { builder: builderBackspace(state.builder) });
 }
 
 export function paletteUndo(state: AppState): AppState {
-  if (state.exercise.type !== 'translate-en-to-formula' || state.phase === 'answered') {
+  if (state.exercise.type !== 'translate-en-to-formula' || !canEditCheckedExercise(state)) {
     return state;
   }
-  return { ...state, builder: builderUndo(state.builder), feedback: null, message: null };
+  return editableUpdate(state, { builder: builderUndo(state.builder) });
 }
 
 export function checkTranslation(state: AppState): AppState {
-  if (state.exercise.type !== 'translate-en-to-formula' || state.phase === 'answered') {
+  if (state.exercise.type !== 'translate-en-to-formula' || !canEditCheckedExercise(state)) {
     return state;
   }
 
@@ -416,18 +434,18 @@ export function selectEvaluationPrediction(
 ): AppState {
   if (
     state.exercise.type !== 'evaluate-formula' ||
-    state.phase === 'answered' ||
+    !canEditCheckedExercise(state) ||
     state.attempt.status === 'finalized'
   ) {
     return state;
   }
-  return { ...state, prediction, feedback: null, message: null };
+  return editableUpdate(state, { prediction });
 }
 
 export function checkEvaluation(state: AppState): AppState {
   if (
     state.exercise.type !== 'evaluate-formula' ||
-    state.phase === 'answered' ||
+    !canEditCheckedExercise(state) ||
     state.prediction === null
   ) {
     return state;
@@ -458,8 +476,8 @@ export function tryAgainPractice(state: AppState): AppState {
         : state.submittedCell,
     prediction: state.exercise.type === 'evaluate-formula' ? null : state.prediction,
     proofDerivedFormula: null,
-    feedback: null,
-    message: null,
+    feedback: state.feedback,
+    message: state.message,
   };
 }
 
@@ -474,20 +492,25 @@ export function setAtomValue(state: AppState, atom: string, value: boolean): App
   const formula = parse(state.exercise.formula!);
   const assignment = { ...state.assignment, [atom]: value };
   const { tree } = evaluateWithNodes(formula, assignment);
+  const repairing = isRepairing(state);
 
   return {
     ...state,
     assignment,
     tree,
-    phase: 'ready',
+    phase: repairing ? 'answered' : 'ready',
     prediction: state.exercise.type === 'evaluate-formula' ? null : state.prediction,
-    message: state.exercise.type === 'evaluate-formula' ? ui(state.locale).valuesUpdated : null,
-    feedback: null,
+    message: repairing
+      ? state.message
+      : state.exercise.type === 'evaluate-formula'
+        ? ui(state.locale).valuesUpdated
+        : null,
+    feedback: repairing ? state.feedback : null,
   };
 }
 
 export function checkCounterexample(state: AppState): AppState {
-  if (state.exercise.type !== 'find-counterexample' || state.phase === 'answered') {
+  if (state.exercise.type !== 'find-counterexample' || !canEditCheckedExercise(state)) {
     return state;
   }
   if (state.exercise.targetValue === undefined) {
@@ -505,20 +528,20 @@ export function checkCounterexample(state: AppState): AppState {
 }
 
 export function selectProofRule(state: AppState, rule: RuleId): AppState {
-  if (state.exercise.type !== 'proof-fill-step' || state.phase === 'answered') return state;
-  return { ...state, proofRule: state.proofRule === rule ? null : rule, feedback: null, message: null };
+  if (state.exercise.type !== 'proof-fill-step' || !canEditCheckedExercise(state)) return state;
+  return editableUpdate(state, { proofRule: state.proofRule === rule ? null : rule });
 }
 
 export function toggleProofCitation(state: AppState, lineNumber: number): AppState {
-  if (state.exercise.type !== 'proof-fill-step' || state.phase === 'answered') return state;
+  if (state.exercise.type !== 'proof-fill-step' || !canEditCheckedExercise(state)) return state;
   const cites = state.proofCites.includes(lineNumber)
     ? state.proofCites.filter((n) => n !== lineNumber)
     : [...state.proofCites, lineNumber];
-  return { ...state, proofCites: cites, feedback: null, message: null };
+  return editableUpdate(state, { proofCites: cites });
 }
 
 export function checkProofStep(state: AppState): AppState {
-  if (state.exercise.type !== 'proof-fill-step' || state.phase === 'answered') return state;
+  if (state.exercise.type !== 'proof-fill-step' || !canEditCheckedExercise(state)) return state;
   const config = getProofExerciseConfig(state.exercise.id);
   if (!config) return state;
   const templates = getFeedbackTemplates(state.locale, state.exercise.id);
