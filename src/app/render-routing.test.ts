@@ -67,4 +67,12 @@ describe('practice presentation routing', () => {
     expect(state.phase).toBe('ready');
     expect(state.feedback).toBeNull();
   });
+
+  it('renders French-authored atom glosses in translation practice', () => {
+    const exercise = EXERCISE_DEFINITIONS.find((candidate) => candidate.id === 'translate-003')!;
+    const html = renderApp(createState('fr', exercise), 0, true);
+    expect(html).toContain('Il pleut.');
+    expect(html).toContain('Le terrain est fermé.');
+    expect(html).not.toContain('It rains.');
+  });
 });

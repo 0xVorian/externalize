@@ -4,7 +4,7 @@ Externalize uses [Semantic Versioning](https://semver.org/) and documents change
 
 ## Current version
 
-Latest **released** version: **0.3.0** (Batch F — learn paths, exercises, progress).
+Latest **released** version: **0.3.2** (practice-attempt integrity, conservative progress migration, and correctness remediation).
 
 `package.json` `"version"` matches the latest changelog release.
 

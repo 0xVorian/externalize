@@ -18,7 +18,7 @@ content/
   prerequisites.json   — concept graph (lessons → exercises prerequisites)
 
 src/app/
-  lessons.ts           — LEVEL_0_LESSONS, LEVEL_1_LESSONS, PRACTICE_UNLOCK_ORDER
+  lessons.ts           — Unit 0/1/2 lessons and sequential practice order
   exercises.ts         — EXERCISE_DEFINITIONS
   presentation.test.ts — presentation inventory (must stay in sync)
   lesson-render.ts     — card, watch table, guided live row
@@ -27,7 +27,8 @@ src/app/
   progress-render.ts   — progress tab + concept map
   concept-map-render.ts
   prerequisites.ts     — loads content/prerequisites.json
-  storage.ts           — progress persistence
+  practice-attempt.ts  — one-session attempt and repair state
+  storage.ts           — v6 progress persistence and centralized finalization
 
 src/i18n/
   lessons.ts           — lesson copy, learn UI, reference panel
@@ -62,20 +63,29 @@ Copy shape in `src/i18n/lessons.ts`:
 | `watchSteps[]` with `{ assignment, explanation }` | `watch` | Truth-table walkthrough |
 | `guidedSteps[]` with `{ kind: 'hint' \| 'done', text }` | `guided` | Step-by-step learner try |
 
-Level 0 lessons live in `LEVEL_0_LESSONS`; Unit 1 connectives in `LEVEL_1_LESSONS`. Combined navigation uses `ALL_LEARN_LESSONS`.
+Lessons live in `LEVEL_0_LESSONS`, `LEVEL_1_LESSONS`, and `LEVEL_2_LESSONS`. Combined navigation uses `ALL_LEARN_LESSONS`.
 
 ## Exercise schema
 
 Defined in `src/app/exercises.ts`:
 
 ```typescript
-type ExerciseType = 'identify-main-connective' | 'evaluate-formula';
+type ExerciseType =
+  | 'identify-main-connective'
+  | 'evaluate-formula'
+  | 'fill-truth-table-cell'
+  | 'find-counterexample'
+  | 'classify-tautology'
+  | 'translate-en-to-formula'
+  | 'proof-fill-step';
 
 type ExerciseDefinition = {
   id: string;
   type: ExerciseType;
-  formula: string;
-  initialAssignment?: Assignment;   // evaluate-formula only
+  formula?: string;
+  initialAssignment?: Assignment;
+  hiddenRowIndex?: number;
+  targetValue?: boolean;
 };
 ```
 
@@ -84,6 +94,7 @@ Copy in `src/i18n/messages.ts`:
 ```typescript
 type ExerciseCopy = {
   prompt: string;
+  atoms?: Record<string, string>; // locale-authored translation glosses
   feedback?: FeedbackTemplate;   // overrides per-tag defaults
 };
 ```
@@ -93,11 +104,14 @@ type ExerciseCopy = {
 | `type` | Learner action | Engine checks |
 |--------|----------------|---------------|
 | `identify-main-connective` | Tap the main operator in the tree | Selected node matches root connective |
-| `evaluate-formula` | Toggle atom values; read computed nodes | All node values match evaluation |
+| `evaluate-formula` | Inspect intermediate values, predict the hidden root, check T/F or V/F | Prediction matches AST evaluation |
+| `fill-truth-table-cell` | Fill one masked result cell | Submitted Boolean matches evaluation |
+| `find-counterexample` | Build an assignment for a target value | Assignment makes the formula match the target |
+| `classify-tautology` | Classify from a complete truth table | Answer matches finite truth-table classification |
+| `translate-en-to-formula` | Build a formula with the tap palette | AST structure/equivalence and misconception classifier |
+| `proof-fill-step` | Select a rule and cite lines | Configured natural-deduction rule validates the step |
 
-Planned types (translation, truth-table fill, counterexample, proof steps) are listed in the roadmap — not yet in `ExerciseType`.
-
-### Truth-table exercises (Phase 4 prep)
+### Truth-table exercises
 
 `engine/truth-table/` generates and validates tables using **locale-agnostic booleans**; the UI maps values via `formatTruthValue()`.
 
@@ -107,11 +121,11 @@ Planned types (translation, truth-table fill, counterexample, proof steps) are l
 | `maskTruthTableRows(table, hiddenRowIndices)` | Partial table with blank result cells for `truth-table-cell` |
 | `validateCell(formula, assignment, submitted)` | Single-cell check; returns `{ correct, expected }` |
 
-Exercise definitions will supply the `atoms` column list and parsed formula; content files do not store `T`/`F` labels.
+Exercise definitions supply formulas and row targets; content files do not store `T`/`F` labels.
 
 ### Gated unlock
 
-`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines which exercises become available after Level 0 completion, and in what order. IDs not in this list are unreachable in the practice tab.
+`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines the order within each unit. Exposure alone does not unlock the next exercise: the preceding exercise ID must be in the v6 `passed` list.
 
 ## Presentation routing
 
@@ -120,7 +134,7 @@ Presentation mode is **not** stored on the lesson/exercise definition. It is inf
 - `src/app/presentation.test.ts` — `PRESENTATION` map (enforced by tests)
 - `docs/presentation.md` — human-readable inventory
 
-Modes: `card`, `truth-table-multi`, `truth-table-live`, `tree-eval`, `tree-scope`.
+Modes include cards, watch grids/tables, live truth rows, evaluation/scope trees, translation palettes, and proof-step panels.
 
 ## Concept graph (data)
 
@@ -138,36 +152,44 @@ scope-and-parens     → all connectives
 
 ## Progress record (local storage)
 
-Stored in browser `localStorage` (see `src/app/storage.ts`). Version 3 includes resume point, lesson completion, per-skill stats, and SRS queue.
+Stored in browser `localStorage` (see `src/app/storage.ts`). Version 6 separates exposure from successful completion and persists the current practice attempt/draft.
 
 ```typescript
 interface ProgressRecord {
-  version: 3;
-  lastSession: string;
-  completedLessons: string[];
-  completedExercises: string[];
+  version: 6;
+  lessonsCompleted: string[];
+  attempted: string[]; // at least one checked answer
+  passed: string[];    // eventually answered correctly
+  practiceDraft?: PracticeDraft;
+  practiceDrafts: Record<string, PracticeDraft>;
   resume: ResumePoint;
-  skills: Record<string, { attempts: number; successes: number }>;
-  errorCounts: Record<FeedbackTag, number>;
-  srsQueue: Array<{ exerciseId: string; due: string; interval: number; ease: number }>;
+  skills: Record<string, SkillStat>;
+  exerciseStats: Record<string, ExerciseStat>;
+  errorCounts: Record<PracticeErrorTag, number>;
+  queue: SrsEntry[];
 }
 ```
 
-Spaced repetition schedules by **demonstrated error tags**, not mere completion.
+One opened exercise session is one attempt. Wrong checks keep that attempt active; the first correct check finalizes it. Only centralized finalization increments attempt/skill/error totals, updates SRS, and adds `passed`.
+
+- A clean pass is correct on the first checked answer and advances the normal SRS interval.
+- A repaired pass follows one or more errors, still adds `passed`, records the encountered errors, and remains due immediately with reduced ease.
+- v5 migration preserves old `completed` IDs only as `attempted` exposure. It resets contaminated practice statistics, errors, and SRS, and requires fresh correct evidence for `passed`.
 
 ## Feedback tag taxonomy
 
-Engine tags (propositional logic v1):
+Engine and practice tags include:
 
 - `correct`
 - `wrong-main-connective`
 - `selected-subconnective`
 - `selected-atom`
 - `selected-operand-not-connective`
+- `reversed-conditional`, `negation-scope`, `missing-parens`
+- proof/counterexample tags
+- practice-only incorrect evaluation, truth-table-cell, and tautology tags
 
 Defaults in `src/i18n/messages.ts`; per-exercise overrides in `EXERCISE_COPY[id].feedback`.
-
-Future tags (from original sketch): `reversed-conditional`, `negation-scope`, `missing-parens`, etc. — added when translation and proof exercise types land.
 
 ## Example: scope exercise (as shipped)
 

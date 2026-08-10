@@ -4,6 +4,7 @@ import type { ResumePoint } from '../app/progress-tracker';
 
 export type ExerciseCopy = {
   prompt: string;
+  atoms?: Record<string, string>;
   feedback?: FeedbackTemplate;
   cellCorrect?: string;
   cellWrong?: string;
@@ -29,6 +30,11 @@ export type UiCopy = {
   continue: string;
   tryAgain: string;
   nextExercise: string;
+  checkEvaluation: string;
+  evaluationChoiceAria: string;
+  evaluationPracticePrompt: string;
+  evaluationCorrect: string;
+  evaluationWrong: string;
   checkCounterexample: string;
   valuesUpdated: string;
   trueLabel: string;
@@ -51,7 +57,6 @@ const FEEDBACK_DEFAULTS_EN: Record<FeedbackTag, string> = {
   'selected-atom': '{label} is a sentence letter — an atomic formula — not a connective.',
   'selected-operand-not-connective': 'That expression is not a connective.',
   'reversed-conditional': 'The conditional runs the wrong way.',
-  'reversed-biconditional': 'The biconditional is reversed.',
   'negation-scope': 'Negation is on the wrong subformula.',
   'missing-parens': 'Grouping is missing.',
   'extra-parens': 'Extra parentheses.',
@@ -77,7 +82,6 @@ const FEEDBACK_DEFAULTS_FR: Record<FeedbackTag, string> = {
     '{label} est une formule atomique (une variable propositionnelle), pas un connecteur.',
   'selected-operand-not-connective': "Cet élément n'est pas un connecteur logique.",
   'reversed-conditional': "Implication inversée.",
-  'reversed-biconditional': 'Biconditionnelle inversée.',
   'negation-scope': 'Mauvaise portée de la négation.',
   'missing-parens': 'Parenthèses manquantes.',
   'extra-parens': 'Parenthèses en trop.',
@@ -181,7 +185,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'eval-001': {
       prompt:
-        'Tap V or F for each letter. The table row shows how P ∧ Q evaluates under your assignment.',
+        'Tap T or F for each letter. The table row shows how P ∧ Q evaluates under your assignment.',
     },
     'eval-002': {
       prompt:
@@ -297,25 +301,30 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'counter-003': { prompt: 'Find an assignment that makes P ∨ Q false.', counterCorrect: 'Correct — both disjuncts false.', counterWrong: 'At least one disjunct is still true.' },
     'counter-004': { prompt: 'Find an assignment where P ↔ Q is false.', counterCorrect: 'Correct — P and Q differ.', counterWrong: 'P and Q still match.' },
     'counter-005': { prompt: 'Find an assignment that makes ¬(P ∨ Q) true. Both disjuncts must be false.', counterCorrect: 'Correct — neither P nor Q is true, so the negated disjunction is true.', counterWrong: 'At least one disjunct is still true, so ¬(P ∨ Q) remains false.' },
-    'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
+    'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', atoms: { P: 'It rains.', Q: 'The game is cancelled.' }, feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
     'translate-002': {
       prompt: 'It is not the case that both the gate is open and the alarm is on. Build the formula.',
+      atoms: { P: 'The gate is open.', Q: 'The alarm is on.' },
       feedback: { 'negation-scope': 'Negation must cover the whole conjunction: ¬(P ∧ Q), not ¬P ∧ Q.' },
     },
     'translate-003': {
-      prompt: 'If it rains, then the game is cancelled, and the field is closed. Build the formula.',
+      prompt: 'The field is closed, and if it rains, the game is cancelled. Build the formula.',
+      atoms: { P: 'It rains.', Q: 'The game is cancelled.', R: 'The field is closed.' },
       feedback: { 'missing-parens': 'Group the conditional first: (P → Q) before conjoining with R.' },
     },
     'translate-004': {
       prompt: 'If the alarm sounds, then there is smoke. Build the matching formula.',
+      atoms: { P: 'The alarm sounds.', Q: 'There is smoke.' },
       feedback: { 'reversed-conditional': 'The alarm sounding is P — it comes before the conditional arrow.' },
     },
     'translate-005': {
       prompt: 'The door is locked if and only if the key is missing. Build the formula.',
+      atoms: { P: 'The door is locked.', Q: 'The key is missing.' },
       feedback: { 'wrong-main-connective': '"If and only if" calls for ↔, not →.' },
     },
     'translate-006': {
       prompt: 'It is not the case that the gate is open or the window is open. Build the formula.',
+      atoms: { P: 'The gate is open.', Q: 'The window is open.' },
       feedback: { 'negation-scope': 'Negation applies to the whole disjunction: ¬(P ∨ Q), not ¬P ∨ Q.' },
     },
     'nd-001': { prompt: 'Complete the proof: choose modus ponens and cite the lines that justify Q.', feedback: { correct: 'Correct — from P → Q and P you derive Q by → elimination (modus ponens).', incomplete: 'Select →E (modus ponens), then tap the premise lines to cite.', 'wrong-rule-for-premises': '→E needs a conditional and its antecedent among the cited lines.', 'wrong-citation': 'Cite the conditional and the matching antecedent (lines 1 and 2).', 'conclusion-does-not-follow': 'That combination does not yield Q on this line.' } },
@@ -520,25 +529,30 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'counter-003': { prompt: 'Trouvez une interprétation qui rend P ∨ Q faux.', counterCorrect: 'Exact — les deux disjonctes sont faux.', counterWrong: 'Au moins un disjonct est encore vrai.' },
     'counter-004': { prompt: 'Trouvez une interprétation où P ↔ Q est faux.', counterCorrect: 'Exact — P et Q diffèrent.', counterWrong: 'P et Q ont encore la même valeur.' },
     'counter-005': { prompt: 'Trouvez une interprétation qui rend ¬(P ∨ Q) vrai. Les deux disjoncts doivent être faux.', counterCorrect: 'Exact — ni P ni Q n\'est vrai, donc la disjonction niée est vraie.', counterWrong: 'Au moins un disjonct est encore vrai, donc ¬(P ∨ Q) reste faux.' },
-    'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
+    'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', atoms: { P: 'Il pleut.', Q: 'Le match est annulé.' }, feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
     'translate-002': {
       prompt: 'Il n\'est pas le cas que la porte soit ouverte et l\'alarme activée. Construisez la formule.',
+      atoms: { P: 'La porte est ouverte.', Q: 'L\'alarme est activée.' },
       feedback: { 'negation-scope': 'La négation doit porter sur toute la conjonction : ¬(P ∧ Q), pas ¬P ∧ Q.' },
     },
     'translate-003': {
-      prompt: 'S\'il pleut, le match est annulé, et le terrain est fermé. Construisez la formule.',
+      prompt: 'Le terrain est fermé. De plus, la pluie entraîne l\'annulation du match. Construisez une seule formule pour ces deux affirmations.',
+      atoms: { P: 'Il pleut.', Q: 'Le match est annulé.', R: 'Le terrain est fermé.' },
       feedback: { 'missing-parens': 'Regroupez d\'abord la conditionnelle : (P → Q) avant de la conjonction avec R.' },
     },
     'translate-004': {
       prompt: 'Si l\'alarme sonne, alors il y a de la fumée. Construisez la formule.',
+      atoms: { P: 'L\'alarme sonne.', Q: 'Il y a de la fumée.' },
       feedback: { 'reversed-conditional': 'L\'alarme correspond à P — elle précède la flèche de la conditionnelle.' },
     },
     'translate-005': {
       prompt: 'La porte est verrouillée si et seulement si la clé manque. Construisez la formule.',
+      atoms: { P: 'La porte est verrouillée.', Q: 'La clé manque.' },
       feedback: { 'wrong-main-connective': '« Si et seulement si » exige ↔, pas →.' },
     },
     'translate-006': {
       prompt: 'Il n\'est pas le cas que la porte soit ouverte ou que la fenêtre soit ouverte. Construisez la formule.',
+      atoms: { P: 'La porte est ouverte.', Q: 'La fenêtre est ouverte.' },
       feedback: { 'negation-scope': 'La négation s\'applique à toute la disjonction : ¬(P ∨ Q), pas ¬P ∨ Q.' },
     },
     'nd-001': { prompt: 'Complétez la démonstration : choisissez le modus ponens et citez les lignes qui justifient Q.', feedback: { correct: 'Exact — de P → Q et P on obtient Q par élimination de → (modus ponens).', incomplete: 'Sélectionnez →E (modus ponens), puis touchez les lignes de prémisses à citer.', 'wrong-rule-for-premises': '→E exige une implication et son antécédent parmi les lignes citées.', 'wrong-citation': 'Citez l\'implication et l\'antécédent correspondant (lignes 1 et 2).', 'conclusion-does-not-follow': 'Cette combinaison ne produit pas Q à cette ligne.' } },
@@ -554,7 +568,7 @@ const UI: Record<Locale, UiCopy> = {
       `${count} exercise${count === 1 ? '' : 's'} scheduled for review`,
     assignment: 'Truth assignment',
     assignmentAria: 'Truth assignment to sentence letters',
-    assignmentHint: 'Tap V or F for each letter to set its truth value.',
+    assignmentHint: 'Tap T or F for each letter to set its truth value.',
     atomGroupAria: (atom) => `Truth value for ${atom}`,
     atomSetTrueAria: (atom) => `Set ${atom} to true`,
     atomSetFalseAria: (atom) => `Set ${atom} to false`,
@@ -567,6 +581,11 @@ const UI: Record<Locale, UiCopy> = {
     continue: 'Continue',
     tryAgain: 'Try again',
     nextExercise: 'Next exercise',
+    checkEvaluation: 'Check prediction',
+    evaluationChoiceAria: 'Predict the truth value of the whole formula',
+    evaluationPracticePrompt: 'Set the sentence letters, follow the visible intermediate values, then predict the truth value at the root.',
+    evaluationCorrect: 'Correct — the root has the truth value you predicted.',
+    evaluationWrong: 'That prediction is not correct. Recheck how the values combine at the root.',
     checkCounterexample: 'Check assignment',
     valuesUpdated: 'Truth values updated at each subformula.',
     trueLabel: 'T',
@@ -598,6 +617,11 @@ const UI: Record<Locale, UiCopy> = {
     continue: 'Continuer',
     tryAgain: 'Réessayer',
     nextExercise: 'Exercice suivant',
+    checkEvaluation: 'Vérifier la prédiction',
+    evaluationChoiceAria: 'Prédire la valeur de vérité de la formule entière',
+    evaluationPracticePrompt: 'Fixez une interprétation, suivez le calcul des sous-formules visibles, puis prédisez la valeur au connecteur principal.',
+    evaluationCorrect: 'Exact — la racine a bien la valeur prédite.',
+    evaluationWrong: 'Cette prédiction est incorrecte. Reprenez le calcul au connecteur principal.',
     checkCounterexample: 'Vérifier l\'interprétation',
     valuesUpdated: 'Les valeurs de vérité se mettent à jour à chaque sous-formule.',
     trueLabel: 'V',
@@ -691,11 +715,12 @@ export type ProgressUiCopy = {
   errorsHeading: string;
   errorsEmpty: string;
   skillLabel: (id: string) => string;
-  errorLabel: (tag: FeedbackTag) => string;
+  errorLabel: (tag: string) => string;
   rateLabel: (rate: number, attempts: number) => string;
   lessonDone: string;
   lessonTodo: string;
   exerciseDone: string;
+  exerciseAttempted: string;
   exerciseLocked: string;
   exerciseLockedUnit1: string;
   exerciseLockedUnit2: string;
@@ -751,14 +776,26 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
             ? 'Tautology check'
           : id === 'practice:translate-en-to-formula'
             ? 'English to formula'
+            : id === 'practice:find-counterexample'
+              ? 'Counterexamples'
+              : id === 'practice:proof-fill-step'
+                ? 'Proof steps'
             : id === 'practice:identify-main-connective'
               ? 'Main connective'
               : id,
-    errorLabel: (tag) => FEEDBACK_DEFAULTS_EN[tag].split('.')[0],
+    errorLabel: (tag) =>
+      tag === 'incorrect-evaluation'
+        ? 'Incorrect formula prediction'
+        : tag === 'incorrect-truth-table-cell'
+          ? 'Incorrect truth-table value'
+          : tag === 'incorrect-tautology'
+            ? 'Incorrect tautology classification'
+            : (FEEDBACK_DEFAULTS_EN[tag as FeedbackTag] ?? tag).split('.')[0],
     rateLabel: (rate, attempts) => `${Math.round(rate * 100)}% over ${attempts} attempts`,
     lessonDone: 'done',
     lessonTodo: 'remaining',
     exerciseDone: 'done',
+    exerciseAttempted: 'attempted',
     exerciseLocked: 'locked',
     exerciseLockedUnit1: 'Unit 1',
     exerciseLockedUnit2: 'Unit 2',
@@ -810,14 +847,28 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
           ? 'Cases de table de vérité'
           : id === 'practice:translate-en-to-formula'
             ? 'Anglais → formule'
+            : id === 'practice:classify-tautology'
+              ? 'Reconnaissance des tautologies'
+              : id === 'practice:find-counterexample'
+                ? 'Contre-exemples'
+                : id === 'practice:proof-fill-step'
+                  ? 'Étapes de démonstration'
             : id === 'practice:identify-main-connective'
               ? 'Connecteur principal'
               : id,
-    errorLabel: (tag) => FEEDBACK_DEFAULTS_FR[tag].split('.')[0],
+    errorLabel: (tag) =>
+      tag === 'incorrect-evaluation'
+        ? 'Prédiction incorrecte'
+        : tag === 'incorrect-truth-table-cell'
+          ? 'Valeur incorrecte dans la table'
+          : tag === 'incorrect-tautology'
+            ? 'Classement incorrect de la tautologie'
+            : (FEEDBACK_DEFAULTS_FR[tag as FeedbackTag] ?? tag).split('.')[0],
     rateLabel: (rate, attempts) => `${Math.round(rate * 100)} % sur ${attempts} essai${attempts > 1 ? 's' : ''}`,
     lessonDone: 'fait',
     lessonTodo: 'reste',
     exerciseDone: 'fait',
+    exerciseAttempted: 'essayé',
     exerciseLocked: 'fermé',
     exerciseLockedUnit1: 'Unité 1',
     exerciseLockedUnit2: 'Unité 2',
@@ -851,6 +902,7 @@ export function progressUi(locale: Locale): ProgressUiCopy {
 export type OnboardingScreenCopy={title:string;body:string;visual?:string};
 export type OnboardingUiCopy={stepLabel:(c:number,t:number)=>string;next:string;skip:string;getStarted:string;screens:OnboardingScreenCopy[]};
 const ONBOARDING_UI:Record<Locale,OnboardingUiCopy>={en:{stepLabel:(c,t)=>`${c} of ${t}`,next:'Next',skip:'Skip intro',getStarted:'Get started',screens:[{title:'See the structure',body:'Formulas are easier when structure is visible. Externalize shows how connectives bind sub-expressions and how truth values flow — so you do not have to hold it all in memory.',visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Tap V or F',body:'Each sentence letter gets True/False segments. Tap to set values and watch the formula evaluate step by step in the vertical tree.',visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment-label">P</span><span class="onboarding-segment active">T</span><span class="onboarding-segment">F</span></div>'},{title:'Your progress stays here',body:'The Progress tab tracks lessons, exercises, and skills that need work. Everything is stored on this device — export anytime to move to another phone.',visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item">Course</span><span class="onboarding-nav-item">Exercises</span><span class="onboarding-nav-item active">Progress</span></div>'}]},fr:{stepLabel:(c,t)=>`${c} sur ${t}`,next:'Suivant',skip:"Passer l'intro",getStarted:'Commencer',screens:[{title:'Voir la structure',body:"Une formule est plus lisible quand sa structure est externalisée. Externalize montre comment les connecteurs lient les sous-formules et comment les valeurs de vérité se propagent — sans tout retenir en mémoire.",visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Appuyez sur V ou F',body:"Chaque variable propositionnelle a des segments V/F. Touchez pour fixer une interprétation et suivre l'évaluation dans l'arbre vertical.",visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment-label">P</span><span class="onboarding-segment active">V</span><span class="onboarding-segment">F</span></div>'},{title:'Votre parcours ici',body:"L'onglet Parcours suit les sections, les exercices et les compétences à consolider. Tout reste sur cet appareil — exportez pour continuer ailleurs.",visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item">Cours</span><span class="onboarding-nav-item">Exercices</span><span class="onboarding-nav-item active">Parcours</span></div>'}]}};
+ONBOARDING_UI.en.screens[1]!.title = 'Tap T or F';
 export function onboardingUi(locale: Locale): OnboardingUiCopy { return ONBOARDING_UI[locale]; }
 export function formatResumeTime(locale: Locale, iso: string): string {
   const date = new Date(iso);

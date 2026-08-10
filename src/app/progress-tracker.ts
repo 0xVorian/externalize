@@ -1,5 +1,6 @@
-import type { Assignment, FeedbackTag } from '../../engine';
+import type { Assignment } from '../../engine';
 import type { ExerciseDefinition } from './exercises';
+import type { PracticeErrorTag } from './practice-attempt';
 
 export type SkillId =
   | 'practice:identify-main-connective'
@@ -29,7 +30,8 @@ export type SkillStat = {
 export type ExerciseStat = {
   attempts: number;
   successes: number;
-  lastErrorTag?: FeedbackTag;
+  repairedPasses: number;
+  lastErrorTag?: PracticeErrorTag;
 };
 
 export type ResumePoint = {
@@ -58,7 +60,7 @@ export type ProgressSummary = {
   resume: ResumePoint | null;
   struggles: Array<{ id: string; labelKey: string; rate: number; attempts: number }>;
   comfortable: Array<{ id: string; labelKey: string; rate: number; attempts: number }>;
-  frequentErrors: Array<{ tag: FeedbackTag; count: number }>;
+  frequentErrors: Array<{ tag: PracticeErrorTag; count: number }>;
 };
 
 export function emptySkillStat(): SkillStat {
@@ -67,17 +69,20 @@ export function emptySkillStat(): SkillStat {
 
 export function recordSkillAttempt(
   stat: SkillStat,
-  correct: boolean,
-  errorTag?: FeedbackTag,
+  cleanPass: boolean,
+  errorTags: PracticeErrorTag[] = [],
 ): SkillStat {
   const recentErrorTags =
-    !correct && errorTag
-      ? [errorTag, ...stat.recentErrorTags.filter((t) => t !== errorTag)].slice(0, 5)
+    errorTags.length > 0
+      ? [
+          ...errorTags.slice().reverse(),
+          ...stat.recentErrorTags.filter((tag) => !errorTags.includes(tag as PracticeErrorTag)),
+        ].slice(0, 5)
       : stat.recentErrorTags;
 
   return {
     attempts: stat.attempts + 1,
-    successes: stat.successes + (correct ? 1 : 0),
+    successes: stat.successes + (cleanPass ? 1 : 0),
     recentErrorTags,
   };
 }
@@ -102,7 +107,7 @@ export function buildProgressSummary(input: {
   reviewDue: number;
   resume: ResumePoint | null;
   skills: Record<string, SkillStat>;
-  errorCounts: Partial<Record<FeedbackTag, number>>;
+  errorCounts: Partial<Record<PracticeErrorTag, number>>;
 }): ProgressSummary {
   const struggles: ProgressSummary['struggles'] = [];
   const comfortable: ProgressSummary['comfortable'] = [];
@@ -125,7 +130,7 @@ export function buildProgressSummary(input: {
 
   const frequentErrors = Object.entries(input.errorCounts)
     .filter(([, count]) => (count ?? 0) > 0)
-    .map(([tag, count]) => ({ tag: tag as FeedbackTag, count: count ?? 0 }))
+    .map(([tag, count]) => ({ tag: tag as PracticeErrorTag, count: count ?? 0 }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 

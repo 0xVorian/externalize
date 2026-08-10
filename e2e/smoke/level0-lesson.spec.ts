@@ -17,6 +17,7 @@ test.describe('Level 0 lesson completion', () => {
     }
 
     await expect(page.locator('.exercise-prompt')).toBeVisible();
+    await expect(page.locator('.watch-grid')).toBeVisible();
     for (let step = 0; step < 5; step += 1) {
       await lessonNext(page).click();
     }

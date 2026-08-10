@@ -5,7 +5,7 @@ Externalize has two test layers:
 | Layer | Command | Scope |
 |-------|---------|-------|
 | Unit / integration | `npm test` | Engine, storage, render helpers, i18n (Vitest) |
-| Browser smoke | `npm run test:e2e` | Eight critical user flows (Playwright) |
+| Browser smoke | `npm run test:e2e` | Critical integration flows plus a targeted mobile matrix (Playwright) |
 
 ## Unit tests (Vitest)
 
@@ -52,8 +52,17 @@ npm run test:e2e:ui
 | `e2e/smoke/onboarding.spec.ts` | First-run intro skip and finish |
 | `e2e/smoke/counter-001.spec.ts` | Find-counterexample toggle and check |
 | `e2e/smoke/translate-002.spec.ts` | Translation try-again after wrong answer |
+| `e2e/smoke/evaluate-lifecycle.spec.ts` | Explicit prediction, wrong-answer repair, exactly-once finalization |
+| `e2e/smoke/scope-repair.spec.ts` | Wrong scope selection repaired inside one attempt |
+| `e2e/smoke/proof-rules.spec.ts` | `nd-001` and `nd-002` through rendered rule controls |
+| `e2e/smoke/practice-resume.spec.ts` | Translation and proof draft hydration after reload |
+| `e2e/smoke/biconditional-symmetry.spec.ts` | Swapped biconditional operands accepted through the UI |
+| `e2e/smoke/french-content.spec.ts` | French-authored prompt and atom gloss rendering |
+| `e2e/mobile/high-risk.spec.ts` | Watch, evaluation, scope, translation, truth table, and proof at 320px and 390px |
 
 Helpers under `e2e/helpers/` seed `localStorage` with the same progress shapes the app uses in production.
+
+Desktop Chromium runs the complete smoke directory. The mobile projects run only `e2e/mobile/` at 320×640 and an emulated 390px phone, so the full suite is not multiplied across devices.
 
 ### Selectors
 

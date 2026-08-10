@@ -13,7 +13,6 @@ import {
   LEVEL_1_PRACTICE_UNLOCK_ORDER,
   LEVEL_2_PRACTICE_UNLOCK_ORDER,
 } from './lessons';
-import type { FeedbackTag } from '../../engine';
 import {
   type SkillStat,
   type ExerciseStat,
@@ -25,22 +24,30 @@ import {
 import { getExerciseDefinition } from './exercises';
 import type { Locale } from '../i18n';
 import { type SrsEntry, createSrsEntry, nextSrsEntryAfterResult } from './srs';
+import {
+  createPracticeAttempt,
+  type PracticeDraft,
+  type PracticeErrorTag,
+} from './practice-attempt';
 
 export type { SrsEntry };
 
 export type ProgressStore = {
-  version: 5;
+  version: 6;
   lessonsCompleted: string[];
   level0Complete: boolean;
   level1Complete: boolean;
   level2Complete: boolean;
   queue: SrsEntry[];
-  completed: string[];
+  attempted: string[];
+  passed: string[];
+  practiceDraft?: PracticeDraft;
+  practiceDrafts: Record<string, PracticeDraft>;
   lastExerciseId?: string;
   resume: ResumePoint;
   skills: Record<string, SkillStat>;
   exerciseStats: Record<string, ExerciseStat>;
-  errorCounts: Partial<Record<FeedbackTag, number>>;
+  errorCounts: Partial<Record<PracticeErrorTag, number>>;
   lastVisitedAt: string;
   onboardingComplete: boolean;
 };
@@ -72,13 +79,15 @@ function defaultResume(): ResumePoint {
 
 function defaultStore(): ProgressStore {
   return {
-    version: 5,
+    version: 6,
     lessonsCompleted: [],
     level0Complete: false,
     level1Complete: false,
     level2Complete: false,
     queue: [],
-    completed: [],
+    attempted: [],
+    passed: [],
+    practiceDrafts: {},
     resume: defaultResume(),
     skills: {},
     exerciseStats: {},
@@ -94,18 +103,19 @@ function migrateStore(raw: unknown): ProgressStore {
   }
   const store = raw as Record<string, unknown>;
 
-  if (store.version === 5) return normalizeV5(store);
-  if (store.version === 4) return migrateV4ToV5(store);
+  if (store.version === 6) return normalizeV6(store);
+  if (store.version === 5) return migrateV5ToV6(store);
+  if (store.version === 4) return migrateV5ToV6(migrateV4ToV5(store));
 
   if (store.version === 3) {
-    return migrateV3ToV4(store);
+    return migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(store)));
   }
 
   if (store.version === 2) {
     const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
     const level0Complete = (store.level0Complete as boolean | undefined) ?? false;
     const lastExerciseId = store.lastExerciseId as string | undefined;
-    return migrateV3ToV4({
+    return migrateV5ToV6(migrateV4ToV5(migrateV3ToV4({
       version: 3,
       lessonsCompleted,
       level0Complete,
@@ -122,7 +132,7 @@ function migrateStore(raw: unknown): ProgressStore {
       exerciseStats: {},
       errorCounts: {},
       lastVisitedAt: nowIso(),
-    });
+    })));
   }
 
   if (store.version === 1) {
@@ -132,10 +142,17 @@ function migrateStore(raw: unknown): ProgressStore {
   return defaultStore();
 }
 
-function normalizeV5(store: Record<string, unknown>): ProgressStore {
+function normalizeV6(store: Record<string, unknown>): ProgressStore {
   const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
+  const practiceDraft = store.practiceDraft as PracticeDraft | undefined;
+  const practiceDrafts = {
+    ...((store.practiceDrafts as Record<string, PracticeDraft> | undefined) ?? {}),
+  };
+  if (practiceDraft) {
+    practiceDrafts[practiceDraft.attempt.exerciseId] = practiceDraft;
+  }
   return {
-    version: 5,
+    version: 6,
     lessonsCompleted,
     level0Complete:
       (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
@@ -144,18 +161,47 @@ function normalizeV5(store: Record<string, unknown>): ProgressStore {
     level2Complete:
       (store.level2Complete as boolean | undefined) ?? isLevel2Complete(lessonsCompleted),
     queue: (store.queue as SrsEntry[] | undefined) ?? [],
-    completed: (store.completed as string[] | undefined) ?? [],
+    attempted: (store.attempted as string[] | undefined) ?? [],
+    passed: (store.passed as string[] | undefined) ?? [],
+    practiceDraft,
+    practiceDrafts,
     lastExerciseId: store.lastExerciseId as string | undefined,
     resume: (store.resume as ResumePoint | undefined) ?? defaultResume(),
     skills: (store.skills as Record<string, SkillStat> | undefined) ?? {},
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
-    errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
+    errorCounts:
+      (store.errorCounts as Partial<Record<PracticeErrorTag, number>> | undefined) ?? {},
     lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
     onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? false,
   };
 }
 
-function migrateV4ToV5(store: Record<string, unknown>): ProgressStore {
+function migrateV5ToV6(store: Record<string, unknown>): ProgressStore {
+  const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
+  return {
+    version: 6,
+    lessonsCompleted,
+    level0Complete:
+      (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
+    level1Complete:
+      (store.level1Complete as boolean | undefined) ?? isLevel1Complete(lessonsCompleted),
+    level2Complete:
+      (store.level2Complete as boolean | undefined) ?? isLevel2Complete(lessonsCompleted),
+    queue: [],
+    attempted: (store.completed as string[] | undefined) ?? [],
+    passed: [],
+    practiceDrafts: {},
+    lastExerciseId: store.lastExerciseId as string | undefined,
+    resume: (store.resume as ResumePoint | undefined) ?? defaultResume(),
+    skills: {},
+    exerciseStats: {},
+    errorCounts: {},
+    lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
+    onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? true,
+  };
+}
+
+function migrateV4ToV5(store: Record<string, unknown>): Record<string, unknown> {
   const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
   return {
     version: 5,
@@ -171,16 +217,17 @@ function migrateV4ToV5(store: Record<string, unknown>): ProgressStore {
     resume: (store.resume as ResumePoint | undefined) ?? defaultResume(),
     skills: (store.skills as Record<string, SkillStat> | undefined) ?? {},
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
-    errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
+    errorCounts:
+      (store.errorCounts as Partial<Record<PracticeErrorTag, number>> | undefined) ?? {},
     lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
     onboardingComplete: (store.onboardingComplete as boolean | undefined) ?? true,
   };
 }
 
 
-function migrateV3ToV4(store: Record<string, unknown>): ProgressStore {
+function migrateV3ToV4(store: Record<string, unknown>): Record<string, unknown> {
   const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
-  return migrateV4ToV5({
+  return {
     version: 4,
     lessonsCompleted,
     level0Complete:
@@ -192,9 +239,10 @@ function migrateV3ToV4(store: Record<string, unknown>): ProgressStore {
     resume: (store.resume as ResumePoint | undefined) ?? defaultResume(),
     skills: (store.skills as Record<string, SkillStat> | undefined) ?? {},
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
-    errorCounts: (store.errorCounts as Partial<Record<FeedbackTag, number>> | undefined) ?? {},
+    errorCounts:
+      (store.errorCounts as Partial<Record<PracticeErrorTag, number>> | undefined) ?? {},
     lastVisitedAt: (store.lastVisitedAt as string | undefined) ?? nowIso(),
-  });
+  };
 }
 
 function firstIncompleteLessonId(completed: string[]): string {
@@ -284,11 +332,11 @@ export function isLevel2PracticeUnlocked(store: ProgressStore): boolean {
 
 export type ExerciseLockReason = 'open' | 'done' | 'sequential' | 'unit0' | 'unit1' | 'unit2';
 
-function progressiveUnlock(order: readonly string[], completed: string[]): string[] {
+function progressiveUnlock(order: readonly string[], passed: string[]): string[] {
   const unlocked: string[] = [];
   for (const exerciseId of order) {
     unlocked.push(exerciseId);
-    if (!completed.includes(exerciseId)) {
+    if (!passed.includes(exerciseId)) {
       break;
     }
   }
@@ -299,15 +347,15 @@ export function getUnlockedExerciseIds(store: ProgressStore): string[] {
   if (!store.level0Complete) {
     return [];
   }
-  const unit0 = progressiveUnlock(LEVEL_0_PRACTICE_UNLOCK_ORDER, store.completed);
+  const unit0 = progressiveUnlock(LEVEL_0_PRACTICE_UNLOCK_ORDER, store.passed);
   if (!isLevel1Complete(store.lessonsCompleted)) {
     return unit0;
   }
-  const unit1 = progressiveUnlock(LEVEL_1_PRACTICE_UNLOCK_ORDER, store.completed);
+  const unit1 = progressiveUnlock(LEVEL_1_PRACTICE_UNLOCK_ORDER, store.passed);
   if (!isLevel2Complete(store.lessonsCompleted)) {
     return [...unit0, ...unit1];
   }
-  const unit2 = progressiveUnlock(LEVEL_2_PRACTICE_UNLOCK_ORDER, store.completed);
+  const unit2 = progressiveUnlock(LEVEL_2_PRACTICE_UNLOCK_ORDER, store.passed);
   return [...unit0, ...unit1, ...unit2];
 }
 
@@ -315,7 +363,7 @@ export function exerciseLockReason(
   store: ProgressStore,
   exerciseId: string,
 ): ExerciseLockReason {
-  if (store.completed.includes(exerciseId)) {
+  if (store.passed.includes(exerciseId)) {
     return 'done';
   }
   if (getUnlockedExerciseIds(store).includes(exerciseId)) {
@@ -412,54 +460,168 @@ export function pickNextExerciseId(store: ProgressStore, fallbackIds: string[]):
   return fallbackIds[0];
 }
 
-export function recordResult(
+export function beginPracticeAttempt(
   store: ProgressStore,
   exerciseId: string,
-  correct: boolean,
-  errorTag?: FeedbackTag,
 ): ProgressStore {
+  if (store.practiceDraft?.attempt.exerciseId === exerciseId) {
+    return store;
+  }
+  const practiceDrafts = { ...store.practiceDrafts };
+  if (store.practiceDraft) {
+    practiceDrafts[store.practiceDraft.attempt.exerciseId] = store.practiceDraft;
+  }
+  const practiceDraft =
+    practiceDrafts[exerciseId] ?? {
+      attempt: createPracticeAttempt(exerciseId),
+      phase: 'ready' as const,
+    };
+  practiceDrafts[exerciseId] = practiceDraft;
+  return {
+    ...store,
+    practiceDraft,
+    practiceDrafts,
+  };
+}
+
+export function persistPracticeDraft(
+  store: ProgressStore,
+  draft: PracticeDraft,
+): ProgressStore {
+  if (
+    store.practiceDraft &&
+    store.practiceDraft.attempt.id !== draft.attempt.id
+  ) {
+    return store;
+  }
+  return {
+    ...store,
+    practiceDraft: draft,
+    practiceDrafts: {
+      ...store.practiceDrafts,
+      [draft.attempt.exerciseId]: draft,
+    },
+  };
+}
+
+export function clearPracticeDraft(store: ProgressStore): ProgressStore {
+  const practiceDrafts = { ...store.practiceDrafts };
+  if (store.practiceDraft) {
+    delete practiceDrafts[store.practiceDraft.attempt.exerciseId];
+  }
+  const { practiceDraft: _practiceDraft, ...rest } = store;
+  return { ...rest, practiceDrafts };
+}
+
+export function finalizePracticeAttempt(
+  store: ProgressStore,
+  draft: PracticeDraft,
+): ProgressStore {
+  const storedAttempt = store.practiceDraft?.attempt;
+  const attempt = draft.attempt;
+  if (
+    !storedAttempt ||
+    storedAttempt.id !== attempt.id ||
+    storedAttempt.status === 'finalized' ||
+    attempt.status === 'finalized' ||
+    attempt.lastCheckCorrect !== true
+  ) {
+    return store;
+  }
+
+  const exerciseId = attempt.exerciseId;
   const exercise = getExerciseDefinition(exerciseId);
   const skillId = exercise ? skillForExercise(exercise) : 'practice:identify-main-connective';
   const prevSkill = store.skills[skillId] ?? emptySkillStat();
-  const prevExercise = store.exerciseStats[exerciseId] ?? { attempts: 0, successes: 0 };
+  const prevExercise = store.exerciseStats[exerciseId] ?? {
+    attempts: 0,
+    successes: 0,
+    repairedPasses: 0,
+  };
+  const cleanPass = attempt.firstCheckedCorrect === true;
+  const repairedPass = !cleanPass;
 
   const errorCounts = { ...store.errorCounts };
-  if (!correct && errorTag) {
+  for (const errorTag of attempt.errorTags) {
     errorCounts[errorTag] = (errorCounts[errorTag] ?? 0) + 1;
   }
 
   const entry = store.queue.find((item) => item.exerciseId === exerciseId);
-  const completed = store.completed.includes(exerciseId)
-    ? store.completed
-    : [...store.completed, exerciseId];
+  const passed = store.passed.includes(exerciseId)
+    ? store.passed
+    : [...store.passed, exerciseId];
 
-  const nextEntry = nextSrsEntryAfterResult(entry, exerciseId, correct);
+  // Repaired passes are scheduled like an incorrect response: review remains due
+  // immediately and ease decreases. Clean passes advance the interval.
+  const nextEntry = nextSrsEntryAfterResult(entry, exerciseId, cleanPass);
   const queue = entry
     ? store.queue.map((item) => (item.exerciseId === exerciseId ? nextEntry : item))
     : [...store.queue, nextEntry];
+  const finalizedAttempt = {
+    ...attempt,
+    status: 'finalized' as const,
+    finalizedAt: nowIso(),
+  };
 
   return updateResume(
     {
       ...store,
-      completed,
+      passed,
       lastExerciseId: exerciseId,
       queue,
+      practiceDraft: { ...draft, attempt: finalizedAttempt },
+      practiceDrafts: {
+        ...store.practiceDrafts,
+        [exerciseId]: { ...draft, attempt: finalizedAttempt },
+      },
       skills: {
         ...store.skills,
-        [skillId]: recordSkillAttempt(prevSkill, correct, errorTag),
+        [skillId]: recordSkillAttempt(prevSkill, cleanPass, attempt.errorTags),
       },
       exerciseStats: {
         ...store.exerciseStats,
         [exerciseId]: {
           attempts: prevExercise.attempts + 1,
-          successes: prevExercise.successes + (correct ? 1 : 0),
-          lastErrorTag: correct ? prevExercise.lastErrorTag : errorTag,
+          successes: prevExercise.successes + (cleanPass ? 1 : 0),
+          repairedPasses: prevExercise.repairedPasses + (repairedPass ? 1 : 0),
+          lastErrorTag:
+            attempt.errorTags.at(-1) ?? prevExercise.lastErrorTag,
         },
       },
       errorCounts,
     },
     { mode: 'practice', exerciseId },
   );
+}
+
+export function recordCheckedPracticeState(
+  store: ProgressStore,
+  draft: PracticeDraft,
+): ProgressStore {
+  const storedAttempt = store.practiceDraft?.attempt;
+  if (
+    !storedAttempt ||
+    storedAttempt.id !== draft.attempt.id ||
+    draft.attempt.checkedAnswers <= storedAttempt.checkedAnswers ||
+    storedAttempt.status === 'finalized'
+  ) {
+    return store;
+  }
+  const attempted = store.attempted.includes(draft.attempt.exerciseId)
+    ? store.attempted
+    : [...store.attempted, draft.attempt.exerciseId];
+  const withCheck = {
+    ...store,
+    attempted,
+    practiceDraft: draft,
+    practiceDrafts: {
+      ...store.practiceDrafts,
+      [draft.attempt.exerciseId]: draft,
+    },
+  };
+  return draft.attempt.lastCheckCorrect
+    ? finalizePracticeAttempt(withCheck, draft)
+    : withCheck;
 }
 
 export function pickResumeExerciseId(store: ProgressStore): string | null {

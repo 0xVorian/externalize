@@ -35,6 +35,7 @@ export function renderTruthTable(
   locale: Locale,
   formula: string,
   rows: TruthTableRow[],
+  options: { hideResult?: boolean } = {},
 ): string {
   const learn = learnUi(locale);
   const atoms = formulaAtoms(formula);
@@ -48,7 +49,7 @@ export function renderTruthTable(
         <tr class="truth-table-row ${row.active ? 'active' : ''}"${row.active ? ' aria-current="step"' : ''}>
           ${row.srLabel ? `<th scope="row" class="sr-only">${row.srLabel}</th>` : ''}
           ${atomCells}
-          <td class="result-cell">${formatTruthValue(locale, result)}</td>
+          <td class="result-cell">${options.hideResult ? '—' : formatTruthValue(locale, result)}</td>
         </tr>
       `;
     })
@@ -75,13 +76,14 @@ export function renderLiveTruthRow(
   locale: Locale,
   formula: string,
   assignment: Record<string, boolean>,
+  options: { hideResult?: boolean } = {},
 ): string {
   const atoms = formulaAtoms(formula);
   const row: Assignment = {};
   for (const atom of atoms) {
     row[atom] = assignment[atom] ?? false;
   }
-  return renderTruthTable(locale, formula, [{ assignment: row, active: true }]);
+  return renderTruthTable(locale, formula, [{ assignment: row, active: true }], options);
 }
 
 export function renderWatchGrid(

@@ -119,7 +119,7 @@ For fill-truth-table exercises, set `hiddenRowIndex` (0-based row in the full ta
 
 ### Step 3 — Add unlock order (if gated)
 
-Append the ID to `PRACTICE_UNLOCK_ORDER` in `src/app/lessons.ts` where it should unlock. Exercises not in this list are unreachable in the gated practice flow.
+Append the ID to `PRACTICE_UNLOCK_ORDER` in `src/app/lessons.ts` where it should unlock. Exercises not in this list are unreachable in the gated practice flow. Sequential progression advances only after the preceding exercise is in v6 `passed`; attempted exposure is not sufficient.
 
 ### Step 4 — Add copy in `src/i18n/messages.ts`
 

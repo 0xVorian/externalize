@@ -19,13 +19,14 @@ export async function gotoFresh(page: Page): Promise<void> {
 }
 
 export async function gotoWithProgress(page: Page, store: ProgressStore): Promise<void> {
-  await page.addInitScript(
+  await page.goto('/');
+  await page.evaluate(
     ({ key, data }) => {
       localStorage.setItem(key, JSON.stringify(data));
     },
     { key: STORAGE_KEY, data: store },
   );
-  await page.goto('/');
+  await page.reload();
   await skipOnboarding(page);
 }
 
