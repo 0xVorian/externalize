@@ -34,6 +34,16 @@ describe('meta-review regressions', () => {
     expect(state.activeLearnerNodeId).toBe('root.R');
   });
 
+  it('describes intermediate feedback as a subformula result', () => {
+    const exercise = getExerciseDefinition('eval-008')!;
+    let state = createState('en', exercise, undefined, 1);
+
+    state = selectLearnerNodeValue(state, 'root.O', false);
+
+    expect(state.feedback?.message).toContain('this subformula is T');
+    expect(state.feedback?.message).not.toContain('the whole formula is T');
+  });
+
   it('resets scaffold work when an assignment changes during evaluation repair', () => {
     const exercise = getExerciseDefinition('eval-007')!;
     let state = createState('en', exercise, undefined, 1);
@@ -67,5 +77,30 @@ describe('meta-review regressions', () => {
     expect(restored.activeLearnerNodeId).toBeNull();
     expect(restored.tree.children[1]?.value).toBe(true);
     expect(restored.tree.value).toBe(true);
+  });
+
+  it('does not apply an advanced scaffold to a finalized draft on reload', () => {
+    const exercise = getExerciseDefinition('eval-007')!;
+    let state = createState('en', exercise, undefined, 0);
+    state = selectEvaluationPrediction(state, true);
+    state = checkEvaluation(state);
+    const finalizedState = {
+      ...state,
+      attempt: {
+        ...state.attempt,
+        status: 'finalized' as const,
+        finalizedAt: new Date().toISOString(),
+      },
+    };
+    const draft = practiceDraftSnapshot(finalizedState);
+
+    const restored = createState('en', exercise, draft, 1);
+
+    expect(restored.attempt.status).toBe('finalized');
+    expect(restored.phase).toBe('answered');
+    expect(restored.scaffoldNodeIds).toEqual([]);
+    expect(restored.activeLearnerNodeId).toBeNull();
+    expect(restored.tree.value).toBe(true);
+    expect(restored.feedback?.correct).toBe(true);
   });
 });
