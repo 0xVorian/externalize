@@ -32,6 +32,8 @@ export type PracticeDraft = {
   proofRule?: RuleId | null;
   proofCites?: number[];
   proofDerivedFormula?: string | null;
+  hintVisible?: boolean;
+  learnerValues?: Record<string, boolean>;
   feedbackTag?: PracticeErrorTag;
 };
 

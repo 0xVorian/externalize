@@ -23,16 +23,19 @@ test('watch uses a real two-dimensional table with one active case at 320px', as
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
-test('scope marks only the selected node and repairs without Try again', async ({ page }) => {
+test('scope selects before checking and repairs inside one attempt', async ({ page }) => {
   await gotoWithProgress(page, progressReadyForExercise('scope-001'));
   await modeButton(page, 'practice').click();
 
   await page.locator('[data-action="select-node"]').filter({ hasText: '→' }).click();
+  await expect(page.locator('.feedback-wrong')).toHaveCount(0);
+  await page.locator('[data-action="check-scope"]').click();
   await expect(page.locator('.feedback-wrong')).toBeVisible();
   const attemptId = await storedAttemptId(page);
-  await expect(page.locator('[data-action="try-again"]')).toHaveCount(0);
+  await page.locator('[data-action="try-again"]').click();
 
   await page.locator('[data-action="select-node"]').filter({ hasText: '∧' }).click();
+  await page.locator('[data-action="check-scope"]').click();
   await expect(page.locator('.feedback-correct')).toBeVisible();
   expect(await storedAttemptId(page)).toBe(attemptId);
   await expect(page.locator('.tree-node.selected')).toHaveCount(1);

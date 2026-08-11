@@ -7,13 +7,22 @@ async function storedProgress(page: Page): Promise<ProgressStore> {
   return page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), STORAGE_KEY);
 }
 
+async function atomIsTrue(page: Page, atom: string): Promise<boolean> {
+  const row = page.locator('.atom-row', {
+    has: page.locator(`.atom-name:text-is("${atom}")`),
+  });
+  return (await row.locator('.atom-segment.true.active').count()) > 0;
+}
+
 test('routes Continue to a due repaired review before a newly unlocked exercise', async ({ page }) => {
   await gotoWithProgress(page, progressReadyForExercise('eval-001'));
   await modeButton(page, 'practice').click();
 
-  await page.locator('[data-action="select-evaluation-prediction"][data-value="true"]').click();
+  const rootTrue = (await atomIsTrue(page, 'P')) && (await atomIsTrue(page, 'Q'));
+  await page.locator(`[data-action="select-evaluation-prediction"][data-value="${rootTrue ? 'false' : 'true'}"]`).click();
   await page.locator('[data-action="check-evaluation"]').click();
-  await page.locator('[data-action="select-evaluation-prediction"][data-value="false"]').click();
+  await page.locator('[data-action="try-again"]').click();
+  await page.locator(`[data-action="select-evaluation-prediction"][data-value="${rootTrue ? 'true' : 'false'}"]`).click();
   await page.locator('[data-action="check-evaluation"]').click();
   await page.locator('[data-action="next"]').click();
 

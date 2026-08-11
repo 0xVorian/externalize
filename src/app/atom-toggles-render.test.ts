@@ -38,7 +38,9 @@ describe('atom-toggles-render', () => {
     });
     expect(html).toContain('atom-panel-readonly');
     expect(html).toContain('These truth values are fixed for this exercise.');
-    expect(html.match(/disabled/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(html).not.toContain('data-action="set-atom-value"');
+    expect(html).not.toContain('<button');
+    expect(html).toContain('role="img"');
   });
 
   it('disables rows when isAtomEnabled returns false', () => {
@@ -56,4 +58,3 @@ describe('atom-toggles-render', () => {
     expect(pSection).toContain('disabled');
   });
 });
-

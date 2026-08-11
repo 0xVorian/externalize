@@ -6,6 +6,7 @@ import {
   createState,
   selectEvaluationPrediction,
   selectLearnerNodeValue,
+  practiceDraftSnapshot,
 } from './state';
 
 function scaffoldState(level: number, assignment = { P: true, Q: false, R: true }) {
@@ -30,5 +31,19 @@ describe('evaluation scaffold', () => {
     state = selectLearnerNodeValue(state, 'root.R', false);
     expect(state.feedback?.tag).toBe('incorrect-intermediate');
     expect(state.learnerValues['root.R']).toBeUndefined();
+    expect(state.attempt.firstCheckedCorrect).toBe(false);
+    expect(state.attempt.errorTags).toContain('incorrect-intermediate');
+  });
+
+  it('restores committed scaffold values from a compact draft', () => {
+    const exercise = getExerciseDefinition('eval-007')!;
+    let state = scaffoldState(1);
+    state = selectLearnerNodeValue(state, 'root.R', true);
+
+    const restored = createState('en', exercise, practiceDraftSnapshot(state), 1);
+
+    expect(restored.learnerValues).toEqual({ 'root.R': true });
+    expect(restored.activeLearnerNodeId).toBeNull();
+    expect(restored.tree.children[1]?.value).toBe(true);
   });
 });

@@ -546,8 +546,14 @@ root.addEventListener('click', (event) => {
       return;
     }
     const value = button.dataset.value === 'true';
-    practiceState = selectLearnerNodeValue(ensurePracticeState(), nodeId, value);
-    persistPracticeState();
+    const currentState = ensurePracticeState();
+    const nextState = selectLearnerNodeValue(currentState, nodeId, value);
+    if (nextState.attempt.checkedAnswers > currentState.attempt.checkedAnswers) {
+      commitCheckedPracticeState(nextState);
+    } else {
+      practiceState = nextState;
+      persistPracticeState();
+    }
     render();
     return;
   }

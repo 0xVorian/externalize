@@ -106,6 +106,35 @@ function defaultStore(): ProgressStore {
   };
 }
 
+const LEGACY_TRANSLATION_SKILL_ID = 'practice:translate-en-to-formula';
+const TRANSLATION_SKILL_ID = 'practice:translate-prose-to-formula';
+
+function normalizeSkillStats(
+  storedSkills: Record<string, SkillStat> | undefined,
+): Record<string, SkillStat> {
+  const skills = { ...(storedSkills ?? {}) };
+  const legacy = skills[LEGACY_TRANSLATION_SKILL_ID];
+  if (!legacy) {
+    return skills;
+  }
+
+  const current = skills[TRANSLATION_SKILL_ID];
+  if (!current) {
+    skills[TRANSLATION_SKILL_ID] = legacy;
+  } else {
+    skills[TRANSLATION_SKILL_ID] = {
+      attempts: current.attempts + legacy.attempts,
+      successes: current.successes + legacy.successes,
+      recentErrorTags: [
+        ...current.recentErrorTags,
+        ...legacy.recentErrorTags.filter((tag) => !current.recentErrorTags.includes(tag)),
+      ].slice(0, 5),
+    };
+  }
+  delete skills[LEGACY_TRANSLATION_SKILL_ID];
+  return skills;
+}
+
 function migrateStore(raw: unknown): ProgressStore {
   if (!raw || typeof raw !== 'object') {
     return defaultStore();
@@ -179,7 +208,7 @@ function normalizeV6(store: Record<string, unknown>): ProgressStore {
     practiceDrafts,
     lastExerciseId: store.lastExerciseId as string | undefined,
     resume: (store.resume as ResumePoint | undefined) ?? defaultResume(),
-    skills: (store.skills as Record<string, SkillStat> | undefined) ?? {},
+    skills: normalizeSkillStats(store.skills as Record<string, SkillStat> | undefined),
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
     errorCounts:
       (store.errorCounts as Partial<Record<PracticeErrorTag, number>> | undefined) ?? {},

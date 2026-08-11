@@ -21,10 +21,12 @@ export function renderAtomPanel(options: AtomToggleRenderOptions): string {
       const value = options.assignment[atom] ?? false;
       const trueActive = value;
       const falseActive = !value;
-      return `
-        <div class="atom-row ${enabled ? '' : 'disabled'}">
-          <span class="atom-name">${atom}</span>
-          <div class="atom-segments" role="group" aria-label="${copy.atomGroupAria(atom)}">
+      const segments = readOnly
+        ? `<div class="atom-segments" role="img" aria-label="${copy.atomGroupAria(atom)}: ${value ? copy.trueLabel : copy.falseLabel}">
+            <span class="atom-segment true ${trueActive ? 'active' : ''}" aria-hidden="true">${copy.trueLabel}</span>
+            <span class="atom-segment false ${falseActive ? 'active' : ''}" aria-hidden="true">${copy.falseLabel}</span>
+          </div>`
+        : `<div class="atom-segments" role="group" aria-label="${copy.atomGroupAria(atom)}">
             <button
               type="button"
               class="atom-segment true ${trueActive ? 'active' : ''}"
@@ -49,7 +51,11 @@ export function renderAtomPanel(options: AtomToggleRenderOptions): string {
             >
               ${copy.falseLabel}
             </button>
-          </div>
+          </div>`;
+      return `
+        <div class="atom-row ${enabled || readOnly ? '' : 'disabled'}">
+          <span class="atom-name">${atom}</span>
+          ${segments}
         </div>
       `;
     })

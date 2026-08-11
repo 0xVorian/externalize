@@ -44,8 +44,9 @@ test.describe('evaluate-formula attempt lifecycle', () => {
     expect(progress.exerciseStats['eval-001']).toBeUndefined();
 
     const attemptId = progress.practiceDraft!.attempt.id;
+    await page.locator('[data-action="try-again"]').click();
     await page.locator(`[data-action="select-evaluation-prediction"][data-value="${rootTrue ? 'true' : 'false'}"]`).click();
-    await expect(page.locator('.feedback-wrong')).toBeVisible();
+    await expect(page.locator('.feedback-wrong')).toHaveCount(0);
     await page.locator('[data-action="check-evaluation"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();
 

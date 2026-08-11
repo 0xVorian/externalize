@@ -174,6 +174,44 @@ describe('storage v3', () => {
     expect(getUnlockedExerciseIds(progress)).toContain('eval-010');
   });
 
+  it('merges the legacy translation skill key into the locale-neutral key', () => {
+    const { progress } = importProgress(JSON.stringify({
+      version: 6,
+      lessonsCompleted: [],
+      level0Complete: false,
+      level1Complete: false,
+      level2Complete: false,
+      queue: [],
+      attempted: [],
+      passed: [],
+      practiceDrafts: {},
+      resume: { mode: 'progress', updatedAt: new Date().toISOString() },
+      skills: {
+        'practice:translate-en-to-formula': {
+          attempts: 3,
+          successes: 2,
+          recentErrorTags: ['wrong-operator'],
+        },
+        'practice:translate-prose-to-formula': {
+          attempts: 1,
+          successes: 1,
+          recentErrorTags: ['wrong-atom'],
+        },
+      },
+      exerciseStats: {},
+      errorCounts: {},
+      lastVisitedAt: new Date().toISOString(),
+      onboardingComplete: true,
+    }));
+
+    expect(progress.skills['practice:translate-en-to-formula']).toBeUndefined();
+    expect(progress.skills['practice:translate-prose-to-formula']).toEqual({
+      attempts: 4,
+      successes: 3,
+      recentErrorTags: ['wrong-atom', 'wrong-operator'],
+    });
+  });
+
   it('continues within the active practice cluster', () => {
     let store = completeLevel0(loadProgress());
     for (const lesson of LEVEL_1_LESSONS) {

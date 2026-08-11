@@ -225,6 +225,16 @@ function hydrateDraft(state: AppState, draft?: PracticeDraft): AppState {
   if (!draft || draft.attempt.exerciseId !== state.exercise.id) {
     return state;
   }
+  const learnerValues =
+    state.exercise.type === 'evaluate-formula'
+      ? Object.fromEntries(
+          state.scaffoldNodeIds.flatMap((nodeId) =>
+            typeof draft.learnerValues?.[nodeId] === 'boolean'
+              ? [[nodeId, draft.learnerValues[nodeId]]]
+              : [],
+          ),
+        )
+      : {};
   let next: AppState = {
     ...state,
     attempt: draft.attempt,
@@ -235,6 +245,12 @@ function hydrateDraft(state: AppState, draft?: PracticeDraft): AppState {
     proofRule: draft.proofRule ?? null,
     proofCites: draft.proofCites ?? [],
     proofDerivedFormula: draft.proofDerivedFormula ?? null,
+    hintVisible: draft.hintVisible ?? false,
+    learnerValues,
+    activeLearnerNodeId:
+      state.exercise.type === 'evaluate-formula'
+        ? nextPendingScaffoldNode(state.scaffoldNodeIds, learnerValues)
+        : null,
   };
   if (draft.assignment && (state.exercise.type === 'evaluate-formula' || state.exercise.type === 'find-counterexample')) {
     next = {
@@ -569,6 +585,7 @@ export function selectLearnerNodeValue(state: AppState, nodeId: string, value: b
     );
     return {
       ...state,
+      attempt: recordAttemptCheck(state.attempt, false, 'incorrect-intermediate'),
       feedback: { correct: false, tag: 'incorrect-intermediate', message },
       message,
     };
@@ -820,6 +837,10 @@ export function practiceDraftSnapshot(state: AppState): PracticeDraft {
     state.exercise.type === 'find-counterexample'
   ) {
     draft.assignment = state.assignment;
+  }
+  if (state.exercise.type === 'evaluate-formula') {
+    draft.hintVisible = state.hintVisible;
+    draft.learnerValues = state.learnerValues;
   }
   if (state.exercise.type === 'translate-en-to-formula') {
     draft.builderTokens = state.builder.tokens;

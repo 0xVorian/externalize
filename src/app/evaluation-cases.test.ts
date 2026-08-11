@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   allAssignmentsForFormula,
   assignmentKey,
@@ -26,8 +26,10 @@ describe('evaluation-cases', () => {
   });
 
   it('weights the T,F row higher for implications when emphasizing errors', () => {
+    const random = vi.spyOn(Math, 'random');
     const counts: Record<string, number> = {};
     for (let index = 0; index < 80; index += 1) {
+      random.mockReturnValue(index / 80);
       const assignment = selectEvaluationAssignment({
         formula: 'P → Q',
         seenKeys: [],
@@ -36,6 +38,7 @@ describe('evaluation-cases', () => {
       const key = assignmentKey(assignment, ['P', 'Q']);
       counts[key] = (counts[key] ?? 0) + 1;
     }
+    random.mockRestore();
     expect(counts['TF'] ?? 0).toBeGreaterThan(15);
   });
 });

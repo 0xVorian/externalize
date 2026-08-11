@@ -133,6 +133,10 @@ button {
 
 .atom-panel-readonly .atom-segment {
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
 }
 
 .mode-button {
