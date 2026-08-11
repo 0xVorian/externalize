@@ -7,14 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-08-11
+
+### Added
+
+- Explore mode: free formula sandbox with live truth rows, no progress or SRS recording
+- Per-attempt diagnostic case selection for `evaluate-formula` practice with coverage-first assignment picking
+
+### Changed
+
+- Graded evaluation exercises use system-chosen, read-only truth assignments; learners predict only the root value
+- Evaluation assessment prompts state the fixed assignment (`Given P = T and Q = F, …`) in English and French
+
 ### Fixed
 
-- Update remaining Playwright specs for in-place repair, Progress sync disclosure, and unit navigation semantics
+- Learners cannot change sentence-letter values during graded `evaluate-formula` practice, preventing self-selected easy cases from counting as mastery evidence
+
+## [0.3.4] - 2026-08-10
+
+- Evaluation exercises use separate `assessmentPrompt`, `hint`, and `feedback` copy; graded prompts must not disclose the answer
+- Rule-aware evaluation feedback that states the correct root value and explains the connective rule using visible child values
+- Learner-produced intermediate values for nested evaluation (`eval-007`, `eval-008`, `eval-020`) with scaffold levels that increase on clean passes
+- Unit 1 nesting and translation lessons before nested practice and translation exercises
+- Unit 0 transfer exercises `tt-001` and `counter-001` for varied retrieval after conjunction evaluation
+- Cluster-based Unit 1 practice unlock (eval, truth-table, scope, translation, and proof clusters progress independently)
+- `scripts/generate-inventory.ts` to emit current lesson and exercise counts
+- Watch-grid lesson styling with a visually distinct active cell state
+- Accessible text status list for the progress concept map (alongside the visual graph)
+- Scope exercises use select-then-check so accidental taps are not graded immediately
+
+### Changed
+
+- Translation skill label is locale-neutral (`Prose to formula` / `Énoncé → formule`); skill id `practice:translate-prose-to-formula`
+- Conservative `negation-scope` translation feedback only when the learner AST contains misplaced negation
+- French lesson copy uses proper *vérité-fonctionnel* terminology instead of calqued *truth-fonctionnel*
+- French progress UI labels the translation skill as *Énoncé → formule* (locale-neutral)
+- Scope and atom tree nodes use distinct accessible names for connectives vs sentence letters
+
+### Fixed
+
+- Grandfather existing v0.3.3 Unit 1 completers onto the three lessons added in v0.3.4 so practice unlock stays consistent
+- Translation `negation-scope` feedback no longer masks wrong-operator or wrong-atom mistakes when negation scope already matches
+- Continue now advances within the active practice cluster instead of jumping to the first unpassed exercise in flattened cluster order
+- Dark-mode truth-table and control surfaces now use semantic CSS variables instead of hard-coded white backgrounds
+- `getCellFeedback()` wrong-answer fallback no longer returns the correct-answer default string
+- `detectNegationScope` no longer tags omitted negation as a scope error
 
 ## [0.3.3] - 2026-08-10
 
 ### Fixed
 
+- Update remaining Playwright specs for in-place repair, Progress sync disclosure, and unit navigation semantics
 - Accept commutative conjunction operand order in `translate-003` via `acceptCommutativeAnd`
 - Hide counterexample assessed root truth value before Check, matching evaluate-formula assessment boundaries
 - Replace misleading `⊃` gloss in lesson 0.1 with explicit `Let P = …` / `Soit P = …` notation

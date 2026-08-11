@@ -2,7 +2,7 @@ import type { Locale } from '../i18n';
 import { learnUi, getReference, ui } from '../i18n';
 import { progressUi } from '../i18n';
 
-export type AppMode = 'learn' | 'practice' | 'progress';
+export type AppMode = 'learn' | 'practice' | 'progress' | 'explore';
 
 export function renderLanguageToggle(locale: Locale): string {
   const copy = ui(locale);
@@ -37,7 +37,7 @@ export function renderModeNav(
   const learn = learnUi(locale);
   const progress = progressUi(locale);
   return `
-    <nav class="mode-nav mode-nav-three" aria-label="Mode">
+    <nav class="mode-nav mode-nav-four" aria-label="Mode">
       <button
         type="button"
         class="mode-button ${mode === 'learn' ? 'active' : ''}"
@@ -47,6 +47,16 @@ export function renderModeNav(
         aria-pressed="${mode === 'learn'}"
       >
         ${learn.learn}
+      </button>
+      <button
+        type="button"
+        class="mode-button ${mode === 'explore' ? 'active' : ''}"
+        data-action="set-mode"
+        data-mode="explore"
+        aria-label="${learn.modeExploreAria}"
+        aria-pressed="${mode === 'explore'}"
+      >
+        ${learn.openExplore}
       </button>
       <button
         type="button"

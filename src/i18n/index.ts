@@ -7,6 +7,9 @@ export {
   formatResumeTime,
   resumeContinueLabel,
   getExerciseCopy,
+  formatEvaluationAssessmentPrompt,
+  getAssessmentPrompt,
+  getExerciseHint,
   getCellFeedback,
   getCounterFeedback,
   getTautologyFeedback,
@@ -14,6 +17,7 @@ export {
   getFeedbackDefaults,
   formatTruthValue,
   formatAssignmentLine,
+  formatEvaluationFeedback,
   translationUi,
   proofUi,
 } from './messages';

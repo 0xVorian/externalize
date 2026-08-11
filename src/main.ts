@@ -29,6 +29,7 @@ import {
 import {
   createState,
   selectNode,
+  checkScope,
   setAtomValue,
   submitCellValue,
   submitTautologyAnswer,
@@ -42,7 +43,9 @@ import {
   toggleProofCitation,
   checkProofStep,
   selectEvaluationPrediction,
+  selectLearnerNodeValue,
   checkEvaluation,
+  showHint,
   tryAgainPractice,
   practiceDraftSnapshot,
   type AppState,
@@ -57,6 +60,14 @@ import {
   type LessonState,
 } from './app/lesson-state';
 import { renderApp } from './app/render';
+import { renderExploreView } from './app/explore-render';
+import {
+  createExploreState,
+  selectExploreFormula,
+  setExploreAtom,
+  applyExploreLocale,
+  type ExploreState,
+} from './app/explore-state';
 import { handleTreeKeydown } from './app/tree-keyboard';
 import { renderLessonView } from './app/lesson-render';
 import { renderProgressView } from './app/progress-render';
@@ -79,6 +90,7 @@ let mode: AppMode = resolveInitialMode(progress);
 
 let lessonState: LessonState = loadLessonFromProgress(progress);
 let practiceState: AppState | null = null;
+let exploreState: ExploreState = createExploreState(locale);
 let onboardingStep = 0;
 let importNotice: { kind: 'success' | 'error'; message: string } | null = null;
 
@@ -104,6 +116,9 @@ importInput.addEventListener('change', () => {
 function resolveInitialMode(store: ProgressStore): AppMode {
   if (store.resume.mode === 'progress') {
     return 'progress';
+  }
+  if (store.resume.mode === 'explore') {
+    return 'explore';
   }
   if (store.resume.mode === 'practice' && store.level0Complete) {
     return 'practice';
@@ -158,7 +173,8 @@ function loadPracticeState(exerciseId?: string): AppState {
   }
   const withAttempt = beginPracticeAttempt(progress, id);
   persistProgress(updateResume(withAttempt, { mode: 'practice', exerciseId: id }));
-  return createState(locale, exercise, progress.practiceDraft);
+  const scaffoldLevel = withAttempt.exerciseStats[id]?.scaffoldLevel ?? 0;
+  return createState(locale, exercise, withAttempt.practiceDraft, scaffoldLevel);
 }
 
 function persistPracticeState(): void {
@@ -200,6 +216,11 @@ function render(): void {
     return;
   }
 
+  if (mode === 'explore') {
+    root.innerHTML = renderExploreView(exploreState, practiceUnlocked);
+    return;
+  }
+
   if (mode === 'learn') {
     root.innerHTML = renderLessonView(lessonState, {
       practiceUnlocked,
@@ -220,6 +241,7 @@ function setLocale(nextLocale: Locale): void {
   locale = nextLocale;
   saveLocale(locale);
   lessonState = applyLessonLocale(lessonState, locale);
+  exploreState = applyExploreLocale(exploreState, locale);
   if (practiceState) {
     practiceState = applyLocale(practiceState, locale);
   }
@@ -239,6 +261,9 @@ function setMode(nextMode: AppMode): void {
     persistProgress(updateResume(progress, { mode: 'progress' }));
   } else if (mode === 'practice') {
     practiceState = loadPracticeState();
+  } else if (mode === 'explore') {
+    exploreState = createExploreState(locale, exploreState.formulaIndex);
+    persistProgress(updateResume(progress, { mode: 'explore' }));
   } else {
     lessonState = loadLessonFromProgress(progress);
     persistLessonResume();
@@ -338,6 +363,7 @@ function applyImportedProgress(imported: ProgressStore, importedLocale?: Locale)
   progress = saveProgress(imported);
   lessonState = loadLessonFromProgress(progress);
   practiceState = null;
+  exploreState = createExploreState(locale);
   mode = resolveInitialMode(progress);
 
   if (importedLocale && importedLocale !== locale) {
@@ -382,7 +408,7 @@ root.addEventListener('click', (event) => {
 
   if (action === 'set-mode') {
     const nextMode = button.dataset.mode;
-    if (nextMode === 'learn' || nextMode === 'practice' || nextMode === 'progress') {
+    if (nextMode === 'learn' || nextMode === 'practice' || nextMode === 'progress' || nextMode === 'explore') {
       setMode(nextMode);
     }
     return;
@@ -417,6 +443,27 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'set-explore-atom') {
+    const atom = button.dataset.atom;
+    const value = button.dataset.value === 'true';
+    if (!atom || mode !== 'explore') {
+      return;
+    }
+    exploreState = setExploreAtom(exploreState, atom, value);
+    render();
+    return;
+  }
+
+  if (action === 'select-explore-formula') {
+    const indexRaw = button.dataset.formulaIndex;
+    if (mode !== 'explore' || !indexRaw) {
+      return;
+    }
+    exploreState = selectExploreFormula(exploreState, Number(indexRaw));
+    render();
+    return;
+  }
+
   if (action === 'set-atom-value') {
     const atom = button.dataset.atom;
     const value = button.dataset.value === 'true';
@@ -446,7 +493,7 @@ root.addEventListener('click', (event) => {
   }
 
   if (needsOnboarding(progress)) { root.innerHTML = renderOnboarding(locale, onboardingStep); return; }
-  if (mode === 'progress') {
+  if (mode === 'progress' || mode === 'explore') {
     return;
   }
 
@@ -459,7 +506,14 @@ root.addEventListener('click', (event) => {
     if (!nodeId) {
       return;
     }
-    commitCheckedPracticeState(selectNode(ensurePracticeState(), nodeId));
+    practiceState = selectNode(ensurePracticeState(), nodeId);
+    persistPracticeState();
+    render();
+    return;
+  }
+
+  if (action === 'check-scope') {
+    commitCheckedPracticeState(checkScope(ensurePracticeState()));
     render();
     return;
   }
@@ -486,8 +540,33 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'select-learner-node-value') {
+    const nodeId = button.dataset.nodeId;
+    if (!nodeId) {
+      return;
+    }
+    const value = button.dataset.value === 'true';
+    const currentState = ensurePracticeState();
+    const nextState = selectLearnerNodeValue(currentState, nodeId, value);
+    if (nextState.attempt.checkedAnswers > currentState.attempt.checkedAnswers) {
+      commitCheckedPracticeState(nextState);
+    } else {
+      practiceState = nextState;
+      persistPracticeState();
+    }
+    render();
+    return;
+  }
+
   if (action === 'check-evaluation') {
     commitCheckedPracticeState(checkEvaluation(ensurePracticeState()));
+    render();
+    return;
+  }
+
+  if (action === 'show-hint') {
+    practiceState = showHint(ensurePracticeState());
+    persistPracticeState();
     render();
     return;
   }

@@ -94,6 +94,8 @@ Copy in `src/i18n/messages.ts`:
 ```typescript
 type ExerciseCopy = {
   prompt: string;
+  assessmentPrompt?: string;   // neutral graded instruction (evaluate-formula uses this)
+  hint?: string;               // optional support, not shown until requested or after error
   atoms?: Record<string, string>; // locale-authored translation glosses
   feedback?: FeedbackTemplate;   // overrides per-tag defaults
 };
@@ -104,7 +106,7 @@ type ExerciseCopy = {
 | `type` | Learner action | Engine checks |
 |--------|----------------|---------------|
 | `identify-main-connective` | Tap the main operator in the tree | Selected node matches root connective |
-| `evaluate-formula` | Inspect intermediate values, predict the hidden root, check T/F or V/F | Prediction matches AST evaluation |
+| `evaluate-formula` | Read the system-chosen assignment, inspect intermediate values, predict the hidden root, check T/F or V/F | Prediction matches AST evaluation under the assigned case |
 | `fill-truth-table-cell` | Fill one masked result cell | Submitted Boolean matches evaluation |
 | `find-counterexample` | Build an assignment for a target value | Assignment makes the formula match the target |
 | `classify-tautology` | Classify from a complete truth table | Answer matches finite truth-table classification |
@@ -122,6 +124,16 @@ type ExerciseCopy = {
 | `validateCell(formula, assignment, submitted)` | Single-cell check; returns `{ correct, expected }` |
 
 Exercise definitions supply formulas and row targets; content files do not store `T`/`F` labels.
+
+### Evaluation case selection
+
+`src/app/evaluation-cases.ts` picks a truth assignment when a graded `evaluate-formula` attempt opens:
+
+- Coverage-first: unseen rows for the formula’s truth table before repeats
+- Error-aware weighting: after `incorrect-evaluation` errors, falsifying rows for implications (e.g. `T,F` for `P → Q`) are weighted higher
+- Seen assignment keys persist on `exerciseStats.seenAssignmentKeys` after a finalized pass
+
+Explore mode (`AppMode: explore`) lets learners manipulate assignments with live results and does not write progress or SRS data.
 
 ### Gated unlock
 

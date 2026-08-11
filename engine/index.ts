@@ -4,6 +4,7 @@ export { parse, mainConnective, ParseError } from './parse/parse';
 export { format, connectiveLabel } from './render/display';
 export { toVerticalTree, findNodeById, annotateTreeValues, resetTreeIds } from './render/tree';
 export { evaluate, evaluateWithNodes, allAssignments } from './eval/evaluate';
+export { evaluateWithLearnerOverlay, expectedNodeValue } from './eval/learner-evaluate';
 export type { EvaluationResult } from './eval/evaluate';
 export { equivalent, distinct, semanticallyEquivalent } from './equiv/equivalent';
 export type { EquivalenceOptions } from './equiv/equivalent';
@@ -13,6 +14,7 @@ export {
   expectedMainConnectiveNodeId,
   classifyTranslation,
   resolveTranslationFeedback,
+  buildEvaluationFeedback,
 } from './feedback';
 export type {
   FeedbackTag,
@@ -22,6 +24,7 @@ export type {
   TranslationFeedbackTemplate,
   TranslationFeedbackResult,
   ProofFeedbackTag,
+  EvaluationFeedbackResult,
 } from './feedback';
 export {
   parseProofLines,

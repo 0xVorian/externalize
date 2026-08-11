@@ -29,6 +29,20 @@ describe('atom-toggles-render', () => {
     expect(ui('en').trueLabel).toBe('T');
   });
 
+  it('disables all rows in read-only mode', () => {
+    const html = renderAtomPanel({
+      locale: 'en',
+      assignment: { P: true, Q: false },
+      action: 'set-atom-value',
+      readOnly: true,
+    });
+    expect(html).toContain('atom-panel-readonly');
+    expect(html).toContain('These truth values are fixed for this exercise.');
+    expect(html).not.toContain('data-action="set-atom-value"');
+    expect(html).not.toContain('<button');
+    expect(html).toContain('role="img"');
+  });
+
   it('disables rows when isAtomEnabled returns false', () => {
     const html = renderAtomPanel({
       locale: 'en',
@@ -44,4 +58,3 @@ describe('atom-toggles-render', () => {
     expect(pSection).toContain('disabled');
   });
 });
-

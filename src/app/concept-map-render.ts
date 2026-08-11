@@ -13,6 +13,8 @@ type ConceptMapUiCopy = {
   availableLegend: string;
   lockedLegend: string;
   graphAria: string;
+  statusListAria: string;
+  statusFor: (label: string, status: ConceptStatus) => string;
 };
 
 const CONCEPT_MAP_UI: Record<Locale, ConceptMapUiCopy> = {
@@ -23,6 +25,13 @@ const CONCEPT_MAP_UI: Record<Locale, ConceptMapUiCopy> = {
     availableLegend: 'Available',
     lockedLegend: 'Locked',
     graphAria: 'Prerequisite graph of course concepts',
+    statusListAria: 'Concept completion status',
+    statusFor: (label, status) =>
+      status === 'completed'
+        ? `${label}: completed`
+        : status === 'available'
+          ? `${label}: available`
+          : `${label}: locked`,
   },
   fr: {
     heading: 'Carte des concepts',
@@ -31,6 +40,13 @@ const CONCEPT_MAP_UI: Record<Locale, ConceptMapUiCopy> = {
     availableLegend: 'Disponible',
     lockedLegend: 'Verrouillé',
     graphAria: 'Graphe des prérequis entre concepts du cours',
+    statusListAria: 'État d\'avancement des concepts',
+    statusFor: (label, status) =>
+      status === 'completed'
+        ? `${label} : terminé`
+        : status === 'available'
+          ? `${label} : disponible`
+          : `${label} : verrouillé`,
   },
 };
 
@@ -255,10 +271,24 @@ function renderEdge(
 
 function renderLegend(copy: ConceptMapUiCopy): string {
   return `
-    <ul class="concept-map-legend" aria-hidden="true">
-      <li><span class="concept-map-swatch concept-map-node-completed"></span>${copy.completedLegend}</li>
-      <li><span class="concept-map-swatch concept-map-node-available"></span>${copy.availableLegend}</li>
-      <li><span class="concept-map-swatch concept-map-node-locked"></span>${copy.lockedLegend}</li>
+    <ul class="concept-map-legend">
+      <li><span class="concept-map-swatch concept-map-node-completed" aria-hidden="true"></span>${copy.completedLegend}</li>
+      <li><span class="concept-map-swatch concept-map-node-available" aria-hidden="true"></span>${copy.availableLegend}</li>
+      <li><span class="concept-map-swatch concept-map-node-locked" aria-hidden="true"></span>${copy.lockedLegend}</li>
+    </ul>`;
+}
+
+function renderStatusList(locale: Locale, store: ProgressStore, copy: ConceptMapUiCopy): string {
+  const items = PREREQUISITES_GRAPH.concepts
+    .map((concept) => {
+      const label = conceptLabel(locale, concept.id);
+      const status = conceptStatus(store, concept.id);
+      return `<li>${escapeXml(copy.statusFor(label, status))}</li>`;
+    })
+    .join('');
+  return `
+    <ul class="concept-map-status-list" aria-label="${escapeXml(copy.statusListAria)}">
+      ${items}
     </ul>`;
 }
 
@@ -274,7 +304,7 @@ function renderConceptGraph(locale: Locale, store: ProgressStore): string {
         class="concept-map-graph"
         viewBox="0 0 ${layout.width.toFixed(1)} ${layout.height.toFixed(1)}"
         role="img"
-        aria-label="${escapeXml(copy.graphAria)}"
+        aria-hidden="true"
         preserveAspectRatio="xMidYMin meet"
       >
         <defs>
@@ -293,6 +323,7 @@ function renderConceptGraph(locale: Locale, store: ProgressStore): string {
         <g class="concept-map-edges">${edges}</g>
         <g class="concept-map-nodes">${nodes}</g>
       </svg>
+      ${renderStatusList(locale, store, copy)}
       ${renderLegend(copy)}
     </div>`;
 }

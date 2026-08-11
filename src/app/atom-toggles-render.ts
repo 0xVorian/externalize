@@ -6,23 +6,27 @@ export type AtomToggleRenderOptions = {
   action: string;
   isAtomEnabled?: (atom: string) => boolean;
   disabled?: boolean;
+  readOnly?: boolean;
 };
 
 export function renderAtomPanel(options: AtomToggleRenderOptions): string {
   const copy = ui(options.locale);
   const atoms = Object.keys(options.assignment).sort();
   const isEnabled = options.isAtomEnabled ?? (() => true);
+  const readOnly = options.readOnly ?? false;
 
   const rows = atoms
     .map((atom) => {
-      const enabled = !options.disabled && isEnabled(atom);
+      const enabled = !options.disabled && !readOnly && isEnabled(atom);
       const value = options.assignment[atom] ?? false;
       const trueActive = value;
       const falseActive = !value;
-      return `
-        <div class="atom-row ${enabled ? '' : 'disabled'}">
-          <span class="atom-name">${atom}</span>
-          <div class="atom-segments" role="group" aria-label="${copy.atomGroupAria(atom)}">
+      const segments = readOnly
+        ? `<div class="atom-segments" role="img" aria-label="${copy.atomGroupAria(atom)}: ${value ? copy.trueLabel : copy.falseLabel}">
+            <span class="atom-segment true ${trueActive ? 'active' : ''}" aria-hidden="true">${copy.trueLabel}</span>
+            <span class="atom-segment false ${falseActive ? 'active' : ''}" aria-hidden="true">${copy.falseLabel}</span>
+          </div>`
+        : `<div class="atom-segments" role="group" aria-label="${copy.atomGroupAria(atom)}">
             <button
               type="button"
               class="atom-segment true ${trueActive ? 'active' : ''}"
@@ -47,16 +51,20 @@ export function renderAtomPanel(options: AtomToggleRenderOptions): string {
             >
               ${copy.falseLabel}
             </button>
-          </div>
+          </div>`;
+      return `
+        <div class="atom-row ${enabled || readOnly ? '' : 'disabled'}">
+          <span class="atom-name">${atom}</span>
+          ${segments}
         </div>
       `;
     })
     .join('');
 
   return `
-    <section class="atom-panel" aria-label="${copy.assignmentAria}">
+    <section class="atom-panel${readOnly ? ' atom-panel-readonly' : ''}" aria-label="${copy.assignmentAria}">
       <h2 class="panel-title">${copy.assignment}</h2>
-      <p class="atom-panel-hint">${copy.assignmentHint}</p>
+      <p class="atom-panel-hint">${readOnly ? copy.assignmentGivenHint : copy.assignmentHint}</p>
       <div class="atom-rows">${rows}</div>
     </section>
   `;

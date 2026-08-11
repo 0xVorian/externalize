@@ -13,6 +13,7 @@ import {
   checkCounterexample,
   checkEvaluation,
   checkProofStep,
+  checkScope,
   checkTranslation,
   createState,
   paletteInsertToken,
@@ -36,6 +37,14 @@ function open(exerciseId: string): Harness {
     store,
     state: createState('en', getExerciseDefinition(exerciseId)!, store.practiceDraft),
   };
+}
+
+function wrongEvalPrediction(state: AppState): AppState {
+  return selectEvaluationPrediction(state, !state.tree.value!);
+}
+
+function correctEvalPrediction(state: AppState): AppState {
+  return selectEvaluationPrediction(state, state.tree.value!);
 }
 
 function commit(harness: Harness, state: AppState): Harness {
@@ -67,8 +76,8 @@ function formula(kind: 'imp', left: string, right: string): Formula {
 }
 
 const cleanChecks: Array<[string, (state: AppState) => AppState]> = [
-  ['identify-main-connective', (state) => selectNode(state, state.tree.id)],
-  ['evaluate-formula', (state) => checkEvaluation(selectEvaluationPrediction(state, false))],
+  ['identify-main-connective', (state) => checkScope(selectNode(state, state.tree.id))],
+  ['evaluate-formula', (state) => checkEvaluation(correctEvalPrediction(state))],
   ['fill-truth-table-cell', (state) => submitCellValue(state, false)],
   ['find-counterexample', (state) => checkCounterexample(setAtomValue(state, 'Q', false))],
   ['classify-tautology', (state) => submitTautologyAnswer(state, true)],
@@ -102,13 +111,13 @@ const repairedChecks: Array<[
 ]> = [
   [
     'identify-main-connective',
-    (state) => selectNode(state, state.tree.children[0]!.id),
-    (state) => selectNode(state, state.tree.id),
+    (state) => checkScope(selectNode(state, state.tree.children[0]!.id)),
+    (state) => checkScope(selectNode(state, state.tree.id)),
   ],
   [
     'evaluate-formula',
-    (state) => checkEvaluation(selectEvaluationPrediction(state, true)),
-    (state) => checkEvaluation(selectEvaluationPrediction(state, false)),
+    (state) => checkEvaluation(wrongEvalPrediction(state)),
+    (state) => checkEvaluation(correctEvalPrediction(state)),
   ],
   [
     'fill-truth-table-cell',
@@ -178,7 +187,7 @@ describe('centralized practice attempt lifecycle', () => {
 
     harness = commit(
       harness,
-      checkEvaluation(selectEvaluationPrediction(harness.state, true)),
+      checkEvaluation(wrongEvalPrediction(harness.state)),
     );
     expect(harness.store.attempted).toEqual(['eval-001']);
     expect(harness.store.passed).toEqual([]);
@@ -189,7 +198,7 @@ describe('centralized practice attempt lifecycle', () => {
     harness = repair(harness);
     harness = commit(
       harness,
-      checkEvaluation(selectEvaluationPrediction(harness.state, false)),
+      checkEvaluation(correctEvalPrediction(harness.state)),
     );
     expect(harness.state.attempt.id).toBe(attemptId);
     expect(harness.store.exerciseStats['eval-001']).toMatchObject({
@@ -225,10 +234,12 @@ describe('centralized practice attempt lifecycle', () => {
     },
   );
 
-  it('does not change learning metrics during evaluation exploration', () => {
+  it('does not allow valuation changes during graded evaluation', () => {
     const opened = open('eval-001');
+    const before = { ...opened.state.assignment };
     const manipulated = setAtomValue(opened.state, 'P', false);
-    const withPrediction = selectEvaluationPrediction(manipulated, true);
+    expect(manipulated.assignment).toEqual(before);
+    const withPrediction = wrongEvalPrediction(manipulated);
     const persisted = persistPracticeDraft(
       opened.store,
       practiceDraftSnapshot(withPrediction),
@@ -244,7 +255,7 @@ describe('centralized practice attempt lifecycle', () => {
     let harness = open('eval-001');
     harness = commit(
       harness,
-      checkEvaluation(selectEvaluationPrediction(harness.state, false)),
+      checkEvaluation(correctEvalPrediction(harness.state)),
     );
     const restored = createState(
       'en',

@@ -4,6 +4,7 @@ import type { BuilderToken } from './translation';
 export type PracticeErrorTag =
   | FeedbackTag
   | 'incorrect-evaluation'
+  | 'incorrect-intermediate'
   | 'incorrect-truth-table-cell'
   | 'incorrect-tautology';
 
@@ -31,6 +32,8 @@ export type PracticeDraft = {
   proofRule?: RuleId | null;
   proofCites?: number[];
   proofDerivedFormula?: string | null;
+  hintVisible?: boolean;
+  learnerValues?: Record<string, boolean>;
   feedbackTag?: PracticeErrorTag;
 };
 

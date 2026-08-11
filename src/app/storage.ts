@@ -8,6 +8,8 @@ import {
   isLevel2Complete,
   isLearnPathComplete,
   firstIncompleteLesson,
+  grandfatherLevel1Lessons,
+  practiceTier,
   PRACTICE_UNLOCK_ORDER,
   LEVEL_0_PRACTICE_UNLOCK_ORDER,
   LEVEL_1_PRACTICE_UNLOCK_ORDER,
@@ -21,7 +23,14 @@ import {
   recordSkillAttempt,
   skillForExercise,
 } from './progress-tracker';
+import {
+  UNIT_1_PRACTICE_CLUSTERS,
+  UNIT_1_CLUSTER_ORDER,
+  unit1ClusterOrder,
+} from './practice-clusters';
 import { getExerciseDefinition } from './exercises';
+import { hasEvaluationScaffold, maxScaffoldLevel } from './evaluation-scaffold';
+import { assignmentKey, selectEvaluationAssignment } from './evaluation-cases';
 import type { Locale } from '../i18n';
 import { type SrsEntry, createSrsEntry, nextSrsEntryAfterResult } from './srs';
 import {
@@ -97,6 +106,35 @@ function defaultStore(): ProgressStore {
   };
 }
 
+const LEGACY_TRANSLATION_SKILL_ID = 'practice:translate-en-to-formula';
+const TRANSLATION_SKILL_ID = 'practice:translate-prose-to-formula';
+
+function normalizeSkillStats(
+  storedSkills: Record<string, SkillStat> | undefined,
+): Record<string, SkillStat> {
+  const skills = { ...(storedSkills ?? {}) };
+  const legacy = skills[LEGACY_TRANSLATION_SKILL_ID];
+  if (!legacy) {
+    return skills;
+  }
+
+  const current = skills[TRANSLATION_SKILL_ID];
+  if (!current) {
+    skills[TRANSLATION_SKILL_ID] = legacy;
+  } else {
+    skills[TRANSLATION_SKILL_ID] = {
+      attempts: current.attempts + legacy.attempts,
+      successes: current.successes + legacy.successes,
+      recentErrorTags: [
+        ...current.recentErrorTags,
+        ...legacy.recentErrorTags.filter((tag) => !current.recentErrorTags.includes(tag)),
+      ].slice(0, 5),
+    };
+  }
+  delete skills[LEGACY_TRANSLATION_SKILL_ID];
+  return skills;
+}
+
 function migrateStore(raw: unknown): ProgressStore {
   if (!raw || typeof raw !== 'object') {
     return defaultStore();
@@ -143,7 +181,11 @@ function migrateStore(raw: unknown): ProgressStore {
 }
 
 function normalizeV6(store: Record<string, unknown>): ProgressStore {
-  const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
+  const storedLevel1Complete = store.level1Complete as boolean | undefined;
+  const lessonsCompleted = grandfatherLevel1Lessons(
+    (store.lessonsCompleted as string[] | undefined) ?? [],
+    storedLevel1Complete,
+  );
   const practiceDraft = store.practiceDraft as PracticeDraft | undefined;
   const practiceDrafts = {
     ...((store.practiceDrafts as Record<string, PracticeDraft> | undefined) ?? {}),
@@ -156,8 +198,7 @@ function normalizeV6(store: Record<string, unknown>): ProgressStore {
     lessonsCompleted,
     level0Complete:
       (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
-    level1Complete:
-      (store.level1Complete as boolean | undefined) ?? isLevel1Complete(lessonsCompleted),
+    level1Complete: isLevel1Complete(lessonsCompleted),
     level2Complete:
       (store.level2Complete as boolean | undefined) ?? isLevel2Complete(lessonsCompleted),
     queue: (store.queue as SrsEntry[] | undefined) ?? [],
@@ -167,7 +208,7 @@ function normalizeV6(store: Record<string, unknown>): ProgressStore {
     practiceDrafts,
     lastExerciseId: store.lastExerciseId as string | undefined,
     resume: (store.resume as ResumePoint | undefined) ?? defaultResume(),
-    skills: (store.skills as Record<string, SkillStat> | undefined) ?? {},
+    skills: normalizeSkillStats(store.skills as Record<string, SkillStat> | undefined),
     exerciseStats: (store.exerciseStats as Record<string, ExerciseStat> | undefined) ?? {},
     errorCounts:
       (store.errorCounts as Partial<Record<PracticeErrorTag, number>> | undefined) ?? {},
@@ -177,14 +218,17 @@ function normalizeV6(store: Record<string, unknown>): ProgressStore {
 }
 
 function migrateV5ToV6(store: Record<string, unknown>): ProgressStore {
-  const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
+  const storedLevel1Complete = store.level1Complete as boolean | undefined;
+  const lessonsCompleted = grandfatherLevel1Lessons(
+    (store.lessonsCompleted as string[] | undefined) ?? [],
+    storedLevel1Complete,
+  );
   return {
     version: 6,
     lessonsCompleted,
     level0Complete:
       (store.level0Complete as boolean | undefined) ?? isLevel0Complete(lessonsCompleted),
-    level1Complete:
-      (store.level1Complete as boolean | undefined) ?? isLevel1Complete(lessonsCompleted),
+    level1Complete: isLevel1Complete(lessonsCompleted),
     level2Complete:
       (store.level2Complete as boolean | undefined) ?? isLevel2Complete(lessonsCompleted),
     queue: [],
@@ -351,7 +395,9 @@ export function getUnlockedExerciseIds(store: ProgressStore): string[] {
   if (!isLevel1Complete(store.lessonsCompleted)) {
     return unit0;
   }
-  const unit1 = progressiveUnlock(LEVEL_1_PRACTICE_UNLOCK_ORDER, store.passed);
+  const unit1 = UNIT_1_CLUSTER_ORDER.flatMap((clusterKey) =>
+    progressiveUnlock(UNIT_1_PRACTICE_CLUSTERS[clusterKey], store.passed),
+  );
   if (!isLevel2Complete(store.lessonsCompleted)) {
     return [...unit0, ...unit1];
   }
@@ -477,6 +523,28 @@ function isDueRepairedReview(store: ProgressStore, exerciseId: string): boolean 
   );
 }
 
+function practiceClusterOrderForExercise(exerciseId: string): readonly string[] | undefined {
+  const tier = practiceTier(exerciseId);
+  if (tier === 'unit0') {
+    return LEVEL_0_PRACTICE_UNLOCK_ORDER;
+  }
+  if (tier === 'unit2') {
+    return LEVEL_2_PRACTICE_UNLOCK_ORDER;
+  }
+  return unit1ClusterOrder(exerciseId);
+}
+
+function nextUnpassedInCluster(
+  store: ProgressStore,
+  clusterOrder: readonly string[],
+  pool: string[],
+): string | undefined {
+  const poolSet = new Set(pool);
+  return clusterOrder.find(
+    (exerciseId) => poolSet.has(exerciseId) && !store.passed.includes(exerciseId),
+  );
+}
+
 /** Authoritative next-exercise policy for Continue, What next?, and resume. */
 export function selectNextExerciseId(store: ProgressStore): string {
   const pool = getUnlockedExerciseIds(store);
@@ -489,6 +557,17 @@ export function selectNextExerciseId(store: ProgressStore): string {
   const repairedDue = due.filter((entry) => isDueRepairedReview(store, entry.exerciseId));
   if (repairedDue.length > 0) {
     return repairedDue[0]!.exerciseId;
+  }
+
+  const anchorId = store.lastExerciseId ?? store.resume.exerciseId;
+  if (anchorId) {
+    const clusterOrder = practiceClusterOrderForExercise(anchorId);
+    if (clusterOrder) {
+      const nextInCluster = nextUnpassedInCluster(store, clusterOrder, pool);
+      if (nextInCluster) {
+        return nextInCluster;
+      }
+    }
   }
 
   const firstUnpassed = pool.find((exerciseId) => !store.passed.includes(exerciseId));
@@ -507,6 +586,27 @@ export function selectNextExerciseId(store: ProgressStore): string {
   return pickNextExerciseId(store, pool);
 }
 
+function ensureEvaluationDraftAssignment(
+  store: ProgressStore,
+  exerciseId: string,
+  draft: PracticeDraft,
+): PracticeDraft {
+  if (draft.assignment) {
+    return draft;
+  }
+  const exercise = getExerciseDefinition(exerciseId);
+  if (exercise?.type !== 'evaluate-formula' || !exercise.formula) {
+    return draft;
+  }
+  const stat = store.exerciseStats[exerciseId];
+  const assignment = selectEvaluationAssignment({
+    formula: exercise.formula,
+    seenKeys: stat?.seenAssignmentKeys ?? [],
+    emphasizeErrors: (store.errorCounts['incorrect-evaluation'] ?? 0) > 0,
+  });
+  return { ...draft, assignment };
+}
+
 export function beginPracticeAttempt(
   store: ProgressStore,
   exerciseId: string,
@@ -518,11 +618,14 @@ export function beginPracticeAttempt(
   if (store.practiceDraft) {
     practiceDrafts[store.practiceDraft.attempt.exerciseId] = store.practiceDraft;
   }
-  const practiceDraft =
+  const practiceDraft = ensureEvaluationDraftAssignment(
+    store,
+    exerciseId,
     practiceDrafts[exerciseId] ?? {
       attempt: createPracticeAttempt(exerciseId),
       phase: 'ready' as const,
-    };
+    },
+  );
   practiceDrafts[exerciseId] = practiceDraft;
   return {
     ...store,
@@ -587,6 +690,20 @@ export function finalizePracticeAttempt(
   };
   const cleanPass = attempt.firstCheckedCorrect === true;
   const repairedPass = !cleanPass;
+  const currentScaffoldLevel = prevExercise.scaffoldLevel ?? 0;
+  const nextScaffoldLevel =
+    cleanPass && hasEvaluationScaffold(exerciseId)
+      ? Math.min(currentScaffoldLevel + 1, maxScaffoldLevel(exerciseId))
+      : currentScaffoldLevel;
+
+  let seenAssignmentKeys = prevExercise.seenAssignmentKeys ?? [];
+  if (exercise?.type === 'evaluate-formula' && draft.assignment) {
+    const atoms = Object.keys(draft.assignment).sort();
+    const key = assignmentKey(draft.assignment, atoms);
+    if (!seenAssignmentKeys.includes(key)) {
+      seenAssignmentKeys = [...seenAssignmentKeys, key];
+    }
+  }
 
   const errorCounts = { ...store.errorCounts };
   for (const errorTag of attempt.errorTags) {
@@ -633,6 +750,8 @@ export function finalizePracticeAttempt(
           repairedPasses: prevExercise.repairedPasses + (repairedPass ? 1 : 0),
           lastErrorTag:
             attempt.errorTags.at(-1) ?? prevExercise.lastErrorTag,
+          scaffoldLevel: nextScaffoldLevel,
+          seenAssignmentKeys,
         },
       },
       errorCounts,

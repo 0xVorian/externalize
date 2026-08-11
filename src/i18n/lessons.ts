@@ -53,6 +53,13 @@ export type LearnUiCopy = {
   truthTableAria: (formula: string) => string;
   modeLearnAria: string;
   modePracticeAria: string;
+  exploreTitle: string;
+  exploreMeta: string;
+  explorePrompt: string;
+  exploreFormulaAria: string;
+  exploreBackToLearn: string;
+  openExplore: string;
+  modeExploreAria: string;
   watchGridAria: (formula: string) => string;
 };
 
@@ -163,6 +170,14 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     truthTableAria: (formula) => `Truth table for ${formula}`,
     modeLearnAria: 'Learn',
     modePracticeAria: 'Exercises',
+    exploreTitle: 'Explore formulas',
+    exploreMeta: 'Free practice — no progress recorded',
+    explorePrompt:
+      'Choose a formula and toggle sentence letters. The result updates live so you can build intuition before graded exercises.',
+    exploreFormulaAria: 'Choose a formula to explore',
+    exploreBackToLearn: 'Back to course',
+    openExplore: 'Explore formulas',
+    modeExploreAria: 'Explore',
     watchGridAria: (formula) => `Truth grid for ${formula}`,
   },
   fr: {
@@ -194,6 +209,14 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     truthTableAria: (formula) => `Table de vérité de ${formula}`,
     modeLearnAria: 'Cours',
     modePracticeAria: 'Exercices',
+    exploreTitle: 'Explorer les formules',
+    exploreMeta: 'Pratique libre — aucun progrès enregistré',
+    explorePrompt:
+      'Choisissez une formule et modifiez les variables propositionnelles. Le résultat se met à jour en direct pour construire une intuition avant les exercices notés.',
+    exploreFormulaAria: 'Choisir une formule à explorer',
+    exploreBackToLearn: 'Retour au cours',
+    openExplore: 'Explorer les formules',
+    modeExploreAria: 'Explorer',
     watchGridAria: (formula) => `Grille de vérité de ${formula}`,
   },
 };
@@ -460,6 +483,45 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         },
       ],
     },
+    'level1-13-nesting': {
+      title: 'Nested structure',
+      subtitle: 'Subformulas inside larger formulas.',
+      card: {
+        title: 'Building complex formulas',
+        body: [
+          'Connectives combine not only sentence letters but entire subformulas. Parentheses mark which subformula a connective governs.',
+          'In (P ∧ Q) ∨ R, the disjunction is the main connective — one disjunct is the whole conjunction.',
+          'Reading nested structure correctly is prerequisite for scope exercises and multi-step evaluation.',
+        ],
+        example: '(P ∧ Q) ∨ R\nP ∧ (Q ∨ R)',
+      },
+    },
+    'level1-14-nesting-guided': {
+      title: 'Guided evaluation: (P ∧ Q) ∨ R',
+      subtitle: 'Follow values through a nested formula.',
+      guidedSteps: [
+        { kind: 'hint', text: 'Tap T for P.', atom: 'P', value: true },
+        { kind: 'hint', text: 'Tap F for Q.', atom: 'Q', value: false },
+        { kind: 'hint', text: 'Tap F for R.', atom: 'R', value: false },
+        {
+          kind: 'done',
+          text: 'P ∧ Q is false, so the left disjunct is false; with R false, the whole disjunction is false.',
+        },
+      ],
+    },
+    'level1-15-translate': {
+      title: 'From sentence to formula',
+      subtitle: 'Using the palette and main connective.',
+      card: {
+        title: 'Translation exercises',
+        body: [
+          'Translation exercises ask you to build a formula that matches the sentence\'s connective structure.',
+          'Use the palette to insert sentence letters, connectives, and parentheses. The preview shows your formula as you build.',
+          'Identify the main connective in the English sentence before tapping — outer structure matters.',
+        ],
+        example: 'If P then Q  →  P → Q',
+      },
+    },
     'level2-01-nesting': { title: 'Nested structure', subtitle: 'Subformulas inside larger formulas.', card: { title: 'Building complex formulas', body: ['Connectives combine not only sentence letters but entire subformulas. Parentheses mark which subformula a connective governs.', 'In (P ∧ Q) → R, the antecedent is the whole conjunction — not P alone. The main connective of the full formula is →.', "Reading nested structure correctly is prerequisite for scope exercises and for applying equivalences such as de Morgan's laws."], example: '(P ∧ Q) → R\nP ∧ (Q ∨ R)' } },
     'level2-02-double-neg': { title: 'Double negation', subtitle: 'Two negations cancel.', card: { title: '¬¬P is equivalent to P', body: ['Negating twice returns the original truth value: if P is true, ¬P is false and ¬¬P is true again.', 'This is the double-negation equivalence — a standard rewrite when simplifying formulas or reading proofs.', 'Do not confuse ¬¬P with ¬(¬P ∧ Q): parentheses determine whether the second negation applies to P alone or to a larger subformula.'], example: 'P  ⇔  ¬¬P' } },
     'level2-03-double-neg-watch': { title: 'Worked cases: ¬¬P', subtitle: 'Double negation on each assignment for P.', watchSteps: [{ assignment: { P: true }, explanation: 'P is true, so ¬P is false and ¬¬P is true again. The outer negation restores the original value.' }, { assignment: { P: false }, explanation: 'P is false; negating twice yields false again. The highlighted row shows ¬¬P = F.' }] },
@@ -512,13 +574,13 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     },
     'level0-03-and': {
       title: 'La conjonction',
-      subtitle: 'Le connecteur ∧ (et truth-fonctionnel).',
+      subtitle: 'Le connecteur ∧ (et vérité-fonctionnel).',
       card: {
         title: 'P ∧ Q — les deux arguments doivent être vrais',
         body: [
           'Une conjonction est vraie si et seulement si ses deux arguments sont vrais.',
           'Dès qu\'un argument est faux, la conjonction est fausse — même si l\'autre est vrai.',
-          'C\'est le sens truth-fonctionnel de « et », celui retenu en logique formelle (distinct de certains emplois du français courant).',
+          'C\'est le sens vérité-fonctionnel de « et », celui retenu en logique formelle (distinct de certains emplois du français courant).',
         ],
         example: 'V ∧ V  ⇒  V\nV ∧ F  ⇒  F\nF ∧ V  ⇒  F\nF ∧ F  ⇒  F',
       },
@@ -564,7 +626,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'La négation',
       subtitle: 'Le connecteur ¬ inverse la valeur de vérité.',
       card: {
-        title: '¬P — la négation truth-fonctionnelle',
+        title: '¬P — la négation vérité-fonctionnelle',
         body: [
           'La négation s\'applique à un seul argument. Si P est vrai, ¬P est faux ; si P est faux, ¬P est vrai.',
           'Le symbole ¬ gouverne l\'expression immédiatement à sa droite — sa portée est cette sous-formule seule.',
@@ -607,7 +669,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Une disjonction inclusive est vraie dès qu\'au moins un argument est vrai.',
           'Elle est fausse uniquement lorsque les deux arguments sont faux — la dernière ligne d\'un tableau à deux variables.',
-          'C\'est le « ou » truth-fonctionnel de la logique : inclusif, non exclusif. Les deux arguments peuvent être vrais.',
+          'C\'est le « ou » vérité-fonctionnel de la logique : inclusif, non exclusif. Les deux arguments peuvent être vrais.',
         ],
         example: 'V ∨ V  ⇒  V\nV ∨ F  ⇒  V\nF ∨ V  ⇒  V\nF ∨ F  ⇒  F',
       },
@@ -649,13 +711,13 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     },
     'level1-07-imp': {
       title: 'L\'implication matérielle',
-      subtitle: 'Le connecteur → (si … alors …, au sens truth-fonctionnel).',
+      subtitle: 'Le connecteur → (si … alors …, au sens vérité-fonctionnel).',
       card: {
         title: 'P → Q — fausse seulement si P vrai et Q faux',
         body: [
           'Une implication matérielle P → Q est fausse dans un seul cas : antécédent vrai, conséquent faux.',
           'Si l\'antécédent P est faux, l\'implication est vraie quelle que soit la valeur de Q — y compris si Q est faux.',
-          'Ce sens truth-fonctionnel diffère parfois du « si … alors … » du langage courant ; en logique formelle, c\'est la convention.',
+          'Ce sens vérité-fonctionnel diffère parfois du « si … alors … » du langage courant ; en logique formelle, c\'est la convention.',
         ],
         example: 'V → V  ⇒  V\nV → F  ⇒  F\nF → V  ⇒  V\nF → F  ⇒  V',
       },
@@ -704,7 +766,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Une équivalence est vraie lorsque P et Q ont la même valeur — tous deux vrais ou tous deux faux.',
           'Elle est fausse lorsque les composants diffèrent : l\'un vrai, l\'autre faux.',
-          'On lit souvent « P si et seulement si Q » ; c\'est une équivalence truth-fonctionnelle mutuelle.',
+          'On lit souvent « P si et seulement si Q » ; c\'est une équivalence vérité-fonctionnelle mutuelle.',
         ],
         example: 'V ↔ V  ⇒  V\nV ↔ F  ⇒  F\nF ↔ V  ⇒  F\nF ↔ F  ⇒  V',
       },
@@ -742,6 +804,45 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
           text: 'P vrai, Q faux — valeurs différentes, donc P ↔ Q est F.',
         },
       ],
+    },
+    'level1-13-nesting': {
+      title: 'Structure imbriquée',
+      subtitle: "Sous-formules à l'intérieur de formules plus grandes.",
+      card: {
+        title: 'Composer des formules complexes',
+        body: [
+          'Les connecteurs combinent non seulement des variables, mais des sous-formules entières. Les parenthèses indiquent la portée.',
+          'Dans (P ∧ Q) ∨ R, la disjonction est le connecteur principal — un disjonct est la conjonction entière.',
+          "Lire correctement l'imbrication est nécessaire pour les exercices de portée et l'évaluation en plusieurs étapes.",
+        ],
+        example: '(P ∧ Q) ∨ R\nP ∧ (Q ∨ R)',
+      },
+    },
+    'level1-14-nesting-guided': {
+      title: 'À vous : évaluer (P ∧ Q) ∨ R',
+      subtitle: 'Suivre les valeurs dans une formule imbriquée.',
+      guidedSteps: [
+        { kind: 'hint', text: 'Toucher V pour P.', atom: 'P', value: true },
+        { kind: 'hint', text: 'Toucher F pour Q.', atom: 'Q', value: false },
+        { kind: 'hint', text: 'Toucher F pour R.', atom: 'R', value: false },
+        {
+          kind: 'done',
+          text: 'P ∧ Q est faux, donc le disjonct gauche est faux ; avec R faux, la disjonction entière est fausse.',
+        },
+      ],
+    },
+    'level1-15-translate': {
+      title: 'De l\'énoncé à la formule',
+      subtitle: 'Palette et connecteur principal.',
+      card: {
+        title: 'Exercices de traduction',
+        body: [
+          'Les exercices de traduction demandent une formule qui respecte la structure des connecteurs de l\'énoncé.',
+          'Utilisez la palette pour insérer variables, connecteurs et parenthèses. L\'aperçu affiche la formule au fur et à mesure.',
+          'Repérez le connecteur principal de l\'énoncé avant de toucher — la structure externe compte.',
+        ],
+        example: 'Si P alors Q  →  P → Q',
+      },
     },
     'level2-01-nesting': { title: 'Structure imbriquée', subtitle: "Sous-formules à l'intérieur de formules plus grandes.", card: { title: 'Composer des formules complexes', body: ['Les connecteurs combinent non seulement des variables, mais des sous-formules entières. Les parenthèses indiquent la portée.', "Dans (P ∧ Q) → R, l'antécédent est la conjonction tout entière — pas P seul. Le connecteur principal de la formule complète est →.", "Lire correctement l'imbrication est nécessaire pour les exercices de portée et pour appliquer des équivalences comme les lois de De Morgan."], example: '(P ∧ Q) → R\nP ∧ (Q ∨ R)' } },
     'level2-02-double-neg': { title: 'Double négation', subtitle: "Deux négations s'annulent.", card: { title: '¬¬P équivaut à P', body: ['Nier deux fois restitue la valeur de vérité initiale : si P est vrai, ¬P est faux et ¬¬P redevient vrai.', "C'est l'équivalence de double négation — une réécriture standard pour simplifier une formule ou lire une démonstration.", 'Ne confondez pas ¬¬P avec ¬(¬P ∧ Q) : les parenthèses fixent si la seconde négation porte sur P seul ou sur une sous-formule plus large.'], example: 'P  ⇔  ¬¬P' } },
