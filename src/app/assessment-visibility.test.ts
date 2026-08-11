@@ -10,6 +10,8 @@ import {
   tryAgainPractice,
 } from './state';
 
+import { beginPracticeAttempt, loadProgress } from './storage';
+
 function countEmDashResultCells(html: string): number {
   return (html.match(/class="result-cell">—<\/td>/g) ?? []).length;
 }
@@ -17,10 +19,16 @@ function countEmDashResultCells(html: string): number {
 describe('assessment root visibility', () => {
   it('hides evaluation root before Check and reveals it after', () => {
     const exercise = getExerciseDefinition('eval-001')!;
-    let state = createState('en', exercise);
+    const store = beginPracticeAttempt(loadProgress(), exercise.id);
+    const assignment = { P: true, Q: false };
+    let state = createState('en', exercise, {
+      ...store.practiceDraft!,
+      assignment,
+    });
     const readyHtml = renderApp(state, 0, true);
     expect(countEmDashResultCells(readyHtml)).toBe(1);
     expect(readyHtml).toContain('<td>T</td><td>F</td>');
+    expect(readyHtml).toContain('atom-panel-readonly');
 
     state = selectEvaluationPrediction(state, false);
     state = checkEvaluation(state);

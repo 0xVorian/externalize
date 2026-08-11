@@ -7,6 +7,13 @@ async function storedProgress(page: Page): Promise<ProgressStore> {
   return page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), STORAGE_KEY);
 }
 
+async function atomIsTrue(page: Page, atom: string): Promise<boolean> {
+  const row = page.locator('.atom-row', {
+    has: page.locator(`.atom-name:text-is("${atom}")`),
+  });
+  return (await row.locator('.atom-segment.true.active').count()) > 0;
+}
+
 test.describe('evaluate-formula attempt lifecycle', () => {
   test('requires prediction, repairs in place, and records once', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
@@ -17,14 +24,17 @@ test.describe('evaluate-formula attempt lifecycle', () => {
     expect(progress.attempted).not.toContain('eval-001');
     expect(progress.passed).not.toContain('eval-001');
 
-    await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="true"]').click();
-    await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
+    await expect(page.locator('[data-action="set-atom-value"]')).toHaveCount(0);
     progress = await storedProgress(page);
     expect(progress.attempted).not.toContain('eval-001');
     expect(progress.exerciseStats['eval-001']).toBeUndefined();
     await expect(page.locator('[data-action="next"]')).toHaveCount(0);
 
-    await page.locator('[data-action="select-evaluation-prediction"][data-value="true"]').click();
+    const p = await atomIsTrue(page, 'P');
+    const q = await atomIsTrue(page, 'Q');
+    const rootTrue = p && q;
+
+    await page.locator(`[data-action="select-evaluation-prediction"][data-value="${rootTrue ? 'false' : 'true'}"]`).click();
     await page.locator('[data-action="check-evaluation"]').click();
     await expect(page.locator('.feedback-wrong')).toBeVisible();
     await expect(page.locator('[data-action="next"]')).toHaveCount(0);
@@ -34,7 +44,7 @@ test.describe('evaluate-formula attempt lifecycle', () => {
     expect(progress.exerciseStats['eval-001']).toBeUndefined();
 
     const attemptId = progress.practiceDraft!.attempt.id;
-    await page.locator('[data-action="select-evaluation-prediction"][data-value="false"]').click();
+    await page.locator(`[data-action="select-evaluation-prediction"][data-value="${rootTrue ? 'true' : 'false'}"]`).click();
     await expect(page.locator('.feedback-wrong')).toBeVisible();
     await page.locator('[data-action="check-evaluation"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();

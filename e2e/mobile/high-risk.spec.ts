@@ -24,10 +24,13 @@ test('evaluation prediction remains usable', async ({ page }) => {
   await gotoWithProgress(page, progressReadyForExercise('eval-001'));
   await modeButton(page, 'practice').click();
   await expect(page.locator('.evaluation-prediction')).toBeVisible();
-  await page.locator('[data-action="select-evaluation-prediction"][data-value="true"]').click();
+  const p = (await page.locator('.atom-row', { has: page.locator('.atom-name:text-is("P")') }).locator('.atom-segment.true.active').count()) > 0;
+  const q = (await page.locator('.atom-row', { has: page.locator('.atom-name:text-is("Q")') }).locator('.atom-segment.true.active').count()) > 0;
+  const rootTrue = p && q;
+  await page.locator(`[data-action="select-evaluation-prediction"][data-value="${rootTrue ? 'false' : 'true'}"]`).click();
   await page.locator('[data-action="check-evaluation"]').click();
   await expect(page.locator('.feedback-wrong')).toBeVisible();
-  await expect(page.locator('[data-action="select-evaluation-prediction"][data-value="false"]')).toBeVisible();
+  await expect(page.locator(`[data-action="select-evaluation-prediction"][data-value="${rootTrue ? 'true' : 'false'}"]`)).toBeVisible();
   await expectNoPageOverflow(page);
 });
 
@@ -36,8 +39,10 @@ test('scope tree repair remains tappable', async ({ page }) => {
   await modeButton(page, 'practice').click();
   const nodes = page.locator('[data-action="select-node"]');
   await nodes.nth(1).click();
-  await expect(page.locator('.feedback-wrong')).toBeVisible();
+  await page.locator('[data-action="check-scope"]').click();
+  await page.locator('[data-action="try-again"]').click();
   await nodes.first().click();
+  await page.locator('[data-action="check-scope"]').click();
   await expect(page.locator('.feedback-correct')).toBeVisible();
   await expectNoPageOverflow(page);
 });

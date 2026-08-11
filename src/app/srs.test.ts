@@ -30,7 +30,7 @@ describe('srs per-skill profiles', () => {
   });
   it('seeds queue entries with profile default ease', () => {
     const store = seedQueue(loadProgress(), ['translate-001', 'scope-001']);
-    expect(store.queue.find((item) => item.exerciseId === 'translate-001')?.ease).toBe(SRS_SKILL_PROFILES['practice:translate-en-to-formula'].defaultEase);
+    expect(store.queue.find((item) => item.exerciseId === 'translate-001')?.ease).toBe(SRS_SKILL_PROFILES['practice:translate-prose-to-formula'].defaultEase);
     expect(store.queue.find((item) => item.exerciseId === 'scope-001')?.ease).toBe(SRS_SKILL_PROFILES['practice:identify-main-connective'].defaultEase);
   });
   it('creates new queue entries through recordResult using skill profile', () => {

@@ -1,0 +1,41 @@
+import { describe, expect, it } from 'vitest';
+import {
+  allAssignmentsForFormula,
+  assignmentKey,
+  selectEvaluationAssignment,
+} from './evaluation-cases';
+
+describe('evaluation-cases', () => {
+  it('lists every truth-table row for a two-atom formula', () => {
+    const pool = allAssignmentsForFormula('P ∧ Q');
+    expect(pool).toHaveLength(4);
+    expect(pool.map((row) => assignmentKey(row, ['P', 'Q'])).sort()).toEqual([
+      'FF',
+      'FT',
+      'TF',
+      'TT',
+    ]);
+  });
+
+  it('prefers unseen assignments before repeats', () => {
+    const assignment = selectEvaluationAssignment({
+      formula: 'P ∧ Q',
+      seenKeys: ['TT', 'TF', 'FT'],
+    });
+    expect(assignmentKey(assignment, ['P', 'Q'])).toBe('FF');
+  });
+
+  it('weights the T,F row higher for implications when emphasizing errors', () => {
+    const counts: Record<string, number> = {};
+    for (let index = 0; index < 80; index += 1) {
+      const assignment = selectEvaluationAssignment({
+        formula: 'P → Q',
+        seenKeys: [],
+        emphasizeErrors: true,
+      });
+      const key = assignmentKey(assignment, ['P', 'Q']);
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    expect(counts['TF'] ?? 0).toBeGreaterThan(15);
+  });
+});

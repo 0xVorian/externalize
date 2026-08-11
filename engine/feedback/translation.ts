@@ -68,9 +68,7 @@ function detectNegationScope(expected: Formula, learner: Formula): boolean {
     if (learner.left.kind === 'not' || learner.right.kind === 'not') {
       return !equivalent(expected, learner, {});
     }
-  }
-  if (learner.kind !== 'not') {
-    return true;
+    return false;
   }
   return false;
 }

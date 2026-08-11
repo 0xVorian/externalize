@@ -8,7 +8,7 @@ export type SkillId =
   | 'practice:fill-truth-table-cell'
   | 'practice:find-counterexample'
   | 'practice:classify-tautology'
-  | 'practice:translate-en-to-formula'
+  | 'practice:translate-prose-to-formula'
   | 'practice:proof-fill-step';
 
 export function skillForExercise(exercise: ExerciseDefinition): SkillId {
@@ -16,7 +16,7 @@ export function skillForExercise(exercise: ExerciseDefinition): SkillId {
   if (exercise.type === 'fill-truth-table-cell') return 'practice:fill-truth-table-cell';
   if (exercise.type === 'find-counterexample') return 'practice:find-counterexample';
   if (exercise.type === 'classify-tautology') return 'practice:classify-tautology';
-  if (exercise.type === 'translate-en-to-formula') return 'practice:translate-en-to-formula';
+  if (exercise.type === 'translate-en-to-formula') return 'practice:translate-prose-to-formula';
   if (exercise.type === 'proof-fill-step') return 'practice:proof-fill-step';
   return 'practice:identify-main-connective';
 }
@@ -32,10 +32,12 @@ export type ExerciseStat = {
   successes: number;
   repairedPasses: number;
   lastErrorTag?: PracticeErrorTag;
+  scaffoldLevel?: number;
+  seenAssignmentKeys?: string[];
 };
 
 export type ResumePoint = {
-  mode: 'learn' | 'practice' | 'progress';
+  mode: 'learn' | 'practice' | 'progress' | 'explore';
   lessonId?: string;
   watchStep?: number;
   watchComplete?: boolean;

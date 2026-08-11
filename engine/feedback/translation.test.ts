@@ -34,7 +34,9 @@ const EXERCISES = {
     accept: ['¬(P ∨ Q)'],
     reject: [
       { learner: '¬P ∨ Q', tag: 'negation-scope' as const },
-      { learner: 'P ∨ Q', tag: 'negation-scope' as const },
+      { learner: 'P ∨ Q', tag: 'wrong-main-connective' as const },
+      { learner: '¬(P ∧ Q)', tag: 'wrong-operator' as const },
+      { learner: '¬P', tag: 'wrong-atom' as const },
     ],
   },
 } as const;
@@ -64,6 +66,11 @@ describe('classifyTranslation', () => {
     const result = classifyTranslation(parse('¬(P ∧ Q)'), parse('¬P ∧ Q'));
     expect(result.correct).toBe(false);
     expect(result.tag).toBe('negation-scope');
+  });
+
+  it('classifies same-scope negation mistakes as operator or atom errors', () => {
+    expect(classifyTranslation(parse('¬(P ∨ Q)'), parse('¬(P ∧ Q)')).tag).toBe('wrong-operator');
+    expect(classifyTranslation(parse('¬(P ∨ Q)'), parse('¬P')).tag).toBe('wrong-atom');
   });
 
   it('detects missing parentheses via precedence', () => {
