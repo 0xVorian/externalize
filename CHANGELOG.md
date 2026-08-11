@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-08-11
+
 ### Added
 
 - Explore mode: free formula sandbox with live truth rows, no progress or SRS recording
