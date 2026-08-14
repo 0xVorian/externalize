@@ -119,3 +119,28 @@ Evaluation and structure can be shown as a **truth table**, a **vertical parse t
 - **Parse tree:** nested formulas, values propagating through subformulas (eval exercises with structure) or scope selection (main connective exercises).
 
 Do not use a parse tree when the lesson is only “here are the four truth-table cases”; use a table with a highlighted row instead. See `docs/presentation.md`.
+
+## 12. Make progress perceptible — and evidence-backed
+
+Tracking progress internally is not enough. The learner should be able to **feel movement while using Externalize**, without needing to visit a separate Progress screen.
+
+Progress operates on three timescales:
+
+- **Immediate:** a checked exercise or completed lesson visibly changes something.
+- **Session:** a short bout of practice has a finite arc and a clear completion state.
+- **Long-term:** the learner can see which capabilities are new, developing, or reliable, and what is likely to come next.
+
+Every progress claim must correspond to real curriculum state or assessed evidence. Do not manufacture an XP economy merely to create motion.
+
+In particular:
+
+- distinguish **completion/exposure** from **reliable performance**;
+- derive skill confidence from finalized graded attempts, not taps, time spent, or Explore activity;
+- make genuine transitions noticeable: a new exercise/capability unlocked, a skill becoming reliable, a unit completed, or support being reduced after clean performance;
+- treat **withdrawal of scaffolding** as a form of progress: the product can visibly ask the learner to carry more of the reasoning once they have earned that trust;
+- surface compact progress context in Learn and Practice rather than confining it to the Progress tab;
+- celebrate transitions more strongly than routine correct clicks.
+
+The emotional message should be **“you can now do more with less help,”** not “a number went up.”
+
+See `docs/progress-visibility.md` for the product model and implementation direction.
