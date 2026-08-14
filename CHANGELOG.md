@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit-completion notices are announced once; later rerenders of the same visible card no longer re-announce to assistive technology
 - Starting a new Practice exercise from Progress after a completed `5 / 5` session now opens a fresh `0 / 5` episode instead of keeping the finished session
 - Session-complete cards are announced once; later rerenders of the same visible card no longer re-announce to assistive technology
+- Clicking the already-active Practice tab at `5 / 5` no longer silently starts a new session; only **Keep practising** does
+- Completing the final Unit 2 lesson after a finished Practice session now opens Practice at `0 / 5` instead of carrying the stale completion
 
 ## [0.3.5] - 2026-08-11
 

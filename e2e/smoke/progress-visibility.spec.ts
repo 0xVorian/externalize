@@ -247,6 +247,32 @@ test.describe('progress visibility', () => {
     await expect(complete).toHaveCount(0);
   });
 
+  test('clicking the active Practice tab at 5 / 5 does not reset the session', async ({
+    page,
+  }) => {
+    await gotoWithProgress(page, progressReadyForExercise('eval-001'));
+    await modeButton(page, 'practice').click();
+
+    for (let index = 0; index < 5; index += 1) {
+      await finalizeCurrentPractice(page);
+      if (index < 4) {
+        await page.locator('[data-action="next"]').click();
+      }
+    }
+
+    const complete = page.locator('[data-testid="session-complete"]');
+    await expect(complete).toBeVisible();
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('5 / 5');
+
+    await modeButton(page, 'practice').click();
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('5 / 5');
+    await expect(complete).toBeVisible();
+
+    await page.locator('[data-action="session-continue"]').click();
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
+    await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
+  });
+
   test('an incomplete Practice session survives leaving and returning', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
     await modeButton(page, 'practice').click();
@@ -290,6 +316,40 @@ test.describe('progress visibility', () => {
 
     await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
+    await expect(page.locator('.exercise-card button.primary')).toBeVisible();
+
+    await finalizeCurrentPractice(page);
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('1 / 5');
+    await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
+  });
+
+  test('final Unit 2 completion opens Practice with a fresh session after 5 / 5', async ({
+    page,
+  }) => {
+    const lastUnit2 = LEVEL_2_LESSONS[LEVEL_2_LESSONS.length - 1]!;
+    await gotoWithProgress(page, progressAtLesson(lastUnit2.id));
+
+    await modeButton(page, 'practice').click();
+    for (let index = 0; index < 5; index += 1) {
+      await finalizeCurrentPractice(page);
+      if (index < 4) {
+        await page.locator('[data-action="next"]').click();
+      }
+    }
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('5 / 5');
+    await expect(page.locator('[data-testid="session-complete"]')).toBeVisible();
+
+    await modeButton(page, 'learn').click();
+    await page.locator('[data-action="set-atom-value"][data-atom="P"][data-value="true"]').click();
+    await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+    await lessonNext(page).click();
+
+    const notice = page.locator('[data-testid="unit-complete"]');
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText('Unit 2 complete');
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
+    await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
     await expect(page.locator('.exercise-card button.primary')).toBeVisible();
 
     await finalizeCurrentPractice(page);

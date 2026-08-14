@@ -366,6 +366,9 @@ function setMode(nextMode: AppMode): void {
   if (nextMode === 'practice' && !isPracticeUnlocked(progress)) {
     return;
   }
+  if (nextMode === mode) {
+    return;
+  }
   if (nextMode !== 'progress') {
     importNotice = null;
   }
@@ -441,6 +444,7 @@ function completeCurrentLesson(): void {
   }
 
   if (isLearnPathComplete(progress.lessonsCompleted)) {
+    preparePracticeEntry();
     mode = 'practice';
     practiceState = loadPracticeState();
     render();
