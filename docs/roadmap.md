@@ -8,6 +8,27 @@ Externalize now has three propositional-logic learning units, graded practice ac
 
 The main unresolved question is no longer whether the core interactions can be built. It is whether sustained use makes symbolic-logic practice meaningfully easier and worth returning to.
 
+### Immediate product priority — make progress perceptible
+
+Testing the current application exposed a concrete experiential problem: Externalize records meaningful learning progress, but much of that movement is invisible during ordinary use. The Progress tab reports state; Learn and Practice do not yet make the learner strongly feel that they are advancing.
+
+The next product pass is therefore **progress visibility**, not curriculum expansion. See [progress-visibility.md](progress-visibility.md).
+
+Target scope:
+
+- [ ] Ambient unit/lesson position in Learn
+- [ ] Ambient capability state in Practice
+- [ ] Finite short practice-session arc (initial target: 5 finalized exercises)
+- [ ] Session-complete summary based on actual changes
+- [ ] Visible transitions for capability reliability, new unlocks, and reduced scaffolding
+- [ ] Capability-first summary in Progress (`You can now`, `In progress`, `Up next`)
+- [ ] EN/FR, accessibility, reduced-motion, and ~320px mobile coverage
+- [ ] Unit and browser regression tests for progress derivation and transition behavior
+
+**Validation criterion:** during normal Learn/Practice use, the learner can tell what they are working on, see that a meaningful action moved them forward, understand what changed, and know what comes next without needing to inspect the detailed Progress dashboard.
+
+Progress claims must remain evidence-backed. This work must not introduce arbitrary XP/account levels or allow Explore/time-spent/session completion to masquerade as mastery.
+
 ## Phase 0 — Documentation
 
 - [x] Preserve original brief
@@ -86,7 +107,7 @@ The original “full propositional MVP” feature list is now substantially impl
 - [x] System-chosen diagnostic cases for graded evaluation
 - [x] Accessible EN/FR UI and course content
 
-**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, and repaired attempt semantics. Do not expand scope merely to satisfy an old checkbox list.
+**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, and repaired attempt semantics. The progress-visibility pass above is part of that validation work. Do not expand curriculum scope merely to satisfy an old checkbox list.
 
 ## Phase 5 — Natural deduction
 
@@ -143,7 +164,7 @@ When writing lessons, follow this loop:
 - Full natural-deduction editor
 - Predicate-logic curriculum/UI
 - Multiple textbook notation systems
-- Achievements, leaderboards, or heavy decorative gamification
+- Achievements, leaderboards, arbitrary XP/account levels, or heavy decorative gamification
 - Hover-only or mouse-only interactions
 
 The next major decision should follow evidence from using the existing product, not the existence of additional technically possible features.
