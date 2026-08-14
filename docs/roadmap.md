@@ -1,88 +1,129 @@
 # Roadmap
 
+This document tracks the shipped application and the remaining validation gates. It is intentionally conservative: implemented prototypes are not promoted to “done” merely because code exists.
+
+## Current status — v0.3.5
+
+Externalize now has three propositional-logic learning units, graded practice across multiple skills, local progress/SRS, EN/FR course material, Explore mode, export/import, a concept map, PWA support, and browser regression coverage.
+
+The main unresolved question is no longer whether the core interactions can be built. It is whether sustained use makes symbolic-logic practice meaningfully easier and worth returning to.
+
 ## Phase 0 — Documentation
 
 - [x] Preserve original brief
 - [x] Record design principles and technical decisions
 - [x] Define MVP scope and build order
-- [x] Sketch content model
-- [x] Adopt MVP-0 sequencing (scope + eval before translation)
+- [x] Define content model and authoring conventions
 - [x] Adopt mobile-first browser as primary target
+- [x] Establish independent EN/FR academic copy policy
 
 ## Phase 1 — Engine spike
 
 Goal: prove the AST + evaluation core before building UI polish.
 
-- [x] Define AST types for propositional formulas
-- [x] Parser: text → AST (minimal, for dev/testing)
-- [x] Renderer: AST → display string (Unicode operators)
-- [x] Renderer: AST → vertical tree structure (for mobile UI)
-- [x] Evaluator: AST + variable assignment → truth value
-- [x] Evaluator: return truth value at every node (for visible intermediate steps)
-- [x] Structural equivalence check + optional commutativity flag
-- [x] Unit tests for parser, evaluator, equivalence
+- [x] Propositional AST types
+- [x] Parser: text → AST
+- [x] Unicode display renderer
+- [x] Vertical tree renderer
+- [x] Evaluator with per-node truth values
+- [x] Structural / semantic equivalence support
+- [x] Truth-table engine
+- [x] Local feedback modules
+- [x] Unit tests for engine behavior
 
-**Exit criterion:** Can parse `(P → Q) ↔ ¬R`, evaluate under `{P: true, Q: false, R: true}` with per-node values, and detect that `¬(P ∧ Q)` differs from `¬P ∧ Q`. **Met.**
+**Exit criterion:** parse and evaluate nested propositional formulas with visible intermediate state and distinguish structurally different scopes. **Met.**
 
-## Phase 2 — MVP-0 (first interactive prototype)
+## Phase 2 — Core interactive prototype
 
-Goal: validate the core UX on a phone — externalized scope, visible evaluation, local feedback.
+Goal: validate the core UX on a phone — externalized scope, visible evaluation, local feedback, and repairable attempts.
 
-**Interactions:**
+- [x] Formula trees readable at ~320px width
+- [x] Main-connective / scope selection
+- [x] Truth-value exploration with visible propagation
+- [x] Local, diagnostic feedback
+- [x] Repair within the same attempt
+- [x] Persisted drafts
+- [x] Local progress and spaced review
+- [x] Mobile and accessibility regression coverage
 
-- [x] Formula displayed as a **vertical tree** (readable at ~320px width)
-- [x] Tap to identify main connective / scope boundaries
-- [x] Toggle atom truth values; every node shows its computed value
-- [x] Local feedback for wrong scope selection (names the bug)
-- [x] 5 hard-coded exercises
-- [x] Minimal spaced-repetition queue in local storage
-
-**Exit criterion:** You use it on your phone for a week and want to return. Working-memory load is visibly reduced. **Pending real-world week test.**
+**Product validation criterion:** use it regularly on a phone and want to return; working-memory load is visibly reduced. **Still pending sustained real-world use.**
 
 ## Phase 3 — Translation prototype
 
-Goal: ordinary language ↔ symbols, now that the tree renderer and feedback loop are proven.
+Goal: ordinary language → symbols using the same visible-state and local-repair principles.
 
-**Design:** [phase3-translation.md](phase3-translation.md) (palette, AST comparison, feedback taxonomy, engine integration). Spike stub: `src/app/translation/`.
+Design: [phase3-translation.md](phase3-translation.md).
 
-- [ ] Tap-based symbol palette (mobile primary)
-- [ ] Optional drag-to-group on desktop, with tap equivalent
-- [ ] Visual scope on built formula
-- [ ] Compare learner AST to expected AST
-- [ ] Local feedback (reversed conditional, wrong negation scope, missing parens)
-- [ ] Structural sub-question per exercise + live read-back preview
-- [ ] Works on phone without horizontal scrolling
+- [x] Tap-based symbol palette
+- [x] Formula builder and AST compilation
+- [x] Compare learner AST to expected structure / accepted equivalence
+- [x] Local feedback for reversed conditionals, negation scope, missing grouping, and wrong atoms
+- [x] Repair without discarding the attempt
+- [x] EN/FR authored prompts and glosses
+- [x] Mobile browser coverage
+- [ ] Optional desktop drag/group interaction
+- [ ] Richer structural read-back / construction affordances if real use justifies them
 
-**Exit criterion:** One translation exercise feels instructive on a phone; feedback is local and repairable.
+**Product validation criterion:** translation practice feels instructive on a phone rather than merely gradable. **Needs real-world use.**
 
-## Phase 4 — Full propositional MVP
+## Phase 4 — Propositional practice system
 
-- [ ] Operator reference panel (pin-able / sheet on mobile)
-- [ ] Multiple exercises per type (hand-authored JSON)
-- [ ] Evaluation exercises (one subexpression at a time)
-- [ ] Interactive truth tables (one missing column/cell at a time)
-- [ ] Counterexample / validity challenges
-- [ ] Spaced-repetition queue (expanded)
-- [ ] Concept map with prerequisites
-- [ ] Progress export/import
-- [ ] Optional PWA manifest for home-screen install
+The original “full propositional MVP” feature list is now substantially implemented.
 
-## Phase 5 — Natural deduction (later)
+- [x] Operator reference during lessons
+- [x] Multiple hand-authored exercises per core skill
+- [x] Evaluation practice
+- [x] Interactive truth-table completion
+- [x] Counterexample / model-finding challenges
+- [x] Tautology classification
+- [x] Translation practice
+- [x] Expanded spaced-repetition scheduling
+- [x] Concept map with prerequisites
+- [x] Progress export/import
+- [x] PWA manifest and offline shell
+- [x] Cluster-based practice progression
+- [x] Separate exploration from graded prediction
+- [x] System-chosen diagnostic cases for graded evaluation
+- [x] Accessible EN/FR UI and course content
 
-Only after Phase 4 interaction patterns are stable.
+**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, and repaired attempt semantics. Do not expand scope merely to satisfy an old checkbox list.
 
-- [ ] Fitch-style line-based proof editor with scope highlighting
-- [ ] Rule picker with visible prerequisites
-- [ ] Fill-one-step and repair-invalid-step exercises
+## Phase 5 — Natural deduction
+
+Status: **prototype only**.
+
+Implemented groundwork:
+
+- [x] Proof rule types and validation engine
+- [x] Mobile-oriented proof rendering
+- [x] Two fill-one-step proof exercises (`nd-001`, `nd-002`)
+- [x] Natural-deduction design document
+
+Deferred until propositional practice is validated:
+
+- [ ] Full Fitch-style proof editor with scope highlighting
+- [ ] Broader rule set and prerequisite-aware rule picker
+- [ ] Repair-invalid-step exercises
+- [ ] Subproof interaction
 - [ ] Derivation replay
-- [ ] Mobile: vertical proof layout, large tap targets for line citations
 
-## Phase 6 — Predicate logic (later)
+## Phase 6 — Predicate logic
 
-- [ ] Quantifiers, predicates, variables in AST
+Status: **engine/design spike only**.
+
+Implemented groundwork:
+
+- [x] Predicate / quantifier AST extensions
+- [x] Parser support for predicates, terms, `∀`, and `∃`
+- [x] Free-variable / predicate-symbol helpers
+- [x] Predicate-logic design document
+
+Deferred:
+
+- [ ] Predicate-logic learning units
 - [ ] Translation exercises for quantified statements
-- [ ] Simple models and countermodels
-- [ ] Quantifier natural deduction rules
+- [ ] Models and countermodels
+- [ ] Quantifier natural-deduction rules and UI
 
 ## Recommended session structure (for content authoring)
 
@@ -99,8 +140,10 @@ When writing lessons, follow this loop:
 
 - Native mobile app
 - User accounts or cloud sync
-- Predicate logic or natural deduction UI
-- Template-based exercise generation
+- Full natural-deduction editor
+- Predicate-logic curriculum/UI
 - Multiple textbook notation systems
-- Achievements, leaderboards, or heavy gamification
+- Achievements, leaderboards, or heavy decorative gamification
 - Hover-only or mouse-only interactions
+
+The next major decision should follow evidence from using the existing product, not the existence of additional technically possible features.
