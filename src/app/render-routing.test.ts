@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISE_DEFINITIONS } from './exercises';
-import { renderApp } from './render';
+import { renderApp, type PracticeViewContext } from './render';
 import { createState, checkTranslation } from './state';
 import { getTranslationExerciseConfig } from './translation';
 import { usesLiveTruthRow } from './truth-table-render';
@@ -75,5 +75,33 @@ describe('practice presentation routing', () => {
     expect(html).toContain('Il pleut.');
     expect(html).toContain('Le terrain est fermé.');
     expect(html).not.toContain('It rains.');
+  });
+
+  it('announces practice capability name and state once without a duplicate sr-only line', () => {
+    const exercise = EXERCISE_DEFINITIONS.find((candidate) => candidate.id === 'eval-001')!;
+    const context: PracticeViewContext = {
+      capabilityState: 'ready',
+      sessionCompleted: 0,
+      sessionTarget: 5,
+      sessionComplete: false,
+    };
+    const html = renderApp(createState('en', exercise), 0, true, context);
+    expect(html).toContain('class="exercise-family">Evaluating formulas');
+    expect(html).toContain('data-testid="capability-state">Ready');
+    expect(html).not.toMatch(/class="sr-only"[^>]*>Evaluating formulas: Ready/);
+    expect(html).toContain('data-testid="practice-session"');
+  });
+
+  it('renders a unit-complete notice in Practice when one is provided', () => {
+    const exercise = EXERCISE_DEFINITIONS.find((candidate) => candidate.id === 'eval-001')!;
+    const html = renderApp(createState('en', exercise), 0, true, {
+      capabilityState: 'ready',
+      sessionCompleted: 0,
+      sessionTarget: 5,
+      sessionComplete: false,
+      unitCompleteNotice: 'Unit 2 complete. Nested structure is in place.',
+    });
+    expect(html).toContain('data-testid="unit-complete"');
+    expect(html).toContain('Unit 2 complete. Nested structure is in place.');
   });
 });

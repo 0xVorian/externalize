@@ -445,6 +445,7 @@ function advancePractice(): void {
     return;
   }
   pendingProgressMoment = null;
+  unitCompleteNotice = null;
   const nextId = selectNextExerciseId(progress);
   persistProgress(clearPracticeDraft(progress));
   practiceState = loadPracticeState(nextId);

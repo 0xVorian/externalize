@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Capability-first progress: derived Ready / Developing / Reliable states, compact Learn unit/lesson meters, Practice session `n / 5` with a real completion boundary, and one-time progress moments for reliability, unlocks, and nested-evaluation scaffold withdrawal
 - Progress tab summary groups **You can now**, **In progress**, and **Up next**, without removing existing lesson, exercise, concept-map, or diagnostic detail
 
+### Fixed
+
+- Unit 2 completion is shown once on the first Practice screen after the Learn path, then clears when the learner continues
+- Practice capability name and state are available once as visible text, without a duplicate screen-reader announcement
+
 ## [0.3.5] - 2026-08-11
 
 ### Added

@@ -239,7 +239,6 @@ function renderPracticeChrome(
         <span class="exercise-family">${familyLabel}</span>
         <span class="capability-chip" data-testid="capability-state">${stateLabel}</span>
       </p>
-      <p class="sr-only">${copy.capabilityStatusAria(familyLabel, stateLabel)}</p>
       <p
         class="practice-session"
         data-testid="practice-session"

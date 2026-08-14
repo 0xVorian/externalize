@@ -1,12 +1,14 @@
 import { test, expect, type Page } from '@playwright/test';
 import { evaluate, parse } from '../../engine';
 import { gotoFresh, gotoWithProgress, lessonNext, modeButton } from '../helpers/app';
+import { LEVEL_1_LESSONS, LEVEL_2_LESSONS } from '../../src/app/lessons';
 import {
   progressAtLesson,
+  progressAtMaxScaffold,
   progressReadyForExercise,
+  progressReadyForScaffoldAdvance,
   withSkillStats,
 } from '../helpers/progress';
-import { updateResume } from '../../src/app/storage';
 
 async function atomIsTrue(page: Page, atom: string): Promise<boolean> {
   const row = page.locator('.atom-row', {
@@ -114,7 +116,9 @@ test.describe('progress visibility', () => {
     await expect(page.locator('.feedback-correct')).toBeVisible();
     await lessonNext(page).click();
     await expect(page.locator('[data-testid="unit-complete"]')).toBeVisible();
-    await expect(page.locator('[data-testid="learn-progress"]')).toContainText('Lesson 1 of 12');
+    await expect(page.locator('[data-testid="learn-progress"]')).toContainText(
+      `Lesson 1 of ${LEVEL_1_LESSONS.length}`,
+    );
   });
 
   test('Practice shows capability state and session 0 / 5', async ({ page }) => {
@@ -153,14 +157,45 @@ test.describe('progress visibility', () => {
   });
 
   test('scaffold advancement explains that the learner will carry more reasoning', async ({ page }) => {
-    const store = updateResume(progressReadyForExercise('eval-007'), {
-      mode: 'practice',
-      exerciseId: 'eval-007',
-    });
+    const store = progressReadyForScaffoldAdvance('eval-007');
     await gotoWithProgress(page, store);
     await modeButton(page, 'practice').click();
     await completeEvalCorrect(page);
     await expect(page.locator('[data-testid="progress-moment"]')).toContainText('intermediate');
+  });
+
+  test('scaffold already at maximum does not announce further withdrawal', async ({ page }) => {
+    const store = progressAtMaxScaffold('eval-007');
+    await gotoWithProgress(page, store);
+    await modeButton(page, 'practice').click();
+    await page
+      .locator('[data-action="select-learner-node-value"][data-node-id="root.R"][data-value="true"]')
+      .click();
+    await completeEvalCorrect(page);
+    await expect(page.locator('[data-testid="progress-moment"]')).toHaveCount(0);
+  });
+
+  test('Unit 2 completion is visible once then clears after continuing Practice', async ({
+    page,
+  }) => {
+    const lastUnit2 = LEVEL_2_LESSONS[LEVEL_2_LESSONS.length - 1]!;
+    await gotoWithProgress(page, progressAtLesson(lastUnit2.id));
+    await page.locator('[data-action="set-atom-value"][data-atom="P"][data-value="true"]').click();
+    await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+    await lessonNext(page).click();
+
+    const notice = page.locator('[data-testid="unit-complete"]');
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText('Unit 2 complete');
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
+
+    await completeEvalCorrect(page);
+    await page.locator('[data-action="next"]').click();
+    await expect(notice).toHaveCount(0);
+
+    await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
+    await expect(page.locator('[data-testid="unit-complete"]')).toHaveCount(0);
   });
 
   test('five finalized exercises complete the session and Keep practising resets it', async ({

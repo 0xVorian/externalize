@@ -216,6 +216,29 @@ describe('progress moment diffs', () => {
     ]);
   });
 
+  it('selects exercise unlock over scaffold advancement when both occur', () => {
+    const moments = diffProgressVisibility(
+      snapshotWith({
+        capabilities: { 'practice:evaluate-formula': 'developing' },
+        unlockedExerciseIds: ['eval-007'],
+        scaffoldLevels: { 'eval-007': 0 },
+      }),
+      snapshotWith({
+        capabilities: { 'practice:evaluate-formula': 'developing' },
+        unlockedExerciseIds: ['eval-007', 'eval-008'],
+        scaffoldLevels: { 'eval-007': 1 },
+      }),
+      'eval-007',
+    );
+    expect(moments).toEqual(
+      expect.arrayContaining([
+        { kind: 'exercise-unlocked', exerciseId: 'eval-008' },
+        { kind: 'scaffold-advanced', exerciseId: 'eval-007', from: 0, to: 1 },
+      ]),
+    );
+    expect(selectProgressMoment(moments)?.kind).toBe('exercise-unlocked');
+  });
+
   it('does not report scaffold advancement at max level', () => {
     const max = scaffoldMaxLevel('eval-007');
     const before = snapshotWith({

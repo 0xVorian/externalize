@@ -46,7 +46,7 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 ### Progress visibility
 
 - Learn unit meters use `role="meter"` plus visible text (position and completed count).
-- Practice capability chips include readable state text (`Ready` / `Developing` / `Reliable`); session position has an accessible label.
+- Practice capability chips include readable state text (`Ready` / `Developing` / `Reliable`); the visible family label and chip are the single accessible announcement. Session position has an accessible label.
 - Progress moments use `role="status"` with `aria-live="polite"` on first insert only, so rerenders do not re-announce.
 - Meter fill animation is disabled under `prefers-reduced-motion`.
 
