@@ -59,6 +59,7 @@ npm run test:e2e:ui
 | `e2e/smoke/biconditional-symmetry.spec.ts` | Swapped biconditional operands accepted through the UI |
 | `e2e/smoke/french-content.spec.ts` | French-authored prompt and atom gloss rendering |
 | `e2e/mobile/high-risk.spec.ts` | Watch, evaluation, scope, translation, truth table, and proof at 320px and 390px |
+| `e2e/smoke/progress-visibility.spec.ts` | Learn meters, practice session counting, reliability/scaffold moments, session complete, Progress capability summary |
 
 Helpers under `e2e/helpers/` seed `localStorage` with the same progress shapes the app uses in production.
 

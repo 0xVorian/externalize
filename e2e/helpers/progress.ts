@@ -14,6 +14,7 @@ import {
   LEVEL_1_LESSONS,
   PRACTICE_UNLOCK_ORDER,
 } from '../../src/app/lessons';
+import type { SkillId } from '../../src/app/progress-tracker';
 
 export const STORAGE_KEY = 'externalize-progress-v1';
 
@@ -78,4 +79,30 @@ export function progressReadyForExercise(exerciseId: string): ProgressStore {
 
   store = seedQueue(store, getUnlockedExerciseIds(store));
   return updateResume(store, { mode: 'practice', exerciseId });
+}
+
+export function withSkillStats(
+  store: ProgressStore,
+  skillId: SkillId,
+  attempts: number,
+  successes: number,
+): ProgressStore {
+  return {
+    ...store,
+    skills: {
+      ...store.skills,
+      [skillId]: { attempts, successes, recentErrorTags: [] },
+    },
+  };
+}
+
+export function progressAtLesson(lessonId: string): ProgressStore {
+  let store = emptyProgress();
+  for (const lesson of [...LEVEL_0_LESSONS, ...LEVEL_1_LESSONS]) {
+    if (lesson.id === lessonId) {
+      break;
+    }
+    store = completeLesson(store, lesson.id);
+  }
+  return updateResume(store, { mode: 'learn', lessonId });
 }

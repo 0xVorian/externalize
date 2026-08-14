@@ -43,6 +43,13 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 - Key sections use `aria-labelledby` tied to heading `id`s (continue, level checklists, exercises).
 - Checklist rows expose combined label + status via `aria-label`; visible status text is `aria-hidden` to avoid duplication.
 
+### Progress visibility
+
+- Learn unit meters use `role="meter"` plus visible text (position and completed count).
+- Practice capability chips include readable state text (`Ready` / `Developing` / `Reliable`); session position has an accessible label.
+- Progress moments use `role="status"` with `aria-live="polite"` on first insert only, so rerenders do not re-announce.
+- Meter fill animation is disabled under `prefers-reduced-motion`.
+
 ### Focus and keyboard
 
 - **Focus-visible:** Consistent `:focus-visible` outline on buttons (mode nav, language, tree nodes, V/F segments, primary/secondary actions, palette stub, reference `<summary>`).

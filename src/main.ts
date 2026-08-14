@@ -59,7 +59,7 @@ import {
   lessonResumeSnapshot,
   type LessonState,
 } from './app/lesson-state';
-import { renderApp } from './app/render';
+import { renderApp, type PracticeViewContext } from './app/render';
 import { renderExploreView } from './app/explore-render';
 import {
   createExploreState,
@@ -73,9 +73,25 @@ import { renderLessonView } from './app/lesson-render';
 import { renderProgressView } from './app/progress-render';
 import { renderOnboarding } from './app/onboarding-render';
 import type { AppMode } from './app/shell-render';
-import { loadLocale, saveLocale, progressUi, type Locale } from './i18n';
+import { loadLocale, saveLocale, progressUi, learnUi, type Locale } from './i18n';
 import { getProofExerciseConfig } from './app/proof/exercise-config';
 import type { RuleId } from '../engine';
+import { skillForExercise } from './app/progress-tracker';
+import {
+  deriveLearnProgress,
+  diffProgressVisibility,
+  selectProgressMoment,
+  snapshotProgressVisibility,
+  type ProgressMoment,
+} from './app/progress-visibility';
+import {
+  createPracticeSession,
+  isPracticeSessionComplete,
+  recordFinalizedAttempt,
+  summarizePracticeSession,
+  type PracticeSession,
+} from './app/practice-session';
+import { currentScaffoldLevel } from './app/evaluation-scaffold';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) {
@@ -93,6 +109,10 @@ let practiceState: AppState | null = null;
 let exploreState: ExploreState = createExploreState(locale);
 let onboardingStep = 0;
 let importNotice: { kind: 'success' | 'error'; message: string } | null = null;
+let practiceSession: PracticeSession = createPracticeSession();
+let pendingProgressMoment: { moment: ProgressMoment; attemptId: string; live: boolean } | null =
+  null;
+let unitCompleteNotice: string | null = null;
 
 const importInput = document.createElement('input');
 importInput.type = 'file';
@@ -136,6 +156,41 @@ function loadLessonFromProgress(store: ProgressStore): LessonState {
     guidedAssignment: store.resume.guidedAssignment,
     guidedComplete: store.resume.guidedComplete,
   });
+}
+
+function resetEphemeralProgressUi(): void {
+  practiceSession = createPracticeSession();
+  pendingProgressMoment = null;
+  unitCompleteNotice = null;
+}
+
+function unitCompleteMessage(unit: 0 | 1 | 2): string {
+  const learn = learnUi(locale);
+  if (unit === 0) return learn.level0Complete;
+  if (unit === 1) return learn.level1Complete;
+  return learn.level2Complete;
+}
+
+function practiceViewContext(): PracticeViewContext {
+  const state = ensurePracticeState();
+  const skillId = skillForExercise(state.exercise);
+  const snapshot = snapshotProgressVisibility(progress);
+  return {
+    capabilityState: snapshot.capabilities[skillId],
+    sessionCompleted: practiceSession.completedAttemptIds.length,
+    sessionTarget: practiceSession.target,
+    sessionComplete: isPracticeSessionComplete(practiceSession),
+    sessionSummary: isPracticeSessionComplete(practiceSession)
+      ? summarizePracticeSession(practiceSession)
+      : null,
+    progressMoment:
+      pendingProgressMoment && pendingProgressMoment.attemptId === state.attempt.id
+        ? pendingProgressMoment.moment
+        : null,
+    progressMomentLive: pendingProgressMoment?.live === true,
+    scaffoldLevel: currentScaffoldLevel(progress.exerciseStats[state.exercise.id]?.scaffoldLevel),
+    unitCompleteNotice,
+  };
 }
 
 function persistProgress(next: ProgressStore): void {
@@ -183,6 +238,8 @@ function persistPracticeState(): void {
 }
 
 function commitCheckedPracticeState(nextState: AppState): void {
+  const before = snapshotProgressVisibility(progress);
+  const wasFinalized = practiceState?.attempt.status === 'finalized';
   practiceState = nextState;
   const nextProgress = recordCheckedPracticeState(
     progress,
@@ -194,6 +251,21 @@ function commitCheckedPracticeState(nextState: AppState): void {
       ...nextState,
       attempt: progress.practiceDraft.attempt,
     };
+  }
+  const nowFinalized = practiceState.attempt.status === 'finalized';
+  if (!wasFinalized && nowFinalized) {
+    const after = snapshotProgressVisibility(progress);
+    const moments = diffProgressVisibility(before, after, nextState.exercise.id);
+    const primary = selectProgressMoment(moments);
+    pendingProgressMoment = primary
+      ? { moment: primary, attemptId: nextState.attempt.id, live: true }
+      : null;
+    practiceSession = recordFinalizedAttempt(
+      practiceSession,
+      nextState.attempt.id,
+      skillForExercise(nextState.exercise),
+      moments,
+    );
   }
 }
 
@@ -227,11 +299,17 @@ function render(): void {
       level0Complete: progress.level0Complete,
       level1Complete: progress.level1Complete,
       learnPathComplete: isLearnPathComplete(progress.lessonsCompleted),
+      learnProgress: deriveLearnProgress(lessonState.lesson.id, progress.lessonsCompleted),
+      unitCompleteNotice,
     });
     return;
   }
 
-  root.innerHTML = renderApp(ensurePracticeState(), progress.queue.length, practiceUnlocked);
+  const context = practiceViewContext();
+  root.innerHTML = renderApp(ensurePracticeState(), progress.queue.length, practiceUnlocked, context);
+  if (pendingProgressMoment) {
+    pendingProgressMoment = { ...pendingProgressMoment, live: false };
+  }
 }
 
 function setLocale(nextLocale: Locale): void {
@@ -255,11 +333,18 @@ function setMode(nextMode: AppMode): void {
   if (nextMode !== 'progress') {
     importNotice = null;
   }
+  if (nextMode !== 'learn') {
+    unitCompleteNotice = null;
+  }
   mode = nextMode;
   if (needsOnboarding(progress)) { root.innerHTML = renderOnboarding(locale, onboardingStep); return; }
   if (mode === 'progress') {
     persistProgress(updateResume(progress, { mode: 'progress' }));
   } else if (mode === 'practice') {
+    if (isPracticeSessionComplete(practiceSession)) {
+      practiceSession = createPracticeSession();
+      pendingProgressMoment = null;
+    }
     practiceState = loadPracticeState();
   } else if (mode === 'explore') {
     exploreState = createExploreState(locale, exploreState.formulaIndex);
@@ -306,7 +391,20 @@ function switchLearnUnit(unit: 0 | 1 | 2): void {
 }
 
 function completeCurrentLesson(): void {
+  unitCompleteNotice = null;
+  const before = {
+    level0: progress.level0Complete,
+    level1: progress.level1Complete,
+    level2: progress.level2Complete,
+  };
   persistProgress(completeLesson(progress, lessonState.lesson.id));
+  if (!before.level0 && progress.level0Complete) {
+    unitCompleteNotice = unitCompleteMessage(0);
+  } else if (!before.level1 && progress.level1Complete) {
+    unitCompleteNotice = unitCompleteMessage(1);
+  } else if (!before.level2 && progress.level2Complete) {
+    unitCompleteNotice = unitCompleteMessage(2);
+  }
 
   if (isLearnPathComplete(progress.lessonsCompleted)) {
     mode = 'practice';
@@ -342,10 +440,34 @@ function advancePractice(): void {
   if (state.attempt.status !== 'finalized') {
     return;
   }
+  if (isPracticeSessionComplete(practiceSession)) {
+    render();
+    return;
+  }
+  pendingProgressMoment = null;
   const nextId = selectNextExerciseId(progress);
   persistProgress(clearPracticeDraft(progress));
   practiceState = loadPracticeState(nextId);
   render();
+}
+
+function keepPractising(): void {
+  practiceSession = createPracticeSession();
+  pendingProgressMoment = null;
+  unitCompleteNotice = null;
+  const state = ensurePracticeState();
+  if (state.attempt.status === 'finalized') {
+    const nextId = selectNextExerciseId(progress);
+    persistProgress(clearPracticeDraft(progress));
+    practiceState = loadPracticeState(nextId);
+  }
+  render();
+}
+
+function finishPracticeSession(): void {
+  pendingProgressMoment = null;
+  unitCompleteNotice = null;
+  setMode('progress');
 }
 
 function exportProgressFile(): void {
@@ -364,6 +486,7 @@ function applyImportedProgress(imported: ProgressStore, importedLocale?: Locale)
   lessonState = loadLessonFromProgress(progress);
   practiceState = null;
   exploreState = createExploreState(locale);
+  resetEphemeralProgressUi();
   mode = resolveInitialMode(progress);
 
   if (importedLocale && importedLocale !== locale) {
@@ -635,6 +758,16 @@ root.addEventListener('click', (event) => {
 
   if (action === 'next') {
     advancePractice();
+    return;
+  }
+
+  if (action === 'session-continue') {
+    keepPractising();
+    return;
+  }
+
+  if (action === 'session-finish') {
+    finishPracticeSession();
   }
 });
 

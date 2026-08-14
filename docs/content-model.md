@@ -29,6 +29,9 @@ src/app/
   prerequisites.ts     — loads content/prerequisites.json
   practice-attempt.ts  — one-session attempt and repair state
   storage.ts           — v6 progress persistence and centralized finalization
+  progress-visibility.ts — derived capability states and progress-moment diffs
+  practice-session.ts  — ephemeral 5-attempt practice session (not mastery)
+  evaluation-scaffold.ts — nested evaluation intermediate-value withdrawal
 
 src/i18n/
   lessons.ts           — lesson copy, learn UI, reference panel
@@ -186,6 +189,9 @@ One opened exercise session is one attempt. Wrong checks keep that attempt activ
 
 - A clean pass is correct on the first checked answer and advances the normal SRS interval.
 - A repaired pass follows one or more errors, still adds `passed`, records the encountered errors, and remains due immediately with reduced ease.
+- Nested evaluate-formula exercises may store optional `exerciseStats[id].scaffoldLevel`. A clean pass increments it when the next level hides additional intermediate values. This is pedagogical support withdrawal, not a separate mastery score.
+- Capability states (Ready / Developing / Reliable) are **derived** from unlocks and `SkillStat` evidence. See [`progress-visibility.md`](progress-visibility.md).
+- The five-attempt practice session lives in app memory only. It must not be written into progress export/import.
 - v5 migration preserves old `completed` IDs only as `attempted` exposure. It resets contaminated practice statistics, errors, and SRS, and requires fresh correct evidence for `passed`.
 
 ## Feedback tag taxonomy

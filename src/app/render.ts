@@ -1,5 +1,5 @@
 import type { TreeNode } from '../../engine';
-import { getExerciseHint, ui, progressUi, formatTruthValue } from '../i18n';
+import { getExerciseHint, ui, progressUi, formatTruthValue, visibilityUi, learnUi } from '../i18n';
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
 import { renderLiveTruthRow, renderPartialTruthTable, renderCompleteTruthTable, renderTautologyChoice, usesLiveTruthRow } from './truth-table-render';
@@ -9,6 +9,25 @@ import { renderTranslationExerciseBody, renderTranslationActions } from './trans
 import { renderProofExerciseBody, renderProofActions } from './proof/proof-render';
 import { treeFocusNodeId } from './tree-keyboard';
 import { skillForExercise } from './progress-tracker';
+import {
+  describeProgressMoment,
+  type CapabilityState,
+  type ProgressMoment,
+} from './progress-visibility';
+import type { PracticeSessionSummary } from './practice-session';
+import { exerciseLabel } from './exercise-label';
+
+export type PracticeViewContext = {
+  capabilityState: CapabilityState;
+  sessionCompleted: number;
+  sessionTarget: number;
+  sessionComplete: boolean;
+  sessionSummary?: PracticeSessionSummary | null;
+  progressMoment?: ProgressMoment | null;
+  progressMomentLive?: boolean;
+  scaffoldLevel?: number;
+  unitCompleteNotice?: string | null;
+};
 
 function showsEvaluatedTree(type: AppState['exercise']['type']): boolean {
   return type === 'evaluate-formula' || type === 'find-counterexample';
@@ -169,15 +188,140 @@ function renderExerciseBody(state: AppState): string {
   return renderScopeBody(state);
 }
 
-function renderCounterexampleActions(state: AppState): string {
+function renderCounterexampleActions(state: AppState, hideContinue: boolean): string {
   const copy = ui(state.locale);
   if (state.attempt.status === 'finalized') {
-    return `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
+    return hideContinue ? '' : `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
   }
   return `<button type="button" class="primary" data-action="check-counterexample">${copy.checkCounterexample}</button>`;
 }
 
-export function renderApp(state: AppState, queueSize: number, practiceUnlocked: boolean): string {
+function capabilityStateLabel(
+  copy: ReturnType<typeof visibilityUi>,
+  state: CapabilityState,
+): string {
+  if (state === 'reliable') return copy.stateReliable;
+  if (state === 'developing') return copy.stateDeveloping;
+  if (state === 'ready') return copy.stateReady;
+  return copy.stateLocked;
+}
+
+function renderPracticeChrome(
+  state: AppState,
+  context: PracticeViewContext,
+): string {
+  const copy = visibilityUi(state.locale);
+  const skillId = skillForExercise(state.exercise);
+  const familyLabel = progressUi(state.locale).skillLabel(skillId);
+  const stateLabel = capabilityStateLabel(copy, context.capabilityState);
+  const moment = context.progressMoment
+    ? describeProgressMoment(
+        context.progressMoment,
+        copy,
+        (id) => progressUi(state.locale).skillLabel(id),
+        (id) => exerciseLabel(state.locale, id),
+      )
+    : null;
+  const unitNotice = context.unitCompleteNotice
+    ? `<section class="unit-complete-card" data-testid="unit-complete" role="status">
+        <h2 class="panel-title">${learnUi(state.locale).unitCompleteHeading}</h2>
+        <p>${context.unitCompleteNotice}</p>
+      </section>`
+    : '';
+  const momentPanel = moment
+    ? `<aside class="progress-moment" data-testid="progress-moment" role="status" aria-live="${context.progressMomentLive ? 'polite' : 'off'}">${moment}</aside>`
+    : '';
+
+  return `
+    ${unitNotice}
+    <div class="practice-progress" data-testid="practice-progress">
+      <p class="practice-capability">
+        <span class="exercise-family">${familyLabel}</span>
+        <span class="capability-chip" data-testid="capability-state">${stateLabel}</span>
+      </p>
+      <p class="sr-only">${copy.capabilityStatusAria(familyLabel, stateLabel)}</p>
+      <p
+        class="practice-session"
+        data-testid="practice-session"
+        aria-label="${copy.sessionProgressAria(context.sessionCompleted, context.sessionTarget)}"
+      >${copy.sessionProgress(context.sessionCompleted, context.sessionTarget)}</p>
+    </div>
+    ${momentPanel}
+  `;
+}
+
+function renderSessionComplete(state: AppState, context: PracticeViewContext): string {
+  if (!context.sessionComplete) {
+    return '';
+  }
+  const copy = visibilityUi(state.locale);
+  const summary = context.sessionSummary;
+  const count = summary?.completedCount ?? context.sessionCompleted;
+  const momentItems =
+    summary && summary.moments.length > 0
+      ? `<ul class="session-complete-moments">${summary.moments
+          .map(
+            (moment) =>
+              `<li>${describeProgressMoment(
+                moment,
+                copy,
+                (id) => progressUi(state.locale).skillLabel(id),
+                (id) => exerciseLabel(state.locale, id),
+              )}</li>`,
+          )
+          .join('')}</ul>`
+      : summary && summary.skillIds.length > 0
+        ? `<p>${copy.sessionPractised(
+            summary.skillIds.map((id) => progressUi(state.locale).skillLabel(id)).join(', '),
+          )}</p>`
+        : '';
+
+  return `
+    <section class="session-complete-card" data-testid="session-complete" role="status">
+      <h2 class="panel-title">${copy.sessionCompleteHeading}</h2>
+      <p>${copy.sessionCompleteCount(count)}</p>
+      ${momentItems}
+      <div class="actions">
+        <button type="button" class="primary" data-action="session-continue">${copy.sessionKeepPractising}</button>
+        <button type="button" class="secondary" data-action="session-finish">${copy.sessionFinish}</button>
+      </div>
+    </section>
+  `;
+}
+
+function renderExerciseActions(state: AppState, hideContinue: boolean): string {
+  const copy = ui(state.locale);
+  const continueButton = hideContinue
+    ? ''
+    : `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
+  const tryAgain = `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>`;
+  const scaffoldBlocksPrediction =
+    state.exercise.type === 'evaluate-formula' &&
+    state.scaffoldNodeIds.length > 0 &&
+    state.activeLearnerNodeId !== null;
+
+  return `
+        <div class="actions">
+          ${state.exercise.type === 'identify-main-connective' && state.phase === 'ready' ? `<button type="button" class="primary" data-action="check-scope"${state.selectedNodeId === null ? ' disabled' : ''}>${copy.checkScope}</button>` : ''}
+          ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' ? (state.attempt.status === 'finalized' ? continueButton : tryAgain) : ''}
+          ${(state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology') && state.phase === 'answered' ? (state.attempt.status === 'finalized' ? continueButton : tryAgain) : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.attempt.status === 'finalized' ? continueButton : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.phase === 'answered' && state.attempt.status !== 'finalized' ? tryAgain : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' && getExerciseHint(state.locale, state.exercise.id) && !state.hintVisible ? `<button type="button" class="secondary" data-action="show-hint">${copy.showHint}</button>` : ''}
+          ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="check-evaluation"${state.prediction === null || scaffoldBlocksPrediction ? ' disabled' : ''}>${copy.checkEvaluation}</button>` : ''}
+          ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state, hideContinue) : ''}
+          ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state, hideContinue) : ''}
+          ${state.exercise.type === 'proof-fill-step' ? renderProofActions(state, hideContinue) : ''}
+        </div>
+  `;
+}
+
+export function renderApp(
+  state: AppState,
+  queueSize: number,
+  practiceUnlocked: boolean,
+  context?: PracticeViewContext,
+): string {
   const copy = ui(state.locale);
   const familyLabel = progressUi(state.locale).skillLabel(skillForExercise(state.exercise));
   const cellCorrect = cellSubmissionCorrect(state);
@@ -199,10 +343,8 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
       ? ''
       : `<p class="formula-display" aria-label="${copy.formulaDisplayAria}">${state.exercise.formula}</p>`;
 
-  const scaffoldBlocksPrediction =
-    state.exercise.type === 'evaluate-formula' &&
-    state.scaffoldNodeIds.length > 0 &&
-    state.activeLearnerNodeId !== null;
+  const hideContinue = Boolean(context?.sessionComplete);
+  const chrome = context ? renderPracticeChrome(state, context) : '';
 
   return `
     <main class="app" lang="${state.locale}">
@@ -214,26 +356,17 @@ export function renderApp(state: AppState, queueSize: number, practiceUnlocked: 
         meta: copy.queueMeta(queueSize),
         referenceOpen: false,
       })}
+      ${chrome}
       <article class="exercise-card">
-        <p class="exercise-family">${familyLabel}</p>
+        ${context ? '' : `<p class="exercise-family">${familyLabel}</p>`}
         <p class="exercise-prompt">${state.prompt}</p>
         ${state.hintVisible && getExerciseHint(state.locale, state.exercise.id) ? `<aside class="exercise-hint" role="note"><strong>${copy.hintHeading}</strong> ${getExerciseHint(state.locale, state.exercise.id)}</aside>` : ''}
         ${formulaLine}
         ${renderExerciseBody(state)}
         ${state.message ? `<p class="feedback ${feedbackClass}" role="status">${state.message}</p>` : ''}
-        <div class="actions">
-          ${state.exercise.type === 'identify-main-connective' && state.phase === 'ready' ? `<button type="button" class="primary" data-action="check-scope"${state.selectedNodeId === null ? ' disabled' : ''}>${copy.checkScope}</button>` : ''}
-          ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' ? `<button type="button" class="primary" data-action="${state.attempt.status === 'finalized' ? 'next' : 'try-again'}">${state.attempt.status === 'finalized' ? copy.continue : copy.tryAgain}</button>` : ''}
-          ${(state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology') && state.phase === 'answered' ? `<button type="button" class="primary" data-action="${state.attempt.status === 'finalized' ? 'next' : 'try-again'}">${state.attempt.status === 'finalized' ? copy.continue : copy.tryAgain}</button>` : ''}
-          ${state.exercise.type === 'evaluate-formula' && state.attempt.status === 'finalized' ? `<button type="button" class="primary" data-action="next">${copy.continue}</button>` : ''}
-          ${state.exercise.type === 'evaluate-formula' && state.phase === 'answered' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="try-again">${copy.tryAgain}</button>` : ''}
-          ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' && getExerciseHint(state.locale, state.exercise.id) && !state.hintVisible ? `<button type="button" class="secondary" data-action="show-hint">${copy.showHint}</button>` : ''}
-          ${state.exercise.type === 'evaluate-formula' && state.phase === 'ready' && state.attempt.status !== 'finalized' ? `<button type="button" class="primary" data-action="check-evaluation"${state.prediction === null || scaffoldBlocksPrediction ? ' disabled' : ''}>${copy.checkEvaluation}</button>` : ''}
-          ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state) : ''}
-          ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state) : ''}
-          ${state.exercise.type === 'proof-fill-step' ? renderProofActions(state) : ''}
-        </div>
+        ${renderExerciseActions(state, hideContinue)}
       </article>
+      ${context ? renderSessionComplete(state, context) : ''}
     </main>
   `;
 }

@@ -203,3 +203,17 @@ The first coherent pass should ship together:
 - Playwright coverage for the highest-risk progress flows.
 
 See `docs/agent-brief-progress-visibility.md` for the implementation brief.
+
+## Implementation
+
+Derived presentation lives next to existing progress storage; it does not add a scoring system.
+
+| Module | Role |
+|---|---|
+| `src/app/progress-visibility.ts` | Capability states and before/after progress-moment diffs |
+| `src/app/practice-session.ts` | In-memory 5-attempt session (not mastery, not export/import) |
+| `src/app/evaluation-scaffold.ts` | Nested evaluation scaffold levels already used for learner-produced intermediates |
+| `src/i18n/messages.ts` (`visibilityUi`) | Independently authored EN/FR copy |
+
+`commitCheckedPracticeState()` in `src/main.ts` diffs visibility snapshots before and after `recordCheckedPracticeState()`. A moment is shown only when underlying state changed, and only once per finalization.
+

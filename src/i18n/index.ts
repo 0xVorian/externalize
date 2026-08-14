@@ -20,8 +20,9 @@ export {
   formatEvaluationFeedback,
   translationUi,
   proofUi,
+  visibilityUi,
 } from './messages';
-export type { ExerciseCopy, UiCopy, ProgressUiCopy, TranslationUiCopy, OnboardingUiCopy, ProofUiCopy } from './messages';
+export type { ExerciseCopy, UiCopy, ProgressUiCopy, TranslationUiCopy, OnboardingUiCopy, ProofUiCopy, VisibilityUiCopy } from './messages';
 export {
   learnUi,
   getLessonCopy,

@@ -72,3 +72,20 @@ test('and-elimination proof controls work on a phone', async ({ page }) => {
   await expect(page.locator('.feedback-correct')).toBeVisible();
   await expectNoPageOverflow(page);
 });
+
+test('learn progress chrome stays inside a narrow phone', async ({ page }) => {
+  await gotoFresh(page);
+  await expect(page.locator('[data-testid="learn-progress"]')).toBeVisible();
+  await expectNoPageOverflow(page);
+});
+
+test('practice and progress chrome stay inside a narrow phone', async ({ page }) => {
+  await gotoWithProgress(page, progressReadyForExercise('eval-001'));
+  await modeButton(page, 'practice').click();
+  await expect(page.locator('[data-testid="practice-progress"]')).toBeVisible();
+  await expectNoPageOverflow(page);
+
+  await modeButton(page, 'progress').click();
+  await expect(page.locator('[data-testid="capability-summary"]')).toBeVisible();
+  await expectNoPageOverflow(page);
+});
