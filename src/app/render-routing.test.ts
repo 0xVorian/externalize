@@ -104,4 +104,62 @@ describe('practice presentation routing', () => {
     expect(html).toContain('data-testid="unit-complete"');
     expect(html).toContain('Unit 2 complete. Nested structure is in place.');
   });
+
+  it('announces a unit-complete card live only on first presentation', () => {
+    const exercise = EXERCISE_DEFINITIONS.find((candidate) => candidate.id === 'eval-001')!;
+    const notice = 'Unit 2 complete. Nested structure is in place.';
+    const base = {
+      capabilityState: 'ready' as const,
+      sessionCompleted: 0,
+      sessionTarget: 5,
+      sessionComplete: false,
+      unitCompleteNotice: notice,
+    };
+    const liveHtml = renderApp(createState('en', exercise), 0, true, {
+      ...base,
+      unitCompleteNoticeLive: true,
+    });
+    const liveTag = liveHtml.match(/<section class="unit-complete-card"[^>]*>/)?.[0];
+    expect(liveTag).toContain('role="status"');
+    expect(liveTag).toContain('aria-live="polite"');
+
+    const laterHtml = renderApp(createState('en', exercise), 0, true, {
+      ...base,
+      unitCompleteNoticeLive: false,
+    });
+    const laterTag = laterHtml.match(/<section class="unit-complete-card"[^>]*>/)?.[0];
+    expect(laterTag).toContain('aria-live="off"');
+    expect(laterTag).not.toContain('role="status"');
+    expect(laterHtml).toContain(notice);
+  });
+
+  it('announces a progress moment live only on first presentation', () => {
+    const exercise = EXERCISE_DEFINITIONS.find((candidate) => candidate.id === 'eval-001')!;
+    const base: PracticeViewContext = {
+      capabilityState: 'reliable',
+      sessionCompleted: 1,
+      sessionTarget: 5,
+      sessionComplete: false,
+      progressMoment: {
+        kind: 'capability-reliable',
+        skillId: 'practice:evaluate-formula',
+      },
+    };
+    const liveHtml = renderApp(createState('en', exercise), 0, true, {
+      ...base,
+      progressMomentLive: true,
+    });
+    const liveTag = liveHtml.match(/<aside class="progress-moment"[^>]*>/)?.[0];
+    expect(liveTag).toContain('role="status"');
+    expect(liveTag).toContain('aria-live="polite"');
+
+    const laterHtml = renderApp(createState('en', exercise), 0, true, {
+      ...base,
+      progressMomentLive: false,
+    });
+    const laterTag = laterHtml.match(/<aside class="progress-moment"[^>]*>/)?.[0];
+    expect(laterTag).toContain('role="status"');
+    expect(laterTag).toContain('aria-live="off"');
+    expect(laterTag).not.toContain('aria-live="polite"');
+  });
 });

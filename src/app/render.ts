@@ -2,6 +2,7 @@ import type { TreeNode } from '../../engine';
 import { getExerciseHint, ui, progressUi, formatTruthValue, visibilityUi, learnUi } from '../i18n';
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
+import { renderUnitCompleteCard } from './lesson-render';
 import { renderLiveTruthRow, renderPartialTruthTable, renderCompleteTruthTable, renderTautologyChoice, usesLiveTruthRow } from './truth-table-render';
 import { cellSubmissionCorrect, tautologySubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
@@ -27,6 +28,7 @@ export type PracticeViewContext = {
   progressMomentLive?: boolean;
   scaffoldLevel?: number;
   unitCompleteNotice?: string | null;
+  unitCompleteNoticeLive?: boolean;
 };
 
 function showsEvaluatedTree(type: AppState['exercise']['type']): boolean {
@@ -223,10 +225,11 @@ function renderPracticeChrome(
       )
     : null;
   const unitNotice = context.unitCompleteNotice
-    ? `<section class="unit-complete-card" data-testid="unit-complete" role="status">
-        <h2 class="panel-title">${learnUi(state.locale).unitCompleteHeading}</h2>
-        <p>${context.unitCompleteNotice}</p>
-      </section>`
+    ? renderUnitCompleteCard(
+        learnUi(state.locale).unitCompleteHeading,
+        context.unitCompleteNotice,
+        context.unitCompleteNoticeLive === true,
+      )
     : '';
   const momentPanel = moment
     ? `<aside class="progress-moment" data-testid="progress-moment" role="status" aria-live="${context.progressMomentLive ? 'polite' : 'off'}">${moment}</aside>`

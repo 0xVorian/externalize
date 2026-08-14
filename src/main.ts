@@ -113,6 +113,7 @@ let practiceSession: PracticeSession = createPracticeSession();
 let pendingProgressMoment: { moment: ProgressMoment; attemptId: string; live: boolean } | null =
   null;
 let unitCompleteNotice: string | null = null;
+let unitCompleteNoticeLive = false;
 
 const importInput = document.createElement('input');
 importInput.type = 'file';
@@ -161,7 +162,24 @@ function loadLessonFromProgress(store: ProgressStore): LessonState {
 function resetEphemeralProgressUi(): void {
   practiceSession = createPracticeSession();
   pendingProgressMoment = null;
+  clearUnitCompleteNotice();
+}
+
+function clearUnitCompleteNotice(): void {
   unitCompleteNotice = null;
+  unitCompleteNoticeLive = false;
+}
+
+function announceUnitComplete(unit: 0 | 1 | 2): void {
+  unitCompleteNotice = unitCompleteMessage(unit);
+  unitCompleteNoticeLive = true;
+}
+
+function disarmLiveAnnouncements(): void {
+  if (pendingProgressMoment) {
+    pendingProgressMoment = { ...pendingProgressMoment, live: false };
+  }
+  unitCompleteNoticeLive = false;
 }
 
 function unitCompleteMessage(unit: 0 | 1 | 2): string {
@@ -190,6 +208,7 @@ function practiceViewContext(): PracticeViewContext {
     progressMomentLive: pendingProgressMoment?.live === true,
     scaffoldLevel: currentScaffoldLevel(progress.exerciseStats[state.exercise.id]?.scaffoldLevel),
     unitCompleteNotice,
+    unitCompleteNoticeLive,
   };
 }
 
@@ -301,15 +320,15 @@ function render(): void {
       learnPathComplete: isLearnPathComplete(progress.lessonsCompleted),
       learnProgress: deriveLearnProgress(lessonState.lesson.id, progress.lessonsCompleted),
       unitCompleteNotice,
+      unitCompleteNoticeLive,
     });
+    disarmLiveAnnouncements();
     return;
   }
 
   const context = practiceViewContext();
   root.innerHTML = renderApp(ensurePracticeState(), progress.queue.length, practiceUnlocked, context);
-  if (pendingProgressMoment) {
-    pendingProgressMoment = { ...pendingProgressMoment, live: false };
-  }
+  disarmLiveAnnouncements();
 }
 
 function setLocale(nextLocale: Locale): void {
@@ -334,7 +353,7 @@ function setMode(nextMode: AppMode): void {
     importNotice = null;
   }
   if (nextMode !== 'learn') {
-    unitCompleteNotice = null;
+    clearUnitCompleteNotice();
   }
   mode = nextMode;
   if (needsOnboarding(progress)) { root.innerHTML = renderOnboarding(locale, onboardingStep); return; }
@@ -391,7 +410,7 @@ function switchLearnUnit(unit: 0 | 1 | 2): void {
 }
 
 function completeCurrentLesson(): void {
-  unitCompleteNotice = null;
+  clearUnitCompleteNotice();
   const before = {
     level0: progress.level0Complete,
     level1: progress.level1Complete,
@@ -399,11 +418,11 @@ function completeCurrentLesson(): void {
   };
   persistProgress(completeLesson(progress, lessonState.lesson.id));
   if (!before.level0 && progress.level0Complete) {
-    unitCompleteNotice = unitCompleteMessage(0);
+    announceUnitComplete(0);
   } else if (!before.level1 && progress.level1Complete) {
-    unitCompleteNotice = unitCompleteMessage(1);
+    announceUnitComplete(1);
   } else if (!before.level2 && progress.level2Complete) {
-    unitCompleteNotice = unitCompleteMessage(2);
+    announceUnitComplete(2);
   }
 
   if (isLearnPathComplete(progress.lessonsCompleted)) {
@@ -445,7 +464,7 @@ function advancePractice(): void {
     return;
   }
   pendingProgressMoment = null;
-  unitCompleteNotice = null;
+  clearUnitCompleteNotice();
   const nextId = selectNextExerciseId(progress);
   persistProgress(clearPracticeDraft(progress));
   practiceState = loadPracticeState(nextId);
@@ -455,7 +474,7 @@ function advancePractice(): void {
 function keepPractising(): void {
   practiceSession = createPracticeSession();
   pendingProgressMoment = null;
-  unitCompleteNotice = null;
+  clearUnitCompleteNotice();
   const state = ensurePracticeState();
   if (state.attempt.status === 'finalized') {
     const nextId = selectNextExerciseId(progress);
@@ -467,7 +486,7 @@ function keepPractising(): void {
 
 function finishPracticeSession(): void {
   pendingProgressMoment = null;
-  unitCompleteNotice = null;
+  clearUnitCompleteNotice();
   setMode('progress');
 }
 

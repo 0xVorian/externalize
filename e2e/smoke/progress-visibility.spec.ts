@@ -188,8 +188,22 @@ test.describe('progress visibility', () => {
     const notice = page.locator('[data-testid="unit-complete"]');
     await expect(notice).toBeVisible();
     await expect(notice).toContainText('Unit 2 complete');
+    await expect(notice).toHaveAttribute('role', 'status');
+    await expect(notice).toHaveAttribute('aria-live', 'polite');
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
 
+    await page.locator('[data-action="select-evaluation-prediction"]').first().click();
+    await expect(notice).toBeVisible();
+    await expect(notice).toContainText('Unit 2 complete');
+    await expect(notice).not.toHaveAttribute('role', 'status');
+    await expect(notice).toHaveAttribute('aria-live', 'off');
+
+    await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
+    await expect(notice).toBeVisible();
+    await expect(notice).not.toHaveAttribute('role', 'status');
+    await expect(notice).toHaveAttribute('aria-live', 'off');
+
+    await page.locator('[data-action="set-locale"][data-locale="en"]').click();
     await completeEvalCorrect(page);
     await page.locator('[data-action="next"]').click();
     await expect(notice).toHaveCount(0);

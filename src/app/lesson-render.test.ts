@@ -47,4 +47,28 @@ describe('lesson presentation routing', () => {
     expect(html).toContain('role="meter"');
     expect(html).toContain('aria-valuenow="1"');
   });
+
+  it('announces a unit-complete card live only on first presentation', () => {
+    const state = createLessonState('en', getLessonDefinition('level0-02-truth')!);
+    const notice = 'Introductory unit complete. Exercises are unlocked.';
+    const liveHtml = renderLessonView(state, {
+      ...defaultLearnProgress,
+      unitCompleteNotice: notice,
+      unitCompleteNoticeLive: true,
+    });
+    const liveTag = liveHtml.match(/<section class="unit-complete-card"[^>]*>/)?.[0];
+    expect(liveTag).toContain('role="status"');
+    expect(liveTag).toContain('aria-live="polite"');
+    expect(liveHtml).toContain(notice);
+
+    const laterHtml = renderLessonView(state, {
+      ...defaultLearnProgress,
+      unitCompleteNotice: notice,
+      unitCompleteNoticeLive: false,
+    });
+    const laterTag = laterHtml.match(/<section class="unit-complete-card"[^>]*>/)?.[0];
+    expect(laterTag).toContain('aria-live="off"');
+    expect(laterTag).not.toContain('role="status"');
+    expect(laterHtml).toContain(notice);
+  });
 });

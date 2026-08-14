@@ -116,6 +116,20 @@ function renderCompletionToast(state: LessonState): string {
   return `<p class="completion-toast" role="status">${message}</p>`;
 }
 
+export function renderUnitCompleteCard(
+  heading: string,
+  notice: string,
+  live: boolean,
+): string {
+  const announcement = live
+    ? 'role="status" aria-live="polite"'
+    : 'aria-live="off"';
+  return `<section class="unit-complete-card" data-testid="unit-complete" ${announcement}>
+        <h2 class="panel-title">${heading}</h2>
+        <p>${notice}</p>
+      </section>`;
+}
+
 export function renderLessonView(
   state: LessonState,
   options: {
@@ -130,6 +144,7 @@ export function renderLessonView(
       completedInUnit: number;
     };
     unitCompleteNotice?: string | null;
+    unitCompleteNoticeLive?: boolean;
   },
 ): string {
   const learn = learnUi(state.locale);
@@ -173,10 +188,11 @@ export function renderLessonView(
   }
 
   const unitCompleteCard = options.unitCompleteNotice
-    ? `<section class="unit-complete-card" data-testid="unit-complete" role="status">
-        <h2 class="panel-title">${learn.unitCompleteHeading}</h2>
-        <p>${options.unitCompleteNotice}</p>
-      </section>`
+    ? renderUnitCompleteCard(
+        learn.unitCompleteHeading,
+        options.unitCompleteNotice,
+        options.unitCompleteNoticeLive === true,
+      )
     : '';
 
   return `
