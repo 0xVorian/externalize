@@ -39,6 +39,10 @@ export type LearnUiCopy = {
   continueUnit1: string;
   continueUnit2: string;
   lessonProgress: (current: number, total: number) => string;
+  lessonOfUnit: (current: number, total: number) => string;
+  lessonsCompletedLabel: (done: number) => string;
+  unitProgressAria: (unitTitle: string, current: number, total: number, done: number) => string;
+  unitCompleteHeading: string;
   nextStep: string;
   startPractice: string;
   level0Complete: string;
@@ -151,6 +155,12 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     continueUnit1: 'Continue to Unit 1',
     continueUnit2: 'Continue to Unit 2',
     lessonProgress: (current, total) => `Section ${current} of ${total}`,
+    lessonOfUnit: (current, total) => `Lesson ${current} of ${total}`,
+    lessonsCompletedLabel: (done) =>
+      done === 1 ? '1 completed' : `${done} completed`,
+    unitProgressAria: (unitTitle, current, total, done) =>
+      `${unitTitle}. Lesson ${current} of ${total}. ${done} of ${total} lessons completed.`,
+    unitCompleteHeading: 'Unit complete',
     nextStep: 'Continue',
     startPractice: 'Begin exercises',
     level0Complete:
@@ -190,6 +200,12 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     continueUnit1: 'Passer à l\'unité 1',
     continueUnit2: 'Passer à l\'unité 2',
     lessonProgress: (current, total) => `Section ${current} sur ${total}`,
+    lessonOfUnit: (current, total) => `Leçon ${current} sur ${total}`,
+    lessonsCompletedLabel: (done) =>
+      done === 1 ? '1 terminée' : `${done} terminées`,
+    unitProgressAria: (unitTitle, current, total, done) =>
+      `${unitTitle}. Leçon ${current} sur ${total}. ${done} leçon${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}.`,
+    unitCompleteHeading: 'Unité terminée',
     nextStep: 'Continuer',
     startPractice: 'Passer aux exercices',
     level0Complete:

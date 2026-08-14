@@ -16,6 +16,70 @@ import { learnUi } from '../i18n';
 import { renderConceptMap } from './concept-map-render';
 import { computeWhatNext } from './what-next';
 import { exerciseLabel } from './exercise-label';
+import {
+  deriveCapabilityStates,
+  nextReadySkillId,
+  type CapabilityState,
+} from './progress-visibility';
+import { TRACKED_SKILL_IDS, type SkillId } from './progress-tracker';
+import { visibilityUi } from '../i18n';
+
+function capabilityStateLabel(
+  copy: ReturnType<typeof visibilityUi>,
+  state: CapabilityState,
+): string {
+  if (state === 'reliable') return copy.stateReliable;
+  if (state === 'developing') return copy.stateDeveloping;
+  if (state === 'ready') return copy.stateReady;
+  return copy.stateLocked;
+}
+
+function renderCapabilityItems(
+  locale: Locale,
+  ids: SkillId[],
+  states: Record<SkillId, CapabilityState>,
+  empty: string,
+): string {
+  const progressCopy = progressUi(locale);
+  const vis = visibilityUi(locale);
+  if (ids.length === 0) {
+    return `<p class="progress-empty">${empty}</p>`;
+  }
+  return `<ul class="capability-summary-list">${ids
+    .map((id) => {
+      const name = progressCopy.skillLabel(id);
+      const state = capabilityStateLabel(vis, states[id]);
+      return `<li><strong>${name}</strong> <span class="capability-chip">${state}</span></li>`;
+    })
+    .join('')}</ul>`;
+}
+
+function renderCapabilitySummary(
+  locale: Locale,
+  store: ProgressStore,
+  suggestionDetail: string,
+): string {
+  const vis = visibilityUi(locale);
+  const progressCopy = progressUi(locale);
+  const states = deriveCapabilityStates(store, getUnlockedExerciseIds(store));
+  const reliable = TRACKED_SKILL_IDS.filter((id) => states[id] === 'reliable');
+  const developing = TRACKED_SKILL_IDS.filter((id) => states[id] === 'developing');
+  const readyId = nextReadySkillId(states);
+  const upNextBody = readyId
+    ? `<ul class="capability-summary-list"><li><strong>${progressCopy.skillLabel(readyId)}</strong> <span class="capability-chip">${vis.stateReady}</span></li></ul>`
+    : `<p class="progress-empty">${suggestionDetail || vis.upNextEmpty}</p>`;
+
+  return `
+    <section class="progress-card capability-summary" data-testid="capability-summary" aria-labelledby="capability-summary-heading">
+      <h2 class="panel-title" id="capability-summary-heading">${vis.youCanNowHeading}</h2>
+      ${renderCapabilityItems(locale, reliable, states, vis.youCanNowEmpty)}
+      <h3 class="progress-subheading">${vis.inProgressHeading}</h3>
+      ${renderCapabilityItems(locale, developing, states, vis.inProgressEmpty)}
+      <h3 class="progress-subheading">${vis.upNextHeading}</h3>
+      ${upNextBody}
+    </section>
+  `;
+}
 
 function renderListItem(
   locale: Locale,
@@ -245,6 +309,8 @@ export function renderProgressView(
         <p class="progress-meta">${copy.lastSeen(formatResumeTime(locale, resume.updatedAt))}</p>
         <button type="button" class="primary" data-action="${suggestion.action}" ${suggestion.exerciseId ? `data-exercise-id="${suggestion.exerciseId}"` : ''}>${suggestion.buttonLabel}</button>
       </section>
+
+      ${renderCapabilitySummary(locale, store, suggestion.detail)}
 
       <section class="progress-card progress-overview" aria-labelledby="progress-overview-heading">
         <h2 class="panel-title" id="progress-overview-heading">${currentUnit.title}</h2>

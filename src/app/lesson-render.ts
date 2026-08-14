@@ -116,6 +116,20 @@ function renderCompletionToast(state: LessonState): string {
   return `<p class="completion-toast" role="status">${message}</p>`;
 }
 
+export function renderUnitCompleteCard(
+  heading: string,
+  notice: string,
+  live: boolean,
+): string {
+  const announcement = live
+    ? 'role="status" aria-live="polite"'
+    : 'aria-live="off"';
+  return `<section class="unit-complete-card" data-testid="unit-complete" ${announcement}>
+        <h2 class="panel-title">${heading}</h2>
+        <p>${notice}</p>
+      </section>`;
+}
+
 export function renderLessonView(
   state: LessonState,
   options: {
@@ -123,6 +137,14 @@ export function renderLessonView(
     level0Complete: boolean;
     level1Complete: boolean;
     learnPathComplete: boolean;
+    learnProgress: {
+      unit: 0 | 1 | 2;
+      lessonPosition: number;
+      lessonTotal: number;
+      completedInUnit: number;
+    };
+    unitCompleteNotice?: string | null;
+    unitCompleteNoticeLive?: boolean;
   },
 ): string {
   const learn = learnUi(state.locale);
@@ -132,6 +154,11 @@ export function renderLessonView(
   const lessonIndex = unitLessons.findIndex((lesson) => lesson.id === state.lesson.id) + 1;
   const unitTitle =
     unit === 2 ? learn.level2Title : unit === 1 ? learn.level1Title : learn.level0Title;
+  const progress = options.learnProgress;
+  const meterPercent =
+    progress.lessonTotal === 0
+      ? 0
+      : Math.round((progress.completedInUnit / progress.lessonTotal) * 100);
 
   let body = '';
   if (state.lesson.type === 'card') {
@@ -160,6 +187,14 @@ export function renderLessonView(
     nextLabel = learn.startPractice;
   }
 
+  const unitCompleteCard = options.unitCompleteNotice
+    ? renderUnitCompleteCard(
+        learn.unitCompleteHeading,
+        options.unitCompleteNotice,
+        options.unitCompleteNoticeLive === true,
+      )
+    : '';
+
   return `
     <main class="app" lang="${state.locale}">
       ${renderShellHeader({
@@ -170,7 +205,27 @@ export function renderLessonView(
         meta: `${copy.subtitle ?? copy.title} · ${learn.lessonProgress(lessonIndex, unitLessons.length)}`,
       })}
 
+      <section
+        class="learn-progress"
+        data-testid="learn-progress"
+        aria-label="${learn.unitProgressAria(unitTitle, progress.lessonPosition, progress.lessonTotal, progress.completedInUnit)}"
+      >
+        <p class="learn-progress-unit">${unitTitle}</p>
+        <p class="learn-progress-meta">${learn.lessonOfUnit(progress.lessonPosition, progress.lessonTotal)} · ${learn.lessonsCompletedLabel(progress.completedInUnit)}</p>
+        <div
+          class="progress-meter"
+          role="meter"
+          aria-valuemin="0"
+          aria-valuemax="${progress.lessonTotal}"
+          aria-valuenow="${progress.completedInUnit}"
+          aria-label="${learn.unitProgressAria(unitTitle, progress.lessonPosition, progress.lessonTotal, progress.completedInUnit)}"
+        >
+          <div class="progress-meter-fill" style="width: ${meterPercent}%"></div>
+        </div>
+      </section>
+
       ${renderUnitPicker(state, options.level0Complete, options.level1Complete)}
+      ${unitCompleteCard}
       ${renderCompletionToast(state)}
 
       ${body}

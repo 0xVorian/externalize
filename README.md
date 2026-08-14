@@ -16,6 +16,7 @@ Start here:
 | [Roadmap](docs/roadmap.md) | Build order, MVP scope, and first prototype |
 | [Future work plan](docs/future-work-plan.md) | Proactive content/engine prep and agent batch plan (not the app roadmap) |
 | [Content model](docs/content-model.md) | How exercises, lessons, and progress are represented as data |
+| [Progress visibility](docs/progress-visibility.md) | Capability states, practice sessions, and progress moments |
 | [Authoring guide](docs/authoring.md) | How to add lessons and exercises (worked examples, checklist) |
 | [Versioning & changelog](docs/versioning.md) | Semver policy and release workflow |
 | [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |

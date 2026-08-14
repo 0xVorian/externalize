@@ -11,6 +11,20 @@ export type SkillId =
   | 'practice:translate-prose-to-formula'
   | 'practice:proof-fill-step';
 
+export const TRACKED_SKILL_IDS: readonly SkillId[] = [
+  'practice:identify-main-connective',
+  'practice:evaluate-formula',
+  'practice:fill-truth-table-cell',
+  'practice:find-counterexample',
+  'practice:classify-tautology',
+  'practice:translate-prose-to-formula',
+  'practice:proof-fill-step',
+];
+
+/** Same threshold used for Progress “comfortable” skills and capability Reliable. */
+export const RELIABLE_MIN_ATTEMPTS = 3;
+export const RELIABLE_MIN_RATE = 0.8;
+
 export function skillForExercise(exercise: ExerciseDefinition): SkillId {
   if (exercise.type === 'evaluate-formula') return 'practice:evaluate-formula';
   if (exercise.type === 'fill-truth-table-cell') return 'practice:fill-truth-table-cell';
@@ -32,6 +46,7 @@ export type ExerciseStat = {
   successes: number;
   repairedPasses: number;
   lastErrorTag?: PracticeErrorTag;
+  /** Optional nested-evaluation scaffold; omitted exercises stay at full support. */
   scaffoldLevel?: number;
   seenAssignmentKeys?: string[];
 };
@@ -122,7 +137,7 @@ export function buildProgressSummary(input: {
     const entry = { id, labelKey: id, rate, attempts: stat.attempts };
     if (rate < 0.6) {
       struggles.push(entry);
-    } else if (rate >= 0.8 && stat.attempts >= 3) {
+    } else if (rate >= RELIABLE_MIN_RATE && stat.attempts >= RELIABLE_MIN_ATTEMPTS) {
       comfortable.push(entry);
     }
   }

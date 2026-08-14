@@ -1141,6 +1141,101 @@ export function progressUi(locale: Locale): ProgressUiCopy {
   return PROGRESS_UI[locale];
 }
 
+export type VisibilityUiCopy = {
+  stateLocked: string;
+  stateReady: string;
+  stateDeveloping: string;
+  stateReliable: string;
+  capabilityStatusAria: (name: string, state: string) => string;
+  sessionProgress: (completed: number, target: number) => string;
+  sessionProgressAria: (completed: number, target: number) => string;
+  sessionCompleteHeading: string;
+  sessionCompleteCount: (count: number) => string;
+  sessionPractised: (names: string) => string;
+  sessionKeepPractising: string;
+  sessionFinish: string;
+  youCanNowHeading: string;
+  youCanNowEmpty: string;
+  inProgressHeading: string;
+  inProgressEmpty: string;
+  upNextHeading: string;
+  upNextEmpty: string;
+  momentReliable: (capability: string) => string;
+  momentCapabilityUnlocked: (capability: string) => string;
+  momentExerciseUnlocked: (exercise: string) => string;
+  momentScaffoldAdvanced: string;
+  momentFirstPass: (capability: string) => string;
+};
+
+const VISIBILITY_UI: Record<Locale, VisibilityUiCopy> = {
+  en: {
+    stateLocked: 'Locked',
+    stateReady: 'Ready',
+    stateDeveloping: 'Developing',
+    stateReliable: 'Reliable',
+    capabilityStatusAria: (name, state) => `${name}: ${state}`,
+    sessionProgress: (completed, target) => `${completed} / ${target}`,
+    sessionProgressAria: (completed, target) =>
+      `Practice session ${completed} of ${target} finalized exercises`,
+    sessionCompleteHeading: 'Session complete',
+    sessionCompleteCount: (count) =>
+      count === 1
+        ? 'You finished 1 exercise in this session.'
+        : `You finished ${count} exercises in this session.`,
+    sessionPractised: (names) => `Practised: ${names}.`,
+    sessionKeepPractising: 'Keep practising',
+    sessionFinish: 'Leave session',
+    youCanNowHeading: 'You can now',
+    youCanNowEmpty:
+      'Nothing is marked reliable yet. That takes several clean passes on the same kind of work.',
+    inProgressHeading: 'In progress',
+    inProgressEmpty: 'No capability is mid-practice yet.',
+    upNextHeading: 'Up next',
+    upNextEmpty: 'The next step appears as lessons and exercises unlock.',
+    momentReliable: (capability) => `${capability} is now reliable.`,
+    momentCapabilityUnlocked: (capability) => `${capability} is now available.`,
+    momentExerciseUnlocked: (exercise) => `Next exercise unlocked: ${exercise}.`,
+    momentScaffoldAdvanced:
+      'Less support next time — you will supply an intermediate value yourself.',
+    momentFirstPass: (capability) => `First recorded pass for ${capability}.`,
+  },
+  fr: {
+    stateLocked: 'Fermé',
+    stateReady: 'Disponible',
+    stateDeveloping: 'En consolidation',
+    stateReliable: 'Fiable',
+    capabilityStatusAria: (name, state) => `${name} : ${state}`,
+    sessionProgress: (completed, target) => `${completed} / ${target}`,
+    sessionProgressAria: (completed, target) =>
+      `Séance d'exercices : ${completed} sur ${target} tentatives finalisées`,
+    sessionCompleteHeading: 'Séance terminée',
+    sessionCompleteCount: (count) =>
+      count === 1
+        ? 'Vous avez mené 1 exercice à terme dans cette séance.'
+        : `Vous avez mené ${count} exercices à terme dans cette séance.`,
+    sessionPractised: (names) => `Travail effectué : ${names}.`,
+    sessionKeepPractising: 'Continuer à s’exercer',
+    sessionFinish: 'Quitter la séance',
+    youCanNowHeading: 'Vous savez désormais',
+    youCanNowEmpty:
+      'Aucune capacité n’est encore marquée fiable. Il faut plusieurs réussites nettes sur le même type de tâche.',
+    inProgressHeading: 'En cours',
+    inProgressEmpty: 'Aucune capacité n’est actuellement en consolidation.',
+    upNextHeading: 'À venir',
+    upNextEmpty: 'La prochaine étape s’affichera lorsque des leçons ou exercices s’ouvriront.',
+    momentReliable: (capability) => `${capability} est désormais fiable.`,
+    momentCapabilityUnlocked: (capability) => `${capability} est maintenant accessible.`,
+    momentExerciseUnlocked: (exercise) => `Nouvel exercice ouvert : ${exercise}.`,
+    momentScaffoldAdvanced:
+      'Moins d’étayage la prochaine fois : vous calculerez vous-même une valeur intermédiaire.',
+    momentFirstPass: (capability) => `Première réussite enregistrée pour ${capability}.`,
+  },
+};
+
+export function visibilityUi(locale: Locale): VisibilityUiCopy {
+  return VISIBILITY_UI[locale];
+}
+
 export type OnboardingScreenCopy={title:string;body:string;visual?:string};
 export type OnboardingUiCopy={stepLabel:(c:number,t:number)=>string;next:string;skip:string;getStarted:string;screens:OnboardingScreenCopy[]};
 const ONBOARDING_UI:Record<Locale,OnboardingUiCopy>={en:{stepLabel:(c,t)=>`${c} of ${t}`,next:'Next',skip:'Skip intro',getStarted:'Get started',screens:[{title:'See the structure',body:'Formulas are easier when structure is visible. Externalize shows how connectives bind sub-expressions and how truth values flow — so you do not have to hold it all in memory.',visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Tap V or F',body:'Each sentence letter gets True/False segments. Tap to set values and watch the formula evaluate step by step in the vertical tree.',visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment-label">P</span><span class="onboarding-segment active">T</span><span class="onboarding-segment">F</span></div>'},{title:'Your progress stays here',body:'The Progress tab tracks lessons, exercises, and skills that need work. Everything is stored on this device — export anytime to move to another phone.',visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item">Course</span><span class="onboarding-nav-item">Exercises</span><span class="onboarding-nav-item active">Progress</span></div>'}]},fr:{stepLabel:(c,t)=>`${c} sur ${t}`,next:'Suivant',skip:"Passer l'intro",getStarted:'Commencer',screens:[{title:'Voir la structure',body:"Une formule est plus lisible quand sa structure est externalisée. Externalize montre comment les connecteurs lient les sous-formules et comment les valeurs de vérité se propagent — sans tout retenir en mémoire.",visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Appuyez sur V ou F',body:"Chaque variable propositionnelle a des segments V/F. Touchez pour fixer une interprétation et suivre l'évaluation dans l'arbre vertical.",visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment-label">P</span><span class="onboarding-segment active">V</span><span class="onboarding-segment">F</span></div>'},{title:'Votre parcours ici',body:"L'onglet Parcours suit les sections, les exercices et les compétences à consolider. Tout reste sur cet appareil — exportez pour continuer ailleurs.",visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item">Cours</span><span class="onboarding-nav-item">Exercices</span><span class="onboarding-nav-item active">Parcours</span></div>'}]}};

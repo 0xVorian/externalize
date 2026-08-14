@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISE_DEFINITIONS } from '../app/exercises';
-import { getExerciseCopy, getFeedbackTemplates, getCellFeedback, ui, formatTruthValue, formatAssignmentLine, formatEvaluationAssessmentPrompt } from './messages';
+import { getExerciseCopy, getFeedbackTemplates, getCellFeedback, ui, formatTruthValue, formatAssignmentLine, formatEvaluationAssessmentPrompt, visibilityUi } from './messages';
 
 describe('i18n', () => {
   for (const locale of ['en', 'fr'] as const) {
@@ -72,5 +72,37 @@ describe('i18n', () => {
         expect(copy.assessmentPrompt?.length).toBeGreaterThan(0);
       }
     }
+  });
+
+  it('authors EN/FR progress-visibility copy independently', () => {
+    const en = visibilityUi('en');
+    const fr = visibilityUi('fr');
+    expect(Object.keys(en).sort()).toEqual(Object.keys(fr).sort());
+    for (const locale of ['en', 'fr'] as const) {
+      const copy = visibilityUi(locale);
+      expect(copy.stateReady).toBeTruthy();
+      expect(copy.stateDeveloping).toBeTruthy();
+      expect(copy.stateReliable).toBeTruthy();
+      expect(copy.sessionProgress(0, 5)).toMatch(/0/);
+      expect(copy.sessionCompleteHeading).toBeTruthy();
+      expect(copy.sessionKeepPractising).toBeTruthy();
+      expect(copy.sessionFinish).toBeTruthy();
+      expect(copy.youCanNowHeading).toBeTruthy();
+      expect(copy.inProgressHeading).toBeTruthy();
+      expect(copy.upNextHeading).toBeTruthy();
+      expect(copy.youCanNowEmpty).toBeTruthy();
+      expect(copy.inProgressEmpty).toBeTruthy();
+      expect(copy.upNextEmpty).toBeTruthy();
+      expect(copy.momentReliable('Evaluating formulas')).toBeTruthy();
+      expect(copy.momentCapabilityUnlocked('Counterexamples')).toBeTruthy();
+      expect(copy.momentExerciseUnlocked('eval-011')).toBeTruthy();
+      expect(copy.momentScaffoldAdvanced).toBeTruthy();
+      expect(copy.momentFirstPass('Evaluating formulas')).toBeTruthy();
+      expect(copy.sessionCompleteCount(5)).toBeTruthy();
+      expect(copy.capabilityStatusAria('Evaluating formulas', copy.stateReady)).toBeTruthy();
+    }
+    expect(visibilityUi('en').stateReady).toBe('Ready');
+    expect(visibilityUi('fr').stateReady).toBe('Disponible');
+    expect(visibilityUi('en').youCanNowHeading).not.toBe(visibilityUi('fr').youCanNowHeading);
   });
 });
