@@ -114,6 +114,7 @@ let pendingProgressMoment: { moment: ProgressMoment; attemptId: string; live: bo
   null;
 let unitCompleteNotice: string | null = null;
 let unitCompleteNoticeLive = false;
+let sessionCompleteLive = false;
 
 const importInput = document.createElement('input');
 importInput.type = 'file';
@@ -162,7 +163,17 @@ function loadLessonFromProgress(store: ProgressStore): LessonState {
 function resetEphemeralProgressUi(): void {
   practiceSession = createPracticeSession();
   pendingProgressMoment = null;
+  sessionCompleteLive = false;
   clearUnitCompleteNotice();
+}
+
+function preparePracticeEntry(): void {
+  if (!isPracticeSessionComplete(practiceSession)) {
+    return;
+  }
+  practiceSession = createPracticeSession();
+  pendingProgressMoment = null;
+  sessionCompleteLive = false;
 }
 
 function clearUnitCompleteNotice(): void {
@@ -180,6 +191,7 @@ function disarmLiveAnnouncements(): void {
     pendingProgressMoment = { ...pendingProgressMoment, live: false };
   }
   unitCompleteNoticeLive = false;
+  sessionCompleteLive = false;
 }
 
 function unitCompleteMessage(unit: 0 | 1 | 2): string {
@@ -198,6 +210,7 @@ function practiceViewContext(): PracticeViewContext {
     sessionCompleted: practiceSession.completedAttemptIds.length,
     sessionTarget: practiceSession.target,
     sessionComplete: isPracticeSessionComplete(practiceSession),
+    sessionCompleteLive,
     sessionSummary: isPracticeSessionComplete(practiceSession)
       ? summarizePracticeSession(practiceSession)
       : null,
@@ -279,12 +292,16 @@ function commitCheckedPracticeState(nextState: AppState): void {
     pendingProgressMoment = primary
       ? { moment: primary, attemptId: nextState.attempt.id, live: true }
       : null;
+    const sessionWasComplete = isPracticeSessionComplete(practiceSession);
     practiceSession = recordFinalizedAttempt(
       practiceSession,
       nextState.attempt.id,
       skillForExercise(nextState.exercise),
       moments,
     );
+    if (!sessionWasComplete && isPracticeSessionComplete(practiceSession)) {
+      sessionCompleteLive = true;
+    }
   }
 }
 
@@ -360,10 +377,7 @@ function setMode(nextMode: AppMode): void {
   if (mode === 'progress') {
     persistProgress(updateResume(progress, { mode: 'progress' }));
   } else if (mode === 'practice') {
-    if (isPracticeSessionComplete(practiceSession)) {
-      practiceSession = createPracticeSession();
-      pendingProgressMoment = null;
-    }
+    preparePracticeEntry();
     practiceState = loadPracticeState();
   } else if (mode === 'explore') {
     exploreState = createExploreState(locale, exploreState.formulaIndex);
@@ -384,6 +398,7 @@ function startPracticeExercise(exerciseId: string): void {
   ) {
     persistProgress(clearPracticeDraft(progress));
   }
+  preparePracticeEntry();
   mode = 'practice';
   practiceState = loadPracticeState(exerciseId);
   render();
@@ -474,6 +489,7 @@ function advancePractice(): void {
 function keepPractising(): void {
   practiceSession = createPracticeSession();
   pendingProgressMoment = null;
+  sessionCompleteLive = false;
   clearUnitCompleteNotice();
   const state = ensurePracticeState();
   if (state.attempt.status === 'finalized') {

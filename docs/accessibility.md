@@ -49,6 +49,7 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 - Practice capability chips include readable state text (`Ready` / `Developing` / `Reliable`); the visible family label and chip are the single accessible announcement. Session position has an accessible label.
 - Progress moments use `role="status"` with `aria-live="polite"` on first insert only, so rerenders do not re-announce.
 - Unit-completion cards use `role="status"` with `aria-live="polite"` on first insert only. Later rerenders of the same visible card use `aria-live="off"` without `role="status"`, so ordinary interaction and locale switches do not repeat the announcement.
+- Session-complete cards use the same one-shot live pattern: first presentation after crossing `5 / 5` uses `role="status"` with `aria-live="polite"`; later rerenders of that same completed session (including locale switches) use `aria-live="off"` without `role="status"`. A later new session can announce its own completion once.
 - Meter fill animation is disabled under `prefers-reduced-motion`.
 
 ### Focus and keyboard

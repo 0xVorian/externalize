@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit 2 completion is shown once on the first Practice screen after the Learn path, then clears when the learner continues
 - Practice capability name and state are available once as visible text, without a duplicate screen-reader announcement
 - Unit-completion notices are announced once; later rerenders of the same visible card no longer re-announce to assistive technology
+- Starting a new Practice exercise from Progress after a completed `5 / 5` session now opens a fresh `0 / 5` episode instead of keeping the finished session
+- Session-complete cards are announced once; later rerenders of the same visible card no longer re-announce to assistive technology
 
 ## [0.3.5] - 2026-08-11
 

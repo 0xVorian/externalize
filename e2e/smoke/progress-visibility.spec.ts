@@ -228,11 +228,73 @@ test.describe('progress visibility', () => {
     const complete = page.locator('[data-testid="session-complete"]');
     await expect(complete).toBeVisible();
     await expect(complete).toContainText('5');
+    await expect(complete).toHaveAttribute('role', 'status');
+    await expect(complete).toHaveAttribute('aria-live', 'polite');
     await expect(page.locator('[data-action="next"]')).toHaveCount(0);
+
+    await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
+    await expect(complete).toBeVisible();
+    await expect(complete).not.toHaveAttribute('role', 'status');
+    await expect(complete).toHaveAttribute('aria-live', 'off');
+
+    await page.locator('[data-action="set-locale"][data-locale="en"]').click();
+    await expect(complete).toBeVisible();
+    await expect(complete).not.toHaveAttribute('role', 'status');
+    await expect(complete).toHaveAttribute('aria-live', 'off');
 
     await page.locator('[data-action="session-continue"]').click();
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
     await expect(complete).toHaveCount(0);
+  });
+
+  test('an incomplete Practice session survives leaving and returning', async ({ page }) => {
+    await gotoWithProgress(page, progressReadyForExercise('eval-001'));
+    await modeButton(page, 'practice').click();
+
+    await finalizeCurrentPractice(page);
+    await page.locator('[data-action="next"]').click();
+    await finalizeCurrentPractice(page);
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('2 / 5');
+
+    await modeButton(page, 'progress').click();
+    await expect(page.locator('[data-testid="capability-summary"]')).toBeVisible();
+
+    await modeButton(page, 'practice').click();
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('2 / 5');
+    await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
+  });
+
+  test('Leave session then Progress Start exercise opens a fresh 0 / 5 session', async ({
+    page,
+  }) => {
+    await gotoWithProgress(page, progressReadyForExercise('eval-001'));
+    await modeButton(page, 'practice').click();
+
+    for (let index = 0; index < 5; index += 1) {
+      await finalizeCurrentPractice(page);
+      if (index < 4) {
+        await page.locator('[data-action="next"]').click();
+      }
+    }
+
+    const complete = page.locator('[data-testid="session-complete"]');
+    await expect(complete).toBeVisible();
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('5 / 5');
+
+    await page.locator('[data-action="session-finish"]').click();
+    await expect(page.locator('[data-testid="capability-summary"]')).toBeVisible();
+
+    const startExercise = page.locator('.what-next-card [data-action="practice-exercise"]');
+    await expect(startExercise).toBeVisible();
+    await startExercise.click();
+
+    await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
+    await expect(page.locator('.exercise-card button.primary')).toBeVisible();
+
+    await finalizeCurrentPractice(page);
+    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('1 / 5');
+    await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
   });
 
   test('Progress view renders the capability-first summary', async ({ page }) => {

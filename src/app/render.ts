@@ -23,6 +23,7 @@ export type PracticeViewContext = {
   sessionCompleted: number;
   sessionTarget: number;
   sessionComplete: boolean;
+  sessionCompleteLive?: boolean;
   sessionSummary?: PracticeSessionSummary | null;
   progressMoment?: ProgressMoment | null;
   progressMomentLive?: boolean;
@@ -278,8 +279,13 @@ function renderSessionComplete(state: AppState, context: PracticeViewContext): s
           )}</p>`
         : '';
 
+  const announcement =
+    context.sessionCompleteLive === true
+      ? 'role="status" aria-live="polite"'
+      : 'aria-live="off"';
+
   return `
-    <section class="session-complete-card" data-testid="session-complete" role="status">
+    <section class="session-complete-card" data-testid="session-complete" ${announcement}>
       <h2 class="panel-title">${copy.sessionCompleteHeading}</h2>
       <p>${copy.sessionCompleteCount(count)}</p>
       ${momentItems}

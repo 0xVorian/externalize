@@ -162,4 +162,50 @@ describe('practice presentation routing', () => {
     expect(laterTag).toContain('aria-live="off"');
     expect(laterTag).not.toContain('aria-live="polite"');
   });
+
+  it('announces a session-complete card live only on first presentation', () => {
+    const exercise = EXERCISE_DEFINITIONS.find((candidate) => candidate.id === 'eval-001')!;
+    const base: PracticeViewContext = {
+      capabilityState: 'developing',
+      sessionCompleted: 5,
+      sessionTarget: 5,
+      sessionComplete: true,
+    };
+    const liveHtml = renderApp(createState('en', exercise), 0, true, {
+      ...base,
+      sessionCompleteLive: true,
+    });
+    const liveTag = liveHtml.match(/<section class="session-complete-card"[^>]*>/)?.[0];
+    expect(liveTag).toContain('role="status"');
+    expect(liveTag).toContain('aria-live="polite"');
+    expect(liveHtml).toContain('data-testid="session-complete"');
+
+    const laterHtml = renderApp(createState('en', exercise), 0, true, {
+      ...base,
+      sessionCompleteLive: false,
+    });
+    const laterTag = laterHtml.match(/<section class="session-complete-card"[^>]*>/)?.[0];
+    expect(laterTag).toContain('aria-live="off"');
+    expect(laterTag).not.toContain('role="status"');
+    expect(laterHtml).toContain('data-testid="session-complete"');
+
+    const freshSessionHtml = renderApp(createState('en', exercise), 0, true, {
+      capabilityState: 'developing',
+      sessionCompleted: 0,
+      sessionTarget: 5,
+      sessionComplete: false,
+      sessionCompleteLive: false,
+    });
+    expect(freshSessionHtml).not.toContain('data-testid="session-complete"');
+
+    const laterSessionHtml = renderApp(createState('en', exercise), 0, true, {
+      ...base,
+      sessionCompleteLive: true,
+    });
+    const laterSessionTag = laterSessionHtml.match(
+      /<section class="session-complete-card"[^>]*>/,
+    )?.[0];
+    expect(laterSessionTag).toContain('role="status"');
+    expect(laterSessionTag).toContain('aria-live="polite"');
+  });
 });
