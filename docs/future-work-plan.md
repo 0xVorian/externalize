@@ -1,125 +1,91 @@
-# Future work plan
+# Future work plan — historical batch record
 
-Planning document for **proactive work** on content, engine modules, and Phase 3–4 preparation. This is **not** the shipped application roadmap — see [Roadmap](roadmap.md) for build order, MVP scope, and phase exit criteria.
+This document preserves the proactive agent/workstream plan used while Externalize was growing from the Level 0 prototype into the current propositional-logic application.
 
-Use this doc when deciding what to work on next in parallel (solo or via agent batches), without confusing it with “what ships in which phase.”
+**It is no longer the source of truth for what to build next.** Most of the work listed here shipped by v0.3.5. See [Roadmap](roadmap.md) for current status and remaining validation gates.
 
-## Purpose
+## Outcome of the original workstreams
 
-Externalize already has a working Level 0 path and gated practice. The next gains come from:
+| Original workstream | Status by v0.3.5 | Where it landed |
+|---------------------|------------------|-----------------|
+| **Level 1 course** | Done | Unit 1 lessons for `¬`, `∨`, `→`, `↔`, nesting, and translation introduction in EN/FR |
+| **Exercise bank** | Done and expanded | Scope, evaluation, truth-table, counterexample, tautology, translation, and proof-step exercises |
+| **Authoring guide** | Done | [authoring.md](authoring.md) and [content-model.md](content-model.md) |
+| **Truth-table engine** | Done | `engine/truth-table/` plus lesson/practice renderers |
+| **Phase 3 translation design** | Done and implemented | [phase3-translation.md](phase3-translation.md), `src/app/translation/`, translation feedback |
+| **Concept map** | Done | Progress concept graph and accessible text status |
+| **2×2 watch grid** | Done | Binary connective watch lessons |
+| **Accessibility pass** | Done for current MVP scope | Keyboard tree navigation, focus/ARIA work, mobile regression tests |
+| **PWA shell** | Done | Manifest, service worker, installable shell |
+| **Predicate-logic prep** | Done as design/engine spike | [predicate-logic.md](predicate-logic.md), AST/parser extensions |
+| **Natural-deduction prep** | Done as design/prototype | [natural-deduction.md](natural-deduction.md), proof engine, two fill-step exercises |
+| **Exercise generation tooling** | Added beyond the original plan | `tools/exercise-generator/` and inventory tooling |
 
-- **Content** — Level 1 lessons, a larger exercise bank, and clear authoring conventions
-- **Engine** — reusable truth-table machinery and Phase 3 translation hooks
-- **Prep** — design stubs and decision records so Phase 3–4 work does not stall on unknowns
+## Original batch mapping
 
-This plan prioritizes work that unblocks learning and authoring. It deliberately defers platform features (cloud sync, gamification, full ND UI) until core propositional interactions are solid.
+The historical batch IDs are kept here so old commits, notes, and discussions remain understandable.
 
-## Workstreams by tier
+### Batch A — Content
 
-Tiers reflect **dependency and payoff**, not roadmap phases. Tier 1 should land before Tier 2; Tier 3 can run in parallel once Tier 1 content exists.
+- **A1 — Level 1 course:** completed.
+- **A2 — Exercise bank:** completed and subsequently expanded beyond the original 15–25 exercise target.
 
-### Tier 1 — Content foundation
+### Batch B — Engine and authoring
 
-| Workstream | Outcome | Notes |
-|------------|---------|-------|
-| **Level 1 course** | Lessons for `¬`, `∨`, `→`, `↔` in EN and FR | Follow Level 0 pattern: intro → recognition → guided try; align with [i18n](i18n.md) (independent academic copy, not literal translation) |
-| **Exercise bank** | 15–25 hand-authored exercises | Mix scope, eval, and early translation-ready prompts; tag skills per [content model](content-model.md) |
-| **Authoring guide** | Contributor-facing how-to | JSON/YAML examples, skill tags, feedback templates, presentation choices ([presentation](presentation.md)) |
+- **B3 — Truth-table engine:** completed and integrated into lessons and practice.
+- **B4 — Authoring guide + content model examples:** completed.
 
-### Tier 2 — Engine and Phase 3 prep
+### Batch C — Translation
 
-| Workstream | Outcome | Notes |
-|------------|---------|-------|
-| **Truth-table engine module** | Shared module for watch tables, live rows, partial cells | Extract from ad hoc rules (e.g. `usesLiveTruthRow`); support generalization beyond `P ∧ Q` |
-| **Phase 3 translation design** | Spec + minimal stub | **Done (C5):** [phase3-translation.md](phase3-translation.md), stub in `src/app/translation/` |
-| **Content model examples** | Concrete files matching the draft schema | One file per exercise type; engine validation targets |
+- **C5 — Translation design + minimal stub:** completed, then developed into working graded translation practice.
 
-### Tier 3 — Phase 4 polish and decision records
+## Work that remains intentionally deferred
 
-| Workstream | Outcome | Notes |
-|------------|---------|-------|
-| **Concept map** | Prerequisite graph + mastery overlay | Render from concept graph in [content model](content-model.md) |
-| **2×2 grid view** | Alternate renderer for small atom sets | Optional spatial view for `P ∧ Q`-style patterns; see [presentation](presentation.md) |
-| **Accessibility (a11y)** | Keyboard paths, focus order, screen-reader labels | Tap-first stays primary; no hover-only affordances |
-| **PWA manifest** | Home-screen install, offline shell | Lightweight; no sync requirement |
-| **Predicate / ND decision docs** | Recorded choices before UI work | **Predicate prep (done):** [predicate-logic.md](predicate-logic.md); ND still TBD in [decisions](decisions.md) |
-| **Predicate / ND decision docs** | Recorded choices before UI work | **ND prep (done):** [natural-deduction.md](natural-deduction.md); predicate logic still TBD; finalize rule set in [decisions](decisions.md) when Phase 5 starts |
-
-## Agent batch launch plan
-
-When running parallel agents (or focused sessions), use three batches with **five workstreams** total. Each stream should produce reviewable artifacts (docs, JSON content, or isolated modules) without blocking others.
-
-### Batch A — Content (parallel)
-
-| ID | Workstream | Deliverables |
-|----|------------|--------------|
-| **A1** | Level 1 course | Lesson copy + structure for `¬`, `∨`, `→`, `↔`; EN and FR; watch/guided patterns where tables fit |
-| **A2** | Exercise bank | 15–25 exercises with ids, skills, expected ASTs, feedback keys |
-
-**Merge order:** A1 and A2 can land independently; reconcile skill tags and concept ids before wiring into the app.
-
-### Batch B — Engine and authoring (parallel)
-
-| ID | Workstream | Deliverables |
-|----|------------|--------------|
-| **B3** | Truth-table engine module | API for full table, highlighted row, live row, future partial cell; tests |
-| **B4** | Authoring guide + content model examples | `docs/` or `content/` examples; validation notes tied to [content model](content-model.md) |
-
-**Merge order:** B4 can start immediately; B3 should not require app-wide refactors in the first PR (module + tests first).
-
-### Batch C — Phase 3 (single stream, after A/B context helps)
-
-| ID | Workstream | Deliverables |
-|----|------------|--------------|
-| **C5** | Phase 3 translation design + minimal stub | **Done:** [phase3-translation.md](phase3-translation.md) + `src/app/translation/` |
-
-**Gate:** C5 benefits from A2 (sample translation prompts) and B4 (schema examples). It does not require B3 or Tier 3 items.
-
-```text
-Batch A (content)     A1 ── Level 1 lessons
-                      A2 ── Exercise bank
-
-Batch B (engine)      B3 ── Truth-table module
-                      B4 ── Authoring guide + examples
-
-Batch C (Phase 3)     C5 ── Translation design + stub
-```
-
-## What not to spend effort on yet
-
-These are explicitly out of scope for this plan (also reflected in [roadmap](roadmap.md) “not building yet”):
+These are not “missing MVP checkboxes.” They remain deferred until use of the existing propositional product provides a reason to pursue them.
 
 | Area | Why defer |
 |------|-----------|
-| **Cloud sync / user accounts** | Local-first MVP; export/import is enough for now |
-| **Heavy gamification** | Achievements, leaderboards, streak mechanics — mastery feedback and concept map first |
-| **React or framework rewrite** | Current stack proves UX; rewrite is churn without new learning outcomes |
-| **Full natural-deduction editor** | Phase 5; needs stable eval/translation patterns and decision docs |
-| **Predicate logic UI** | Phase 6; AST prep in [predicate-logic.md](predicate-logic.md) — implement after Phase 4–5 |
-| **Template-based exercise generation** | Hand-authored JSON until patterns and feedback are proven |
-| **Multiple textbook notation systems** | One canonical Unicode notation per [decisions](decisions.md) |
+| **Cloud sync / user accounts** | Local-first storage plus export/import is sufficient for the current validation stage |
+| **Heavy gamification** | Mastery evidence and useful practice matter more than decorative retention mechanics |
+| **React or framework rewrite** | Current TypeScript/Vite architecture supports the product; a rewrite would add churn without a learning benefit |
+| **Full natural-deduction editor** | The existing proof prototype is enough groundwork until propositional practice is validated |
+| **Predicate-logic curriculum/UI** | Engine/parser preparation exists; teaching and interaction design should follow evidence from the current product |
+| **Multiple notation systems** | One canonical Unicode notation is sufficient for the current scope |
+| **Native mobile app** | The mobile-first PWA is the current validation vehicle |
 
-Revisit this list only after Phase 3 translation feels instructive on a phone and the exercise bank covers core propositional skills.
+## Current near-term gate
+
+The next gains should come from **using and observing the product**, not from executing another prewritten feature batch.
+
+Questions to answer before broadening scope:
+
+1. Does Externalize actually reduce working-memory burden while solving symbolic-logic problems?
+2. Are the Learn → Practice → repair → review loops pleasant enough to repeat voluntarily?
+3. Do the different practice types measure distinct skills cleanly enough for progress/SRS to mean something?
+4. Is the existing propositional curriculum deep enough to expose real weaknesses rather than only rehearse familiar cases?
+5. Which interactions are genuinely instructive on a phone, and which merely function technically?
+
+When those questions generate concrete evidence, create a new focused work plan rather than reviving the completed batch structure above.
 
 ## Related documentation
 
 | Document | Relationship |
 |----------|--------------|
-| [Roadmap](roadmap.md) | **App build order** and phase exit criteria — not duplicated here |
-| [Presentation](presentation.md) | When to use truth tables vs parse trees; 2×2 grid notes |
-| [Content model](content-model.md) | Exercise schema, concept graph, progress shape |
-| [Technical decisions](decisions.md) | Platform, notation, authoring, open questions |
-| [Predicate logic (Phase 6 prep)](predicate-logic.md) | AST extension, notation, engine impact — design only |
-| [Natural deduction (Phase 5 prep)](natural-deduction.md) | Fitch mobile layout, rule-set options, fill/repair exercise patterns |
-| [Design principles](design-principles.md) | Non-negotiable UX constraints for all workstreams |
-| [Internationalization](i18n.md) | EN/FR copy conventions for Level 1 and exercises |
+| [Roadmap](roadmap.md) | Current shipped status and validation gates |
+| [Design principles](design-principles.md) | Non-negotiable pedagogical and UX constraints |
+| [Presentation](presentation.md) | When to use truth tables, parse trees, and other representations |
+| [Content model](content-model.md) | Exercise schema, concepts, and progress representation |
+| [Authoring guide](authoring.md) | Adding lessons and exercises |
+| [Technical decisions](decisions.md) | Platform, notation, and architecture choices |
+| [Predicate logic](predicate-logic.md) | Phase 6 engine/design preparation |
+| [Natural deduction](natural-deduction.md) | Phase 5 design/prototype preparation |
 
-## Session checklist (contributors)
+## Contributor hygiene
 
-Before opening a PR tied to this plan:
+For future work:
 
-1. State which batch/id (e.g. A2, B3) the change belongs to
-2. Link new content to skill tags and concept ids
-3. Confirm mobile tap-first completion on a ~320px viewport for any UI
-4. Add or update [CHANGELOG](../CHANGELOG.md) under `[Unreleased]` for user-visible changes
-5. Do **not** fold this work into [roadmap](roadmap.md) phase checkboxes unless the feature actually ships in the app
+1. Tie changes to a current issue or explicit product question rather than one of the historical A/B/C batches.
+2. Link new content to skill tags and concept ids.
+3. Confirm mobile tap-first completion around a 320px viewport for interactive UI.
+4. Add user-visible changes to [CHANGELOG](../CHANGELOG.md) under `[Unreleased]`.
+5. Keep exploration, graded prediction, and construction distinct when interpreting progress evidence.
