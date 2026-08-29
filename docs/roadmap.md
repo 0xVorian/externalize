@@ -2,9 +2,11 @@
 
 This document tracks the shipped application and the remaining validation gates. It is intentionally conservative: implemented prototypes are not promoted to “done” merely because code exists.
 
-## Current status — v0.4.0
+## Current status — post-v0.3.5 `master`
 
 Externalize now has three propositional-logic learning units, graded practice across multiple skills, local progress/SRS, EN/FR course material, Explore mode, export/import, a concept map, PWA support, browser regression coverage, and evidence-backed progress visibility throughout Learn, Practice, and Progress.
+
+The latest changelog release is v0.3.5. The progress-visibility work merged after that release and remains under `[Unreleased]`; this document describes the current `master` state rather than pretending that merged code has already been cut as a release.
 
 The main unresolved question is no longer whether the core interactions can be built, or whether progress can be made perceptible without inventing arbitrary gamification. It is whether sustained use makes symbolic-logic practice meaningfully easier and worth returning to.
 
