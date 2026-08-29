@@ -4,9 +4,9 @@ Externalize uses [Semantic Versioning](https://semver.org/) and documents change
 
 ## Current version
 
-Latest changelog release: **0.4.0** (evidence-backed progress visibility and finite Practice sessions).
+Latest changelog release: **0.3.5** (evaluation integrity and Explore mode).
 
-`package.json` `"version"` matches the latest changelog release.
+`package.json` `"version"` matches the latest changelog release. Feature work merged after v0.3.5 remains under `## [Unreleased]` until an explicit release is cut.
 
 GitHub release objects and tags are optional markers and may lag the changelog/package version; they are not the authoritative release source for this repository.
 
@@ -20,7 +20,7 @@ GitHub release objects and tags are optional markers and may lag the changelog/p
 
 Pre-1.0 (`0.x.y`): the public surface is still settling. Breaking changes bump **minor**, not major, until `1.0.0` marks a stable content schema and progress format.
 
-The v0.3.4 and v0.3.5 changelog entries historically used patch bumps for feature-bearing work. That numbering is retained as history; new releases should follow the policy above rather than treating prior drift as precedent.
+The v0.3.4 and v0.3.5 changelog entries historically used patch bumps for feature-bearing work. That numbering is retained as history; it is not by itself a reason to silently override the policy for the next release. The current unreleased progress-visibility work is feature-bearing under the policy above, so its release number should be chosen deliberately when the release is cut.
 
 ## Changelog workflow
 
