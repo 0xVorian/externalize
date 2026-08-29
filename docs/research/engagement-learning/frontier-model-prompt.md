@@ -1,81 +1,105 @@
-# Frontier-Model Research Prompt — Externalize Engagement & Learning
+# Frontier-model research prompt — engagement as an instrument for durable mastery
 
-You are one of **three independent frontier models** conducting a research investigation for Externalize, a mobile-first symbolic-logic learning application.
+You are conducting an independent research investigation for **Externalize**, a mobile-first symbolic-logic learning application.
 
-Your initial submission will be compared with two other models. **Do not optimize for consensus.** Independently investigate the question, challenge the brief where appropriate, and report the strongest evidence and reasoning you can establish.
-
-## Task
-
-> **How can Externalize exploit the strongest known mechanisms for motivation, habit formation, attention and repeated engagement while preserving—or improving—durable retention, transfer, calibration and genuine mastery?**
-
-Investigate **both conventional educational interventions and manipulative/dark-pattern behavioral techniques**. Do not exclude variable reinforcement, loss aversion, streaks, near misses, scarcity, commitment effects, social comparison, casino mechanics, free-to-play design, notification engineering, or similar mechanisms merely because their commercial uses are ethically troubling.
-
-We want to know what works, why, under what conditions, for how long, and whether it can be redirected toward the learner’s own interests.
+## Governing principle
 
 > **Engagement is instrumental. Learning is the objective.**
 
-A mechanism that increases sessions, streaks, clicks, XP, or time-in-app while degrading delayed retention or transfer is a failure.
+Do not assume that increasing app opens, session length, streak length, attempts, XP, DAU or retention is desirable in itself. The target is durable capability: retrieval strength, transfer, calibration, time-to-mastery and progressively more independent performance.
 
-## Required reading
+## Research question
 
-Use the provided research brief, **“Externalize — Research Brief: Engagement, Durable Learning, and Ethical Use of Behavioral Mechanisms,”** as the scope and methodological specification. Challenge it if warranted. Unsupported assumptions are not constraints.
+How can Externalize exploit the strongest known mechanisms for motivation, habit formation, attention and repeated engagement while preserving—or improving—retrieval strength, transfer, calibration and genuine mastery?
 
-## Research requirements
+## What to investigate
 
-Use web/research capabilities extensively. Prioritize primary papers, systematic reviews, meta-analyses, preregistered experiments, strong field experiments, and high-quality educational-technology evidence. Industry evidence is useful when methods/results are sufficiently disclosed, but company adoption is not evidence.
+Search broadly across learning science, cognitive psychology, intelligent tutoring, educational technology, behavior design, habit formation, consumer behavior, social-media engagement, games/F2P design and gambling research where relevant.
 
-For consequential claims provide citations; primary sources/DOIs where possible; distinguish causation from correlation and immediate performance from delayed learning; report defensible effect sizes; identify populations/context; note contradictory evidence/replication problems; assess external validity to adult mobile symbolic-logic learning; and state uncertainty.
+Include both respectable educational mechanisms and potentially manipulative mechanisms. Examples include retrieval practice, spacing, successive relearning, interleaving, worked examples and fading, self-explanation, productive failure, feedback, calibration, implementation intentions, defaults, notifications, streaks, loss framing, goal gradients, endowed progress, leaderboards, scarcity, hearts/energy, near misses, variable reinforcement, currencies and continuation mechanics.
 
-Search cognitive science, educational psychology, behavioral economics, motivation, habit research, intelligent tutoring systems, HCI, serious games, mobile/free-to-play games, gambling, social-media engagement, advertising/conversion, language learning, spaced repetition, and relevant adjacent fields. Do not merely compile familiar gamification ideas; investigate their empirical foundations.
+The point of examining dark or controversial mechanisms is **not** to endorse them. Determine what causal power is actually evidenced, whether the effect is proximal behavior or durable learning, and whether the mechanism can be redirected toward a learning-useful act without creating a second reward objective.
 
-## Measurement integrity
+## Epistemic requirements
 
-Treat Goodhart effects as central. For every significant mechanism ask:
+Distinguish clearly:
 
-> **If Externalize rewards this, what behavior does a rational learner actually learn to optimize?**
+- **Knowns** — established project state or well-supported evidence.
+- **Assumptions** — propositions not established for Externalize.
+- **Open questions** — material uncertainties.
+- **Findings** — conclusions supported by the investigation.
+- **Recommendations** — experiments or candidate design directions.
+- **Decisions** — none; the research report does not authorize product commitments.
 
-Investigate easy-task farming, meaningless streak preservation, hint dependence, rapid guessing, challenge avoidance, interface-pattern memorization, metric manipulation, and other ways engagement could corrupt mastery evidence.
+Do not use agreement with the brief, product convention, previous implementation behavior or other models as evidence.
 
-## Required output
+For material empirical claims, assess evidence according to causal identification, delayed endpoint, transfer distance, task/population relevance, measurement integrity and replication. Meta-analysis is useful but is not automatically more decision-relevant than a strong field experiment with the right outcome.
 
-Produce a substantive report containing:
+## Challenge the project
 
-1. Executive synthesis
-2. Important corrections/challenges to the brief
-3. Evidence map
-4. Mechanism Arsenal of roughly 30–50 mechanisms where literature supports analysis
-5. Strongest candidates for Externalize
-6. Effective-but-dangerous mechanisms
-7. Popular ideas with weak/contradictory evidence
-8. Cross-mechanism interactions/conflicts
-9. Goodhart / measurement-integrity analysis
-10. Proposed learning-aligned engagement loop
-11. Externalize-specific implementation concepts
-12. Smallest credible experiments for highest-value uncertainties
-13. Adversarial critique
-14. Open questions
-15. Bibliography
+Do not assume the research question is perfectly formed. Explicitly test whether:
 
-For each mechanism include where possible: name; provenance; psychological/cognitive mechanism; target; evidence quality; effect magnitude; durability; external-validity concerns; counterevidence; Goodhart risk; ethical risk; concrete Externalize application; backfire; smallest test; primary learning metric; secondary engagement metric; guardrail; overall assessment.
+- Externalize has demonstrated an engagement problem at all;
+- “externalize every intermediate state” should remain permanent as expertise grows;
+- mobile-first is compatible with difficult high-element-interactivity proof construction;
+- personalization is worth its complexity;
+- conventional gamification would create Goodhart incentives or corrupt mastery evidence;
+- the best design may simply be excellent pedagogy, honest capability progress, good cues and no reward economy.
 
-Use assessments such as **Strong candidate**, **Promising**, **Context-dependent**, **Speculative**, **Effective but dangerous**, **Probably counterproductive**, or **Insufficient evidence**, without forcing positive recommendations.
+You are allowed to conclude that evidence is insufficient or that no decision should be made.
 
-## Epistemic discipline
+## Required analysis of each candidate mechanism
 
-Keep distinct:
+For mechanisms worth serious attention, cover:
 
-- **Knowns:** established evidence or authoritative project state.
-- **Assumptions:** propositions used provisionally.
-- **Findings:** conclusions supported by investigation.
-- **Open questions:** material uncertainties.
-- **Recommendations:** reasoned proposals, not project decisions.
+1. provenance and proposed mechanism;
+2. behavioral/cognitive target;
+3. quality and relevance of evidence;
+4. whether effects survive delay;
+5. whether learning or merely activity improves;
+6. external-validity limits for adult symbolic logic on a phone;
+7. Goodhart and learner-model corruption risk;
+8. attention/working-memory cost;
+9. autonomy/ethical risk where relevant;
+10. likely Externalize implementation;
+11. plausible backfire modes;
+12. smallest credible experiment;
+13. primary delayed-learning metric;
+14. secondary engagement metric;
+15. guardrails;
+16. overall assessment.
 
-Do not silently promote assumptions, common industry practice, inherited design choices, or plausible mechanisms into facts. Agreement among sources—or among the three models—is not evidence.
+## Special questions
 
-## Independence
+Pay particular attention to:
 
-This is your **independent initial submission**. You have not seen the other two models’ findings and should not attempt to predict or emulate them. Explore evidence you believe matters even if another researcher may overlook it.
+- whether daily practice incentives conflict with item-level optimal spacing;
+- whether a cadence/day-count mechanism is more learning-aligned than volume rewards;
+- whether reset-on-miss streaks have evidence beyond behavior preservation;
+- how lapse recovery should work;
+- whether session initiation can be habitualized while formal reasoning remains deliberative;
+- how assistance/hints can avoid systematic guessing and bottom-out behavior;
+- when scaffolding should fade;
+- how Externalize should test transfer away from its exact interface representation;
+- whether progress visibility itself alters behavior and should be treated as an intervention;
+- whether “graduation” and reduced app dependence can be a successful outcome.
 
-If evidence is insufficient, say so. If the question is malformed, explain why. If a supposedly powerful engagement mechanism is folklore, say so. If an ethically uncomfortable mechanism has unusually strong evidence and can plausibly align with durable learning, do not omit it.
+## Experimental standard
 
-The goal is not a persuasive report. The goal is to improve our epistemic position before product decisions.
+Prefer experiments that can distinguish real learning from proxy activity. Use delayed held-out probes and representation/transfer changes where possible. Identify when N=1 validation is informative and when much larger samples are needed. Warn against novelty effects and experiments too short to reveal durable outcomes.
+
+## Output
+
+Produce a rigorous research report, not a product pitch. Include:
+
+- executive synthesis;
+- corrections/challenges to the brief;
+- evidence map;
+- mechanism arsenal;
+- strongest candidates;
+- mechanisms to avoid or defer;
+- material uncertainties;
+- proposed validation experiments;
+- explicit non-decisions.
+
+End with the strongest version of the simpler competitor: **Externalize with excellent pedagogy, honest evidence-backed progress, cue-based return, and no engagement economy.** Treat that as a serious baseline, not a straw man.
