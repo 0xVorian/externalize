@@ -1,231 +1,194 @@
-# Engagement & Durable Learning — Multi-model Synthesis
+# Externalize engagement and durable-learning research synthesis
 
-**Date:** 2026-08-29  
-**Status:** Research synthesis; recommendations are not product decisions.  
-**Inputs:** three independent frontier-model investigations (GPT-5.6 Sol, Grok, Opus 5), followed by evidence-level comparison and targeted verification of consequential claims.
+## Status
 
-## Executive conclusion
+**Investigative synthesis — findings and recommendations, not product decisions.**
 
-The research improves Externalize’s epistemic position but **does not justify adding a gamification layer now**.
+This document synthesizes three independent frontier-model investigations commissioned around one governing principle:
 
-The strongest common conclusion is not “find better rewards.” It is:
+> **Engagement is instrumental. Learning is the objective.**
 
-> **Make the cognitively useful act the rewarded act, make returning to that act cheap, and do not create a cheaper proxy game.**
+The reports are evidence and candidate reasoning, not authority. Agreement among models is not treated as evidence. The synthesis compares evidence, assumptions, counterevidence, uncertainty, and explanatory strength, and preserves material dissent.
 
-The evidence is asymmetric. Retrieval practice, spacing, successive relearning, worked examples/fading, self-explanation, interleaving under appropriate conditions, and transfer testing have substantially stronger claims to durable learning than XP, streaks, loot, near-misses, hearts, scarcity, or leaderboards. Most classic engagement machinery has evidence for changing behavior, not for improving delayed learning.
+## Research question
 
-The current baseline validation period should therefore remain clean. First establish what failure Externalize actually has: learning, transfer, return, persistence, mobile usability, or something else.
+How can Externalize exploit the strongest known mechanisms for motivation, habit formation, attention and repeated engagement while preserving—or improving—retrieval strength, transfer, calibration and genuine mastery?
 
-## Process and provenance
-
-The three reports were produced independently from the same brief. Their agreement is **not** treated as evidence. This synthesis compares underlying evidence, assumptions, reasoning, counterevidence, external validity, and project relevance.
-
-### Known project state
-
-- Graded evidence is already distinguished from Explore/activity.
-- Progress claims are intended to derive from graded evidence rather than time, activity, or arbitrary XP.
-- A prior evaluation-integrity flaw demonstrated that allowing learners to choose easier evidence can corrupt mastery claims.
-- Current priority is sustained real use/validation, not feature expansion.
-
-### Research findings
-
-The findings below are supported by the investigation but are not automatically binding design constraints.
-
-## Findings that survive synthesis
-
-### F1 — Valid learning events should be authoritative over activity
-
-Delayed learning evidence should dominate product claims of progress. Opens, minutes, sessions, XP, streak length, and completion can be useful diagnostics, but are not evidence of mastery.
-
-This reinforces rather than overturns the existing graded-evidence direction.
-
-### F2 — Retrieval + spacing is the strongest spine for return behavior
-
-The best-supported reason to bring a learner back is not “daily engagement” in the abstract. It is to produce effortful retrieval at useful lags. Successive relearning combines retrieval, spacing, and repeated criterion attainment and is particularly promising, although much of its strongest evidence is on simpler material than multi-step proofs.
-
-Implication: a future return system should schedule cognitively useful retrieval, not manufacture activity.
-
-### F3 — Engagement science is stronger for **initiation** than for improving the cognitive work after entry
-
-Implementation intentions, stable cues, friction reduction, reminders, lapse recovery, and related mechanisms plausibly affect whether a session begins. Once inside a session, cognitive/educational evidence should generally dominate the design.
-
-This is a default, not an invariant: some motivational effects operate during difficult work, but “behavior design outside / learning science inside” is a useful decomposition.
-
-### F4 — Habitize the doorway, not formal inference
-
-Habit research most directly supports making a simple initiation action increasingly cue-driven: e.g. a stable context → open Externalize → begin due retrieval.
-
-It does not establish that high-element-interactivity symbolic reasoning becomes a habit in the same sense. Formal reasoning remains deliberative for a long time; desirable difficulties often deliberately increase deliberation.
-
-### F5 — Cadence is a more defensible incentive target than volume
-
-Opus identified unusually relevant 2025 randomized evidence comparing rewards for **days practised** with rewards for **questions completed**. Days-based incentives produced more distributed practice and better exam performance. This provides direct support for cadence/distribution as a legitimate target rather than raw exercise volume.
-
-Important limitation: this was an academic incentive context, not a voluntary adult consumer logic app. It supports a hypothesis, not an Externalize feature decision.
-
-### F6 — Conventional reset-on-miss streaks are not justified
-
-The evidence does not establish that destroying a visible streak after one missed day improves durable learning. Streaks have obvious Goodhart and lapse risks: minimum qualifying activity, late-night junk practice, anxiety, and abandonment after loss.
-
-A more promising decomposition is to preserve the useful component—practice cadence—without deleting historical achievement. Example hypothesis: “practised on 17 appropriately spaced days” rather than “17-day streak; miss tomorrow and return to zero.”
-
-This is a leading engagement hypothesis, not yet a product decision.
-
-### F7 — Lapse recovery deserves more attention than streak preservation
-
-Large-scale behavioral evidence suggests interventions can improve behavior while active yet rarely persist after withdrawal; notably, in the 2021 Milkman et al. gym megastudy the strongest intervention rewarded returning after a missed workout.
-
-For Externalize, a lapse should plausibly become a recovery/retrieval opportunity rather than a failure state. “You missed several days; here is one worthwhile thing to retrieve now” is better aligned with both memory and behavior than a destroyed counter.
-
-### F8 — Auxiliary reward economies are a measurement-integrity hazard
-
-XP, coins, leagues, battle passes, achievements, easy streak qualifiers, and similar systems create a second objective. A rational learner can optimize that objective instead of mastery.
-
-This is documented both in intelligent-tutoring “gaming the system” research and in qualitative learning-app evidence. The project’s own earlier easy-evidence flaw is the same class of problem.
-
-The core risk is epistemic as much as ethical: an auxiliary economy can make the learner model wrong.
-
-### F9 — The “externalize every intermediate state” doctrine has an important expertise-reversal challenge
-
-All three reports independently raise a consequential concern: scaffolding and explicit intermediate-state requirements that help novices may become redundant load as schemas develop.
-
-The evidence for worked examples, fading, cognitive load, and expertise reversal is substantial. Logic-specific Hyperproof/Openproof work also suggests representation-by-learner interactions matter.
-
-However, the transfer from that literature to Externalize’s exact doctrine remains inferential. Externalization may be more than scaffolding; disciplined explicit reasoning may itself be part of the target skill.
-
-Therefore this is **not a decision to weaken the doctrine**. It becomes a high-priority open question:
-
-> Does mandatory externalization eventually inhibit unaided symbolic reasoning, or is continued explicit intermediate reasoning part of the competence Externalize intends to teach?
-
-### F10 — Transfer away from the exact interface must eventually matter
-
-A learner can become good at an interface without acquiring portable logical competence. Mastery evidence should eventually include delayed, unaided, and representationally varied problems. The exact representation and timing remain open.
-
-### F11 — Mobile-first is an assumption worth testing, not protecting
-
-High element interactivity plus phone UI may create extraneous load. Grok makes the strongest version of this challenge. There is enough cognitive-load evidence to justify testing phone reconstruction against a larger surface; there is not enough Externalize-specific evidence to conclude mobile-first is wrong.
-
-### F12 — The strongest “dark” mechanisms contain less unique treasure than expected
-
-Near misses, variable reinforcement, artificial scarcity, hearts/energy, and similar mechanisms can affect behavior, but their popular reputations often exceed the quality/relevance of evidence for durable learning. Newer near-miss work in particular complicates the simple “near miss causes persistent play” story.
-
-Even where such mechanisms move engagement, they commonly create a reward channel decoupled from truth or skill. That is especially hostile to a logic tutor whose objective includes calibration.
-
-## Important disagreement among the reports
-
-### Streaks
-
-- **GPT-5.6 Sol:** treat evidence-based streak vs activity streak vs none as an empirical question.
-- **Grok:** a valid-retrieval streak may be usable with slack/recovery, but remains dangerous.
-- **Opus 5:** decompose the mechanism; preserve days-practised/cadence, remove reset-on-miss loss framing.
-
-**Synthesis:** Opus currently offers the strongest design hypothesis because it preserves the part with direct learning-relevant evidence while avoiding an unnecessary loss mechanism. It still needs Externalize-specific testing.
-
-### Dark engagement mechanisms
-
-- **Grok:** more willing to treat several casino/F2P mechanisms as behaviorally strong but hostile to learning/calibration.
-- **Opus:** more skeptical that the strongest folklore claims survive careful empirical review.
-- **GPT-5.6 Sol:** intermediate position; selective experiments only if a real engagement problem emerges.
-
-**Synthesis:** take behavioral potency seriously, but do not infer educational value. There is no current justification for contaminating the baseline with casino-style mechanics.
-
-### Two clocks
-
-Grok proposes an engagement clock and mastery clock. The decomposition is analytically useful, but visibly presenting two prestigious progress systems risks recreating Goodhart: users optimize the easier one.
-
-**Preferred formulation:** one authoritative visible capability/progress model, with behavioral/cadence instrumentation underneath it. A cadence display, if eventually used, should be historical/contextual rather than a second advancement currency.
-
-## Open questions
-
-These remain material and should not be silently closed:
-
-1. Does visible capability state predict delayed held-out performance?
-2. Does mandatory intermediate-state externalization eventually become redundant load?
-3. Does fading externalization improve or damage delayed unaided performance?
-4. Does competence transfer across representations and away from Externalize’s UI?
-5. Is mobile-first compatible with serious multi-step reconstruction, or does a larger surface materially improve learning?
-6. What knowledge-component grain makes spacing/successive relearning tractable for logic?
-7. Do adult voluntary learners tolerate retrieval-first and delayed confirmation without school/course coercion?
-8. Is voluntary return actually a bottleneck in the current product?
-9. If return is a bottleneck, is neutral cadence + strong lapse recovery sufficient before loss-framed mechanisms are considered?
-10. Does any sophisticated personalized scheduler beat a simple robust spacing policy enough to justify complexity?
-11. What hint policy preserves learning without making legitimate struggle feel punitive?
-12. How much representational variability is needed to detect interface-pattern learning?
-
-## Recommended validation hypotheses
-
-These are recommendations for investigation, not authorized implementation commitments.
-
-### H1 — Mastery validity
-
-**Question:** Does the visible capability model predict performance on held-out, delayed problems?
-
-**Why first:** If it does not, engagement optimization would accelerate use of an invalid measurement system.
-
-**Primary evidence:** delayed unaided held-out performance.
-
-### H2 — Externalization transfer / fading
-
-**Question:** As competence rises, does reducing compulsory externalization improve or damage delayed unaided reasoning?
-
-Compare continued full externalization with carefully staged fading. Do not change the doctrine permanently based on cognitive-load theory alone.
-
-### H3 — Representation transfer
-
-**Question:** Can the same capability be demonstrated when presentation/input format changes?
-
-This tests whether the learner acquired logic rather than Externalize-specific interaction patterns.
-
-### H4 — Initiation
-
-**Question:** Does a simple stable cue / implementation intention materially increase scheduled valid retrieval without introducing a reward economy?
-
-This is the lowest-risk engagement experiment if baseline use shows an initiation problem.
-
-## What not to build yet
-
-Do not infer authorization for:
-
-- XP or pseudo-currency;
-- global leaderboards/leagues;
-- battle passes;
-- hearts/lives/energy tied to errors;
-- fake scarcity or countdowns;
-- loot/variable-ratio cosmetic rewards;
-- casino-style near-miss animation;
-- infinite “one more” session chaining;
-- reset-on-miss streaks;
-- sophisticated notification personalization;
-- a permanent change to the externalization doctrine.
-
-These are not permanently forbidden. They currently lack sufficient project-specific justification relative to their complexity, Goodhart risk, or ethical cost.
-
-## Leading engagement hypothesis if baseline return fails
-
-Do **not** begin with “streak vs no streak.”
-
-First test:
-
-> **neutral learning cadence + good lapse recovery vs baseline**
-
-A plausible implementation would acknowledge cumulative appropriately spaced practice without deleting history after a miss, and after a lapse route the learner directly to one worthwhile due retrieval. Capability progress remains authoritative.
-
-Only if a genuine return problem remains after lower-risk mechanisms should loss-framed engagement be considered.
-
-## Adversarial challenge to this synthesis
-
-The strongest case against this direction is that voluntary persistence, not pedagogy, may be the binding constraint. A beautifully incentive-compatible tutor that nobody opens teaches nobody. Desirable difficulty can make a consumer product unpleasant; strict mastery evidence can feel stingy; adult hobbyists may not find formal logic intrinsically rewarding enough for informational progress alone; and many lab/classroom effects may shrink badly in a mobile voluntary context.
-
-Those objections do **not** justify adding generic gamification now. They justify keeping engagement as a first-class uncertainty and being willing to escalate if clean baseline evidence shows that people learn when they use Externalize but simply do not return.
-
-The opposite failure is also possible: Externalize may already be sufficiently engaging, while retention, transfer, or mobile cognitive load is the real bottleneck. Adding engagement machinery before diagnosing the failure would obscure the baseline and close design space without evidence.
-
-## Current recommendation
-
-> **Keep the baseline clean. Instrument it better. Validate whether Externalize teaches what it claims to teach, including delayed transfer and the externalization/fading question. Treat “learning-aligned cadence, not engagement volume” as the leading engagement hypothesis, not yet as product behavior.**
-
-If voluntary return later emerges as the bottleneck, start with initiation friction, stable cues, neutral cadence, and non-shaming lapse recovery before escalating to loss-framed or casino-derived mechanics.
+Primary outcomes are delayed retention, transfer, calibration, time-to-mastery, voluntary return, and reduction in scaffolding. Session length, DAU, XP, streaks, and similar activity metrics are proxies at best and are not objectives.
 
 ## Source reports
 
-See `reports/` for the three independent submissions. They are preserved as research evidence, including disagreement and speculative material; this synthesis is intentionally not a replacement for them.
+- [`reports/gpt-5.6-sol.md`](reports/gpt-5.6-sol.md) — GPT-5.6 Sol.
+- [`reports/grok.md`](reports/grok.md) — Grok; faithful text extraction of the submitted PDF.
+- [`reports/opus-5.md`](reports/opus-5.md) — Opus 5.
+
+The common research brief and frontier-model prompt are preserved alongside this synthesis.
+
+## Strongest evidence-backed learning mechanisms
+
+The reports converge on a core that is well supported independently of their agreement: retrieval practice, spacing, successive relearning, informative feedback, generation/self-explanation, worked examples with fading, appropriately timed interleaving, calibration training, and transfer probes.
+
+Relevant evidence highlighted in the reports includes:
+
+- Retrieval practice: meta-analytic benefits around `g ≈ 0.50–0.70` versus restudy depending on synthesis and comparison; transfer benefits are meaningful but heterogeneous.
+- Spacing: exceptionally mature evidence; the useful interval depends on the desired retention horizon rather than a universal daily cadence.
+- Successive relearning: strong results when criterion retrieval is regained across spaced sessions, though much direct work is in definition/vocabulary settings and external validity to proof construction remains an open question.
+- Self-explanation: meta-analytic benefit around `g ≈ 0.55`.
+- Interleaving: positive average effects, including in mathematics, but moderator-dependent; novices may benefit from blocked introduction before discrimination-heavy interleaving.
+- Worked examples and fading: strong support for novices under high element interactivity, with expertise-reversal evidence warning against permanent scaffolding.
+- Step-level tutoring and feedback: useful evidence exists, but field effects and assistance/hint policy are substantially less settled than the broad proposition that feedback helps.
+
+The practical implication is not “add pedagogy and then gamify it.” It is to make the cognitively useful act the rewarded act, and make return cheap enough that learners perform that act at useful memory intervals.
+
+## Findings
+
+### 1. Delayed learning evidence must remain authoritative over activity metrics
+
+Externalize should evaluate interventions by what learners can later retrieve, transfer, and solve unaided, not by how much behavior the intervention generates inside the app. Any mechanism that improves opens, streaks, XP, or session volume while degrading delayed performance is a failure by the governing objective.
+
+### 2. Spacing plus retrieval is the strongest evidence-backed core around which return behavior can be organized
+
+The reports differ on many engagement mechanisms but not on the underlying learning value of effortful retrieval separated by useful delays. A return is valuable insofar as it creates a useful retrieval opportunity; return frequency is not intrinsically valuable.
+
+### 3. Engagement interventions have stronger evidence for getting people to start than for improving what they do once started
+
+Behavioral mechanisms such as implementation intentions, defaults, low friction, reminders, cues, and lapse recovery have a plausible role around session initiation. Once a learning episode starts, conventional learning science should dominate the design.
+
+This yields a useful default division—not yet an invariant:
+
+- **Outside/before the session:** cueing, implementation intentions, low friction, reminder timing, lapse recovery.
+- **Inside the session:** retrieval, spacing, feedback, fading, interleaving, calibration, transfer.
+
+### 4. Session initiation is a plausible habit target; formal reasoning is not established as one
+
+Habit evidence supports stable cue → open Externalize → attempt due retrieval. It does not justify treating valid symbolic inference itself as something that should become automatic through the same mechanism. Formal reasoning remains deliberative and working-memory-intensive for a substantial period, and desirable difficulties may deliberately increase effort.
+
+### 5. Cadence incentive is more defensible than volume incentive
+
+Opus highlighted unusually direct evidence from YeckehZaare & Resnick (2025), *npj Science of Learning*, “Counting days is a spacing incentive that unlocks the potential of low GPA students.” Two randomized studies compared incentives based on questions answered with incentives based on days on which practice occurred. Counting practice days encouraged spacing and improved exam performance, particularly among lower-GPA students.
+
+This is unusually relevant evidence for Externalize because it aligns an engagement incentive with a learning mechanism. Its limits matter: the studies involved course/grading incentives, not voluntary adult mobile learning, and they do not directly establish that a never-decreasing practice-days counter is superior to a reset streak in Externalize.
+
+### 6. Reset-on-miss streaks are not justified by current learning evidence
+
+Streak representations can causally influence behavior, but evidence that reset-on-miss streaks improve durable learning is lacking. Once a streak becomes valuable, it also creates an optimization target distinct from mastery. That invites minimum-effort preservation behavior and can corrupt the evidence stream used by the learner model.
+
+A conventional streak therefore should not be added merely because it is commercially common.
+
+### 7. Lapse recovery looks unusually promising and underexploited relative to streak preservation
+
+Milkman et al.'s large 2021 gym megastudy found that many interventions increased behavior during the intervention while few produced measurable post-intervention change; one of the strongest interventions rewarded returning after a missed workout. Transfer from gym attendance to learning is inferential, but the broader design intuition is attractive: make returning after a lapse easy and salient rather than making the lapse itself a failure state.
+
+For Externalize, a lapse may even create a useful memory interval. The resulting hypothesis is to treat return after absence as a valuable retrieval opportunity, not as restoration of a damaged engagement score.
+
+### 8. XP, leaderboards, pseudo-currency, hearts, fake scarcity, near-misses and casino-style variable rewards currently lack compelling learning-aligned justification
+
+The research deliberately examined mechanisms from F2P games, gambling, social media and consumer behavior. There is evidence that several can change behavior. That is not evidence that they improve learning.
+
+Their deeper risk in Externalize is epistemic: they can create a second reward economy in which users rationally optimize visible proxies rather than capability. Tutoring research on gaming the system—systematic guessing, bottom-out hint use, and related strategies—shows that interaction metrics can diverge from learning. Dark patterns are therefore not only ethical risks; they can become attacks on the validity of the learner model.
+
+### 9. Near-miss and variable-reward folklore is weaker and less transferable than product mythology suggests
+
+Grok is more willing than Opus to treat casino-derived mechanisms as behaviorally potent, while Opus emphasizes the weakness of evidence for importing variable-ratio reinforcement claims into ordinary product use. Preregistered near-miss work supports effects on subjective motivation/urge in some gambling tasks but shows more mixed effects on subsequent behavior.
+
+The synthesis does not need to resolve this dispute to reach a product-relevant conclusion: these mechanisms are not evidenced learning interventions, and Externalize has no demonstrated need that would justify the measurement corruption and motivational risks they introduce.
+
+### 10. Progress itself may be the best reward if it remains epistemically expensive
+
+Visible progress is defensible when it represents capability supported by later, system-chosen evidence. Progress becomes dangerous when activity can cheaply manufacture it.
+
+Grok's “two-clock” idea is useful analytically: an engagement clock is cheap and frequent; a mastery clock is slower and evidence-backed. Exposing both prominently, however, risks creating two games. The stronger current synthesis is:
+
+> **one authoritative visible progress model, with behavioral machinery underneath it rather than a second advancement currency.**
+
+Capability should remain prestigious progress. Cadence, if ever exposed, should be contextual/history information rather than an XP-like parallel status system.
+
+### 11. Scaffolding probably needs to fade with expertise; whether Externalize's exact intermediate-state requirement should fade remains open
+
+All three reports challenge the permanence—not the novice usefulness—of “externalize every intermediate state.” Expertise-reversal and cognitive-load research imply that scaffolds useful during acquisition can become redundant or obstructive once schemas develop.
+
+This does **not** authorize changing the doctrine. A consequential unresolved question remains:
+
+> Does mandatory externalization eventually inhibit unaided symbolic reasoning, or is explicit intermediate-state construction itself part of the target competence Externalize intends to teach?
+
+That must be tested rather than decided by analogy.
+
+### 12. Transfer away from Externalize's exact interface must eventually be part of mastery evidence
+
+A learner can appear fluent because the interface supplies recognition cues, state decomposition, or a familiar representation. Genuine mastery should therefore eventually survive representation changes, reduced scaffolding, and novel problems. The exact transfer criterion remains to be designed.
+
+### 13. Mobile-first is an assumption worth challenging, not a conclusion to reverse
+
+Grok explicitly raises a possible collision between mobile-first interaction and high-element-interactivity proof construction. A phone may be excellent for cues, retrieval and short practice while harder construction might benefit from a larger surface. This is a legitimate open question, not evidence that Externalize should stop being mobile-first.
+
+## Material disagreements preserved
+
+| Question | GPT-5.6 Sol | Grok | Opus 5 | Synthesis |
+|---|---|---|---|---|
+| Streaks | Test activity vs evidence streak vs none | Potentially usable if tied to valid retrieval and recovery | Decompose the mechanism: keep cadence, drop reset-on-miss | Opus's decomposition is currently strongest; no streak justified yet |
+| Dark mechanics | Potentially potent but risky; test selectively | Often behaviorally potent but hazardous to calibration | Reputation often exceeds evidence; mostly not worth complexity | Closer to Opus, while retaining Grok's warning about behavior/measurement corruption |
+| Immediate experimentation | Several N=1 tests | Prioritize learning architecture and assistance questions | Instrument first; run only N=1-valid tests | Opus/GPT hybrid: validate mastery/transfer and baseline failure modes first |
+| Externalization | Should adaptively fade | Challenges permanence under expertise reversal | Challenges permanence and proposes transfer testing | Important consequential open question; no doctrine change authorized |
+
+Agreement in this table is not itself evidence. The retained synthesis is based on the underlying studies, reasoning and applicability to Externalize.
+
+## Challenge before commitment
+
+The strongest case against adding an engagement layer now is that the project has not established an engagement bottleneck.
+
+Different observed failures imply different interventions:
+
+- “I like this and learning works, but I forget to open it” points toward initiation mechanics.
+- “I open willingly but practice feels repetitive” points toward task/learning-loop design rather than streaks.
+- “I use it frequently but do not retain” means engagement mechanics are largely irrelevant and may obscure the real problem.
+- “The capability display says I know things I cannot later do” is a mastery-model integrity problem and should outrank engagement work.
+
+Adding rewards before diagnosing the failure mode would contaminate the validation baseline and create new explanatory variables.
+
+## Recommended validation hypotheses
+
+These are recommendations for investigation, not authorized product changes.
+
+1. **Mastery validity.** Does the visible capability model predict performance on held-out, delayed problems?
+2. **Externalization transfer.** As competence rises, does reduced scaffolding improve or damage delayed unaided performance?
+3. **Representation transfer.** Can the same capability be demonstrated when the interface representation changes?
+4. **Initiation.** Does a simple cue / implementation-intention ritual materially increase actual scheduled retrievals without creating a reward economy?
+
+Only if voluntary return emerges as a material bottleneck should the first engagement-specific comparison be something like:
+
+> **neutral learning-aligned cadence + good lapse recovery vs baseline**
+
+before escalating to reset streaks, loss framing, currencies, or other engagement machinery.
+
+## N=1 experimental notes from the reports
+
+Opus provides the most explicit validation-oriented experiment hierarchy. Its N=1-friendly proposals include initiation/if–then planning, testing whether capability display predicts held-out performance, representation rotation, and checking whether step-level feedback induces guess-and-check behavior. Other questions—reset-streak harm, lapse-recovery policy, interleaving, productive failure—likely require substantially more observations or participants for credible inference.
+
+Useful methodological cautions from the reports:
+
+- short experiments can mistake novelty dynamics for durable effects;
+- delayed tests should generally be measured at meaningful delays rather than immediately;
+- held-out probes should be defined before training when possible;
+- within-subject item-pool splitting can make personal validation more informative;
+- learning endpoints should be primary, with engagement outcomes secondary;
+- stopping rules matter: a good learning product should know when more activity today is counterproductive.
+
+## Current recommendation
+
+**Do not start a gamification sprint.**
+
+Keep the baseline clean and instrument it well enough to distinguish initiation, experience, retention, calibration and mastery-model failures. Validate capability truthfulness and transfer before adding a new engagement economy.
+
+The leading engagement hypothesis, should return later become the bottleneck, is:
+
+> **learning-aligned cadence, not engagement volume.**
+
+The leading design caution is:
+
+> **do not let a proxy reward become easier to optimize than genuine capability.**
+
+## Decisions
+
+None created by this synthesis.
+
+Any future adoption of streaks, cadence displays, scaffold fading, notification policy, a changed externalization doctrine, or other consequential mechanism requires an explicit project decision after the relevant uncertainty has been reduced.
