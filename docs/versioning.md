@@ -4,9 +4,11 @@ Externalize uses [Semantic Versioning](https://semver.org/) and documents change
 
 ## Current version
 
-Latest **released** version: **0.3.2** (practice-attempt integrity, conservative progress migration, and correctness remediation).
+Latest changelog release: **0.4.0** (evidence-backed progress visibility and finite Practice sessions).
 
 `package.json` `"version"` matches the latest changelog release.
+
+GitHub release objects and tags are optional markers and may lag the changelog/package version; they are not the authoritative release source for this repository.
 
 ## Semver policy
 
@@ -17,6 +19,8 @@ Latest **released** version: **0.3.2** (practice-attempt integrity, conservative
 | **PATCH** | Bug fixes, copy tweaks, internal refactors with no behavior change | Same |
 
 Pre-1.0 (`0.x.y`): the public surface is still settling. Breaking changes bump **minor**, not major, until `1.0.0` marks a stable content schema and progress format.
+
+The v0.3.4 and v0.3.5 changelog entries historically used patch bumps for feature-bearing work. That numbering is retained as history; new releases should follow the policy above rather than treating prior drift as precedent.
 
 ## Changelog workflow
 
@@ -71,8 +75,8 @@ Bad:
 | Artifact | Role |
 |----------|------|
 | `CHANGELOG.md` | Human-readable history; authoritative for release notes |
-| `package.json` `"version"` | Machine-readable version (once app code exists) |
-| Git tags `vX.Y.Z` | Optional; mark releases in version control |
+| `package.json` `"version"` | Machine-readable version |
+| Git tags / GitHub releases | Optional markers; may lag the changelog/package state |
 
 ## Agent rule
 
