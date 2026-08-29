@@ -1,0 +1,40 @@
+name: Reconstruct research sources
+
+on:
+  push:
+    branches:
+      - docs/engagement-learning-research-synthesis
+
+permissions:
+  contents: write
+
+jobs:
+  reconstruct:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/engagement-learning-research-synthesis
+
+      - name: Reconstruct original source reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/research/engagement-learning/reports
+          cat .transport/opusxz-* | base64 -d | xz -d > docs/research/engagement-learning/reports/opus-5.md
+          cat .transport/grokxz-* | base64 -d | xz -d > docs/research/engagement-learning/reports/grok.pdf
+          test "$(git hash-object docs/research/engagement-learning/reports/opus-5.md)" = "606115265be05b73297b9b2c525bbf906bc671bc"
+          test "$(git hash-object docs/research/engagement-learning/reports/grok.pdf)" = "7a6d0a9c49a097225966c0a5d5186d44ab93afe6"
+          rm -rf .transport
+          rm -f .github/workflows/reconstruct-research-sources.yml
+
+      - name: Commit reconstructed sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs: archive original engagement research reports"
+          git push origin HEAD:docs/engagement-learning-research-synthesis
