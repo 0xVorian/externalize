@@ -1,128 +1,103 @@
-# Externalize — Research Brief: Engagement, Durable Learning, and Ethical Use of Behavioral Mechanisms
+# Externalize engagement and durable-learning research brief
 
-**Status:** Investigative research brief  
-**Project:** Externalize  
-**Research question:** How can Externalize exploit the strongest known mechanisms for motivation, habit formation, attention, repeated engagement, memory, and learning while preserving—or improving—durable retention, transfer, calibration, and genuine mastery?
+## Objective
 
-## 1. Objective
-
-Externalize is a mobile-first symbolic-logic learning application built around the doctrine **“externalize every intermediate state.”** The current product is entering a validation period in which sustained real use should take priority over feature expansion.
-
-In parallel, we want a rigorous research program on interventions that could make users start learning sessions more reliably; return over days, weeks, and months; persist through difficult material; retrieve knowledge at useful intervals; retain concepts durably; transfer learned skills to unfamiliar problems; develop accurate confidence about what they know; experience visible, meaningful progress; and eventually need less scaffolding rather than becoming dependent on the product.
-
-The research should deliberately examine the entire behavioral-design toolbox, including mechanisms commonly criticized as manipulative or “dark patterns.” The fact that a mechanism has been exploited by casinos, social media, advertising, free-to-play games, or other attention-maximizing products is **not** grounds for excluding it. The purpose is to ask whether those mechanisms can be redirected toward the learner’s own long-term interests.
+Investigate how Externalize can improve voluntary return, persistence and attention while preserving—or improving—durable learning.
 
 > **Engagement is instrumental. Learning is the objective.**
 
-Time in app, sessions completed, streak length, clicks, XP, and similar measures are not success criteria unless evidence shows that they contribute to genuine learning or useful habit formation.
+The research should not optimize app activity for its own sake. A mechanism is valuable only insofar as it improves, or at minimum does not corrupt, retrieval strength, transfer, calibration, time-to-mastery and genuine capability.
 
-## 2. Current known context
+## Research question
 
-Treat the following as project context, not as conclusions the research must defend:
+How can Externalize exploit the strongest known mechanisms for motivation, habit formation, attention and repeated engagement while preserving—or improving—retrieval strength, transfer, calibration and genuine mastery?
 
-- Externalize teaches symbolic logic.
-- Its central pedagogical doctrine is to require learners to expose intermediate reasoning rather than jump directly to answers.
-- The product distinguishes graded learning evidence from exploratory activity.
-- Explore activity, time spent, and mere session completion should not automatically count as mastery evidence.
-- Recent work made learning progress visible using evidence-backed capability states.
-- A previous evaluation-integrity problem showed that apparently reasonable UX can corrupt mastery evidence when learners can strategically choose easier evidence.
-- The current product phase prioritizes sustained personal use and validation rather than immediate curriculum expansion.
-- Full natural deduction and predicate logic are presently deferred; this research should not assume they must be the next product additions.
+## Primary outcomes
 
-## 3. Core research questions
+Treat these as the outcomes that matter:
 
-### A. Learning and memory
+- delayed retention;
+- transfer to novel problems and altered representations;
+- confidence calibration;
+- time-to-mastery;
+- voluntary return when useful practice is due;
+- reduction in required scaffolding without capability loss.
 
-Investigate retrieval practice/testing effects, spaced practice and optimal scheduling, interleaving, desirable difficulties, generation, elaboration and self-explanation, worked examples and fading, feedback timing and specificity, error correction, mastery learning, overlearning, successive relearning, contextual variability, transfer-appropriate processing, metacognitive calibration, confidence judgments, pretesting, productive failure, chunking and automaticity, cognitive load and expertise reversal, and forgetting/relearning/memory-strength models.
+DAU, session length, XP, streak length, raw attempt count and similar activity measures are proxies at best. They must not silently become objectives.
 
-Determine not merely whether these effects exist, but how reliably they generalize to a mobile symbolic-logic tutor.
+## Research scope
 
-### B. Motivation and persistence
+Investigate both conventional learning science and behavior-design mechanisms that are commonly used to increase engagement, including mechanisms that may be manipulative or commercially controversial. The point is not to endorse them; it is to understand what is actually known about their causal effects and whether their behavioral power can be aligned with learning rather than proxy maximization.
 
-Investigate self-determination theory; autonomy, competence, and relatedness; self-efficacy; expectancy-value; goal gradients; implementation intentions; commitment devices; temptation bundling; fresh starts; endowed progress; sunk costs; loss aversion; completion bias; Zeigarnik/Ovsiankina effects; identity-based motivation; goals/subgoals; perceived competence; flow/challenge calibration; curiosity/information gaps; uncertainty and anticipation.
+Relevant areas include:
 
-Distinguish short-lived behavioral effects from mechanisms with evidence of sustained behavior change.
+- retrieval practice, spacing and successive relearning;
+- interleaving, generation, self-explanation and productive failure;
+- worked examples, fading and expertise reversal;
+- feedback timing, hint architecture and intelligent tutoring;
+- calibration and metacognitive judgments;
+- habit formation, implementation intentions, defaults and friction;
+- reminders and notifications;
+- streaks, loss framing, goal gradients and endowed progress;
+- variable reinforcement, near misses and pseudo-currencies;
+- leaderboards, social comparison and competition;
+- scarcity, hearts/energy systems and stopping/continuation design;
+- Goodhart effects, gaming-the-system and wheel-spinning;
+- attention costs and seductive details;
+- lapse recovery and return after absence.
 
-### C. Habit formation and return behavior
+## Required epistemic discipline
 
-Investigate cue-routine-reward structures, context-dependent habits, reminders/notifications, streaks and recovery, daily goals, reward schedules, escalating commitment, rituals, defaults, friction, choice architecture, progress preservation, restart after lapses, temporal landmarks, personalized timing, “just one more” mechanics, and unfinished-session effects.
+Distinguish throughout:
 
-Pay particular attention to what happens **after a lapse**. A system producing impressive 14-day streaks but abandonment after the first missed day may be worse than one with less impressive engagement statistics.
+- **Knowns:** established project state or evidence with strong support.
+- **Assumptions:** propositions provisionally used but not established for Externalize.
+- **Open questions:** uncertainties material to product direction.
+- **Findings:** conclusions supported by the investigation.
+- **Recommendations:** proposed experiments or design hypotheses.
+- **Decisions:** explicit owner-authorized commitments only.
 
-### D. Games, consumer apps, casinos, and attention engineering
+Do not treat repeated claims, model agreement, inherited implementation behavior, popular product practice or a research finding as a binding constraint.
 
-Deliberately investigate free-to-play/mobile games, social media, gambling/casino design, loyalty programs, fitness and language-learning apps, productivity apps, subscription products, advertising, and conversion optimization.
+For important claims, prefer evidence with causal identification, delayed learning endpoints, transfer measurement, relevant populations/tasks, replication and measurement integrity. Publication type alone is not a sufficient evidence hierarchy.
 
-Relevant mechanisms include variable-ratio reinforcement, near misses, streaks, daily rewards, quests, battle-pass-like progression, XP/levels, achievements, collections, unlocking, scarcity/countdowns, loss framing, social proof, leaderboards/status, reciprocity, personalization, surprise rewards, progress bars, endowed progress, artificial stopping/continuation points, session chaining, re-engagement notifications, pseudo-currency, reward anticipation, and escalating rewards.
+## Challenge the brief
 
-Do not recommend these simply because they increase engagement. Determine mechanism, evidence strength, durability, harms, and whether a learning-oriented implementation can align the mechanism with the learner’s interests.
+The investigation is explicitly allowed to conclude that:
 
-### E. Educational technology and intelligent tutoring systems
+- the engagement problem is malformed or not yet demonstrated;
+- a mechanism commonly called “engagement” is really a proxy-control mechanism with no learning justification;
+- a current product doctrine should be tested rather than preserved forever;
+- mobile-first interaction creates a learning constraint worth investigating;
+- a simpler product with excellent pedagogy and honest capability is a stronger competitor than a gamified product;
+- no consequential design decision should yet be made.
 
-Investigate intelligent tutors, adaptive learning, computer-assisted instruction, MOOCs, language apps, spaced-repetition systems, mathematics/programming tutors, serious games, and mastery-based courseware. Prefer actual learning and retention outcomes over product claims.
+## Application to Externalize
 
-### F. Measurement integrity and Goodhart effects
+For every candidate mechanism, ask:
 
-This is first-class. For every engagement mechanism ask whether it incentivizes optimizing the proxy rather than learning: easy-exercise farming, meaningless streak activity, easy-material selection, rapid guessing, interface-pattern memorization, challenge avoidance, hint abuse, scaffold dependence, confidence manipulation, completion without retention, or unrelated achievement chasing.
+1. What behavior or cognitive process does it actually target?
+2. What is the strength and external validity of the evidence?
+3. Does it improve delayed learning or merely proximal activity?
+4. Could a sophisticated learner optimize the visible metric without improving capability?
+5. Could it corrupt the learner model or calibration?
+6. Does it consume attention or working memory needed for reasoning?
+7. What is the smallest credible experiment for Externalize?
+8. What primary metric, guardrail and delayed endpoint would falsify the intervention?
+9. Is the mechanism useful for session initiation, within-session learning, or both?
+10. What is the strongest case that adopting it would be premature or harmful?
 
-Identify ways to detect/prevent these without making the product adversarial toward legitimate learners.
+## Deliverables
 
-## 4. Outcomes and metrics
+Each independent research submission should provide:
 
-**Learning outcomes:** delayed retention, unaided retrieval, novel-problem transfer, reduced scaffolding, error-type reduction, confidence calibration, successful relearning, capability across varied representations.
+- an evidence map of relevant mechanisms;
+- the strongest learning-aligned candidates;
+- mechanisms that appear behaviorally potent but learning-unproven;
+- mechanisms that are structurally dangerous to mastery or calibration;
+- important evidence gaps and external-validity limitations;
+- challenges to current Externalize assumptions/doctrine;
+- proposed experiments with primary learning endpoints and guardrails;
+- an explicit account of what should **not** yet be decided.
 
-**Behavioral outcomes:** voluntary return, initiation, lapse recovery, persistence on difficult material, appropriately spaced retrieval, curriculum continuation.
-
-**Experience outcomes:** competence, enjoyment, frustration, anxiety, agency, perceived progress, trust.
-
-**Proxy metrics — cautious:** time in app, taps, raw sessions, XP, streak length, lesson completion, notification opens.
-
-A study improving only proxy metrics is not evidence of improved learning.
-
-## 5. Evidence standards
-
-Prefer roughly: systematic reviews/meta-analyses; preregistered randomized studies; strong field experiments; replicated laboratory experiments; high-quality longitudinal evidence; well-designed edtech studies; credible industry experiments with disclosed methods; mechanistic/theoretical work; practitioner reports/cases; anecdote/folklore.
-
-This hierarchy is not absolute. Relevance, external validity, sample, measurement quality, replication, and applicability matter. For important claims seek primary literature, report effect sizes when meaningful, distinguish immediate performance from delayed learning, note contradictions/replication failures, identify populations, distinguish laboratory from sustained field behavior, distinguish causation from correlation, and state uncertainty explicitly. Company adoption is not evidence.
-
-## 6. Dark-pattern treatment
-
-Do **not** sanitize the research. For potentially manipulative mechanisms document what it does, proposed psychology, behavioral evidence, durability, harms, commercial exploitation, learning alignment, autonomy, mastery distortion, and whether a less manipulative intervention gets the same benefit.
-
-Classify ethical risk separately from empirical effectiveness. “Effective but dangerous” is a legitimate finding.
-
-## 7. Externalize-specific analysis
-
-For every promising mechanism provide a concrete implementation concept and specify target behavior/learning process, causal mechanism, supporting evidence, measurement corruption, failure modes, ethics, smallest credible experiment, primary learning metric, secondary engagement metric, and guardrail.
-
-Illustrations include retrieval shortly before predicted forgetting; a streak dependent on meaningful retrieval rather than opening; recovery after lapse rather than resetting progress; rewards only after demonstrated evidence; capability progression after delayed successful retrieval; and unfinished goals that encourage return without artificial withholding. These are illustrations, not predetermined recommendations.
-
-## 8. Required synthesis: Mechanism Arsenal
-
-For each mechanism record name, provenance, mechanism of action, target, evidence quality, defensible effect magnitude, horizon, external-validity concerns, counterevidence, Goodhart risk, ethical risk, Externalize application, backfire modes, test, and overall assessment.
-
-Classify as **Strong candidate**, **Promising / investigate experimentally**, **Context-dependent**, **Speculative**, **Effective but dangerous**, **Probably counterproductive**, or **Insufficient evidence**. Do not force mechanisms into positive recommendations.
-
-## 9. Cross-mechanism analysis
-
-Identify reinforcing combinations, interference, intrinsic-motivation harms, conflicts with desirable difficulty, reward-induced strategy changes, novelty/decay, and expertise-dependent interventions.
-
-Investigate a learning-aligned loop in which the learner returns; return triggers appropriately difficult retrieval; retrieval generates valid evidence; evidence produces meaningful progress; progress reinforces return; scaffolding decreases; and the learner ultimately becomes less dependent on Externalize.
-
-## 10. Adversarial challenge
-
-Before recommendations ask whether increased practice is being mistaken for learning; effects are too small/context-specific; gamification crowds out interest; progress creates gaming; reminders/streaks create guilt; scheduling makes curriculum incoherent; desirable difficulty merely makes the product unpleasant; evidence comes from unrelated populations; effects are transient; personalization is justified; or a simpler excellent-pedagogy product would outperform behavioral machinery.
-
-Preserve material disagreement rather than resolving it by majority vote.
-
-## 11. Scope boundaries
-
-This research is **investigative**. It may establish findings and candidate hypotheses. It does **not** authorize implementation, mastery-model changes, new invariants, curriculum expansion, notifications, gamification, or a release plan.
-
-Research findings are not decisions. Consequential product commitments require separate synthesis, challenge, prioritization, and explicit owner decision.
-
-## 12. Desired final deliverable
-
-The synthesis should provide an executive synthesis; evidence map; 30–50-mechanism arsenal; top Externalize candidates; dangerous-but-interesting mechanisms; clever-sounding mechanisms that probably do not work; system-level interactions; open questions; experiment backlog; adversarial critique; and bibliography.
-
-The desired outcome is not maximum engagement. It is a system in which behavioral engineering makes it easier for a learner to repeatedly do the cognitively useful thing at the cognitively useful time—and makes genuine intellectual progress sufficiently rewarding that the loop sustains itself.
+The subsequent synthesis must compare evidence and reasoning, not count votes among models.
