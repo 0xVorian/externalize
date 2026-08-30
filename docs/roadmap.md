@@ -2,32 +2,34 @@
 
 This document tracks the shipped application and the remaining validation gates. It is intentionally conservative: implemented prototypes are not promoted to “done” merely because code exists.
 
-## Current status — v0.3.5
+## Current status — post-v0.3.5 `master`
 
-Externalize now has three propositional-logic learning units, graded practice across multiple skills, local progress/SRS, EN/FR course material, Explore mode, export/import, a concept map, PWA support, and browser regression coverage.
+Externalize now has three propositional-logic learning units, graded practice across multiple skills, local progress/SRS, EN/FR course material, Explore mode, export/import, a concept map, PWA support, browser regression coverage, and evidence-backed progress visibility throughout Learn, Practice, and Progress.
 
-The main unresolved question is no longer whether the core interactions can be built. It is whether sustained use makes symbolic-logic practice meaningfully easier and worth returning to.
+The latest changelog release is v0.3.5. The progress-visibility work merged after that release and remains under `[Unreleased]`; this document describes the current `master` state rather than pretending that merged code has already been cut as a release.
 
-### Immediate product priority — make progress perceptible
+The main unresolved question is no longer whether the core interactions can be built, or whether progress can be made perceptible without inventing arbitrary gamification. It is whether sustained use makes symbolic-logic practice meaningfully easier and worth returning to.
 
-Testing the current application exposed a concrete experiential problem: Externalize records meaningful learning progress, but much of that movement is invisible during ordinary use. The Progress tab reports state; Learn and Practice do not yet make the learner strongly feel that they are advancing.
+### Current validation priority — sustained personal use
 
-The next product pass is therefore **progress visibility**, not curriculum expansion. See [progress-visibility.md](progress-visibility.md).
+The progress-visibility pass defined in [progress-visibility.md](progress-visibility.md) is implemented. Learn exposes unit/lesson position; Practice exposes capability state and finite five-exercise sessions; Progress leads with capability-oriented summaries; meaningful transitions are derived from graded evidence rather than time spent or arbitrary XP.
 
-Target scope:
+Implemented scope:
 
-- [ ] Ambient unit/lesson position in Learn
-- [ ] Ambient capability state in Practice
-- [ ] Finite short practice-session arc (initial target: 5 finalized exercises)
-- [ ] Session-complete summary based on actual changes
-- [ ] Visible transitions for capability reliability, new unlocks, and reduced scaffolding
-- [ ] Capability-first summary in Progress (`You can now`, `In progress`, `Up next`)
-- [ ] EN/FR, accessibility, reduced-motion, and ~320px mobile coverage
-- [ ] Unit and browser regression tests for progress derivation and transition behavior
+- [x] Ambient unit/lesson position in Learn
+- [x] Ambient capability state in Practice
+- [x] Finite short practice-session arc (5 finalized exercises)
+- [x] Session-complete summary based on actual changes
+- [x] Visible transitions for capability reliability, new unlocks, and reduced scaffolding
+- [x] Capability-first summary in Progress (`You can now`, `In progress`, `Up next`)
+- [x] EN/FR, accessibility, reduced-motion, and ~320px mobile coverage
+- [x] Unit and browser regression tests for progress derivation and transition behavior
 
-**Validation criterion:** during normal Learn/Practice use, the learner can tell what they are working on, see that a meaningful action moved them forward, understand what changed, and know what comes next without needing to inspect the detailed Progress dashboard.
+**Validation criterion now:** use the current application repeatedly in ordinary phone sessions and determine whether the learner can tell what they are working on, notice meaningful progress, retain and transfer symbolic-logic skills, and want to return without being prompted by product-development work.
 
-Progress claims must remain evidence-backed. This work must not introduce arbitrary XP/account levels or allow Explore/time-spent/session completion to masquerade as mastery.
+Progress claims must remain evidence-backed. Explore, time spent, and session completion are motivational/contextual signals only and must not masquerade as mastery.
+
+Until sustained use produces evidence for a concrete change, **product validation takes priority over curriculum expansion**.
 
 ## Phase 0 — Documentation
 
@@ -106,8 +108,9 @@ The original “full propositional MVP” feature list is now substantially impl
 - [x] Separate exploration from graded prediction
 - [x] System-chosen diagnostic cases for graded evaluation
 - [x] Accessible EN/FR UI and course content
+- [x] Evidence-backed progress visibility in ordinary Learn/Practice use
 
-**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, and repaired attempt semantics. The progress-visibility pass above is part of that validation work. Do not expand curriculum scope merely to satisfy an old checkbox list.
+**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, repaired attempt semantics, retention, and transfer. Do not expand curriculum scope merely to satisfy an old checkbox list or because additional engine work is technically possible.
 
 ## Phase 5 — Natural deduction
 
