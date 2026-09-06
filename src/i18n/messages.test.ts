@@ -82,7 +82,7 @@ describe('i18n', () => {
       const copy = visibilityUi(locale);
       expect(copy.stateReady).toBeTruthy();
       expect(copy.stateDeveloping).toBeTruthy();
-      expect(copy.stateReliable).toBeTruthy();
+      expect(copy.stateConsistent).toBeTruthy();
       expect(copy.sessionProgress(0, 5)).toMatch(/0/);
       expect(copy.sessionCompleteHeading).toBeTruthy();
       expect(copy.sessionKeepPractising).toBeTruthy();
@@ -93,7 +93,7 @@ describe('i18n', () => {
       expect(copy.youCanNowEmpty).toBeTruthy();
       expect(copy.inProgressEmpty).toBeTruthy();
       expect(copy.upNextEmpty).toBeTruthy();
-      expect(copy.momentReliable('Evaluating formulas')).toBeTruthy();
+      expect(copy.momentConsistent('Evaluating formulas')).toBeTruthy();
       expect(copy.momentCapabilityUnlocked('Counterexamples')).toBeTruthy();
       expect(copy.momentExerciseUnlocked('eval-011')).toBeTruthy();
       expect(copy.momentScaffoldAdvanced).toBeTruthy();

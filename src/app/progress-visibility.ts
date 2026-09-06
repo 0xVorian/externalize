@@ -6,8 +6,8 @@ import {
 } from './evaluation-scaffold';
 import { PRACTICE_UNLOCK_ORDER, lessonUnit, lessonsForUnit } from './lessons';
 import {
-  RELIABLE_MIN_ATTEMPTS,
-  RELIABLE_MIN_RATE,
+  CONSISTENT_MIN_ATTEMPTS,
+  CONSISTENT_MIN_RATE,
   TRACKED_SKILL_IDS,
   skillForExercise,
   successRate,
@@ -16,10 +16,10 @@ import {
 } from './progress-tracker';
 import { getUnlockedExerciseIds, type ProgressStore } from './storage';
 
-export type CapabilityState = 'locked' | 'ready' | 'developing' | 'reliable';
+export type CapabilityState = 'locked' | 'ready' | 'developing' | 'consistent';
 
 export type ProgressMoment =
-  | { kind: 'capability-reliable'; skillId: SkillId }
+  | { kind: 'capability-consistent'; skillId: SkillId }
   | { kind: 'capability-first-pass'; skillId: SkillId }
   | { kind: 'exercise-unlocked'; exerciseId: string }
   | { kind: 'capability-unlocked'; skillId: SkillId }
@@ -39,7 +39,7 @@ export type LearnProgressContext = {
 };
 
 const MOMENT_PRIORITY: ProgressMoment['kind'][] = [
-  'capability-reliable',
+  'capability-consistent',
   'capability-unlocked',
   'exercise-unlocked',
   'scaffold-advanced',
@@ -66,8 +66,8 @@ export function deriveCapabilityState(
     return 'ready';
   }
   const rate = successRate(stat ?? { attempts: 0, successes: 0, recentErrorTags: [] });
-  if (attempts >= RELIABLE_MIN_ATTEMPTS && rate >= RELIABLE_MIN_RATE) {
-    return 'reliable';
+  if (attempts >= CONSISTENT_MIN_ATTEMPTS && rate >= CONSISTENT_MIN_RATE) {
+    return 'consistent';
   }
   return 'developing';
 }
@@ -111,8 +111,8 @@ export function diffProgressVisibility(
     if (from === to) {
       continue;
     }
-    if (to === 'reliable') {
-      moments.push({ kind: 'capability-reliable', skillId });
+    if (to === 'consistent') {
+      moments.push({ kind: 'capability-consistent', skillId });
     }
     if (from === 'locked' && to !== 'locked') {
       moments.push({ kind: 'capability-unlocked', skillId });
@@ -196,17 +196,17 @@ export function deriveLearnProgress(
   };
 }
 
-export function reliableFromStat(stat: SkillStat | undefined): boolean {
-  if (!stat || stat.attempts < RELIABLE_MIN_ATTEMPTS) {
+export function consistentFromStat(stat: SkillStat | undefined): boolean {
+  if (!stat || stat.attempts < CONSISTENT_MIN_ATTEMPTS) {
     return false;
   }
-  return successRate(stat) >= RELIABLE_MIN_RATE;
+  return successRate(stat) >= CONSISTENT_MIN_RATE;
 }
 
 export function describeProgressMoment(
   moment: ProgressMoment,
   copy: {
-    momentReliable: (capability: string) => string;
+    momentConsistent: (capability: string) => string;
     momentCapabilityUnlocked: (capability: string) => string;
     momentExerciseUnlocked: (exercise: string) => string;
     momentScaffoldAdvanced: string;
@@ -216,8 +216,8 @@ export function describeProgressMoment(
   exerciseName: (id: string) => string,
 ): string {
   switch (moment.kind) {
-    case 'capability-reliable':
-      return copy.momentReliable(skillLabel(moment.skillId));
+    case 'capability-consistent':
+      return copy.momentConsistent(skillLabel(moment.skillId));
     case 'capability-unlocked':
       return copy.momentCapabilityUnlocked(skillLabel(moment.skillId));
     case 'exercise-unlocked':

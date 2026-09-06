@@ -56,7 +56,7 @@ export function isPracticeSessionComplete(session: PracticeSession): boolean {
 
 function momentKey(moment: ProgressMoment): string {
   switch (moment.kind) {
-    case 'capability-reliable':
+    case 'capability-consistent':
     case 'capability-first-pass':
     case 'capability-unlocked':
       return `${moment.kind}:${moment.skillId}`;

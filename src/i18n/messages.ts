@@ -1145,7 +1145,7 @@ export type VisibilityUiCopy = {
   stateLocked: string;
   stateReady: string;
   stateDeveloping: string;
-  stateReliable: string;
+  stateConsistent: string;
   capabilityStatusAria: (name: string, state: string) => string;
   sessionProgress: (completed: number, target: number) => string;
   sessionProgressAria: (completed: number, target: number) => string;
@@ -1160,7 +1160,7 @@ export type VisibilityUiCopy = {
   inProgressEmpty: string;
   upNextHeading: string;
   upNextEmpty: string;
-  momentReliable: (capability: string) => string;
+  momentConsistent: (capability: string) => string;
   momentCapabilityUnlocked: (capability: string) => string;
   momentExerciseUnlocked: (exercise: string) => string;
   momentScaffoldAdvanced: string;
@@ -1172,7 +1172,7 @@ const VISIBILITY_UI: Record<Locale, VisibilityUiCopy> = {
     stateLocked: 'Locked',
     stateReady: 'Ready',
     stateDeveloping: 'Developing',
-    stateReliable: 'Reliable',
+    stateConsistent: 'Consistent so far',
     capabilityStatusAria: (name, state) => `${name}: ${state}`,
     sessionProgress: (completed, target) => `${completed} / ${target}`,
     sessionProgressAria: (completed, target) =>
@@ -1187,12 +1187,12 @@ const VISIBILITY_UI: Record<Locale, VisibilityUiCopy> = {
     sessionFinish: 'Leave session',
     youCanNowHeading: 'You can now',
     youCanNowEmpty:
-      'Nothing is marked reliable yet. That takes several clean passes on the same kind of work.',
+      'Nothing is marked consistent yet. This reflects repeated clean performance, not delayed mastery.',
     inProgressHeading: 'In progress',
     inProgressEmpty: 'No capability is mid-practice yet.',
     upNextHeading: 'Up next',
     upNextEmpty: 'The next step appears as lessons and exercises unlock.',
-    momentReliable: (capability) => `${capability} is now reliable.`,
+    momentConsistent: (capability) => `${capability} is consistent across recent attempts.`,
     momentCapabilityUnlocked: (capability) => `${capability} is now available.`,
     momentExerciseUnlocked: (exercise) => `Next exercise unlocked: ${exercise}.`,
     momentScaffoldAdvanced:
@@ -1203,7 +1203,7 @@ const VISIBILITY_UI: Record<Locale, VisibilityUiCopy> = {
     stateLocked: 'Fermé',
     stateReady: 'Disponible',
     stateDeveloping: 'En consolidation',
-    stateReliable: 'Fiable',
+    stateConsistent: 'Régulier pour l’instant',
     capabilityStatusAria: (name, state) => `${name} : ${state}`,
     sessionProgress: (completed, target) => `${completed} / ${target}`,
     sessionProgressAria: (completed, target) =>
@@ -1218,12 +1218,12 @@ const VISIBILITY_UI: Record<Locale, VisibilityUiCopy> = {
     sessionFinish: 'Quitter la séance',
     youCanNowHeading: 'Vous savez désormais',
     youCanNowEmpty:
-      'Aucune capacité n’est encore marquée fiable. Il faut plusieurs réussites nettes sur le même type de tâche.',
+      'Aucune capacité n’est encore marquée régulière. Cet état reflète des réussites nettes répétées, pas une maîtrise différée.',
     inProgressHeading: 'En cours',
     inProgressEmpty: 'Aucune capacité n’est actuellement en consolidation.',
     upNextHeading: 'À venir',
     upNextEmpty: 'La prochaine étape s’affichera lorsque des leçons ou exercices s’ouvriront.',
-    momentReliable: (capability) => `${capability} est désormais fiable.`,
+    momentConsistent: (capability) => `Résultats réguliers pour ${capability} sur les essais récents.`,
     momentCapabilityUnlocked: (capability) => `${capability} est maintenant accessible.`,
     momentExerciseUnlocked: (exercise) => `Nouvel exercice ouvert : ${exercise}.`,
     momentScaffoldAdvanced:

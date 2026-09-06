@@ -9,11 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Capability-first progress: derived Ready / Developing / Reliable states, compact Learn unit/lesson meters, Practice session `n / 5` with a real completion boundary, and one-time progress moments for reliability, unlocks, and nested-evaluation scaffold withdrawal
+- Capability-first progress: derived Ready / Developing / Consistent states, compact Learn unit/lesson meters, Practice session `n / 5` with a real completion boundary, and one-time progress moments for consistency, unlocks, and nested-evaluation scaffold withdrawal
 - Progress tab summary groups **You can now**, **In progress**, and **Up next**, without removing existing lesson, exercise, concept-map, or diagnostic detail
+
+### Changed
+
+- Renamed the short-horizon capability state from **Reliable** to **Consistent so far** so three recent clean attempts are not presented as delayed mastery evidence
+- Standardized development, CI, and Cloudflare deployment on Node 22; release checks now include the Playwright suite
+- PWA navigation now prefers fresh HTML online while retaining a cached built shell for offline reloads
 
 ### Fixed
 
+- Progress imports now reject unsupported internal progress versions instead of silently resetting to a blank store; failed local loads preserve the raw payload under a recovery key
 - Unit 2 completion is shown once on the first Practice screen after the Learn path, then clears when the learner continues
 - Practice capability name and state are available once as visible text, without a duplicate screen-reader announcement
 - Unit-completion notices are announced once; later rerenders of the same visible card no longer re-announce to assistive technology

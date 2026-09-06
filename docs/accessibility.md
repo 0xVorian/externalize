@@ -46,7 +46,7 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 ### Progress visibility
 
 - Learn unit meters use `role="meter"` plus visible text (position and completed count).
-- Practice capability chips include readable state text (`Ready` / `Developing` / `Reliable`); the visible family label and chip are the single accessible announcement. Session position has an accessible label.
+- Practice capability chips include readable state text (`Ready` / `Developing` / `Consistent so far`); the visible family label and chip are the single accessible announcement. Session position has an accessible label.
 - Progress moments use `role="status"` with `aria-live="polite"` on first insert only, so rerenders do not re-announce.
 - Unit-completion cards use `role="status"` with `aria-live="polite"` on first insert only. Later rerenders of the same visible card use `aria-live="off"` without `role="status"`, so ordinary interaction and locale switches do not repeat the announcement.
 - Session-complete cards use the same one-shot live pattern: first presentation after crossing `5 / 5` uses `role="status"` with `aria-live="polite"`; later rerenders of that same completed session (including locale switches) use `aria-live="off"` without `role="status"`. A later new session can announce its own completion once.
@@ -58,9 +58,9 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 - **Keyboard activation:** All interactive controls remain native `<button>` elements; Enter/Space activate via the existing delegated click handler. Read-only tree nodes are not in the tab order.
 - **Tree keyboard navigation:** Scope exercises (main-connective selection) use roving `tabindex` on connective buttons; Arrow Up/Down move between visible nodes, Arrow Right/Left move to first child or parent, Home/End jump to first/last node. Focus-visible outline applies; `aria-selected` reflects selection on `treeitem` elements.
 
-### Symbol palette (stub)
+### Symbol palette
 
-- Already had `aria-label` on buttons and `role="group"` on palette rows; no markup changes. Focus-visible styles added for when the palette ships.
+- Palette buttons have `aria-label`; palette rows use `role="group"`; focus-visible styling applies in the shipped translation exercises.
 
 ## Known gaps
 
@@ -69,7 +69,7 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 - **Reference panel:** Native `<details>`; no custom expand/collapse announcements beyond browser defaults.
 - **Live region politeness:** Feedback uses `role="status"` but not `aria-live="polite"` explicitly (implicit for status role in most browsers).
 - **Color-only state:** Active V/F segment and selected tree node also use border/weight changes, but rely partly on green/red tint — verify contrast in user themes.
-- **Translation palette:** Not wired into the live app yet; a11y reviewed at renderer level only.
+- **Translation palette:** Shipped and covered by browser flows; continue manual screen-reader checks as the construction UI evolves.
 
 ## Testing notes
 

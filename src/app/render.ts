@@ -203,7 +203,7 @@ function capabilityStateLabel(
   copy: ReturnType<typeof visibilityUi>,
   state: CapabilityState,
 ): string {
-  if (state === 'reliable') return copy.stateReliable;
+  if (state === 'consistent') return copy.stateConsistent;
   if (state === 'developing') return copy.stateDeveloping;
   if (state === 'ready') return copy.stateReady;
   return copy.stateLocked;

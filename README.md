@@ -13,7 +13,7 @@ Start here:
 | [Vision & brief](docs/vision.md) | Original concept, learning path, exercise types, success criterion |
 | [Design principles](docs/design-principles.md) | Non-negotiable UX and pedagogical constraints |
 | [Technical decisions](docs/decisions.md) | Platform, architecture, notation, and open questions with current answers |
-| [Roadmap](docs/roadmap.md) | Build order, MVP scope, and first prototype |
+| [Roadmap](docs/roadmap.md) | Current priorities, shipped phases, and validation gates |
 | [Future work plan](docs/future-work-plan.md) | Proactive content/engine prep and agent batch plan (not the app roadmap) |
 | [Content model](docs/content-model.md) | How exercises, lessons, and progress are represented as data |
 | [Progress visibility](docs/progress-visibility.md) | Capability states, practice sessions, and progress moments |
@@ -23,7 +23,9 @@ Start here:
 | [Testing](docs/testing.md) | Vitest unit tests and Playwright smoke suite |
 | [Presentation](docs/presentation.md) | When to use truth tables vs parse trees, layout rules |
 | [Predicate logic (Phase 6 prep)](docs/predicate-logic.md) | AST extension, notation, engine impact — design only |
-| [Changelog](CHANGELOG.md) | Record of released changes |
+| [Changelog](CHANGELOG.md) | Record of released and unreleased changes |
+
+For current state, treat this README and the roadmap as authoritative. Design briefs, phase plans, and agent briefs record scoped or historical decisions and may intentionally describe pre-implementation states.
 
 ## Status
 
@@ -53,7 +55,7 @@ Connect the GitHub repository in Cloudflare Pages with:
 |---------|-------|
 | Build command | `npm run build` |
 | Build output directory | `dist` |
-| Node.js version | `20` (or set `NODE_VERSION=20`) |
+| Node.js version | `22` (or set `NODE_VERSION=22`) |
 
 No environment variables required for MVP-0. Progress is stored in the browser (`localStorage`).
 
@@ -61,7 +63,7 @@ After deploy, open the Pages URL on your phone to run the week test.
 
 ## Install as PWA (home screen)
 
-Externalize ships a web app manifest and a lightweight service worker that caches the app shell (HTML, manifest, icons). Progress still lives in `localStorage` on each device — use Progress → Export/Import to move between installs.
+Externalize ships a web app manifest and a service worker that pre-caches the built app shell, refreshes navigation from the network when available, and falls back to the cached shell offline. Progress still lives in `localStorage` on each device — use Progress → Export/Import to move between installs.
 
 **Android (Chrome):** open the site → menu (⋮) → **Install app** or **Add to Home screen**.
 

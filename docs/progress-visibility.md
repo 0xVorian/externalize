@@ -58,7 +58,7 @@ The primary long-term language should be capabilities rather than arbitrary acco
 Prefer:
 
 - **Main connective — Developing**
-- **Formula evaluation — Reliable**
+- **Formula evaluation — Consistent**
 - **Counterexamples — Ready**
 
 Over:
@@ -70,10 +70,10 @@ Over:
 The existing skill statistics provide a conservative first derivation:
 
 - **Ready** — the skill is available in unlocked practice but has no finalized graded attempts;
-- **Developing** — at least one finalized graded attempt exists, but the reliability threshold has not been met;
-- **Reliable** — at least 3 finalized attempts with a clean-pass rate of at least 80%.
+- **Developing** — at least one finalized graded attempt exists, but the consistency threshold has not been met;
+- **Consistent** — at least 3 finalized attempts with a clean-pass rate of at least 80%. This is deliberately a recent-performance state, not a claim of delayed retention, transfer, or mastery.
 
-This mirrors the existing `comfortable` logic in `progress-tracker.ts`. Repaired passes are completed attempts but are not counted as clean successes, so they must not inflate reliability.
+This mirrors the existing `comfortable` logic in `progress-tracker.ts`. Repaired passes are completed attempts but are not counted as clean successes, so they must not inflate the consistency state.
 
 These labels are presentation states, not a new persistence or scoring system unless implementation evidence later shows a need for one.
 
@@ -110,7 +110,7 @@ Completing a lesson should visibly advance that context. Unit completion is a tr
 Practice should always make the following easy to perceive:
 
 - current capability/skill;
-- current capability state (`Ready`, `Developing`, `Reliable` where applicable);
+- current capability state (`Ready`, `Developing`, `Consistent` where applicable);
 - practice-session position (`n / 5`);
 - meaningful transition after finalization, when one occurred.
 
@@ -122,7 +122,7 @@ The Progress view should become more capability-oriented and less like a storage
 
 Keep detailed lists/statistics available, but foreground:
 
-- **You can now** — reliable capabilities;
+- **You can now** — consistent capabilities;
 - **In progress** — developing capabilities;
 - **Up next** — unlocked/ready capability or the next meaningful curriculum step;
 - current unit/session/review context.
@@ -139,7 +139,7 @@ After a finalized practice attempt, compare the relevant state before and after 
 
 Priority transitions:
 
-1. **Capability became Reliable**
+1. **Capability became Consistent**
 2. **New exercise or capability unlocked**
 3. **Scaffold level advanced / assistance reduced**
 4. **Unit or curriculum milestone completed**
@@ -147,7 +147,7 @@ Priority transitions:
 
 Example tone:
 
-- `Formula evaluation is now reliable.`
+- `Formula evaluation is consistent across recent attempts.`
 - `Counterexamples are now available.`
 - `Less support next time — you’ll supply an intermediate value yourself.`
 
@@ -196,7 +196,7 @@ The first coherent pass should ship together:
 - ambient unit/lesson progress in Learn;
 - ambient capability state and `n / 5` session progress in Practice;
 - a session-complete state with evidence-backed summary;
-- transition messaging for reliability, unlocks, and scaffold advancement;
+- transition messaging for consistency, unlocks, and scaffold advancement;
 - a capability-first summary near the top of Progress;
 - EN/FR copy, keyboard/screen-reader semantics, reduced-motion-safe behavior, and ~320px mobile coverage;
 - unit tests for capability-state derivation and transition detection;

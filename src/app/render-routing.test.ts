@@ -136,12 +136,12 @@ describe('practice presentation routing', () => {
   it('announces a progress moment live only on first presentation', () => {
     const exercise = EXERCISE_DEFINITIONS.find((candidate) => candidate.id === 'eval-001')!;
     const base: PracticeViewContext = {
-      capabilityState: 'reliable',
+      capabilityState: 'consistent',
       sessionCompleted: 1,
       sessionTarget: 5,
       sessionComplete: false,
       progressMoment: {
-        kind: 'capability-reliable',
+        kind: 'capability-consistent',
         skillId: 'practice:evaluate-formula',
       },
     };
