@@ -82,15 +82,20 @@ import {
   diffProgressVisibility,
   selectProgressMoment,
   snapshotProgressVisibility,
-  type ProgressMoment,
 } from './app/progress-visibility';
 import {
-  createPracticeSession,
-  isPracticeSessionComplete,
-  recordFinalizedAttempt,
-  summarizePracticeSession,
-  type PracticeSession,
-} from './app/practice-session';
+  announceUnitComplete,
+  clearPracticeProgressMoment,
+  clearUnitCompleteNotice,
+  createPracticeUiState,
+  disarmLiveAnnouncements,
+  isPracticeUiSessionComplete,
+  practiceUiContext,
+  preparePracticeEntry,
+  recordPracticeFinalization,
+  resetPracticeUiState,
+  restartPracticeSession,
+} from './app/practice-ui-state';
 import { currentScaffoldLevel } from './app/evaluation-scaffold';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
@@ -109,12 +114,7 @@ let practiceState: AppState | null = null;
 let exploreState: ExploreState = createExploreState(locale);
 let onboardingStep = 0;
 let importNotice: { kind: 'success' | 'error'; message: string } | null = null;
-let practiceSession: PracticeSession = createPracticeSession();
-let pendingProgressMoment: { moment: ProgressMoment; attemptId: string; live: boolean } | null =
-  null;
-let unitCompleteNotice: string | null = null;
-let unitCompleteNoticeLive = false;
-let sessionCompleteLive = false;
+let practiceUi = createPracticeUiState();
 
 const importInput = document.createElement('input');
 importInput.type = 'file';
@@ -160,40 +160,6 @@ function loadLessonFromProgress(store: ProgressStore): LessonState {
   });
 }
 
-function resetEphemeralProgressUi(): void {
-  practiceSession = createPracticeSession();
-  pendingProgressMoment = null;
-  sessionCompleteLive = false;
-  clearUnitCompleteNotice();
-}
-
-function preparePracticeEntry(): void {
-  if (!isPracticeSessionComplete(practiceSession)) {
-    return;
-  }
-  practiceSession = createPracticeSession();
-  pendingProgressMoment = null;
-  sessionCompleteLive = false;
-}
-
-function clearUnitCompleteNotice(): void {
-  unitCompleteNotice = null;
-  unitCompleteNoticeLive = false;
-}
-
-function announceUnitComplete(unit: 0 | 1 | 2): void {
-  unitCompleteNotice = unitCompleteMessage(unit);
-  unitCompleteNoticeLive = true;
-}
-
-function disarmLiveAnnouncements(): void {
-  if (pendingProgressMoment) {
-    pendingProgressMoment = { ...pendingProgressMoment, live: false };
-  }
-  unitCompleteNoticeLive = false;
-  sessionCompleteLive = false;
-}
-
 function unitCompleteMessage(unit: 0 | 1 | 2): string {
   const learn = learnUi(locale);
   if (unit === 0) return learn.level0Complete;
@@ -207,21 +173,8 @@ function practiceViewContext(): PracticeViewContext {
   const snapshot = snapshotProgressVisibility(progress);
   return {
     capabilityState: snapshot.capabilities[skillId],
-    sessionCompleted: practiceSession.completedAttemptIds.length,
-    sessionTarget: practiceSession.target,
-    sessionComplete: isPracticeSessionComplete(practiceSession),
-    sessionCompleteLive,
-    sessionSummary: isPracticeSessionComplete(practiceSession)
-      ? summarizePracticeSession(practiceSession)
-      : null,
-    progressMoment:
-      pendingProgressMoment && pendingProgressMoment.attemptId === state.attempt.id
-        ? pendingProgressMoment.moment
-        : null,
-    progressMomentLive: pendingProgressMoment?.live === true,
+    ...practiceUiContext(practiceUi, state.attempt.id),
     scaffoldLevel: currentScaffoldLevel(progress.exerciseStats[state.exercise.id]?.scaffoldLevel),
-    unitCompleteNotice,
-    unitCompleteNoticeLive,
   };
 }
 
@@ -289,19 +242,13 @@ function commitCheckedPracticeState(nextState: AppState): void {
     const after = snapshotProgressVisibility(progress);
     const moments = diffProgressVisibility(before, after, nextState.exercise.id);
     const primary = selectProgressMoment(moments);
-    pendingProgressMoment = primary
-      ? { moment: primary, attemptId: nextState.attempt.id, live: true }
-      : null;
-    const sessionWasComplete = isPracticeSessionComplete(practiceSession);
-    practiceSession = recordFinalizedAttempt(
-      practiceSession,
+    practiceUi = recordPracticeFinalization(
+      practiceUi,
       nextState.attempt.id,
       skillForExercise(nextState.exercise),
       moments,
+      primary,
     );
-    if (!sessionWasComplete && isPracticeSessionComplete(practiceSession)) {
-      sessionCompleteLive = true;
-    }
   }
 }
 
@@ -310,6 +257,17 @@ function ensurePracticeState(): AppState {
     practiceState = loadPracticeState();
   }
   return practiceState;
+}
+
+function updatePracticeState(update: (state: AppState) => AppState): void {
+  practiceState = update(ensurePracticeState());
+  persistPracticeState();
+  render();
+}
+
+function checkPracticeState(check: (state: AppState) => AppState): void {
+  commitCheckedPracticeState(check(ensurePracticeState()));
+  render();
 }
 
 function render(): void {
@@ -336,16 +294,16 @@ function render(): void {
       level1Complete: progress.level1Complete,
       learnPathComplete: isLearnPathComplete(progress.lessonsCompleted),
       learnProgress: deriveLearnProgress(lessonState.lesson.id, progress.lessonsCompleted),
-      unitCompleteNotice,
-      unitCompleteNoticeLive,
+      unitCompleteNotice: practiceUi.unitCompleteNotice,
+      unitCompleteNoticeLive: practiceUi.unitCompleteNoticeLive,
     });
-    disarmLiveAnnouncements();
+    practiceUi = disarmLiveAnnouncements(practiceUi);
     return;
   }
 
   const context = practiceViewContext();
   root.innerHTML = renderApp(ensurePracticeState(), progress.queue.length, practiceUnlocked, context);
-  disarmLiveAnnouncements();
+  practiceUi = disarmLiveAnnouncements(practiceUi);
 }
 
 function setLocale(nextLocale: Locale): void {
@@ -373,14 +331,14 @@ function setMode(nextMode: AppMode): void {
     importNotice = null;
   }
   if (nextMode !== 'learn') {
-    clearUnitCompleteNotice();
+    practiceUi = clearUnitCompleteNotice(practiceUi);
   }
   mode = nextMode;
   if (needsOnboarding(progress)) { root.innerHTML = renderOnboarding(locale, onboardingStep); return; }
   if (mode === 'progress') {
     persistProgress(updateResume(progress, { mode: 'progress' }));
   } else if (mode === 'practice') {
-    preparePracticeEntry();
+    practiceUi = preparePracticeEntry(practiceUi);
     practiceState = loadPracticeState();
   } else if (mode === 'explore') {
     exploreState = createExploreState(locale, exploreState.formulaIndex);
@@ -401,7 +359,7 @@ function startPracticeExercise(exerciseId: string): void {
   ) {
     persistProgress(clearPracticeDraft(progress));
   }
-  preparePracticeEntry();
+  practiceUi = preparePracticeEntry(practiceUi);
   mode = 'practice';
   practiceState = loadPracticeState(exerciseId);
   render();
@@ -428,7 +386,7 @@ function switchLearnUnit(unit: 0 | 1 | 2): void {
 }
 
 function completeCurrentLesson(): void {
-  clearUnitCompleteNotice();
+  practiceUi = clearUnitCompleteNotice(practiceUi);
   const before = {
     level0: progress.level0Complete,
     level1: progress.level1Complete,
@@ -436,15 +394,15 @@ function completeCurrentLesson(): void {
   };
   persistProgress(completeLesson(progress, lessonState.lesson.id));
   if (!before.level0 && progress.level0Complete) {
-    announceUnitComplete(0);
+    practiceUi = announceUnitComplete(practiceUi, unitCompleteMessage(0));
   } else if (!before.level1 && progress.level1Complete) {
-    announceUnitComplete(1);
+    practiceUi = announceUnitComplete(practiceUi, unitCompleteMessage(1));
   } else if (!before.level2 && progress.level2Complete) {
-    announceUnitComplete(2);
+    practiceUi = announceUnitComplete(practiceUi, unitCompleteMessage(2));
   }
 
   if (isLearnPathComplete(progress.lessonsCompleted)) {
-    preparePracticeEntry();
+    practiceUi = preparePracticeEntry(practiceUi);
     mode = 'practice';
     practiceState = loadPracticeState();
     render();
@@ -478,12 +436,12 @@ function advancePractice(): void {
   if (state.attempt.status !== 'finalized') {
     return;
   }
-  if (isPracticeSessionComplete(practiceSession)) {
+  if (isPracticeUiSessionComplete(practiceUi)) {
     render();
     return;
   }
-  pendingProgressMoment = null;
-  clearUnitCompleteNotice();
+  practiceUi = clearPracticeProgressMoment(practiceUi);
+  practiceUi = clearUnitCompleteNotice(practiceUi);
   const nextId = selectNextExerciseId(progress);
   persistProgress(clearPracticeDraft(progress));
   practiceState = loadPracticeState(nextId);
@@ -491,10 +449,7 @@ function advancePractice(): void {
 }
 
 function keepPractising(): void {
-  practiceSession = createPracticeSession();
-  pendingProgressMoment = null;
-  sessionCompleteLive = false;
-  clearUnitCompleteNotice();
+  practiceUi = restartPracticeSession(practiceUi);
   const state = ensurePracticeState();
   if (state.attempt.status === 'finalized') {
     const nextId = selectNextExerciseId(progress);
@@ -505,8 +460,7 @@ function keepPractising(): void {
 }
 
 function finishPracticeSession(): void {
-  pendingProgressMoment = null;
-  clearUnitCompleteNotice();
+  practiceUi = clearUnitCompleteNotice(clearPracticeProgressMoment(practiceUi));
   setMode('progress');
 }
 
@@ -526,7 +480,7 @@ function applyImportedProgress(imported: ProgressStore, importedLocale?: Locale)
   lessonState = loadLessonFromProgress(progress);
   practiceState = null;
   exploreState = createExploreState(locale);
-  resetEphemeralProgressUi();
+  practiceUi = resetPracticeUiState();
   mode = resolveInitialMode(progress);
 
   if (importedLocale && importedLocale !== locale) {
@@ -643,9 +597,7 @@ root.addEventListener('click', (event) => {
       return;
     }
     if (mode === 'practice') {
-      practiceState = setAtomValue(ensurePracticeState(), atom, value);
-      persistPracticeState();
-      render();
+      updatePracticeState((state) => setAtomValue(state, atom, value));
       return;
     }
     return;
@@ -669,37 +621,30 @@ root.addEventListener('click', (event) => {
     if (!nodeId) {
       return;
     }
-    practiceState = selectNode(ensurePracticeState(), nodeId);
-    persistPracticeState();
-    render();
+    updatePracticeState((state) => selectNode(state, nodeId));
     return;
   }
 
   if (action === 'check-scope') {
-    commitCheckedPracticeState(checkScope(ensurePracticeState()));
-    render();
+    checkPracticeState(checkScope);
     return;
   }
 
   if (action === 'submit-tautology-answer') {
     const value = button.dataset.value === 'true';
-    commitCheckedPracticeState(submitTautologyAnswer(ensurePracticeState(), value));
-    render();
+    checkPracticeState((state) => submitTautologyAnswer(state, value));
     return;
   }
 
   if (action === 'submit-cell-value') {
     const value = button.dataset.value === 'true';
-    commitCheckedPracticeState(submitCellValue(ensurePracticeState(), value));
-    render();
+    checkPracticeState((state) => submitCellValue(state, value));
     return;
   }
 
   if (action === 'select-evaluation-prediction') {
     const value = button.dataset.value === 'true';
-    practiceState = selectEvaluationPrediction(ensurePracticeState(), value);
-    persistPracticeState();
-    render();
+    updatePracticeState((state) => selectEvaluationPrediction(state, value));
     return;
   }
 
@@ -722,34 +667,27 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'check-evaluation') {
-    commitCheckedPracticeState(checkEvaluation(ensurePracticeState()));
-    render();
+    checkPracticeState(checkEvaluation);
     return;
   }
 
   if (action === 'show-hint') {
-    practiceState = showHint(ensurePracticeState());
-    persistPracticeState();
-    render();
+    updatePracticeState(showHint);
     return;
   }
 
   if (action === 'palette-insert') {
-    practiceState = paletteInsertToken(ensurePracticeState(), button.dataset.token, button.dataset.value);
-    persistPracticeState();
-    render();
+    updatePracticeState((state) =>
+      paletteInsertToken(state, button.dataset.token, button.dataset.value),
+    );
     return;
   }
   if (action === 'palette-backspace') {
-    practiceState = paletteBackspace(ensurePracticeState());
-    persistPracticeState();
-    render();
+    updatePracticeState(paletteBackspace);
     return;
   }
   if (action === 'palette-undo') {
-    practiceState = paletteUndo(ensurePracticeState());
-    persistPracticeState();
-    render();
+    updatePracticeState(paletteUndo);
     return;
   }
   if (action === 'proof-select-rule') {
@@ -757,42 +695,33 @@ root.addEventListener('click', (event) => {
     const config = getProofExerciseConfig(state.exercise.id);
     const rule = button.dataset.rule as RuleId | undefined;
     if (config && rule && config.allowedRules.includes(rule)) {
-      practiceState = selectProofRule(state, rule);
-      persistPracticeState();
-      render();
+      updatePracticeState((current) => selectProofRule(current, rule));
     }
     return;
   }
   if (action === 'proof-toggle-cite') {
     const line = Number(button.dataset.line);
     if (Number.isInteger(line) && line > 0) {
-      practiceState = toggleProofCitation(ensurePracticeState(), line);
-      persistPracticeState();
-      render();
+      updatePracticeState((state) => toggleProofCitation(state, line));
     }
     return;
   }
   if (action === 'check-proof') {
-    commitCheckedPracticeState(checkProofStep(ensurePracticeState()));
-    render();
+    checkPracticeState(checkProofStep);
     return;
   }
   if (action === 'check-translation') {
-    commitCheckedPracticeState(checkTranslation(ensurePracticeState()));
-    render();
+    checkPracticeState(checkTranslation);
     return;
   }
 
   if (action === 'try-again') {
-    practiceState = tryAgainPractice(ensurePracticeState());
-    persistPracticeState();
-    render();
+    updatePracticeState(tryAgainPractice);
     return;
   }
 
   if (action === 'check-counterexample') {
-    commitCheckedPracticeState(checkCounterexample(ensurePracticeState()));
-    render();
+    checkPracticeState(checkCounterexample);
     return;
   }
 
