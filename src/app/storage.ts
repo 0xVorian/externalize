@@ -62,6 +62,7 @@ export type ProgressStore = {
 };
 
 const STORAGE_KEY = 'externalize-progress-v1';
+const STORAGE_RECOVERY_KEY = 'externalize-progress-recovery-v1';
 
 export const PROGRESS_EXPORT_KIND = 'externalize-progress-export';
 export const PROGRESS_EXPORT_VERSION = 1;
@@ -137,7 +138,7 @@ function normalizeSkillStats(
 
 function migrateStore(raw: unknown): ProgressStore {
   if (!raw || typeof raw !== 'object') {
-    return defaultStore();
+    throw new Error('Invalid progress data');
   }
   const store = raw as Record<string, unknown>;
 
@@ -177,7 +178,11 @@ function migrateStore(raw: unknown): ProgressStore {
     return migrateStore({ ...store, version: 2, lessonsCompleted: [], level0Complete: false });
   }
 
-  return defaultStore();
+  const version = store.version;
+  if (version === undefined) {
+    throw new Error('Invalid progress data: missing version');
+  }
+  throw new Error(`Unsupported progress version: ${String(version)}`);
 }
 
 function normalizeV6(store: Record<string, unknown>): ProgressStore {
@@ -294,13 +299,21 @@ function firstIncompleteLessonId(completed: string[]): string {
 }
 
 export function loadProgress(): ProgressStore {
+  let raw: string | null = null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return defaultStore();
     }
     return migrateStore(JSON.parse(raw));
   } catch {
+    if (raw) {
+      try {
+        localStorage.setItem(STORAGE_RECOVERY_KEY, raw);
+      } catch {
+        // Recovery is best-effort; never erase the original storage key here.
+      }
+    }
     return defaultStore();
   }
 }

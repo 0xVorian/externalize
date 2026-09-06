@@ -28,7 +28,7 @@ function capabilityStateLabel(
   copy: ReturnType<typeof visibilityUi>,
   state: CapabilityState,
 ): string {
-  if (state === 'reliable') return copy.stateReliable;
+  if (state === 'consistent') return copy.stateConsistent;
   if (state === 'developing') return copy.stateDeveloping;
   if (state === 'ready') return copy.stateReady;
   return copy.stateLocked;
@@ -62,7 +62,7 @@ function renderCapabilitySummary(
   const vis = visibilityUi(locale);
   const progressCopy = progressUi(locale);
   const states = deriveCapabilityStates(store, getUnlockedExerciseIds(store));
-  const reliable = TRACKED_SKILL_IDS.filter((id) => states[id] === 'reliable');
+  const consistent = TRACKED_SKILL_IDS.filter((id) => states[id] === 'consistent');
   const developing = TRACKED_SKILL_IDS.filter((id) => states[id] === 'developing');
   const readyId = nextReadySkillId(states);
   const upNextBody = readyId
@@ -72,7 +72,7 @@ function renderCapabilitySummary(
   return `
     <section class="progress-card capability-summary" data-testid="capability-summary" aria-labelledby="capability-summary-heading">
       <h2 class="panel-title" id="capability-summary-heading">${vis.youCanNowHeading}</h2>
-      ${renderCapabilityItems(locale, reliable, states, vis.youCanNowEmpty)}
+      ${renderCapabilityItems(locale, consistent, states, vis.youCanNowEmpty)}
       <h3 class="progress-subheading">${vis.inProgressHeading}</h3>
       ${renderCapabilityItems(locale, developing, states, vis.inProgressEmpty)}
       <h3 class="progress-subheading">${vis.upNextHeading}</h3>

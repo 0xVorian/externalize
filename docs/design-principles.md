@@ -128,15 +128,15 @@ Progress operates on three timescales:
 
 - **Immediate:** a checked exercise or completed lesson visibly changes something.
 - **Session:** a short bout of practice has a finite arc and a clear completion state.
-- **Long-term:** the learner can see which capabilities are new, developing, or reliable, and what is likely to come next.
+- **Long-term:** the learner can see which capabilities are new, developing, or consistent across recent attempts, and what is likely to come next.
 
 Every progress claim must correspond to real curriculum state or assessed evidence. Do not manufacture an XP economy merely to create motion.
 
 In particular:
 
-- distinguish **completion/exposure** from **reliable performance**;
+- distinguish **completion/exposure** from **consistent recent performance**;
 - derive skill confidence from finalized graded attempts, not taps, time spent, or Explore activity;
-- make genuine transitions noticeable: a new exercise/capability unlocked, a skill becoming reliable, a unit completed, or support being reduced after clean performance;
+- make genuine transitions noticeable: a new exercise/capability unlocked, a skill becoming consistent across recent attempts, a unit completed, or support being reduced after clean performance;
 - treat **withdrawal of scaffolding** as a form of progress: the product can visibly ask the learner to carry more of the reasoning once they have earned that trust;
 - surface compact progress context in Learn and Practice rather than confining it to the Progress tab;
 - celebrate transitions more strongly than routine correct clicks.

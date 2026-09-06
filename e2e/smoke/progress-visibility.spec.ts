@@ -143,7 +143,7 @@ test.describe('progress visibility', () => {
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('1 / 5');
   });
 
-  test('crossing the reliability threshold surfaces a progress moment', async ({ page }) => {
+  test('crossing the consistency threshold surfaces a progress moment', async ({ page }) => {
     const store = withSkillStats(
       progressReadyForExercise('eval-001'),
       'practice:evaluate-formula',
@@ -153,7 +153,7 @@ test.describe('progress visibility', () => {
     await gotoWithProgress(page, store);
     await modeButton(page, 'practice').click();
     await completeEvalCorrect(page);
-    await expect(page.locator('[data-testid="progress-moment"]')).toContainText('reliable');
+    await expect(page.locator('[data-testid="progress-moment"]')).toContainText('consistent');
   });
 
   test('scaffold advancement explains that the learner will carry more reasoning', async ({ page }) => {

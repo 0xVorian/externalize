@@ -21,9 +21,9 @@ export const TRACKED_SKILL_IDS: readonly SkillId[] = [
   'practice:proof-fill-step',
 ];
 
-/** Same threshold used for Progress “comfortable” skills and capability Reliable. */
-export const RELIABLE_MIN_ATTEMPTS = 3;
-export const RELIABLE_MIN_RATE = 0.8;
+/** Same threshold used for Progress “comfortable” skills and capability Consistent. */
+export const CONSISTENT_MIN_ATTEMPTS = 3;
+export const CONSISTENT_MIN_RATE = 0.8;
 
 export function skillForExercise(exercise: ExerciseDefinition): SkillId {
   if (exercise.type === 'evaluate-formula') return 'practice:evaluate-formula';
@@ -137,7 +137,7 @@ export function buildProgressSummary(input: {
     const entry = { id, labelKey: id, rate, attempts: stat.attempts };
     if (rate < 0.6) {
       struggles.push(entry);
-    } else if (rate >= RELIABLE_MIN_RATE && stat.attempts >= RELIABLE_MIN_ATTEMPTS) {
+    } else if (rate >= CONSISTENT_MIN_RATE && stat.attempts >= CONSISTENT_MIN_ATTEMPTS) {
       comfortable.push(entry);
     }
   }

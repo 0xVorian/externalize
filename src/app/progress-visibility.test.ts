@@ -101,7 +101,7 @@ describe('capability derivation', () => {
     expect(states['practice:evaluate-formula']).toBe('developing');
   });
 
-  it('becomes reliable at 3 attempts with a clean-pass rate of 0.8', () => {
+  it('becomes consistent at 3 attempts with a clean-pass rate of 0.8', () => {
     const store = {
       ...completeLevel0(emptyStore()),
       skills: {
@@ -110,7 +110,7 @@ describe('capability derivation', () => {
     };
     expect(
       deriveCapabilityState('practice:evaluate-formula', store, ['eval-001']),
-    ).toBe('reliable');
+    ).toBe('consistent');
   });
 
   it('stays developing at 4 attempts with a 0.75 clean-pass rate', () => {
@@ -135,7 +135,7 @@ describe('capability derivation', () => {
     ).toBe('developing');
   });
 
-  it('does not become reliable from three repaired passes', () => {
+  it('does not become consistent from three repaired passes', () => {
     const store = {
       ...completeLevel0(emptyStore()),
       skills: {
@@ -149,21 +149,21 @@ describe('capability derivation', () => {
 });
 
 describe('progress moment diffs', () => {
-  it('fires reliability only when crossing into reliable', () => {
+  it('fires consistency only when crossing into consistent', () => {
     const before = snapshotWith({
       capabilities: { 'practice:evaluate-formula': 'developing' },
       unlockedExerciseIds: ['eval-001'],
     });
     const crossing = snapshotWith({
-      capabilities: { 'practice:evaluate-formula': 'reliable' },
+      capabilities: { 'practice:evaluate-formula': 'consistent' },
       unlockedExerciseIds: ['eval-001'],
     });
     const already = snapshotWith({
-      capabilities: { 'practice:evaluate-formula': 'reliable' },
+      capabilities: { 'practice:evaluate-formula': 'consistent' },
       unlockedExerciseIds: ['eval-001'],
     });
     expect(selectProgressMoment(diffProgressVisibility(before, crossing))).toEqual({
-      kind: 'capability-reliable',
+      kind: 'capability-consistent',
       skillId: 'practice:evaluate-formula',
     });
     expect(diffProgressVisibility(crossing, already)).toEqual([]);
@@ -322,6 +322,6 @@ describe('imported progress derivation', () => {
       },
     };
     const snapshot = snapshotProgressVisibility(store);
-    expect(snapshot.capabilities['practice:evaluate-formula']).toBe('reliable');
+    expect(snapshot.capabilities['practice:evaluate-formula']).toBe('consistent');
   });
 });

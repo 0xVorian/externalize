@@ -360,5 +360,12 @@ describe('storage v3', () => {
   it('rejects invalid import data', () => {
     expect(() => importProgress('not json')).toThrow();
     expect(() => importProgress('{"kind":"externalize-progress-export","exportVersion":99}')).toThrow();
+    expect(() => importProgress('{"version":7}')).toThrow('Unsupported progress version: 7');
+    expect(() =>
+      importProgress(
+        '{"kind":"externalize-progress-export","exportVersion":1,"progress":{"version":7}}',
+      ),
+    ).toThrow('Unsupported progress version: 7');
+    expect(() => importProgress('{}')).toThrow('Invalid progress data: missing version');
   });
 });

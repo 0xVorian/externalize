@@ -190,7 +190,7 @@ One opened exercise session is one attempt. Wrong checks keep that attempt activ
 - A clean pass is correct on the first checked answer and advances the normal SRS interval.
 - A repaired pass follows one or more errors, still adds `passed`, records the encountered errors, and remains due immediately with reduced ease.
 - Nested evaluate-formula exercises may store optional `exerciseStats[id].scaffoldLevel`. A clean pass increments it when the next level hides additional intermediate values. This is pedagogical support withdrawal, not a separate mastery score.
-- Capability states (Ready / Developing / Reliable) are **derived** from unlocks and `SkillStat` evidence. See [`progress-visibility.md`](progress-visibility.md).
+- Capability states (Ready / Developing / Consistent) are **derived** from unlocks and `SkillStat` evidence. See [`progress-visibility.md`](progress-visibility.md).
 - The five-attempt practice session lives in app memory only. It must not be written into progress export/import.
 - v5 migration preserves old `completed` IDs only as `attempted` exposure. It resets contaminated practice statistics, errors, and SRS, and requires fresh correct evidence for `passed`.
 
