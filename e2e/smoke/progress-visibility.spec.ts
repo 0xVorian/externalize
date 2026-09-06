@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { evaluate, parse } from '../../engine';
+import { evaluate, evaluateWithNodes, findNodeById, parse } from '../../engine';
 import { gotoFresh, gotoWithProgress, lessonNext, modeButton } from '../helpers/app';
 import { LEVEL_1_LESSONS, LEVEL_2_LESSONS } from '../../src/app/lessons';
 import {
@@ -25,6 +25,21 @@ async function readAssignment(page: Page): Promise<Record<string, boolean>> {
     assignment[atom] = await atomIsTrue(page, atom);
   }
   return assignment;
+}
+
+async function selectLearnerNodeCorrect(page: Page, nodeId: string): Promise<void> {
+  const formula = (await page.locator('.formula-display').innerText()).trim();
+  const assignment = await readAssignment(page);
+  const tree = evaluateWithNodes(parse(formula), assignment).tree;
+  const node = findNodeById(tree, nodeId);
+  if (!node || node.value === undefined) {
+    throw new Error(`Unable to derive learner value for ${nodeId}`);
+  }
+  await page
+    .locator(
+      `[data-action="select-learner-node-value"][data-node-id="${nodeId}"][data-value="${node.value ? 'true' : 'false'}"]`,
+    )
+    .click();
 }
 
 async function completeEvalCorrect(page: Page): Promise<void> {
@@ -168,9 +183,7 @@ test.describe('progress visibility', () => {
     const store = progressAtMaxScaffold('eval-007');
     await gotoWithProgress(page, store);
     await modeButton(page, 'practice').click();
-    await page
-      .locator('[data-action="select-learner-node-value"][data-node-id="root.R"][data-value="true"]')
-      .click();
+    await selectLearnerNodeCorrect(page, 'root.R');
     await completeEvalCorrect(page);
     await expect(page.locator('[data-testid="progress-moment"]')).toHaveCount(0);
   });

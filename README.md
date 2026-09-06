@@ -33,7 +33,7 @@ For current state, treat this README and the roadmap as authoritative. Design br
 
 **Experimental:** The small natural-deduction exercise set and predicate-logic AST/parser spike. Predicate-logic curriculum remains design-only.
 
-**Current focus:** Sustained personal use and validation of the repaired attempt/progress semantics.
+**Current focus:** Sustained personal use and validation of retention, transfer, repaired-attempt semantics, and whether the product is worth returning to.
 
 ## Development
 
