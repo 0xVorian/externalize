@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Consolidated transient Practice progress/session announcements into a dedicated state module and unified draft-vs-checked practice mutations, reducing orchestration duplication without changing learner behavior
 - Renamed the short-horizon capability state from **Reliable** to **Consistent so far** so three recent clean attempts are not presented as delayed mastery evidence
 - Standardized development, CI, and Cloudflare deployment on Node 22; release checks now include the Playwright suite
 - PWA navigation now prefers fresh HTML online while retaining a cached built shell for offline reloads
