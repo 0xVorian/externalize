@@ -1,7 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { updateResume } from '../../src/app/storage';
 import { emptyProgress, progressAfterLevel0, progressReadyForExercise, STORAGE_KEY } from '../helpers/progress';
-import { gotoWithProgress, modeButton } from '../helpers/app';
+import { gotoWithProgress, clickMode, enterLearn, modeButton } from '../helpers/app';
+import { expandSessionMore } from '../helpers/session';
 
 async function storedAttemptId(page: Page): Promise<string> {
   return page.evaluate(
@@ -14,6 +15,7 @@ test('watch uses a real two-dimensional table with one active case at 320px', as
   await page.setViewportSize({ width: 320, height: 760 });
   const store = updateResume(emptyProgress(), { mode: 'learn', lessonId: 'level0-04-watch' });
   await gotoWithProgress(page, store);
+  await enterLearn(page);
 
   const grid = page.locator('.watch-grid');
   await expect(grid).toBeVisible();
@@ -25,7 +27,7 @@ test('watch uses a real two-dimensional table with one active case at 320px', as
 
 test('scope selects before checking and repairs inside one attempt', async ({ page }) => {
   await gotoWithProgress(page, progressReadyForExercise('scope-001'));
-  await modeButton(page, 'practice').click();
+  await clickMode(page, 'practice');
 
   await page.locator('[data-action="select-node"]').filter({ hasText: '→' }).click();
   await expect(page.locator('.feedback-wrong')).toHaveCount(0);
@@ -44,7 +46,7 @@ test('scope selects before checking and repairs inside one attempt', async ({ pa
 test('evaluation and truth-table answer controls meet the mobile target size', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 760 });
   await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-  await modeButton(page, 'practice').click();
+  await clickMode(page, 'practice');
 
   for (const button of await page.locator('.evaluation-prediction .cell-segment').all()) {
     const box = await button.boundingBox();
@@ -53,7 +55,7 @@ test('evaluation and truth-table answer controls meet the mobile target size', a
   }
 
   await gotoWithProgress(page, progressReadyForExercise('tt-001'));
-  await modeButton(page, 'practice').click();
+  await clickMode(page, 'practice');
   for (const button of await page.locator('.blank-cell .cell-segment').all()) {
     const box = await button.boundingBox();
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
@@ -64,7 +66,7 @@ test('evaluation and truth-table answer controls meet the mobile target size', a
 test('translation atom letters and glosses are visibly separated at 320px', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 760 });
   await gotoWithProgress(page, progressReadyForExercise('translate-001'));
-  await modeButton(page, 'practice').click();
+  await clickMode(page, 'practice');
 
   const item = page.locator('.atom-key-list li').first();
   const letter = await item.locator('.atom-key-letter').boundingBox();
@@ -77,7 +79,7 @@ test('translation atom letters and glosses are visibly separated at 320px', asyn
 
 test('proof repair remains one attempt while feedback stays visible', async ({ page }) => {
   await gotoWithProgress(page, progressReadyForExercise('nd-001'));
-  await modeButton(page, 'practice').click();
+  await clickMode(page, 'practice');
 
   await page.locator('[data-action="proof-select-rule"]').click();
   await page.locator('[data-action="proof-toggle-cite"][data-line="1"]').click();
@@ -94,7 +96,7 @@ test('proof repair remains one attempt while feedback stays visible', async ({ p
 
 test('Learn reference is closed by default and unit navigation does not claim tab semantics', async ({ page }) => {
   await gotoWithProgress(page, progressAfterLevel0());
-  await modeButton(page, 'learn').click();
+  await clickMode(page, 'learn');
 
   await expect(page.locator('.reference-panel')).not.toHaveAttribute('open', '');
   await expect(page.locator('[role="tablist"]')).toHaveCount(0);
@@ -104,6 +106,7 @@ test('Learn reference is closed by default and unit navigation does not claim ta
 
 test('locked Practice has no dangling aria-describedby', async ({ page }) => {
   await gotoWithProgress(page, emptyProgress());
+  await expandSessionMore(page);
   const practice = modeButton(page, 'practice');
   await expect(practice).toBeDisabled();
   await expect(practice).not.toHaveAttribute('aria-describedby', /.+/);
@@ -112,6 +115,7 @@ test('locked Practice has no dangling aria-describedby', async ({ page }) => {
 test('Progress is resume-first with detail closed but reachable', async ({ page }) => {
   const store = updateResume(progressAfterLevel0(), { mode: 'progress' });
   await gotoWithProgress(page, store);
+  await clickMode(page, 'progress');
 
   const cards = page.locator('main.app > .progress-card');
   await expect(cards.first()).toHaveClass(/what-next-card/);

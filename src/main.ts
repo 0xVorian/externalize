@@ -41,6 +41,8 @@ import {
   setRouteDepth,
   sourcePlan,
   sourceItemKind,
+  isSourceExerciseId,
+  isSourceItemId,
 } from './app/source-route';
 import { renderSourceLearnView } from './app/source-learn-render';
 import {
@@ -116,6 +118,26 @@ import {
   restartPracticeSession,
 } from './app/practice-ui-state';
 import { currentScaffoldLevel } from './app/evaluation-scaffold';
+import {
+  offerOpening,
+  startSession,
+  resumeSession,
+  completeCurrentStep,
+  currentSessionStep,
+  sessionPosition,
+  isSessionComplete,
+  sessionSegmentMs,
+  type PersistedSession,
+} from './app/session-plan';
+import {
+  loadActiveSession,
+  saveActiveSession,
+  clearActiveSession,
+} from './app/session-persistence';
+import { recordSessionEvent } from './app/session-telemetry';
+import { renderSessionOpening } from './app/session-opening-render';
+import { renderRoundComplete } from './app/session-complete-render';
+import { isLastWatchUnit } from './app/session-units';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) {
@@ -135,6 +157,10 @@ let exploreState: ExploreState = createExploreState(locale);
 let onboardingStep = 0;
 let importNotice: { kind: 'success' | 'error'; message: string } | null = null;
 let practiceUi = createPracticeUiState();
+type ShellSurface = 'opening' | 'session' | 'complete' | 'browse';
+let surface: ShellSurface = 'opening';
+let activeSession: PersistedSession | null = loadActiveSession();
+let recordedOpeningOffer = false;
 
 const importInput = document.createElement('input');
 importInput.type = 'file';
@@ -224,11 +250,186 @@ function practiceViewContext(): PracticeViewContext {
     capabilityState: snapshot.capabilities[skillId],
     ...practiceUiContext(practiceUi, state.attempt.id),
     scaffoldLevel: currentScaffoldLevel(progress.exerciseStats[state.exercise.id]?.scaffoldLevel),
+    session: sessionChrome(),
+    ...(surface === 'session' ? { sessionComplete: false } : {}),
   };
 }
 
 function persistProgress(next: ProgressStore): void {
   progress = saveProgress(next);
+}
+
+function currentOffer() {
+  return offerOpening(progress, activeSession);
+}
+
+function sessionChrome(): { current: number; total: number } | undefined {
+  if (surface !== 'session' || !activeSession) {
+    return undefined;
+  }
+  return sessionPosition(activeSession);
+}
+
+function isSourceSessionItem(): boolean {
+  if (surface !== 'session' || !activeSession) {
+    return false;
+  }
+  const step = currentSessionStep(activeSession);
+  return Boolean(step && isSourceItemId(step.itemId));
+}
+
+function loadStepItem(itemId: string, unitIndex?: number): void {
+  if (getExerciseDefinition(itemId)) {
+    if (isSourceExerciseId(itemId) || isSourceItemId(itemId)) {
+      const exercise = getExerciseDefinition(itemId)!;
+      const withAttempt = beginPracticeAttempt(progress, itemId);
+      persistProgress(withAttempt);
+      sourcePracticeState = createState(locale, exercise, withAttempt.practiceDraft);
+      practiceState = null;
+      mode = 'learn';
+      return;
+    }
+    practiceUi = preparePracticeEntry(practiceUi);
+    practiceState = loadPracticeState(itemId);
+    sourcePracticeState = null;
+    mode = 'practice';
+    return;
+  }
+  const lesson = getLessonDefinition(itemId);
+  if (lesson) {
+    lessonState = createLessonState(
+      locale,
+      lesson,
+      unitIndex !== undefined ? { watchStep: unitIndex } : undefined,
+    );
+    sourcePracticeState = null;
+    mode = 'learn';
+    if (!isSourceItemId(itemId)) {
+      persistLessonResume();
+    }
+  }
+}
+
+function enterSession(session: PersistedSession, action: 'started' | 'interrupted' = 'started'): void {
+  activeSession = session;
+  saveActiveSession(session);
+  if (action === 'started') {
+    recordSessionEvent({
+      kind: action === 'started' && session.currentIndex > 0 ? 'resume' : session.plan.kind,
+      action: 'started',
+      stepCount: session.plan.steps.length,
+    });
+  }
+  surface = 'session';
+  const step = currentSessionStep(session);
+  if (step) {
+    loadStepItem(step.itemId, step.unitIndex);
+  }
+}
+
+function beginOfferedSession(): void {
+  const offer = currentOffer();
+  if (!offer.plan) {
+    return;
+  }
+  if (offer.kind === 'resume' && activeSession) {
+    enterSession(resumeSession(activeSession, new Date().toISOString()));
+    render();
+    return;
+  }
+  enterSession(startSession(offer.plan, new Date().toISOString()));
+  render();
+}
+
+function finishSessionRound(): void {
+  if (activeSession) {
+    recordSessionEvent({
+      kind: activeSession.plan.kind,
+      action: 'completed',
+      stepCount: activeSession.plan.steps.length,
+      durationMs: sessionSegmentMs(activeSession),
+    });
+  }
+  surface = 'complete';
+  render();
+}
+
+function advanceActiveSession(): void {
+  if (!activeSession) {
+    render();
+    return;
+  }
+  activeSession = completeCurrentStep(activeSession);
+  saveActiveSession(activeSession);
+  if (isSessionComplete(activeSession)) {
+    finishSessionRound();
+    return;
+  }
+  const step = currentSessionStep(activeSession);
+  if (step) {
+    loadStepItem(step.itemId, step.unitIndex);
+  }
+  render();
+}
+
+function completeSessionItem(itemId: string): void {
+  const step = activeSession ? currentSessionStep(activeSession) : undefined;
+  const unitIndex = step?.itemId === itemId ? step.unitIndex : undefined;
+  const lesson = getLessonDefinition(itemId);
+  if (isSourceItemId(itemId) || isSourceExerciseId(itemId)) {
+    persistProgress(completeSourceItem(progress, itemId));
+  } else if (lesson && !getExerciseDefinition(itemId)) {
+    if (lesson.type === 'watch' && unitIndex !== undefined && !isLastWatchUnit(itemId, unitIndex)) {
+      persistProgress(
+        updateResume(progress, {
+          mode: 'learn',
+          lessonId: itemId,
+          watchStep: unitIndex + 1,
+          watchComplete: false,
+        }),
+      );
+    } else {
+      persistProgress(completeLesson(progress, itemId));
+    }
+  }
+  advanceActiveSession();
+}
+
+function exitActiveSession(): void {
+  if (activeSession && !isSessionComplete(activeSession)) {
+    saveActiveSession(activeSession);
+    recordSessionEvent({
+      kind: activeSession.plan.kind,
+      action: 'interrupted',
+      stepCount: activeSession.plan.steps.length,
+      durationMs: sessionSegmentMs(activeSession),
+    });
+  }
+  surface = 'opening';
+  recordedOpeningOffer = false;
+  render();
+}
+
+function closeCompletedSession(): void {
+  clearActiveSession();
+  activeSession = null;
+  surface = 'opening';
+  recordedOpeningOffer = false;
+  render();
+}
+
+function startAnotherRound(): void {
+  clearActiveSession();
+  activeSession = null;
+  const offer = offerOpening(progress, null);
+  if (!offer.plan) {
+    surface = 'opening';
+    recordedOpeningOffer = false;
+    render();
+    return;
+  }
+  enterSession(startSession(offer.plan, new Date().toISOString()));
+  render();
 }
 
 function persistLessonResume(): void {
@@ -324,6 +525,30 @@ function render(): void {
   const practiceUnlocked = isPracticeUnlocked(progress);
 
   if (needsOnboarding(progress)) { root.innerHTML = renderOnboarding(locale, onboardingStep); return; }
+
+  if (surface === 'opening') {
+    const offer = currentOffer();
+    if (!recordedOpeningOffer) {
+      recordSessionEvent({
+        kind: offer.kind,
+        action: 'offered',
+        stepCount: offer.plan?.steps.length ?? 0,
+      });
+      recordedOpeningOffer = true;
+    }
+    root.innerHTML = renderSessionOpening({ locale, offer, practiceUnlocked });
+    return;
+  }
+
+  if (surface === 'complete') {
+    root.innerHTML = renderRoundComplete({
+      locale,
+      nextReviewAt: currentOffer().nextReviewAt,
+    });
+    return;
+  }
+
+  const session = sessionChrome();
   if (mode === 'progress') {
     root.innerHTML = renderProgressView(locale, progress, practiceUnlocked, {
       importNotice: importNotice ?? undefined,
@@ -337,17 +562,29 @@ function render(): void {
   }
 
   if (mode === 'learn') {
-    if (isSourceLearn()) {
+    if (isSourceLearn() || isSourceSessionItem()) {
       const items = plannedSourceItems(progress);
-      const itemId = currentSourceItemId(progress);
+      const itemId =
+        surface === 'session' && currentSessionStep(activeSession!)
+          ? currentSessionStep(activeSession!)!.itemId
+          : currentSourceItemId(progress);
       if (sourceItemKind(itemId) === 'exercise') {
         sourcePracticeState = sourcePracticeState?.exercise.id === itemId
           ? sourcePracticeState
-          : loadSourcePracticeState();
+          : (() => {
+              const exercise = getExerciseDefinition(itemId);
+              if (!exercise) return null;
+              const withAttempt = beginPracticeAttempt(progress, itemId);
+              persistProgress(withAttempt);
+              return createState(locale, exercise, withAttempt.practiceDraft);
+            })();
       } else {
         sourcePracticeState = null;
         if (lessonState.lesson.id !== itemId) {
-          lessonState = loadLessonFromProgress(progress);
+          const lesson = getLessonDefinition(itemId);
+          if (lesson) {
+            lessonState = createLessonState(locale, lesson);
+          }
         }
       }
       const itemIndex = Math.max(1, items.indexOf(itemId) + 1);
@@ -359,10 +596,11 @@ function render(): void {
         plan: sourcePlan(progress),
         itemIndex,
         itemTotal: items.length,
-        isTerminal: !nextSourceItemId(progress, itemId),
+        isTerminal: surface === 'session' ? false : !nextSourceItemId(progress, itemId),
         routeComplete: isPlannedSourceSequenceComplete(progress),
         lessonState: sourcePracticeState ? undefined : lessonState,
         practiceState: sourcePracticeState ?? undefined,
+        session,
       });
       practiceUi = disarmLiveAnnouncements(practiceUi);
       return;
@@ -376,6 +614,7 @@ function render(): void {
       learnProgress: deriveLearnProgress(lessonState.lesson.id, progress.lessonsCompleted),
       unitCompleteNotice: practiceUi.unitCompleteNotice,
       unitCompleteNoticeLive: practiceUi.unitCompleteNoticeLive,
+      session,
     });
     practiceUi = disarmLiveAnnouncements(practiceUi);
     return;
@@ -407,9 +646,10 @@ function setMode(nextMode: AppMode): void {
   if (nextMode === 'practice' && !isPracticeUnlocked(progress)) {
     return;
   }
-  if (nextMode === mode) {
+  if (nextMode === mode && surface === 'browse') {
     return;
   }
+  surface = 'browse';
   if (nextMode !== 'progress') {
     importNotice = null;
   }
@@ -436,7 +676,13 @@ function setMode(nextMode: AppMode): void {
   render();
 }
 
-function finishOnboarding(): void { persistProgress(completeOnboarding(progress)); onboardingStep = 0; render(); }
+function finishOnboarding(): void {
+  persistProgress(completeOnboarding(progress));
+  onboardingStep = 0;
+  surface = 'opening';
+  recordedOpeningOffer = false;
+  render();
+}
 function startPracticeExercise(exerciseId: string): void {
   if (!isPracticeUnlocked(progress)) return;
   if (
@@ -446,6 +692,7 @@ function startPracticeExercise(exerciseId: string): void {
     persistProgress(clearPracticeDraft(progress));
   }
   practiceUi = preparePracticeEntry(practiceUi);
+  surface = 'browse';
   mode = 'practice';
   practiceState = loadPracticeState(exerciseId);
   render();
@@ -489,6 +736,7 @@ function completeCurrentLesson(): void {
 
   if (isLearnPathComplete(progress.lessonsCompleted)) {
     practiceUi = preparePracticeEntry(practiceUi);
+    surface = 'browse';
     mode = 'practice';
     practiceState = loadPracticeState();
     render();
@@ -507,6 +755,14 @@ function completeCurrentLesson(): void {
 }
 
 function handleLessonNext(): void {
+  if (surface === 'session' && activeSession) {
+    const step = currentSessionStep(activeSession);
+    if (!step) {
+      return;
+    }
+    completeSessionItem(step.itemId);
+    return;
+  }
   if (isSourceLearn()) {
     persistProgress(completeSourceItem(progress, currentSourceItemId(progress)));
     sourcePracticeState = null;
@@ -527,6 +783,13 @@ function handleLessonNext(): void {
 function advancePractice(): void {
   const state = ensurePracticeState();
   if (state.attempt.status !== 'finalized') {
+    return;
+  }
+  if (surface === 'session' && activeSession) {
+    const step = currentSessionStep(activeSession);
+    if (step) {
+      completeSessionItem(step.itemId);
+    }
     return;
   }
   if (isPracticeUiSessionComplete(practiceUi)) {
@@ -568,7 +831,14 @@ function exportProgressFile(): void {
   URL.revokeObjectURL(url);
 }
 
+function invalidateEphemeralSession(): void {
+  clearActiveSession();
+  activeSession = null;
+  recordedOpeningOffer = false;
+}
+
 function applyImportedProgress(imported: ProgressStore, importedLocale?: Locale): void {
+  invalidateEphemeralSession();
   progress = saveProgress(imported);
   lessonState = loadLessonFromProgress(progress);
   practiceState = null;
@@ -589,6 +859,7 @@ function handleImportRaw(raw: string): void {
     const { progress: imported, locale: importedLocale } = importProgress(raw);
     applyImportedProgress(imported, importedLocale);
     importNotice = { kind: 'success', message: copy.importSuccess };
+    surface = 'browse';
     mode = 'progress';
     persistProgress(updateResume(progress, { mode: 'progress' }));
     render();
@@ -622,6 +893,23 @@ root.addEventListener('click', (event) => {
     if (nextMode === 'learn' || nextMode === 'practice' || nextMode === 'progress' || nextMode === 'explore') {
       setMode(nextMode);
     }
+    return;
+  }
+
+  if (action === 'session-begin') {
+    beginOfferedSession();
+    return;
+  }
+  if (action === 'session-exit') {
+    exitActiveSession();
+    return;
+  }
+  if (action === 'session-done') {
+    closeCompletedSession();
+    return;
+  }
+  if (action === 'session-another') {
+    startAnotherRound();
     return;
   }
 
@@ -706,6 +994,13 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'source-next' || action === 'source-complete') {
+    if (surface === 'session' && activeSession) {
+      const step = currentSessionStep(activeSession);
+      if (step) {
+        completeSessionItem(step.itemId);
+      }
+      return;
+    }
     persistProgress(completeSourceItem(progress, currentSourceItemId(progress)));
     sourcePracticeState = null;
     lessonState = loadLessonFromProgress(progress);

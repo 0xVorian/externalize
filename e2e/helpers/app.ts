@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test';
 import type { ProgressStore } from '../../src/app/storage';
+import { STORAGE_KEY } from './progress';
+import { openBrowseMode } from './session';
 
 export async function skipOnboarding(page: Page): Promise<void> {
   const overlay = page.locator('.onboarding-overlay');
@@ -8,7 +10,23 @@ export async function skipOnboarding(page: Page): Promise<void> {
   }
   await page.waitForSelector('main.app');
 }
-import { STORAGE_KEY } from './progress';
+
+export async function enterLearn(page: Page): Promise<void> {
+  if (await page.getByTestId('session-opening').count()) {
+    await openBrowseMode(page, 'learn');
+  }
+}
+
+export async function clickMode(
+  page: Page,
+  mode: 'learn' | 'practice' | 'progress' | 'explore',
+): Promise<void> {
+  if (await page.getByTestId('session-opening').count()) {
+    await openBrowseMode(page, mode);
+    return;
+  }
+  await page.locator(`[data-action="set-mode"][data-mode="${mode}"]`).click();
+}
 
 export async function gotoFresh(page: Page): Promise<void> {
   await page.addInitScript(() => {
@@ -16,6 +34,11 @@ export async function gotoFresh(page: Page): Promise<void> {
   });
   await page.goto('/');
   await skipOnboarding(page);
+}
+
+export async function gotoLearn(page: Page): Promise<void> {
+  await gotoFresh(page);
+  await enterLearn(page);
 }
 
 export async function gotoWithProgress(page: Page, store: ProgressStore): Promise<void> {
@@ -28,6 +51,11 @@ export async function gotoWithProgress(page: Page, store: ProgressStore): Promis
   );
   await page.reload();
   await skipOnboarding(page);
+}
+
+export async function gotoLearnWithProgress(page: Page, store: ProgressStore): Promise<void> {
+  await gotoWithProgress(page, store);
+  await enterLearn(page);
 }
 
 export function lessonNext(page: Page) {

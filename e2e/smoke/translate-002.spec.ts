@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { progressReadyForExercise } from '../helpers/progress';
-import { gotoWithProgress, insertPaletteToken, modeButton } from '../helpers/app';
+import { gotoWithProgress, insertPaletteToken, clickMode } from '../helpers/app';
 
 async function buildConjunctionWithoutNegation(page: Page): Promise<void> {
   await insertPaletteToken(page, 'paren', 'open');
@@ -22,7 +22,7 @@ async function buildNegatedConjunction(page: Page): Promise<void> {
 test.describe('translate-002 translation exercise', () => {
   test('keeps feedback visible while the learner repairs the same attempt', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('translate-002'));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
 
     await expect(page.locator('.symbol-palette')).toBeVisible();
 

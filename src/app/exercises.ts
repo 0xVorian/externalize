@@ -83,10 +83,17 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'nd-001', type: 'proof-fill-step' },
   { id: 'nd-002', type: 'proof-fill-step' },
   {
+    id: 'lat-predict-empty-club',
+    type: 'classify-choice',
+    choiceIds: ['still-true', 'needs-instance'],
+    correctChoiceId: 'still-true',
+  },
+  {
     id: 'lat-retrieve-conditional',
     type: 'classify-choice',
-    choiceIds: ['vacuous-true', 'existential'],
-    correctChoiceId: 'vacuous-true',
+    formula: 'F(a) → G(a)',
+    choiceIds: ['holds', 'fails'],
+    correctChoiceId: 'holds',
   },
   {
     id: 'lat-check-universal',

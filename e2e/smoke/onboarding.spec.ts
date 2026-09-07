@@ -14,7 +14,8 @@ test.describe('First-run onboarding', () => {
 
     await expect(page.locator('.onboarding-overlay')).toHaveCount(0);
     await expect(page.locator('main.app')).toBeVisible();
-    await expect(page.locator('.lesson-card-title')).toBeVisible();
+    await expect(page.getByTestId('session-opening')).toBeVisible();
+    await expect(page.getByTestId('session-primary-action')).toBeVisible();
   });
 
   test('finish completes onboarding after stepping through screens', async ({ page }) => {

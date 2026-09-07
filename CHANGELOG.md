@@ -9,9 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Session-first default: opening the app offers one bounded round with visible step count and approximate time, then Start / Continue / Resume. Active chrome is Exit plus `n / m`. Finishing the envelope is a stopping point (`Done for now`, with `Do another short round` secondary)
+- Learning-aligned re-entry from existing learner state: resume an interrupted round, a due quick review, see what stuck after stale evidence, continue the active route, or you're good for now with the next useful review when SRS can name it
+- Local session telemetry in a separate `localStorage` key (`externalize-session-events-v1`): offered kind, started/completed/interrupted, step count, coarse duration of the current active segment, timestamp. It is not mastery evidence and is not part of progress export
+- Sobel Chapter II opening rewritten as progressive micro-lessons: empty-club setup, checked prediction, missing-counterexample explanation, truth by vacuity, ordinary if–then, `→`, a genuine conditional check, universal meaning, `∀`, existential meaning, existential name, `∃`, same-witness conjunction, then a fresh transfer example before returning to Descartes. Unit 0 still names sentence letters after the schematic idea is in view
 - Adaptive curriculum Phase A: the existing three-unit logic course now runs as the explicit `logic-foundations` route, with canonical concept × capability evidence on graded exercises, per-route progress, and a conservative v6 → v7 progress migration that preserves skills, SRS, resume, and existing learner evidence
 - Adaptive curriculum Phase B: a Learn route for *Logic and Theism* Chapter II §§2.6–2.8 (pp. 35–40) over the same portable concept state, using a `classify-choice` interaction, source anchors without reproducing book text, Reading vs Mastery depth, and a browser walkthrough through terminal completion
 - Adaptive curriculum Phase C: a deterministic skip / retrieve / teach planner that injects the smallest prerequisite detour from `conceptEvidence`, so already-demonstrated conditionals skip the Sobel bridge while unseen quantifiers still get a short teach sequence
+
+### Changed
+
+- The default learner journey is the session offer rather than a four-way Learn / Explore / Practice / Progress choice. Those modes remain reachable under More, outside an active round
+- A session “step” is one learner-perceived micro-activity. Watch lessons with separately advanced cases count as one step per case, so the advertised envelope matches the work inside the round
+- Planner diagnostics (`Avant de poursuivre`, missing-prerequisite / short-bridge copy) no longer appear as learner-facing UI. The planner still chooses skip / retrieve / teach internally
+- Opening priority is resume, then due review, then lapse recovery, then route continuation, then idle. A mid-course learner with remaining lessons and stale evidence is offered lapse recovery before new material
+- Source-route and Learn chrome (route, depth, locator, unit picker) stay on the browse surfaces and are hidden during an active bounded session
+- Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion, and without fabricating `lastSeenAt`
+- Learn shows a route picker between Logic foundations and Logic and Theism; switching routes does not create duplicate concept IDs. Source exercises enter the Practice pool only after a checked pass
+- `practice:classify-choice` remains SRS/telemetry for the Sobel classification UI and is deliberately kept off the Progress interaction-family capability list; portable mastery stays in concept × capability evidence
 
 ### Fixed
 
@@ -21,15 +36,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - After that terminal action, the Done / return-to-the-book button is removed; the completed banner and Sobel locator remain, so the same completion click cannot be repeated
 - Source-route checks stay on the current item (with feedback and Next) until the learner continues; a correct retrieve no longer jumps away because the planner dropped the item
 - Existential-quantifier lessons (EN and FR) now attribute existential commitment to `∃`, not to conjunction
+- Sobel preparation now requires a checked empty-club prediction before the counterexample explanation and the vacuity name; the learner cannot advance from setup to explanation without answering
+- The `conditional:apply` bridge now teaches ordinary if–then, then `→`, then a checked application (`lat-retrieve-conditional` on `F(a) → G(a)`) before `∀x (F(x) → G(x))`. The empty-club prediction (`lat-predict-empty-club`) no longer grants `conditional × apply`
+- The `∃` intro names the existential quantifier without witness or existential-commitment jargon; those terms arrive with same-witness conjunction
 - The prerequisite planner no longer treats a missing bridge as skip; unmet requirements without authored material are an explicit `unsupported` outcome
 - v6→v7 backfilled concept evidence with unknown recency prompts retrieve rather than counting as definitely fresh
 - French source copy uses « cas de vérité par vacuité » rather than the English loan « vacuous »
-
-### Changed
-
-- Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion, and without fabricating `lastSeenAt`
-- Learn shows a route picker between Logic foundations and Logic and Theism; switching routes does not create duplicate concept IDs. Source exercises enter the Practice pool only after a checked pass
-- `practice:classify-choice` remains SRS/telemetry for the Sobel classification UI and is deliberately kept off the Progress interaction-family capability list; portable mastery stays in concept × capability evidence
+- Successful progress import, and any wholesale replace of authoritative learner state, clears the interrupted bounded-session envelope so Resume cannot replay a plan against different progress
+- Session telemetry duration counts only the current active segment, not wall-clock time spent away after an interruption
 
 ## [0.4.0] - 2026-09-07
 

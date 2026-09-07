@@ -1047,3 +1047,105 @@ button {
     transition: none;
   }
 }
+
+.session-opening h1,
+.session-complete h1 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.7rem;
+}
+
+.session-detail,
+.session-effort,
+.session-review {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.session-effort {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.session-chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.session-exit {
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.session-position {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.session-more {
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.session-more-summary {
+  cursor: pointer;
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.session-more-nav {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.session-more-nav button {
+  min-height: var(--tap-min);
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.session-more-nav button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.source-complete-banner {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--accent-soft);
+}
+
+.source-locator {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+@media (max-width: 360px) {
+  .session-opening h1,
+  .session-complete h1 {
+    font-size: 1.45rem;
+  }
+}

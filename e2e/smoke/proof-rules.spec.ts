@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { RuleId } from '../../engine';
-import { gotoWithProgress, modeButton } from '../helpers/app';
+import { gotoWithProgress, clickMode, skipOnboarding } from '../helpers/app';
 import { progressReadyForExercise } from '../helpers/progress';
 
 const cases: Array<{ id: string; rule: RuleId; cites: number[]; derived: string }> = [
@@ -11,7 +11,7 @@ const cases: Array<{ id: string; rule: RuleId; cites: number[]; derived: string 
 for (const exercise of cases) {
   test(`${exercise.id} completes through its rendered rule controls`, async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise(exercise.id));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
 
     const rule = page.locator(
       `[data-action="proof-select-rule"][data-rule="${exercise.rule}"]`,
@@ -26,6 +26,8 @@ for (const exercise of cases) {
     await expect(page.locator('.feedback-correct')).toBeVisible();
     await expect(page.locator('[data-action="next"]')).toBeVisible();
     await page.reload();
+    await skipOnboarding(page);
+    await clickMode(page, 'practice');
     await expect(page.locator('.proof-line-missing .proof-formula')).toHaveText(
       exercise.derived,
     );

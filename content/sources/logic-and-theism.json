@@ -16,13 +16,13 @@
         { "concept": "existential-quantifier", "capability": "recognize" }
       ],
       "items": [
-        "lat-ii-26-context",
         "lat-classify-triangle",
         "lat-classify-visitor",
         "lat-formalize-readings",
         "lat-predict-descartes",
         "lat-interrogate-premises",
         "lat-transfer-kind",
+        "lat-ii-26-context",
         "lat-ii-26-return"
       ],
       "modes": ["prerequisite", "derive", "predict", "interrogate", "formalize", "transfer"]

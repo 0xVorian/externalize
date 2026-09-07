@@ -24,10 +24,10 @@ The canonical current failure mode is the Sobel Chapter II screen that can simul
 
 Authorized sequence:
 
-1. **UX-A — session shell and finite contract:** one-action entry, fixed 5–7 step envelope where content permits, visible effort, no silent expansion, interruption/resume, explicit completion. **Authorized; not yet implemented.**
-2. **UX-B — low-intimidation beginner surface:** planner internals removed from learner copy; progressive disclosure of route/depth/reference/source controls; Sobel opening rebuilt around meaning → use → name → notation → independent use; earliest foundations audited for the same failure mode. **Authorized; not yet implemented.**
-3. **UX-C — learning-aligned re-entry:** due review / continue / lapse-recovery / nothing-useful-due opening states, plus next-useful-review indication where existing SRS state supports it. **Authorized; not yet implemented.**
-4. **UX-D — minimal local validation telemetry:** only if it remains small and clearly separate from mastery. **Optional / defer if it complicates persistence.**
+1. **UX-A — session shell and finite contract:** one-action entry, fixed 5–7 step envelope where content permits, visible effort, no silent expansion, interruption/resume, explicit completion. **Implemented.**
+2. **UX-B — low-intimidation beginner surface:** planner internals removed from learner copy; progressive disclosure of route/depth/reference/source controls; Sobel opening rebuilt around meaning → use → name → notation → independent use; earliest foundations audited for the same failure mode. **Implemented.**
+3. **UX-C — learning-aligned re-entry:** due review / continue / lapse-recovery / nothing-useful-due opening states, plus next-useful-review indication where existing SRS state supports it. **Implemented.**
+4. **UX-D — minimal local validation telemetry:** small separate `localStorage` event log; not part of progress v7. **Implemented.**
 
 **UX gate:** a learner can open Externalize and feel that doing one round is trivially reasonable even when the reasoning inside that round is genuinely difficult.
 

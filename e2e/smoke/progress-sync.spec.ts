@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { completeLesson, serializeProgressExport } from '../../src/app/storage';
 import { emptyProgress, STORAGE_KEY } from '../helpers/progress';
-import { modeButton, skipOnboarding } from '../helpers/app';
+import { clickMode, skipOnboarding } from '../helpers/app';
 
 test.describe('Progress export/import', () => {
   test('round-trips progress through export and file import', async ({ page }) => {
@@ -23,7 +23,7 @@ test.describe('Progress export/import', () => {
     await page.reload();
     await skipOnboarding(page);
 
-    await modeButton(page, 'progress').click();
+    await clickMode(page, 'progress');
     await page
       .locator('.progress-disclosure')
       .filter({ has: page.locator('[data-action="export-progress"]') })
@@ -40,7 +40,7 @@ test.describe('Progress export/import', () => {
     await page.reload();
     await skipOnboarding(page);
 
-    await modeButton(page, 'progress').click();
+    await clickMode(page, 'progress');
     await page
       .locator('.progress-disclosure')
       .filter({ has: page.locator('[data-action="import-progress"]') })

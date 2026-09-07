@@ -8,8 +8,8 @@ import type { AppState } from './state';
 import type { PlannedIntervention } from './planner';
 import type { RouteDepth } from './curriculum';
 import { renderRoutePicker } from './route-picker-render';
-import { getConcept } from './concepts';
 import { LOGIC_AND_THEISM_SOURCE_PACK } from './source-route';
+import { renderSessionFrame } from './session-chrome-render';
 
 export function renderDepthToggle(locale: Locale, depth: RouteDepth): string {
   const learn = learnUi(locale);
@@ -21,47 +21,14 @@ export function renderDepthToggle(locale: Locale, depth: RouteDepth): string {
   `;
 }
 
-function renderPlannerBanner(locale: Locale, plan: PlannedIntervention[]): string {
-  const learn = learnUi(locale);
-  const active = plan.filter((item) => item.kind !== 'skip');
-  if (active.length === 0) {
-    return '';
-  }
-  const lines = active.map((item) => {
-    const conceptLabel =
-      getConcept(item.requirement.concept)?.label[locale] ?? item.requirement.concept;
-    if (item.kind === 'retrieve') {
-      return `<li>${learn.plannerRetrieve} (${conceptLabel})</li>`;
-    }
-    if (item.kind === 'unsupported') {
-      return `<li>${learn.plannerUnsupported} (${conceptLabel})</li>`;
-    }
-    return `<li>${learn.plannerTeach} (${conceptLabel})</li>`;
-  });
-  return `
-    <section class="planner-banner" data-testid="planner-banner">
-      <h2 class="panel-title">${learn.beforeYouContinue}</h2>
-      <ul>${lines.join('')}</ul>
-    </section>
-  `;
-}
-
-export function renderSourceLearnView(options: {
+function sourceBodyAndActions(options: {
   locale: Locale;
-  practiceUnlocked: boolean;
-  activeRouteId: string;
-  depth: RouteDepth;
-  plan: PlannedIntervention[];
-  itemIndex: number;
-  itemTotal: number;
   isTerminal: boolean;
   routeComplete: boolean;
   lessonState?: LessonState;
   practiceState?: AppState;
-}): string {
+}): { title: string; body: string; actions: string } {
   const learn = learnUi(options.locale);
-  const anchor = LOGIC_AND_THEISM_SOURCE_PACK.anchors[0];
-  const locator = `${learn.sourceLocator}: ${anchor.locator}`;
   let body = '';
   let actions = '';
   let title = learn.routeSobel;
@@ -92,9 +59,41 @@ export function renderSourceLearnView(options: {
       );
     }
   }
+  return { title, body, actions };
+}
+
+export function renderSourceLearnView(options: {
+  locale: Locale;
+  practiceUnlocked: boolean;
+  activeRouteId: string;
+  depth: RouteDepth;
+  plan: PlannedIntervention[];
+  itemIndex: number;
+  itemTotal: number;
+  isTerminal: boolean;
+  routeComplete: boolean;
+  lessonState?: LessonState;
+  practiceState?: AppState;
+  session?: { current: number; total: number };
+}): string {
+  const learn = learnUi(options.locale);
+  const anchor = LOGIC_AND_THEISM_SOURCE_PACK.anchors[0];
+  const locator = `${learn.sourceLocator}: ${anchor.locator}`;
+  const { title, body, actions } = sourceBodyAndActions(options);
   const completeBanner = options.routeComplete
-    ? `<section class="planner-banner" data-testid="source-route-complete" role="status"><p>${learn.sourceRouteComplete}</p></section>`
+    ? `<section class="source-complete-banner" data-testid="source-route-complete" role="status"><p>${learn.sourceRouteComplete}</p><p class="source-locator">${locator}</p></section>`
     : '';
+  void options.plan;
+
+  if (options.session) {
+    return renderSessionFrame({
+      locale: options.locale,
+      current: options.session.current,
+      total: options.session.total,
+      body: `${completeBanner}${body}`,
+      actions,
+    });
+  }
 
   return `
     <main class="app" lang="${options.locale}">
@@ -103,11 +102,10 @@ export function renderSourceLearnView(options: {
         mode: 'learn',
         practiceUnlocked: options.practiceUnlocked,
         title,
-        meta: `${locator} · ${learn.lessonProgress(options.itemIndex, options.itemTotal)}`,
+        meta: options.routeComplete ? locator : title,
       })}
       ${renderRoutePicker(options.locale, options.activeRouteId)}
       ${renderDepthToggle(options.locale, options.depth)}
-      ${renderPlannerBanner(options.locale, options.plan)}
       ${completeBanner}
       ${body}
       <div class="actions">${actions}</div>

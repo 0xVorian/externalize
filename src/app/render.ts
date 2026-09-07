@@ -3,6 +3,7 @@ import { getExerciseHint, ui, progressUi, formatTruthValue, visibilityUi, learnU
 import type { AppState } from './state';
 import { renderShellHeader } from './shell-render';
 import { renderUnitCompleteCard } from './lesson-render';
+import { renderSessionFrame } from './session-chrome-render';
 import { renderLiveTruthRow, renderPartialTruthTable, renderCompleteTruthTable, renderTautologyChoice, usesLiveTruthRow } from './truth-table-render';
 import { cellSubmissionCorrect, tautologySubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
@@ -31,6 +32,7 @@ export type PracticeViewContext = {
   scaffoldLevel?: number;
   unitCompleteNotice?: string | null;
   unitCompleteNoticeLive?: boolean;
+  session?: { current: number; total: number };
 };
 
 function showsEvaluatedTree(type: AppState['exercise']['type']): boolean {
@@ -311,7 +313,6 @@ function renderExerciseActions(state: AppState, hideContinue: boolean): string {
     state.activeLearnerNodeId !== null;
 
   return `
-        <div class="actions">
           ${state.exercise.type === 'identify-main-connective' && state.phase === 'ready' ? `<button type="button" class="primary" data-action="check-scope"${state.selectedNodeId === null ? ' disabled' : ''}>${copy.checkScope}</button>` : ''}
           ${state.exercise.type === 'identify-main-connective' && state.phase === 'answered' ? (state.attempt.status === 'finalized' ? continueButton : tryAgain) : ''}
           ${(state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology') && state.phase === 'answered' ? (state.attempt.status === 'finalized' ? continueButton : tryAgain) : ''}
@@ -323,15 +324,12 @@ function renderExerciseActions(state: AppState, hideContinue: boolean): string {
           ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state, hideContinue) : ''}
           ${state.exercise.type === 'proof-fill-step' ? renderProofActions(state, hideContinue) : ''}
           ${state.exercise.type === 'classify-choice' ? renderClassifyChoiceActions(state, hideContinue) : ''}
-        </div>
   `;
 }
 
-export function renderApp(
+function renderExerciseCard(
   state: AppState,
-  queueSize: number,
-  practiceUnlocked: boolean,
-  context?: PracticeViewContext,
+  options: { includeFamily: boolean; actions?: string },
 ): string {
   const copy = ui(state.locale);
   const familyLabel = progressUi(state.locale).skillLabel(skillForExercise(state.exercise));
@@ -348,14 +346,48 @@ export function renderApp(
         : state.message
           ? 'feedback-info'
           : '';
-
   const formulaLine =
-    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology' || state.exercise.type === 'classify-choice' || state.exercise.type === 'proof-fill-step'
+    state.exercise.type === 'translate-en-to-formula' ||
+    state.exercise.type === 'fill-truth-table-cell' ||
+    state.exercise.type === 'classify-tautology' ||
+    state.exercise.type === 'classify-choice' ||
+    state.exercise.type === 'proof-fill-step'
       ? ''
       : `<p class="formula-display" aria-label="${copy.formulaDisplayAria}">${state.exercise.formula}</p>`;
 
+  return `
+      <article class="exercise-card">
+        ${options.includeFamily ? `<p class="exercise-family">${familyLabel}</p>` : ''}
+        <p class="exercise-prompt">${state.prompt}</p>
+        ${state.hintVisible && getExerciseHint(state.locale, state.exercise.id) ? `<aside class="exercise-hint" role="note"><strong>${copy.hintHeading}</strong> ${getExerciseHint(state.locale, state.exercise.id)}</aside>` : ''}
+        ${formulaLine}
+        ${renderExerciseBody(state)}
+        ${state.message ? `<p class="feedback ${feedbackClass}" role="status">${state.message}</p>` : ''}
+        ${options.actions ? `<div class="actions">${options.actions}</div>` : ''}
+      </article>
+  `;
+}
+
+export function renderApp(
+  state: AppState,
+  queueSize: number,
+  practiceUnlocked: boolean,
+  context?: PracticeViewContext,
+): string {
+  const copy = ui(state.locale);
   const hideContinue = Boolean(context?.sessionComplete);
-  const chrome = context ? renderPracticeChrome(state, context) : '';
+  const chrome = context && !context.session ? renderPracticeChrome(state, context) : '';
+  const actions = renderExerciseActions(state, hideContinue);
+
+  if (context?.session) {
+    return renderSessionFrame({
+      locale: state.locale,
+      current: context.session.current,
+      total: context.session.total,
+      body: renderExerciseCard(state, { includeFamily: false }),
+      actions,
+    });
+  }
 
   return `
     <main class="app" lang="${state.locale}">
@@ -368,15 +400,7 @@ export function renderApp(
         referenceOpen: false,
       })}
       ${chrome}
-      <article class="exercise-card">
-        ${context ? '' : `<p class="exercise-family">${familyLabel}</p>`}
-        <p class="exercise-prompt">${state.prompt}</p>
-        ${state.hintVisible && getExerciseHint(state.locale, state.exercise.id) ? `<aside class="exercise-hint" role="note"><strong>${copy.hintHeading}</strong> ${getExerciseHint(state.locale, state.exercise.id)}</aside>` : ''}
-        ${formulaLine}
-        ${renderExerciseBody(state)}
-        ${state.message ? `<p class="feedback ${feedbackClass}" role="status">${state.message}</p>` : ''}
-        ${renderExerciseActions(state, hideContinue)}
-      </article>
+      ${renderExerciseCard(state, { includeFamily: !context, actions })}
       ${context ? renderSessionComplete(state, context) : ''}
     </main>
   `;

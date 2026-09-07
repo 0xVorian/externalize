@@ -1,10 +1,18 @@
 import type { LessonDefinition } from './lessons';
 
 export const SOURCE_LESSONS: LessonDefinition[] = [
-  { id: 'lat-ii-26-context', type: 'card', unit: 0 },
   { id: 'lat-conditional-bridge', type: 'card', unit: 0 },
+  { id: 'lat-empty-no-counterexample', type: 'card', unit: 0 },
+  { id: 'lat-name-vacuity', type: 'card', unit: 0 },
+  { id: 'lat-conditional-meaning', type: 'card', unit: 0 },
+  { id: 'lat-conditional-notation', type: 'card', unit: 0 },
+  { id: 'lat-universal-meaning', type: 'card', unit: 0 },
   { id: 'lat-quantifier-universal', type: 'card', unit: 0 },
+  { id: 'lat-existential-meaning', type: 'card', unit: 0 },
+  { id: 'lat-name-existential', type: 'card', unit: 0 },
   { id: 'lat-quantifier-existential', type: 'card', unit: 0 },
+  { id: 'lat-existential-conjunction', type: 'card', unit: 0 },
+  { id: 'lat-ii-26-context', type: 'card', unit: 0 },
   { id: 'lat-ii-26-return', type: 'card', unit: 0 },
 ];
 

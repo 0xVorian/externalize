@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { gotoWithProgress } from '../helpers/app';
+import { gotoWithProgress, clickMode } from '../helpers/app';
 import { emptyProgress } from '../helpers/progress';
 import { evidenceKey } from '../../src/app/curriculum';
 import { getExerciseDefinition } from '../../src/app/exercises';
@@ -82,13 +82,12 @@ test.describe('Logic and Theism source route', () => {
     page,
   }) => {
     await gotoWithProgress(page, sobelWalkthroughProgress());
+    await clickMode(page, 'learn');
     await page
       .locator(`[data-action="set-route"][data-route-id="${LOGIC_AND_THEISM_READING_ROUTE_ID}"]`)
       .click();
 
-    await expect(page.locator('[data-testid="planner-banner"]')).toBeVisible();
-    await expect(page.locator('[data-testid="planner-banner"]')).toContainText('short check');
-    await expect(page.locator('[data-testid="planner-banner"]')).toContainText('brief bridge');
+    await expect(page.locator('[data-testid="planner-banner"]')).toHaveCount(0);
 
     await expect(page.locator('.exercise-prompt')).toBeVisible();
     await answerCurrentClassify(page, { wrongFirst: true });

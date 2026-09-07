@@ -73,11 +73,6 @@ export type LearnUiCopy = {
   readingDepth: string;
   masteryDepth: string;
   depthGroupAria: string;
-  beforeYouContinue: string;
-  plannerSkip: string;
-  plannerRetrieve: string;
-  plannerTeach: string;
-  plannerUnsupported: string;
   returnToBook: string;
   sourceRouteComplete: string;
 };
@@ -211,12 +206,6 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     readingDepth: 'Reading',
     masteryDepth: 'Mastery',
     depthGroupAria: 'Section depth',
-    beforeYouContinue: 'Before you continue',
-    plannerSkip: 'Already demonstrated — no detour.',
-    plannerRetrieve: 'A short check before the source example.',
-    plannerTeach: 'A brief bridge for a missing prerequisite.',
-    plannerUnsupported:
-      'This prerequisite has no authored bridge, so it cannot be treated as known.',
     returnToBook: 'Done — return to the book',
     sourceRouteComplete:
       'This reading is complete. Continue in Sobel at Chapter II §§2.6–2.8. Switching to Mastery still opens any remaining formal check.',
@@ -272,12 +261,6 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     readingDepth: 'Lecture',
     masteryDepth: 'Maîtrise',
     depthGroupAria: 'Profondeur de la section',
-    beforeYouContinue: 'Avant de poursuivre',
-    plannerSkip: 'Déjà établi — pas de détour.',
-    plannerRetrieve: 'Un contrôle bref avant l’exemple du texte.',
-    plannerTeach: 'Un pont court pour un prérequis manquant.',
-    plannerUnsupported:
-      'Ce prérequis n’a pas de pont rédigé : il ne peut pas être tenu pour acquis.',
     returnToBook: 'Terminé — retour au livre',
     sourceRouteComplete:
       'Cette lecture est achevée. Reprenez Sobel au chapitre II, §§2.6–2.8. Le mode Maîtrise reste disponible pour toute vérification formelle encore ouverte.',
@@ -288,39 +271,38 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
   en: {
     'level0-01-letters': {
       title: 'Sentence letters',
-      subtitle: 'Atomic statements and schematic letters.',
+      subtitle: 'Treating whole statements as units.',
       card: {
-        title: 'Letters stand for statements',
+        title: 'One letter for a whole statement',
         body: [
-          'Propositional logic treats whole statements as units. A sentence letter such as P schematically represents some statement — we leave its content unspecified.',
-          'Example: P might translate “It is snowing.” Q might translate “The lecture is cancelled.” The logic concerns how statements combine, not their subject matter.',
-          'Using letters lets us display form clearly: the same pattern (P ∧ Q) can represent countless pairs of statements.',
+          'We often need to reason about whole statements without rewriting them each time. Logic therefore lets a letter such as P stand in for some statement, leaving its content unspecified.',
+          'That schematic letter is called a sentence letter. Example: P might translate “It is snowing.” Q might translate “The lecture is cancelled.”',
+          'Using letters displays form clearly: the same pattern (P ∧ Q) can represent countless pairs of statements.',
         ],
         example: 'Let P = “It is snowing.”',
       },
     },
     'level0-02-truth': {
       title: 'Truth assignments',
-      subtitle: 'Every statement is true or false under an interpretation.',
+      subtitle: 'Each statement is true or false.',
       card: {
-        title: 'Truth values',
+        title: 'True or false, then a full assignment',
         body: [
-          'Classical propositional logic assumes bivalence: each statement is true (T) or false (F), not both.',
-          'A truth assignment specifies, for each sentence letter, which truth value it receives.',
-          'On exercises, tap T or F next to each letter to set its value; the table or tree updates immediately.',
-          'Evaluating a formula means computing its truth value from the assignment, using the rules for each connective.',
+          'In this course, each statement is either true (T) or false (F), not both.',
+          'A truth assignment records, for each sentence letter, which of those two values it receives.',
+          'On exercises, tap T or F next to each letter; the table or tree updates immediately. Evaluating a formula means computing its value from that assignment.',
         ],
         example: 'Assignment:  P ↦ T ,  Q ↦ F',
       },
     },
     'level0-03-and': {
       title: 'Conjunction',
-      subtitle: 'The connective ∧ (truth-functional and).',
+      subtitle: 'Both parts must be true.',
       card: {
-        title: 'P ∧ Q — both conjuncts must be true',
+        title: 'P ∧ Q — true only when both are true',
         body: [
-          'A conjunction is true if and only if both of its conjuncts are true.',
-          'If either conjunct is false, the conjunction is false — even when the other conjunct is true.',
+          'A compound that requires both parts to be true is a conjunction, written with ∧.',
+          'If either part is false, the whole conjunction is false — even when the other part is true.',
           'This is the truth-functional reading of “and” used in logic, not every ordinary-language use of the word.',
         ],
         example: 'T ∧ T  ⇒  T\nT ∧ F  ⇒  F\nF ∧ T  ⇒  F\nF ∧ F  ⇒  F',
@@ -610,12 +592,12 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
   fr: {
     'level0-01-letters': {
       title: 'Variables propositionnelles',
-      subtitle: 'Propositions atomiques et schémas formels.',
+      subtitle: 'Traiter une proposition entière comme un bloc.',
       card: {
-        title: 'Des lettres pour des propositions',
+        title: 'Une lettre pour une proposition entière',
         body: [
-          'En logique propositionnelle, on traite une proposition entière comme un bloc. Une variable P représente schématiquement une proposition dont on ne précise pas le contenu.',
-          'Exemple : P pourrait se lire « Il neige. » et Q « Le cours est annulé. » La logique étudie les combinaisons de propositions, indépendamment de leur thème.',
+          'On a souvent besoin de raisonner sur des propositions entières sans les réécrire. La logique laisse donc une lettre telle que P tenir lieu d’une proposition, sans en préciser le contenu.',
+          'Cette lettre schématique s’appelle une variable propositionnelle. Exemple : P pourrait se lire « Il neige. » et Q « Le cours est annulé. »',
           'Les symboles rendent la forme visible : un même schéma (P ∧ Q) peut instancier des paires de propositions très différentes.',
         ],
         example: 'Soit P = « Il neige. »',
@@ -623,27 +605,26 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     },
     'level0-02-truth': {
       title: 'Interprétations et valeurs de vérité',
-      subtitle: 'Vrai ou faux, sous une valuation donnée.',
+      subtitle: 'Chaque proposition est vraie ou fausse.',
       card: {
-        title: 'Bivalence',
+        title: 'Vrai ou faux, puis une interprétation complète',
         body: [
-          'En logique classique, toute proposition est vraie (V) ou fausse (F) — principe de bivalence.',
-          'Une interprétation (ou valuation) attribue à chaque variable propositionnelle une valeur de vérité.',
-          'Aux exercices, toucher V ou F à côté de chaque variable ; le tableau ou l\'arbre se met à jour aussitôt.',
-          'Évaluer une formule, c\'est calculer sa valeur à partir de cette interprétation et des règles des connecteurs.',
+          'Dans ce cours, chaque proposition est vraie (V) ou fausse (F), sans troisième cas.',
+          'Une interprétation (ou valuation) attribue à chaque variable propositionnelle l’une de ces deux valeurs.',
+          'Aux exercices, toucher V ou F à côté de chaque variable ; le tableau ou l’arbre se met à jour. Évaluer une formule, c’est calculer sa valeur à partir de cette interprétation.',
         ],
         example: 'Interprétation :  P ↦ V ,  Q ↦ F',
       },
     },
     'level0-03-and': {
       title: 'La conjonction',
-      subtitle: 'Le connecteur ∧ (et vérité-fonctionnel).',
+      subtitle: 'Les deux parties doivent être vraies.',
       card: {
-        title: 'P ∧ Q — les deux arguments doivent être vrais',
+        title: 'P ∧ Q — vrai seulement si les deux le sont',
         body: [
-          'Une conjonction est vraie si et seulement si ses deux arguments sont vrais.',
-          'Dès qu\'un argument est faux, la conjonction est fausse — même si l\'autre est vrai.',
-          'C\'est le sens vérité-fonctionnel de « et », celui retenu en logique formelle (distinct de certains emplois du français courant).',
+          'Un composé qui exige la vérité des deux parties est une conjonction, notée ∧.',
+          'Dès qu’une partie est fausse, le tout est faux — même si l’autre est vraie.',
+          'C’est le sens vérité-fonctionnel de « et », celui retenu en logique formelle (distinct de certains emplois du français courant).',
         ],
         example: 'V ∧ V  ⇒  V\nV ∧ F  ⇒  F\nF ∧ V  ⇒  F\nF ∧ F  ⇒  F',
       },
@@ -941,6 +922,11 @@ export function getLessonCopy(locale: Locale, lessonId: string): LessonCopy {
     throw new Error(`Missing lesson copy for ${lessonId} (${locale})`);
   }
   return copy;
+}
+
+/** Watch-case count is locale-independent; EN is the canonical length. */
+export function watchCaseCount(lessonId: string): number {
+  return LESSONS.en[lessonId]?.watchSteps?.length ?? 0;
 }
 
 export function getReference(locale: Locale): ReferenceEntry[] {
