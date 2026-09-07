@@ -1,5 +1,5 @@
-import logicFoundationsRoute from '../../content/routes/logic-foundations.json';
-import logicAndTheismReadingRoute from '../../content/routes/logic-and-theism-reading.json';
+import logicFoundationsRoute from '../../content/routes/logic-foundations.json' with { type: 'json' };
+import logicAndTheismReadingRoute from '../../content/routes/logic-and-theism-reading.json' with { type: 'json' };
 import {
   ALL_LEARN_LESSONS,
   LEVEL_0_LESSONS,

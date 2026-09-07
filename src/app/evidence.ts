@@ -1,4 +1,4 @@
-import evidenceGraph from '../../content/exercise-evidence.json';
+import evidenceGraph from '../../content/exercise-evidence.json' with { type: 'json' };
 import { isCanonicalConcept } from './concepts';
 import {
   CAPABILITIES,

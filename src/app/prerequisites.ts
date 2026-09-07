@@ -1,4 +1,4 @@
-import graph from '../../content/prerequisites.json';
+import graph from '../../content/prerequisites.json' with { type: 'json' };
 import type { Locale } from '../i18n';
 
 export type PrerequisitesGraph = typeof graph;

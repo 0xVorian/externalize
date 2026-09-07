@@ -869,6 +869,12 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'try-again') {
+    if (isSourceLearn() && sourcePracticeState) {
+      sourcePracticeState = tryAgainPractice(sourcePracticeState);
+      persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(sourcePracticeState)));
+      render();
+      return;
+    }
     updatePracticeState(tryAgainPractice);
     return;
   }

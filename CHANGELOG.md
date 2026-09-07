@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion
 - Learn shows a route picker between Logic foundations and Logic and Theism; switching routes does not create duplicate concept IDs. Source exercises enter the Practice pool only after a checked pass
 
+### Fixed
+
+- Content JSON imports declare `type: json` so Playwright helpers can load progress modules under native Node ESM
+- Source-route classification items can be repaired in place: Try again re-enables the choice list instead of leaving the attempt stuck
+
 ## [0.4.0] - 2026-09-07
 
 ### Added

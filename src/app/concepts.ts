@@ -1,4 +1,4 @@
-import extraConcepts from '../../content/concepts-extra.json';
+import extraConcepts from '../../content/concepts-extra.json' with { type: 'json' };
 import { PREREQUISITES_GRAPH } from './prerequisites';
 import type { ConceptDefinition, ConceptId } from './curriculum';
 

@@ -1,4 +1,4 @@
-import sourcePack from '../../content/sources/logic-and-theism.json';
+import sourcePack from '../../content/sources/logic-and-theism.json' with { type: 'json' };
 import {
   LOGIC_AND_THEISM_READING_ROUTE_ID,
   LOGIC_FOUNDATIONS_ROUTE_ID,

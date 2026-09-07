@@ -28,7 +28,7 @@ import { SOURCE_LESSONS } from './source-lessons';
 import { getLessonCopy, getExerciseCopy, learnUi } from '../i18n';
 import { EXERCISE_DEFINITIONS } from './exercises';
 import { SOURCE_EXERCISE_IDS } from './source-route';
-import { createState, selectClassificationChoice, checkClassification } from './state';
+import { createState, selectClassificationChoice, checkClassification, tryAgainPractice } from './state';
 import { getExerciseDefinition } from './exercises';
 
 function completeLevel0() {
@@ -235,5 +235,8 @@ describe('classify-choice interaction', () => {
     state = checkClassification(state);
     expect(state.feedback?.correct).toBe(false);
     expect(state.attempt.status).toBe('active');
+    state = tryAgainPractice(state);
+    expect(state.phase).toBe('ready');
+    expect(state.selectedChoiceId).toBeNull();
   });
 });
