@@ -92,6 +92,8 @@ export type RouteProgress = {
   currentStepId?: string;
   depthByStep?: Record<string, RouteDepth>;
   seenItems?: string[];
+  /** ISO timestamp when the learner finished the then-planned sequence at least once. */
+  completedAt?: string;
 };
 
 export function evidenceKey(concept: ConceptId, capability: Capability): string {

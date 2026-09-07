@@ -105,15 +105,39 @@ export function plannedSourceItems(store: ProgressStore): string[] {
   return [...injected, ...core, ...mastery];
 }
 
+export function isPlannedSourceSequenceComplete(store: ProgressStore): boolean {
+  const items = plannedSourceItems(store);
+  const seen = new Set(store.routes[LOGIC_AND_THEISM_READING_ROUTE_ID]?.seenItems ?? []);
+  return items.length > 0 && items.every((itemId) => seen.has(itemId));
+}
+
+export function sourceRouteCompletedAt(store: ProgressStore): string | undefined {
+  return store.routes[LOGIC_AND_THEISM_READING_ROUTE_ID]?.completedAt;
+}
+
 export function currentSourceItemId(store: ProgressStore): string {
   const items = plannedSourceItems(store);
   const progress = store.routes[LOGIC_AND_THEISM_READING_ROUTE_ID];
   const resumeId = store.resume.lessonId ?? store.resume.exerciseId;
-  if (resumeId && items.includes(resumeId)) {
+  const seen = new Set(progress?.seenItems ?? []);
+  const firstUnseen = items.find((itemId) => !seen.has(itemId));
+  const draft = store.practiceDraft;
+  const draftId = draft?.attempt.exerciseId;
+  if (
+    draftId &&
+    isSourceExerciseId(draftId) &&
+    draft.attempt.status === 'finalized' &&
+    !seen.has(draftId)
+  ) {
+    return draftId;
+  }
+  if (resumeId && items.includes(resumeId) && !seen.has(resumeId)) {
     return resumeId;
   }
-  const seen = new Set(progress?.seenItems ?? []);
-  return items.find((itemId) => !seen.has(itemId)) ?? items[0]!;
+  if (firstUnseen) {
+    return firstUnseen;
+  }
+  return items[items.length - 1]!;
 }
 
 export function nextSourceItemId(store: ProgressStore, currentId: string): string | undefined {
@@ -123,6 +147,41 @@ export function nextSourceItemId(store: ProgressStore, currentId: string): strin
     return undefined;
   }
   return items[index + 1];
+}
+
+function resumeAtSourceItem(store: ProgressStore, itemId: string): ProgressStore {
+  const isExercise = Boolean(getExerciseDefinition(itemId));
+  return withLearnResume(
+    {
+      ...store,
+      routes: setRouteCurrentItem(store.routes, LOGIC_AND_THEISM_READING_ROUTE_ID, itemId),
+    },
+    {
+      lessonId: isExercise ? undefined : itemId,
+      exerciseId: isExercise ? itemId : undefined,
+    },
+  );
+}
+
+function withSequenceCompletion(store: ProgressStore): ProgressStore {
+  if (!isPlannedSourceSequenceComplete(store)) {
+    return store;
+  }
+  const routeId = LOGIC_AND_THEISM_READING_ROUTE_ID;
+  const current = store.routes[routeId] ?? emptySourceRouteProgress();
+  if (current.completedAt) {
+    return store;
+  }
+  return {
+    ...store,
+    routes: {
+      ...store.routes,
+      [routeId]: {
+        ...current,
+        completedAt: new Date().toISOString(),
+      },
+    },
+  };
 }
 
 export function emptySourceRouteProgress(): RouteProgress {
@@ -152,24 +211,16 @@ export function setActiveRoute(store: ProgressStore, routeId: string): ProgressS
         : undefined;
     return withLearnResume(next, { lessonId: keepLesson, exerciseId: undefined });
   }
-  const itemId = currentSourceItemId({ ...next, activeRouteId: routeId });
-  const isExercise = Boolean(getExerciseDefinition(itemId));
-  return withLearnResume(
-    {
-      ...next,
-      routes: setRouteCurrentItem(next.routes, routeId, itemId),
-    },
-    {
-      lessonId: isExercise ? undefined : itemId,
-      exerciseId: isExercise ? itemId : undefined,
-    },
+  return resumeAtSourceItem(
+    { ...next, activeRouteId: routeId },
+    currentSourceItemId({ ...next, activeRouteId: routeId }),
   );
 }
 
 export function setRouteDepth(store: ProgressStore, depth: RouteDepth): ProgressStore {
   const routeId = LOGIC_AND_THEISM_READING_ROUTE_ID;
   const current = store.routes[routeId] ?? emptySourceRouteProgress();
-  return {
+  const next: ProgressStore = {
     ...store,
     routes: {
       ...store.routes,
@@ -179,30 +230,30 @@ export function setRouteDepth(store: ProgressStore, depth: RouteDepth): Progress
       },
     },
   };
+  return resumeAtSourceItem(next, currentSourceItemId(next));
+}
+
+function itemAfterCompletion(store: ProgressStore, completedId: string): string {
+  const items = plannedSourceItems(store);
+  const index = items.indexOf(completedId);
+  if (index >= 0 && index < items.length - 1) {
+    return items[index + 1]!;
+  }
+  const seen = new Set(store.routes[LOGIC_AND_THEISM_READING_ROUTE_ID]?.seenItems ?? []);
+  const firstUnseen = items.find((itemId) => !seen.has(itemId));
+  return firstUnseen ?? items[items.length - 1] ?? completedId;
 }
 
 export function completeSourceItem(store: ProgressStore, itemId: string): ProgressStore {
   const lessonsCompleted = isSourceLessonId(itemId) && !store.lessonsCompleted.includes(itemId)
     ? [...store.lessonsCompleted, itemId]
     : store.lessonsCompleted;
-  const withSeen: ProgressStore = {
+  const withSeen = withSequenceCompletion({
     ...store,
     lessonsCompleted,
     routes: markRouteItemSeen(store.routes, store.activeRouteId, itemId),
-  };
-  const nextId = nextSourceItemId(withSeen, itemId);
-  const currentId = nextId ?? itemId;
-  const isExercise = Boolean(getExerciseDefinition(currentId));
-  return withLearnResume(
-    {
-      ...withSeen,
-      routes: setRouteCurrentItem(withSeen.routes, withSeen.activeRouteId, currentId),
-    },
-    {
-      lessonId: isExercise ? undefined : currentId,
-      exerciseId: isExercise ? currentId : undefined,
-    },
-  );
+  });
+  return resumeAtSourceItem(withSeen, itemAfterCompletion(withSeen, itemId));
 }
 
 export function sourceItemKind(itemId: string): 'lesson' | 'exercise' | undefined {

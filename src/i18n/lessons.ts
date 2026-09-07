@@ -77,6 +77,9 @@ export type LearnUiCopy = {
   plannerSkip: string;
   plannerRetrieve: string;
   plannerTeach: string;
+  plannerUnsupported: string;
+  returnToBook: string;
+  sourceRouteComplete: string;
 };
 
 const REFERENCE: Record<Locale, ReferenceEntry[]> = {
@@ -212,6 +215,11 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     plannerSkip: 'Already demonstrated — no detour.',
     plannerRetrieve: 'A short check before the source example.',
     plannerTeach: 'A brief bridge for a missing prerequisite.',
+    plannerUnsupported:
+      'This prerequisite has no authored bridge, so it cannot be treated as known.',
+    returnToBook: 'Done — return to the book',
+    sourceRouteComplete:
+      'This reading is complete. Continue in Sobel at Chapter II §§2.6–2.8. Switching to Mastery still opens any remaining formal check.',
   },
   fr: {
     learn: 'Cours',
@@ -268,6 +276,11 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     plannerSkip: 'Déjà établi — pas de détour.',
     plannerRetrieve: 'Un contrôle bref avant l’exemple du texte.',
     plannerTeach: 'Un pont court pour un prérequis manquant.',
+    plannerUnsupported:
+      'Ce prérequis n’a pas de pont rédigé : il ne peut pas être tenu pour acquis.',
+    returnToBook: 'Terminé — retour au livre',
+    sourceRouteComplete:
+      'Cette lecture est achevée. Reprenez Sobel au chapitre II, §§2.6–2.8. Le mode Maîtrise reste disponible pour toute vérification formelle encore ouverte.',
   },
 };
 

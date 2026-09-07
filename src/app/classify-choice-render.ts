@@ -43,5 +43,5 @@ export function renderClassifyChoiceActions(state: AppState, hideContinue = fals
       ? ''
       : `<button type="button" class="primary" data-action="next-exercise">${copy.continue}</button>`;
   }
-  return `<button type="button" class="secondary" data-action="try-again">${copy.tryAgain}</button>`;
+  return `<button type="button" class="secondary" data-action="try-again" data-testid="try-again">${copy.tryAgain}</button>`;
 }

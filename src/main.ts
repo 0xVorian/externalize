@@ -33,6 +33,8 @@ import {
 import {
   completeSourceItem,
   currentSourceItemId,
+  isPlannedSourceSequenceComplete,
+  nextSourceItemId,
   plannedSourceItems,
   routeDepth,
   setActiveRoute,
@@ -357,6 +359,8 @@ function render(): void {
         plan: sourcePlan(progress),
         itemIndex,
         itemTotal: items.length,
+        isTerminal: !nextSourceItemId(progress, itemId),
+        routeComplete: isPlannedSourceSequenceComplete(progress),
         lessonState: sourcePracticeState ? undefined : lessonState,
         practiceState: sourcePracticeState ?? undefined,
       });
@@ -596,8 +600,9 @@ function handleImportRaw(raw: string): void {
 }
 
 root.addEventListener('click', (event) => {
-  const target = event.target as HTMLElement;
-  const button = target.closest<HTMLElement>('[data-action]');
+  const raw = event.target;
+  const el = raw instanceof Element ? raw : raw instanceof Node ? raw.parentElement : null;
+  const button = el?.closest<HTMLElement>('[data-action]');
   if (!button) {
     return;
   }
@@ -700,11 +705,27 @@ root.addEventListener('click', (event) => {
     return;
   }
 
-  if (action === 'source-next') {
+  if (action === 'source-next' || action === 'source-complete') {
     persistProgress(completeSourceItem(progress, currentSourceItemId(progress)));
     sourcePracticeState = null;
     lessonState = loadLessonFromProgress(progress);
     render();
+    return;
+  }
+
+  if (action === 'try-again') {
+    if (isSourceLearn()) {
+      if (!sourcePracticeState) {
+        sourcePracticeState = loadSourcePracticeState();
+      }
+      if (sourcePracticeState) {
+        sourcePracticeState = tryAgainPractice(sourcePracticeState);
+        persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(sourcePracticeState)));
+        render();
+      }
+      return;
+    }
+    updatePracticeState(tryAgainPractice);
     return;
   }
 
@@ -865,17 +886,6 @@ root.addEventListener('click', (event) => {
   }
   if (action === 'check-translation') {
     checkPracticeState(checkTranslation);
-    return;
-  }
-
-  if (action === 'try-again') {
-    if (isSourceLearn() && sourcePracticeState) {
-      sourcePracticeState = tryAgainPractice(sourcePracticeState);
-      persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(sourcePracticeState)));
-      render();
-      return;
-    }
-    updatePracticeState(tryAgainPractice);
     return;
   }
 

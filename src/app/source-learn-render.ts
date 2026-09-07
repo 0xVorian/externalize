@@ -33,6 +33,9 @@ function renderPlannerBanner(locale: Locale, plan: PlannedIntervention[]): strin
     if (item.kind === 'retrieve') {
       return `<li>${learn.plannerRetrieve} (${conceptLabel})</li>`;
     }
+    if (item.kind === 'unsupported') {
+      return `<li>${learn.plannerUnsupported} (${conceptLabel})</li>`;
+    }
     return `<li>${learn.plannerTeach} (${conceptLabel})</li>`;
   });
   return `
@@ -51,6 +54,8 @@ export function renderSourceLearnView(options: {
   plan: PlannedIntervention[];
   itemIndex: number;
   itemTotal: number;
+  isTerminal: boolean;
+  routeComplete: boolean;
   lessonState?: LessonState;
   practiceState?: AppState;
 }): string {
@@ -60,11 +65,14 @@ export function renderSourceLearnView(options: {
   let body = '';
   let actions = '';
   let title = learn.routeSobel;
+  const terminalButton = `<button type="button" class="primary" data-action="source-complete" data-testid="source-complete">${learn.returnToBook}</button>`;
   if (options.lessonState) {
     const copy = getLessonCopy(options.locale, options.lessonState.lesson.id);
     title = copy.title;
     body = renderCardLesson(options.lessonState);
-    actions = `<button type="button" class="primary" data-action="lesson-next">${learn.nextStep}</button>`;
+    actions = options.isTerminal
+      ? terminalButton
+      : `<button type="button" class="primary" data-action="lesson-next">${learn.nextStep}</button>`;
   } else if (options.practiceState) {
     const copy = getExerciseCopy(options.locale, options.practiceState.exercise.id);
     title = copy.prompt;
@@ -72,15 +80,20 @@ export function renderSourceLearnView(options: {
       ? `<p class="feedback ${options.practiceState.feedback?.correct ? 'feedback-correct' : options.practiceState.feedback ? 'feedback-wrong' : 'feedback-info'}" role="status">${options.practiceState.message}</p>`
       : '';
     body = `<article class="lesson-card"><p class="exercise-prompt">${copy.prompt}</p>${renderClassifyChoiceBody(options.practiceState)}${feedback}</article>`;
-    const nextAction =
-      options.practiceState.attempt.status === 'finalized'
-        ? `<button type="button" class="primary" data-action="source-next">${learn.nextStep}</button>`
-        : renderClassifyChoiceActions(options.practiceState, true).replace(
-            'next-exercise',
-            'source-next',
-          );
-    actions = nextAction;
+    if (options.practiceState.attempt.status === 'finalized') {
+      actions = options.isTerminal
+        ? terminalButton
+        : `<button type="button" class="primary" data-action="source-next">${learn.nextStep}</button>`;
+    } else {
+      actions = renderClassifyChoiceActions(options.practiceState, true).replace(
+        'next-exercise',
+        'source-next',
+      );
+    }
   }
+  const completeBanner = options.routeComplete
+    ? `<section class="planner-banner" data-testid="source-route-complete" role="status"><p>${learn.sourceRouteComplete}</p></section>`
+    : '';
 
   return `
     <main class="app" lang="${options.locale}">
@@ -94,6 +107,7 @@ export function renderSourceLearnView(options: {
       ${renderRoutePicker(options.locale, options.activeRouteId)}
       ${renderDepthToggle(options.locale, options.depth)}
       ${renderPlannerBanner(options.locale, options.plan)}
+      ${completeBanner}
       ${body}
       <div class="actions">${actions}</div>
     </main>

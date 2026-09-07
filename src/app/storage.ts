@@ -41,6 +41,7 @@ import {
 import type { ConceptCapabilityStat, RouteProgress } from './curriculum';
 import {
   LOGIC_FOUNDATIONS_ROUTE_ID,
+  LOGIC_AND_THEISM_READING_ROUTE_ID,
   initialRouteProgress,
   markRouteItemSeen,
   setRouteCurrentItem,
@@ -877,7 +878,10 @@ export function finalizePracticeAttempt(
           at: nowIso(),
         },
       ),
-      routes: markRouteItemSeen(store.routes, store.activeRouteId, exerciseId),
+      routes:
+        store.activeRouteId === LOGIC_AND_THEISM_READING_ROUTE_ID
+          ? store.routes
+          : markRouteItemSeen(store.routes, store.activeRouteId, exerciseId),
     },
     { mode: 'practice', exerciseId },
   );
