@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import type { ProgressStore } from '../../src/app/storage';
-import { gotoWithProgress, modeButton } from '../helpers/app';
+import { gotoWithProgress, clickMode } from '../helpers/app';
 import { progressReadyForExercise, STORAGE_KEY } from '../helpers/progress';
 
 async function storedProgress(page: Page): Promise<ProgressStore> {
@@ -16,7 +16,7 @@ async function atomIsTrue(page: Page, atom: string): Promise<boolean> {
 
 test('routes Continue to a due repaired review before a newly unlocked exercise', async ({ page }) => {
   await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-  await modeButton(page, 'practice').click();
+  await clickMode(page, 'practice');
 
   const rootTrue = (await atomIsTrue(page, 'P')) && (await atomIsTrue(page, 'Q'));
   await page.locator(`[data-action="select-evaluation-prediction"][data-value="${rootTrue ? 'false' : 'true'}"]`).click();

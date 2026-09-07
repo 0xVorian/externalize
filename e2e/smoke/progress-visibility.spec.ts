@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { evaluate, evaluateWithNodes, findNodeById, parse } from '../../engine';
-import { gotoFresh, gotoWithProgress, lessonNext, modeButton } from '../helpers/app';
+import { gotoFresh, gotoWithProgress, lessonNext, clickMode, enterLearn } from '../helpers/app';
 import { LEVEL_1_LESSONS, LEVEL_2_LESSONS } from '../../src/app/lessons';
 import {
   progressAtLesson,
@@ -113,6 +113,7 @@ async function finalizeCurrentPractice(page: Page): Promise<void> {
 test.describe('progress visibility', () => {
   test('Learn shows unit/lesson progress and advances after completion', async ({ page }) => {
     await gotoFresh(page);
+    await enterLearn(page);
     const chrome = page.locator('[data-testid="learn-progress"]');
     await expect(chrome).toContainText('Lesson 1 of 5');
     await expect(chrome).toContainText('0 completed');
@@ -126,6 +127,7 @@ test.describe('progress visibility', () => {
 
   test('completing the last Unit 0 lesson makes the unit transition explicit', async ({ page }) => {
     await gotoWithProgress(page, progressAtLesson('level0-05-guided'));
+    await enterLearn(page);
     await page.locator('[data-action="set-atom-value"][data-atom="P"][data-value="true"]').click();
     await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();
@@ -138,14 +140,14 @@ test.describe('progress visibility', () => {
 
   test('Practice shows capability state and session 0 / 5', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     await expect(page.locator('[data-testid="capability-state"]')).toContainText('Ready');
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
   });
 
   test('finalizing one clean exercise advances the session to 1 / 5', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     await completeEvalCorrect(page);
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('1 / 5');
     await expect(page.locator('[data-testid="capability-state"]')).toContainText('Developing');
@@ -153,7 +155,7 @@ test.describe('progress visibility', () => {
 
   test('wrong then repair then correct advances the session only once', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     await completeEvalWrongThenCorrect(page);
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('1 / 5');
   });
@@ -166,7 +168,7 @@ test.describe('progress visibility', () => {
       2,
     );
     await gotoWithProgress(page, store);
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     await completeEvalCorrect(page);
     await expect(page.locator('[data-testid="progress-moment"]')).toContainText('consistent');
   });
@@ -174,7 +176,7 @@ test.describe('progress visibility', () => {
   test('scaffold advancement explains that the learner will carry more reasoning', async ({ page }) => {
     const store = progressReadyForScaffoldAdvance('eval-007');
     await gotoWithProgress(page, store);
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     await completeEvalCorrect(page);
     await expect(page.locator('[data-testid="progress-moment"]')).toContainText('intermediate');
   });
@@ -182,7 +184,7 @@ test.describe('progress visibility', () => {
   test('scaffold already at maximum does not announce further withdrawal', async ({ page }) => {
     const store = progressAtMaxScaffold('eval-007');
     await gotoWithProgress(page, store);
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     await selectLearnerNodeCorrect(page, 'root.R');
     await completeEvalCorrect(page);
     await expect(page.locator('[data-testid="progress-moment"]')).toHaveCount(0);
@@ -193,6 +195,7 @@ test.describe('progress visibility', () => {
   }) => {
     const lastUnit2 = LEVEL_2_LESSONS[LEVEL_2_LESSONS.length - 1]!;
     await gotoWithProgress(page, progressAtLesson(lastUnit2.id));
+    await enterLearn(page);
     await page.locator('[data-action="set-atom-value"][data-atom="P"][data-value="true"]').click();
     await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();
@@ -229,7 +232,7 @@ test.describe('progress visibility', () => {
     page,
   }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
 
     for (let index = 0; index < 5; index += 1) {
       await finalizeCurrentPractice(page);
@@ -264,7 +267,7 @@ test.describe('progress visibility', () => {
     page,
   }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
 
     for (let index = 0; index < 5; index += 1) {
       await finalizeCurrentPractice(page);
@@ -277,7 +280,7 @@ test.describe('progress visibility', () => {
     await expect(complete).toBeVisible();
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('5 / 5');
 
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('5 / 5');
     await expect(complete).toBeVisible();
 
@@ -288,17 +291,17 @@ test.describe('progress visibility', () => {
 
   test('an incomplete Practice session survives leaving and returning', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
 
     await finalizeCurrentPractice(page);
     await page.locator('[data-action="next"]').click();
     await finalizeCurrentPractice(page);
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('2 / 5');
 
-    await modeButton(page, 'progress').click();
+    await clickMode(page, 'progress');
     await expect(page.locator('[data-testid="capability-summary"]')).toBeVisible();
 
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('2 / 5');
     await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
   });
@@ -307,7 +310,7 @@ test.describe('progress visibility', () => {
     page,
   }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
 
     for (let index = 0; index < 5; index += 1) {
       await finalizeCurrentPractice(page);
@@ -342,7 +345,7 @@ test.describe('progress visibility', () => {
     const lastUnit2 = LEVEL_2_LESSONS[LEVEL_2_LESSONS.length - 1]!;
     await gotoWithProgress(page, progressAtLesson(lastUnit2.id));
 
-    await modeButton(page, 'practice').click();
+    await clickMode(page, 'practice');
     for (let index = 0; index < 5; index += 1) {
       await finalizeCurrentPractice(page);
       if (index < 4) {
@@ -352,7 +355,7 @@ test.describe('progress visibility', () => {
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('5 / 5');
     await expect(page.locator('[data-testid="session-complete"]')).toBeVisible();
 
-    await modeButton(page, 'learn').click();
+    await clickMode(page, 'learn');
     await page.locator('[data-action="set-atom-value"][data-atom="P"][data-value="true"]').click();
     await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();
@@ -372,7 +375,7 @@ test.describe('progress visibility', () => {
 
   test('Progress view renders the capability-first summary', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
-    await modeButton(page, 'progress').click();
+    await clickMode(page, 'progress');
     const summary = page.locator('[data-testid="capability-summary"]');
     await expect(summary).toBeVisible();
     await expect(summary).toContainText('You can now');

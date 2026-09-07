@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 import type { ProgressStore } from '../../src/app/storage';
-import { gotoWithProgress, modeButton } from '../helpers/app';
+import { gotoWithProgress, clickMode } from '../helpers/app';
 import { progressReadyForExercise, STORAGE_KEY } from '../helpers/progress';
 
 test('repairs a scope error inside one attempt', async ({ page }) => {
   await gotoWithProgress(page, progressReadyForExercise('scope-001'));
-  await modeButton(page, 'practice').click();
+  await clickMode(page, 'practice');
 
   const nodes = page.locator('[data-action="select-node"]');
   await nodes.nth(1).click();
