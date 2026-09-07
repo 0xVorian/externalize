@@ -5,7 +5,7 @@ import {
   lessonNext,
   modeButton,
 } from '../helpers/app';
-import { progressReadyForExercise } from '../helpers/progress';
+import { emptyProgress, progressReadyForExercise } from '../helpers/progress';
 
 async function expectNoPageOverflow(page: Page): Promise<void> {
   expect(
@@ -76,6 +76,14 @@ test('and-elimination proof controls work on a phone', async ({ page }) => {
 test('learn progress chrome stays inside a narrow phone', async ({ page }) => {
   await gotoFresh(page);
   await expect(page.locator('[data-testid="learn-progress"]')).toBeVisible();
+  await expectNoPageOverflow(page);
+});
+
+test('Logic and Theism route chrome fits a narrow phone', async ({ page }) => {
+  await gotoWithProgress(page, emptyProgress());
+  await page.locator('[data-action="set-route"][data-route-id="logic-and-theism-reading"]').click();
+  await expect(page.locator('[data-testid="route-picker"]')).toBeVisible();
+  await expect(page.locator('[data-testid="planner-banner"]')).toBeVisible();
   await expectNoPageOverflow(page);
 });
 
