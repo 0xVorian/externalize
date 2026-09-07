@@ -9,9 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Session-first default: opening the app offers one bounded round with visible step count and approximate time, then Start / Continue / Resume. Active chrome is Exit plus `n / m`. Finishing the envelope is a stopping point (`Done for now`, with `Do another short round` secondary)
+- Learning-aligned re-entry from existing learner state: resume an interrupted round, a due quick review, continue the active route, see what stuck after stale evidence, or you're good for now with the next useful review when SRS can name it
+- Local session telemetry in a separate `localStorage` key (`externalize-session-events-v1`): offered kind, started/completed/interrupted, step count, coarse duration, timestamp. It is not mastery evidence and is not part of progress export
+- Sobel Chapter II opening rewritten around an ordinary empty-class case before naming vacuous truth, `∀`, or `∃`. Unit 0 still names sentence letters after the schematic idea is in view
 - Adaptive curriculum Phase A: the existing three-unit logic course now runs as the explicit `logic-foundations` route, with canonical concept × capability evidence on graded exercises, per-route progress, and a conservative v6 → v7 progress migration that preserves skills, SRS, resume, and existing learner evidence
 - Adaptive curriculum Phase B: a Learn route for *Logic and Theism* Chapter II §§2.6–2.8 (pp. 35–40) over the same portable concept state, using a `classify-choice` interaction, source anchors without reproducing book text, Reading vs Mastery depth, and a browser walkthrough through terminal completion
 - Adaptive curriculum Phase C: a deterministic skip / retrieve / teach planner that injects the smallest prerequisite detour from `conceptEvidence`, so already-demonstrated conditionals skip the Sobel bridge while unseen quantifiers still get a short teach sequence
+
+### Changed
+
+- The default learner journey is the session offer rather than a four-way Learn / Explore / Practice / Progress choice. Those modes remain reachable under More, outside an active round
+- Planner diagnostics (`Avant de poursuivre`, missing-prerequisite / short-bridge copy) no longer appear as learner-facing UI. The planner still chooses skip / retrieve / teach internally
+- Source-route and Learn chrome (route, depth, locator, unit picker) stay on the browse surfaces and are hidden during an active bounded session
+- Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion, and without fabricating `lastSeenAt`
+- Learn shows a route picker between Logic foundations and Logic and Theism; switching routes does not create duplicate concept IDs. Source exercises enter the Practice pool only after a checked pass
+- `practice:classify-choice` remains SRS/telemetry for the Sobel classification UI and is deliberately kept off the Progress interaction-family capability list; portable mastery stays in concept × capability evidence
 
 ### Fixed
 
@@ -24,12 +37,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The prerequisite planner no longer treats a missing bridge as skip; unmet requirements without authored material are an explicit `unsupported` outcome
 - v6→v7 backfilled concept evidence with unknown recency prompts retrieve rather than counting as definitely fresh
 - French source copy uses « cas de vérité par vacuité » rather than the English loan « vacuous »
-
-### Changed
-
-- Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion, and without fabricating `lastSeenAt`
-- Learn shows a route picker between Logic foundations and Logic and Theism; switching routes does not create duplicate concept IDs. Source exercises enter the Practice pool only after a checked pass
-- `practice:classify-choice` remains SRS/telemetry for the Sobel classification UI and is deliberately kept off the Progress interaction-family capability list; portable mastery stays in concept × capability evidence
 
 ## [0.4.0] - 2026-09-07
 

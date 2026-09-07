@@ -32,6 +32,11 @@ src/app/
   routes.ts            — route loader and selectors
   planner.ts           — skip / retrieve / teach / unsupported prerequisite policy
   source-route.ts      — Sobel route sequencing, completion, and revisit
+  session-types.ts     — SessionPlan / OpeningOffer contracts
+  session-plan.ts      — deterministic 5–7 step envelope over route/SRS items
+  session-persistence.ts — interrupted-round resume (separate from progress v7)
+  session-telemetry.ts — local UX-D events, not mastery
+  session-opening-render.ts / session-chrome-render.ts / session-complete-render.ts
   presentation.test.ts — presentation inventory (must stay in sync)
   lesson-render.ts     — card, watch table, guided live row
   classify-choice-render.ts — tap-to-classify source items
@@ -48,6 +53,7 @@ src/app/
 
 src/i18n/
   lessons.ts           — lesson copy, learn UI, reference panel
+  session.ts            — session opening / chrome / completion copy
   source.ts            — Logic and Theism lesson/exercise copy (EN + FR)
   messages.ts          — exercise prompts, feedback, practice UI
   locale.ts            — preference load/save
@@ -222,6 +228,8 @@ One opened exercise session is one attempt. Wrong checks keep that attempt activ
 Graded exercises declare what a successful attempt should strengthen in `content/exercise-evidence.json`. Interaction families (`evaluate-formula`, translation, etc.) remain `SkillId`s; portable learner state uses concept × capability pairs (`recognize`, `apply`, `debug`, `transfer`). Source-route items tag the same canonical concepts (including extras such as `existential-import`); they must not invent source-specific duplicates.
 
 The `logic-and-theism-reading` route’s skip / retrieve / teach detours are produced by `src/app/planner.ts` from `conceptEvidence`, then sequenced by `src/app/source-route.ts`. An unmet requirement with no authored bridge is `unsupported`, not skip. Evidence with attempts but missing/invalid `lastSeenAt` (including v6→v7 backfill) is retrieved rather than treated as fresh. Completing the final planned Reading item persists `routes[id].completedAt` and a terminal Done / return-to-book action; revisiting does not restart at item 1. Reading depth omits the Mastery empty-domain item; Mastery includes it without splitting concept identity. `practice:classify-choice` is SRS/telemetry only — it is not on the Progress capability list (`TRACKED_SKILL_IDS`); portable source mastery lives in concept × capability evidence.
+
+Default initiation is a bounded session (`session-plan.ts`) over those same concrete items. Session completion writes no `conceptEvidence` or SRS. Planner categories are not learner-facing copy; a source-route detour is offered as a short preparation round. Interrupted sessions persist under `externalize-active-session-v1`, separate from progress v7.
 
 ## Feedback tag taxonomy
 

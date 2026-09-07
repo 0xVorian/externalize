@@ -1,6 +1,6 @@
 # Session-first, low-intimidation UX
 
-**Status:** Authorized product/UX direction for the next Externalize implementation pass.  
+**Status:** Implemented on `feat/session-first-ux`; awaiting independent review.  
 **Created:** 2026-09-07  
 **Scope:** reduce initiation cost, intimidation, and re-entry friction without weakening the logic, learner model, SRS, or adaptive-curriculum semantics.
 
@@ -345,7 +345,7 @@ Required:
 - existing Learn / Explore / Practice / Progress still reachable outside the active session;
 - no mastery/SRS change from session completion itself.
 
-**Gate:** a normal learner can open Externalize and begin one useful bounded round with one obvious tap, knowing the approximate effort before starting.
+**Gate:** a normal learner can open Externalize and begin one useful bounded round with one obvious tap, knowing the approximate effort before starting. **Implemented** (`session-plan.ts`, opening/chrome/complete renderers, `main.ts` orchestration, persistence for interrupted resume).
 
 ## Phase UX-B — low-intimidation beginner surface
 
@@ -361,7 +361,7 @@ Required:
 - independently authored EN/FR copy;
 - preserve actual formal terms and notation, introduced progressively rather than deleted.
 
-**Gate:** the opening and Sobel preparation flow no longer requires the learner to understand route/planner vocabulary or multiple new technical terms before doing the first useful reasoning step.
+**Gate:** the opening and Sobel preparation flow no longer requires the learner to understand route/planner vocabulary or multiple new technical terms before doing the first useful reasoning step. **Implemented** (planner copy removed from `learnUi`; Sobel empty-class opening; session chrome hides route/depth; Unit 0 still introduces “sentence letter” after the schematic idea).
 
 ## Phase UX-C — learning-aligned re-entry
 
@@ -374,7 +374,7 @@ Required:
 - next-useful-review indication after a completed round when derivable from existing SRS state;
 - no notifications, conventional streak, XP, or backend required.
 
-**Gate:** returning after a gap produces one obvious, bounded, pedagogically justified next action.
+**Gate:** returning after a gap produces one obvious, bounded, pedagogically justified next action. **Implemented** (`offerOpening` derives resume / quick-review / continue / lapse-recovery / idle from existing SRS and route state).
 
 ## Phase UX-D — validation instrumentation
 
@@ -391,7 +391,7 @@ Local-only, minimal session telemetry may record:
 
 This telemetry is **not mastery evidence** and should remain clearly separate from concept/SRS state.
 
-**Gate:** enough local evidence exists to judge whether the bounded-session redesign lowers initiation friction without polluting the learner model.
+**Gate:** enough local evidence exists to judge whether the bounded-session redesign lowers initiation friction without polluting the learner model. **Implemented** as a small separate `localStorage` log (`session-telemetry.ts`, key `externalize-session-events-v1`). Not part of progress v7 export/import.
 
 ---
 
