@@ -12,7 +12,8 @@ import {
 export type PlannedIntervention =
   | { kind: 'skip'; requirement: Requirement }
   | { kind: 'retrieve'; requirement: Requirement; itemId: string }
-  | { kind: 'teach'; requirement: Requirement; itemIds: string[] };
+  | { kind: 'teach'; requirement: Requirement; itemIds: string[] }
+  | { kind: 'unsupported'; requirement: Requirement; reason: 'missing-bridge' };
 
 export type PrerequisiteBridge = {
   retrieve: string;
@@ -46,18 +47,36 @@ export function isEvidenceConsistent(stat?: ConceptCapabilityStat): boolean {
   );
 }
 
+/** True when graded attempts exist but lastSeenAt is missing or unparseable. */
+export function hasUnknownRecency(stat?: ConceptCapabilityStat): boolean {
+  if (!stat || stat.attempts <= 0) {
+    return false;
+  }
+  if (!stat.lastSeenAt) {
+    return true;
+  }
+  return Number.isNaN(Date.parse(stat.lastSeenAt));
+}
+
 export function isEvidenceStale(
   stat?: ConceptCapabilityStat,
   now = Date.now(),
 ): boolean {
-  if (!stat?.lastSeenAt) {
+  if (!stat || stat.attempts <= 0) {
     return false;
   }
-  const seen = Date.parse(stat.lastSeenAt);
-  if (Number.isNaN(seen)) {
-    return false;
+  if (hasUnknownRecency(stat)) {
+    return true;
   }
+  const seen = Date.parse(stat.lastSeenAt!);
   return now - seen > STALE_AFTER_MS;
+}
+
+export function missingPrerequisiteBridges(requirements: Requirement[]): Requirement[] {
+  return requirements.filter((requirement) => {
+    const capability = requirement.capability ?? 'apply';
+    return !PREREQUISITE_BRIDGES[evidenceKey(requirement.concept, capability)];
+  });
 }
 
 export function evidenceForRequirement(
@@ -90,7 +109,7 @@ export function planRequirement(
   }
 
   if (!bridge) {
-    return { kind: 'skip', requirement };
+    return { kind: 'unsupported', requirement, reason: 'missing-bridge' };
   }
 
   if (stat.attempts > 0) {

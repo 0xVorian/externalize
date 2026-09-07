@@ -10,6 +10,7 @@ import {
   recordCheckedPracticeState,
 } from './storage';
 import { recordAttemptCheck } from './practice-attempt';
+import { planRequirement } from './planner';
 import { LEVEL_0_LESSONS } from './lessons';
 import { LOGIC_FOUNDATIONS_ROUTE_ID } from './routes';
 import { showHint, createState } from './state';
@@ -129,6 +130,46 @@ describe('v6 → v7 migration', () => {
       transferPasses: 0,
       recentErrors: ['incorrect-evaluation'],
     });
+    expect(progress.conceptEvidence[key]?.lastSeenAt).toBeUndefined();
+  });
+
+  it('does not treat consistent migrated evidence of unknown age as skip-fresh', () => {
+    const { progress } = importProgress(
+      JSON.stringify({
+        version: 6,
+        lessonsCompleted: [...LEVEL_0_IDS],
+        level0Complete: true,
+        level1Complete: false,
+        level2Complete: false,
+        queue: [],
+        attempted: ['eval-004'],
+        passed: ['eval-004'],
+        practiceDrafts: {},
+        resume: { mode: 'practice', exerciseId: 'eval-004', updatedAt: new Date().toISOString() },
+        skills: {},
+        exerciseStats: {
+          'eval-004': {
+            attempts: 4,
+            successes: 4,
+            repairedPasses: 0,
+          },
+        },
+        errorCounts: {},
+        lastVisitedAt: new Date().toISOString(),
+        onboardingComplete: true,
+      }),
+    );
+    const key = evidenceKey('conditional', 'apply');
+    expect(progress.conceptEvidence[key]).toEqual({
+      attempts: 4,
+      cleanPasses: 4,
+      transferPasses: 0,
+      recentErrors: [],
+    });
+    expect(progress.conceptEvidence[key]?.lastSeenAt).toBeUndefined();
+    expect(
+      planRequirement(progress.conceptEvidence, { concept: 'conditional', capability: 'apply' }).kind,
+    ).toBe('retrieve');
   });
 
   it('does not invent concept evidence from lesson completion in a v6 export', () => {
