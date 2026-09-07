@@ -12,6 +12,12 @@ export type SkillId =
   | 'practice:translate-prose-to-formula'
   | 'practice:proof-fill-step';
 
+/**
+ * Interaction families shown on the Progress capability surface.
+ * `practice:classify-choice` is omitted on purpose: it is SRS/telemetry for the
+ * Sobel classification UI, while durable source-route mastery lives in portable
+ * concept × capability evidence (`existential-import`, quantifiers, etc.).
+ */
 export const TRACKED_SKILL_IDS: readonly SkillId[] = [
   'practice:identify-main-connective',
   'practice:evaluate-formula',
@@ -131,8 +137,9 @@ export function buildProgressSummary(input: {
   const struggles: ProgressSummary['struggles'] = [];
   const comfortable: ProgressSummary['comfortable'] = [];
 
-  for (const [id, stat] of Object.entries(input.skills)) {
-    if (stat.attempts < 2) {
+  for (const id of TRACKED_SKILL_IDS) {
+    const stat = input.skills[id];
+    if (!stat || stat.attempts < 2) {
       continue;
     }
     const rate = successRate(stat);
