@@ -217,6 +217,30 @@
     {
       "id": "level2-08-demorgan-guided",
       "concept": "demorgan"
+    },
+    {
+      "id": "level2-09-de-morgan-guided",
+      "concept": "demorgan"
+    },
+    {
+      "id": "lat-ii-26-context",
+      "concept": "existential-import"
+    },
+    {
+      "id": "lat-conditional-bridge",
+      "concept": "conditional"
+    },
+    {
+      "id": "lat-quantifier-universal",
+      "concept": "universal-quantifier"
+    },
+    {
+      "id": "lat-quantifier-existential",
+      "concept": "existential-quantifier"
+    },
+    {
+      "id": "lat-ii-26-return",
+      "concept": "existential-import"
     }
   ],
   "exercises": [
@@ -671,6 +695,56 @@
       "requiresLessons": [
         "level0-05-guided"
       ]
+    },
+    {
+      "id": "lat-retrieve-conditional",
+      "concept": "conditional",
+      "requiresLessons": ["lat-conditional-bridge"]
+    },
+    {
+      "id": "lat-check-universal",
+      "concept": "universal-quantifier",
+      "requiresLessons": ["lat-quantifier-universal"]
+    },
+    {
+      "id": "lat-check-existential",
+      "concept": "existential-quantifier",
+      "requiresLessons": ["lat-quantifier-existential"]
+    },
+    {
+      "id": "lat-classify-triangle",
+      "concept": "existential-import",
+      "requiresLessons": ["lat-ii-26-context"]
+    },
+    {
+      "id": "lat-classify-visitor",
+      "concept": "existential-import",
+      "requiresLessons": ["lat-ii-26-context"]
+    },
+    {
+      "id": "lat-formalize-readings",
+      "concept": "existential-import",
+      "requiresLessons": ["lat-ii-26-context"]
+    },
+    {
+      "id": "lat-predict-descartes",
+      "concept": "existential-import",
+      "requiresLessons": ["lat-ii-26-context"]
+    },
+    {
+      "id": "lat-interrogate-premises",
+      "concept": "existential-import",
+      "requiresLessons": ["lat-ii-26-context"]
+    },
+    {
+      "id": "lat-transfer-kind",
+      "concept": "existential-import",
+      "requiresLessons": ["lat-ii-26-context"]
+    },
+    {
+      "id": "lat-mastery-empty-domain",
+      "concept": "existential-import",
+      "requiresLessons": ["lat-ii-26-context"]
     }
   ]
 }

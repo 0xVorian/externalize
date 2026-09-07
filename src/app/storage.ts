@@ -46,6 +46,7 @@ import {
   setRouteCurrentItem,
 } from './routes';
 import { backfillConceptEvidence, evidenceForExercise, recordConceptEvidence } from './evidence';
+import { isSourceExerciseId } from './source-route';
 
 export type { SrsEntry };
 
@@ -476,7 +477,13 @@ function progressiveUnlock(order: readonly string[], passed: string[]): string[]
 }
 
 export function getUnlockedExerciseIds(store: ProgressStore): string[] {
-  return unlockedLogicFoundationsExercises(store);
+  const foundations = unlockedLogicFoundationsExercises(store);
+  const sourcePassed = store.passed.filter((id) => isSourceExerciseId(id));
+  if (sourcePassed.length === 0) {
+    return foundations;
+  }
+  const seen = new Set(foundations);
+  return [...foundations, ...sourcePassed.filter((id) => !seen.has(id))];
 }
 
 function unlockedLogicFoundationsExercises(store: ProgressStore): string[] {

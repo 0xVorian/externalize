@@ -1,0 +1,31 @@
+{
+  "id": "logic-and-theism",
+  "title": {
+    "en": "Logic and Theism",
+    "fr": "Logic and Theism"
+  },
+  "citation": "Jordan Howard Sobel, Logic and Theism: Arguments For and Against Beliefs in God (Cambridge University Press, 2004)",
+  "routes": ["logic-and-theism-reading"],
+  "anchors": [
+    {
+      "id": "sobel-ii-26-28",
+      "locator": "II.2.6–2.8, pp. 35–40",
+      "requires": [
+        { "concept": "conditional", "capability": "apply" },
+        { "concept": "universal-quantifier", "capability": "recognize" },
+        { "concept": "existential-quantifier", "capability": "recognize" }
+      ],
+      "items": [
+        "lat-ii-26-context",
+        "lat-classify-triangle",
+        "lat-classify-visitor",
+        "lat-formalize-readings",
+        "lat-predict-descartes",
+        "lat-interrogate-premises",
+        "lat-transfer-kind",
+        "lat-ii-26-return"
+      ],
+      "modes": ["prerequisite", "derive", "predict", "interrogate", "formalize", "transfer"]
+    }
+  ]
+}

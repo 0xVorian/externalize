@@ -69,6 +69,25 @@
       { "concept": "disjunction", "capability": "apply", "role": "supporting" }
     ],
     "nd-001": [{ "concept": "conditional", "capability": "apply", "role": "primary" }],
-    "nd-002": [{ "concept": "conjunction", "capability": "apply", "role": "primary" }]
+    "nd-002": [{ "concept": "conjunction", "capability": "apply", "role": "primary" }],
+    "lat-retrieve-conditional": [{ "concept": "conditional", "capability": "apply", "role": "primary" }],
+    "lat-check-universal": [{ "concept": "universal-quantifier", "capability": "recognize", "role": "primary" }],
+    "lat-check-existential": [{ "concept": "existential-quantifier", "capability": "recognize", "role": "primary" }],
+    "lat-classify-triangle": [
+      { "concept": "universal-quantifier", "capability": "recognize", "role": "primary" },
+      { "concept": "existential-import", "capability": "recognize", "role": "supporting" }
+    ],
+    "lat-classify-visitor": [
+      { "concept": "existential-quantifier", "capability": "recognize", "role": "primary" },
+      { "concept": "existential-import", "capability": "recognize", "role": "supporting" }
+    ],
+    "lat-formalize-readings": [
+      { "concept": "universal-quantifier", "capability": "apply", "role": "primary" },
+      { "concept": "existential-quantifier", "capability": "apply", "role": "supporting" }
+    ],
+    "lat-predict-descartes": [{ "concept": "existential-import", "capability": "apply", "role": "primary" }],
+    "lat-interrogate-premises": [{ "concept": "existential-import", "capability": "debug", "role": "primary" }],
+    "lat-transfer-kind": [{ "concept": "existential-import", "capability": "transfer", "role": "primary" }],
+    "lat-mastery-empty-domain": [{ "concept": "existential-import", "capability": "apply", "role": "primary" }]
   }
 }

@@ -1,14 +1,20 @@
+import extraConcepts from '../../content/concepts-extra.json';
 import { PREREQUISITES_GRAPH } from './prerequisites';
 import type { ConceptDefinition, ConceptId } from './curriculum';
 
 export type { ConceptDefinition, ConceptId };
 
+const EXTRA_CONCEPTS = extraConcepts.concepts as ConceptDefinition[];
+
 export function canonicalConcepts(): ConceptDefinition[] {
-  return PREREQUISITES_GRAPH.concepts.map((concept) => ({
+  const fromGraph = PREREQUISITES_GRAPH.concepts.map((concept) => ({
     id: concept.id,
     requires: concept.requires,
     label: concept.label,
   }));
+  const seen = new Set(fromGraph.map((concept) => concept.id));
+  const extras = EXTRA_CONCEPTS.filter((concept) => !seen.has(concept.id));
+  return [...fromGraph, ...extras];
 }
 
 export function getConcept(id: ConceptId): ConceptDefinition | undefined {
@@ -16,5 +22,5 @@ export function getConcept(id: ConceptId): ConceptDefinition | undefined {
 }
 
 export function isCanonicalConcept(id: string): boolean {
-  return PREREQUISITES_GRAPH.concepts.some((concept) => concept.id === id);
+  return canonicalConcepts().some((concept) => concept.id === id);
 }

@@ -1,6 +1,6 @@
 # Adaptive curriculum implementation assessment
 
-**Status:** Phase A implemented in the runtime; Phases B–C remain the authorized next gates  
+**Status:** Phases A–C implemented in the runtime for the Chapter II pilot; stop before Phase D (Chapter III–XIII renderers, PDF, generic generator)  
 **Created:** 2026-09-07  
 **Updated:** 2026-09-07  
 **Scope:** turn the source-driven curriculum idea into a small, testable extension of the existing application without rewriting Externalize
@@ -24,6 +24,8 @@ Do **not** build a generic AI curriculum generator, PDF reader, universal activi
 ---
 
 ## Observed current state
+
+The notes below described the runtime **before** Phases A–C. They remain as the rationale for the refactor. After the pilot, the logic course runs as `logic-foundations`, progress is v7, the Chapter II Sobel slice is `logic-and-theism-reading`, and a skip/retrieve/teach planner injects prerequisite items from portable `conceptEvidence`.
 
 ### What is already reusable
 
@@ -290,7 +292,13 @@ Sobel II.2.6–2.8
     -> return to book
 ```
 
-**Gate:** using this route gets the learner back into Sobel faster and with better understanding than manually switching between the book and the canonical logic track.
+**Gate:** using this route gets the learner back into Sobel faster and with better understanding than manually switching between the book and the canonical logic track. **Met in code** for the authorized slice: `content/routes/logic-and-theism-reading.json` plus `content/sources/logic-and-theism.json` (anchors and paraphrases only), a `classify-choice` interaction, portable `existential-import` evidence, Reading vs Mastery depth, and tests in `src/app/source-route.test.ts`. Independent full-suite verification belongs with the assignment close-out.
+
+Implemented items (not a full predicate curriculum):
+
+- extra canonical concepts `universal-quantifier`, `existential-quantifier`, `existential-import` in `content/concepts-extra.json` (kept off the Progress concept-map graph);
+- source lessons and `lat-*` exercises as a Learn route over the same v7 learner model;
+- source exercises enter the global Practice pool only after a checked pass.
 
 ## Phase C — deterministic just-in-time planner
 
@@ -313,6 +321,8 @@ type PlannedIntervention =
 ```
 
 Avoid opaque recommendations that cannot be inspected.
+
+**Gate:** planner decisions are explicit and testable. **Met in code** (`src/app/planner.ts`): `skip` when evidence is consistent and not stale; `retrieve` when some attempts exist but are weak/stale; `teach` when unseen. Bridges are listed in `PREREQUISITE_BRIDGES`. The Learn UI shows the non-skip interventions. Tests cover skip/retrieve/teach and portable-mastery suppression of the conditional bridge.
 
 ## Phase D — expand only when the representation changes
 
@@ -410,6 +420,6 @@ The pilot is specifically intended to answer these questions with usage evidence
 
 ## Recommendation
 
-Proceed with **Phase A + the narrow Chapter II vertical slice**, but stop there before implementing Chapter III–X interactions.
+Phases A–C of the Chapter II pilot are implemented. Stop there before Chapter III–XIII interaction families, a PDF reader, a generic curriculum generator, a server/backend, cloud accounts, a universal reasoning engine, or merging lessons and exercises into a generic `ActivityDefinition`.
 
 The conceptual direction has enough merit to justify refactoring curriculum orchestration. It does **not** yet justify turning Externalize into a general educational platform. The next proof should be brutally concrete: can the same learner state and the same concept graph move smoothly between the existing logic course and Sobel, with less redundant work and better comprehension?

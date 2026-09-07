@@ -8,6 +8,7 @@ import { cellSubmissionCorrect, tautologySubmissionCorrect } from './state';
 import { renderAtomPanel } from './atom-toggles-render';
 import { renderTranslationExerciseBody, renderTranslationActions } from './translation/translation-render';
 import { renderProofExerciseBody, renderProofActions } from './proof/proof-render';
+import { renderClassifyChoiceActions, renderClassifyChoiceBody } from './classify-choice-render';
 import { treeFocusNodeId } from './tree-keyboard';
 import { skillForExercise } from './progress-tracker';
 import {
@@ -185,6 +186,7 @@ function renderExerciseBody(state: AppState): string {
     return renderFillTruthTableBody(state);
   }
   if (state.exercise.type === 'classify-tautology') return renderTautologyBody(state);
+  if (state.exercise.type === 'classify-choice') return renderClassifyChoiceBody(state);
   if (state.exercise.type === 'proof-fill-step') {
     return renderProofExerciseBody(state);
   }
@@ -320,6 +322,7 @@ function renderExerciseActions(state: AppState, hideContinue: boolean): string {
           ${state.exercise.type === 'find-counterexample' ? renderCounterexampleActions(state, hideContinue) : ''}
           ${state.exercise.type === 'translate-en-to-formula' ? renderTranslationActions(state, hideContinue) : ''}
           ${state.exercise.type === 'proof-fill-step' ? renderProofActions(state, hideContinue) : ''}
+          ${state.exercise.type === 'classify-choice' ? renderClassifyChoiceActions(state, hideContinue) : ''}
         </div>
   `;
 }
@@ -347,7 +350,7 @@ export function renderApp(
           : '';
 
   const formulaLine =
-    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology' || state.exercise.type === 'proof-fill-step'
+    state.exercise.type === 'translate-en-to-formula' || state.exercise.type === 'fill-truth-table-cell' || state.exercise.type === 'classify-tautology' || state.exercise.type === 'classify-choice' || state.exercise.type === 'proof-fill-step'
       ? ''
       : `<p class="formula-display" aria-label="${copy.formulaDisplayAria}">${state.exercise.formula}</p>`;
 

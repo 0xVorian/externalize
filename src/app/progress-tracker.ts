@@ -8,6 +8,7 @@ export type SkillId =
   | 'practice:fill-truth-table-cell'
   | 'practice:find-counterexample'
   | 'practice:classify-tautology'
+  | 'practice:classify-choice'
   | 'practice:translate-prose-to-formula'
   | 'practice:proof-fill-step';
 
@@ -30,6 +31,7 @@ export function skillForExercise(exercise: ExerciseDefinition): SkillId {
   if (exercise.type === 'fill-truth-table-cell') return 'practice:fill-truth-table-cell';
   if (exercise.type === 'find-counterexample') return 'practice:find-counterexample';
   if (exercise.type === 'classify-tautology') return 'practice:classify-tautology';
+  if (exercise.type === 'classify-choice') return 'practice:classify-choice';
   if (exercise.type === 'translate-en-to-formula') return 'practice:translate-prose-to-formula';
   if (exercise.type === 'proof-fill-step') return 'practice:proof-fill-step';
   return 'practice:identify-main-connective';

@@ -1,0 +1,28 @@
+{
+  "concepts": [
+    {
+      "id": "universal-quantifier",
+      "label": {
+        "en": "Universal quantifier (∀)",
+        "fr": "Quantificateur universel (∀)"
+      },
+      "requires": ["conditional", "scope-and-parens"]
+    },
+    {
+      "id": "existential-quantifier",
+      "label": {
+        "en": "Existential quantifier (∃)",
+        "fr": "Quantificateur existentiel (∃)"
+      },
+      "requires": ["conjunction", "scope-and-parens"]
+    },
+    {
+      "id": "existential-import",
+      "label": {
+        "en": "Existential import",
+        "fr": "Import existentiel"
+      },
+      "requires": ["universal-quantifier", "existential-quantifier", "conditional"]
+    }
+  ]
+}

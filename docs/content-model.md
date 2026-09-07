@@ -16,18 +16,25 @@ Future direction: YAML/JSON authoring under `content/` may replace hand-edited T
 ```
 content/
   prerequisites.json        — concept graph (lessons → exercises prerequisites)
+  concepts-extra.json       — additional canonical concepts used by source routes (not on the Progress map)
   exercise-evidence.json    — explicit concept × capability tags on graded exercises
   routes/logic-foundations.json — canonical Learn/Practice sequence
+  routes/logic-and-theism-reading.json — Chapter II §§2.6–2.8 source route
+  sources/logic-and-theism.json — source pack (anchors, citation; no book text)
 
 src/app/
   lessons.ts           — Unit 0/1/2 lessons and sequential practice order
+  source-lessons.ts    — source-route card lessons (not in ALL_LEARN_LESSONS)
   exercises.ts         — EXERCISE_DEFINITIONS
   curriculum.ts        — route, capability, and evidence types
-  concepts.ts          — canonical concept lookup
+  concepts.ts          — canonical concept lookup (prerequisites + extras)
   evidence.ts          — load evidence tags; record/backfill conceptEvidence
   routes.ts            — route loader and selectors
+  planner.ts           — skip / retrieve / teach prerequisite policy
+  source-route.ts      — Sobel route sequencing and completion
   presentation.test.ts — presentation inventory (must stay in sync)
   lesson-render.ts     — card, watch table, guided live row
+  classify-choice-render.ts — tap-to-classify source items
   render.ts            — practice tree + toggles
   truth-table-render.ts
   progress-render.ts   — progress tab + concept map
@@ -41,6 +48,7 @@ src/app/
 
 src/i18n/
   lessons.ts           — lesson copy, learn UI, reference panel
+  source.ts            — Logic and Theism lesson/exercise copy (EN + FR)
   messages.ts          — exercise prompts, feedback, practice UI
   locale.ts            — preference load/save
   *.test.ts            — parity checks for both locales
@@ -72,7 +80,7 @@ Copy shape in `src/i18n/lessons.ts`:
 | `watchSteps[]` with `{ assignment, explanation }` | `watch` | Truth-table walkthrough |
 | `guidedSteps[]` with `{ kind: 'hint' \| 'done', text }` | `guided` | Step-by-step learner try |
 
-Lessons live in `LEVEL_0_LESSONS`, `LEVEL_1_LESSONS`, and `LEVEL_2_LESSONS`. Combined navigation uses `ALL_LEARN_LESSONS`.
+Lessons live in `LEVEL_0_LESSONS`, `LEVEL_1_LESSONS`, and `LEVEL_2_LESSONS`. Combined navigation uses `ALL_LEARN_LESSONS`. Source-route cards live in `src/app/source-lessons.ts` and are **not** part of that sequence.
 
 ## Exercise schema
 
@@ -85,6 +93,7 @@ type ExerciseType =
   | 'fill-truth-table-cell'
   | 'find-counterexample'
   | 'classify-tautology'
+  | 'classify-choice'
   | 'translate-en-to-formula'
   | 'proof-fill-step';
 
@@ -95,6 +104,8 @@ type ExerciseDefinition = {
   initialAssignment?: Assignment;
   hiddenRowIndex?: number;
   targetValue?: boolean;
+  choiceIds?: string[];
+  correctChoiceId?: string;
 };
 ```
 
@@ -106,6 +117,7 @@ type ExerciseCopy = {
   assessmentPrompt?: string;   // neutral graded instruction (evaluate-formula uses this)
   hint?: string;               // optional support, not shown until requested or after error
   atoms?: Record<string, string>; // locale-authored translation glosses
+  choices?: Record<string, string>; // locale labels for classify-choice ids
   feedback?: FeedbackTemplate;   // overrides per-tag defaults
 };
 ```
@@ -121,6 +133,7 @@ type ExerciseCopy = {
 | `classify-tautology` | Classify from a complete truth table | Answer matches finite truth-table classification |
 | `translate-en-to-formula` | Build a formula with the tap palette | AST structure/equivalence and misconception classifier |
 | `proof-fill-step` | Select a rule and cite lines | Configured natural-deduction rule validates the step |
+| `classify-choice` | Select one labelled reading, then check | Selected id matches `correctChoiceId` (not formula string equality) |
 
 ### Truth-table exercises
 
@@ -146,7 +159,7 @@ Explore mode (`AppMode: explore`) lets learners manipulate assignments with live
 
 ### Gated unlock
 
-`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines the order within each unit. Exposure alone does not unlock the next exercise: the preceding exercise ID must be in the `passed` list. The `logic-foundations` route reproduces this order; route-aware unlock currently delegates to the same Unit 0 / clustered Unit 1 / Unit 2 policy.
+`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines the order within each unit. Exposure alone does not unlock the next exercise: the preceding exercise ID must be in the `passed` list. The `logic-foundations` route reproduces this order; route-aware unlock currently delegates to the same Unit 0 / clustered Unit 1 / Unit 2 policy. Source-route `lat-*` exercises are not in that unlock order; they enter the global Practice pool only after a checked pass.
 
 ## Presentation routing
 
@@ -201,12 +214,14 @@ One opened exercise session is one attempt. Wrong checks keep that attempt activ
 - Nested evaluate-formula exercises may store optional `exerciseStats[id].scaffoldLevel`. A clean pass increments it when the next level hides additional intermediate values. This is pedagogical support withdrawal, not a separate mastery score.
 - Capability states (Ready / Developing / Consistent) are **derived** from unlocks and `SkillStat` evidence. See [`progress-visibility.md`](progress-visibility.md).
 - The five-attempt practice session lives in app memory only. It must not be written into progress export/import.
-- v6 → v7 migration preserves skills, exerciseStats, passed, drafts, queue, and resume. It sets `activeRouteId` to `logic-foundations`, initializes that route from lesson/resume state, and backfills `conceptEvidence` only from `exerciseStats` plus explicit evidence tags. Lesson completion alone is not mastery evidence.
+- v6 → v7 migration preserves skills, exerciseStats, passed, drafts, queue, and resume. It sets `activeRouteId` to `logic-foundations`, initializes that route from lesson/resume state, and backfills `conceptEvidence` only from `exerciseStats` plus explicit evidence tags. Lesson completion alone is not mastery evidence. A v6 export does not invent `logic-and-theism-reading` route state.
 - v5 migration preserves old `completed` IDs only as `attempted` exposure. It resets contaminated practice statistics, errors, and SRS, and requires fresh correct evidence for `passed`.
 
 ## Evidence tags
 
-Graded exercises declare what a successful attempt should strengthen in `content/exercise-evidence.json`. Interaction families (`evaluate-formula`, translation, etc.) remain `SkillId`s; portable learner state uses concept × capability pairs (`recognize`, `apply`, `debug`, `transfer`).
+Graded exercises declare what a successful attempt should strengthen in `content/exercise-evidence.json`. Interaction families (`evaluate-formula`, translation, etc.) remain `SkillId`s; portable learner state uses concept × capability pairs (`recognize`, `apply`, `debug`, `transfer`). Source-route items tag the same canonical concepts (including extras such as `existential-import`); they must not invent source-specific duplicates.
+
+The `logic-and-theism-reading` route’s skip / retrieve / teach detours are produced by `src/app/planner.ts` from `conceptEvidence`, then sequenced by `src/app/source-route.ts`. Reading depth omits the Mastery empty-domain item; Mastery includes it without splitting concept identity.
 
 ## Feedback tag taxonomy
 

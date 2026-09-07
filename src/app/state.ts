@@ -24,7 +24,7 @@ import {
   findNodeById,
 } from '../../engine';
 import type { Locale } from '../i18n';
-import { getAssessmentPrompt, getExerciseHint, getCellFeedback, getCounterFeedback, getTautologyFeedback, getFeedbackTemplates, formatEvaluationFeedback, ui } from '../i18n';
+import { getAssessmentPrompt, getExerciseHint, getExerciseCopy, getCellFeedback, getCounterFeedback, getTautologyFeedback, getFeedbackTemplates, formatEvaluationFeedback, ui } from '../i18n';
 import type { ExerciseDefinition } from './exercises';
 import { scaffoldNodeIdsForLevel } from './evaluation-scaffold';
 import { selectEvaluationAssignment } from './evaluation-cases';
@@ -61,6 +61,7 @@ export type AppState = {
   prompt: string;
   phase: AppPhase;
   selectedNodeId: string | null;
+  selectedChoiceId?: string | null;
   assignment: Assignment;
   tree: TreeNode;
   builder: BuilderReducerState;
@@ -159,6 +160,13 @@ function feedbackMessage(
   if (state.exercise.type === 'classify-tautology') {
     return getTautologyFeedback(state.locale, state.exercise.id, correct);
   }
+  if (state.exercise.type === 'classify-choice') {
+    const copy = getExerciseCopy(state.locale, state.exercise.id);
+    if (correct) {
+      return copy.feedback?.correct ?? getFeedbackTemplates(state.locale, state.exercise.id).correct ?? '';
+    }
+    return copy.choiceWrong ?? getFeedbackTemplates(state.locale, state.exercise.id).correct ?? '';
+  }
   if (state.exercise.type === 'find-counterexample') {
     return getCounterFeedback(state.locale, state.exercise.id, correct);
   }
@@ -241,6 +249,7 @@ function hydrateDraft(state: AppState, draft?: PracticeDraft): AppState {
     phase: draft.phase,
     prediction: draft.prediction ?? null,
     selectedNodeId: draft.selectedNodeId ?? null,
+    selectedChoiceId: draft.selectedChoiceId ?? state.selectedChoiceId ?? null,
     submittedCell: draft.submittedCell ?? null,
     proofRule: draft.proofRule ?? null,
     proofCites: draft.proofCites ?? [],
@@ -296,6 +305,36 @@ export function createState(
       selectedNodeId: null,
       assignment: {},
       tree: placeholderTree(),
+      builder: createBuilderReducerState(),
+      feedback: null,
+      message: null,
+      prediction: null,
+      submittedCell: null,
+      partialTable: null,
+      proofLines: [],
+      proofRule: null,
+      proofCites: [],
+      proofDerivedFormula: null,
+      hintVisible: false,
+      learnerValues: {},
+      scaffoldNodeIds: [],
+      scaffoldLevel: 0,
+      activeLearnerNodeId: null,
+    }, draft);
+  }
+
+  if (exercise.type === 'classify-choice') {
+    const prompt = getAssessmentPrompt(locale, exercise.id, exercise.type);
+    return hydrateDraft({
+      locale,
+      exercise,
+      attempt,
+      prompt,
+      phase: 'ready',
+      selectedNodeId: null,
+      selectedChoiceId: draft?.selectedChoiceId ?? null,
+      assignment: {},
+      tree: exercise.formula ? toVerticalTree(parse(exercise.formula)) : placeholderTree(),
       builder: createBuilderReducerState(),
       feedback: null,
       message: null,
@@ -628,6 +667,32 @@ export function checkEvaluation(state: AppState): AppState {
   return correct ? checked : { ...checked, hintVisible: Boolean(getExerciseHint(state.locale, state.exercise.id)) };
 }
 
+export function selectClassificationChoice(state: AppState, choiceId: string): AppState {
+  if (state.exercise.type !== 'classify-choice' || state.phase === 'answered') {
+    return state;
+  }
+  if (state.attempt.status === 'finalized') {
+    return state;
+  }
+  if (!state.exercise.choiceIds?.includes(choiceId)) {
+    return state;
+  }
+  return { ...state, selectedChoiceId: choiceId };
+}
+
+export function checkClassification(state: AppState): AppState {
+  if (
+    state.exercise.type !== 'classify-choice' ||
+    !canEditCheckedExercise(state) ||
+    !state.selectedChoiceId
+  ) {
+    return state;
+  }
+  const correct = state.selectedChoiceId === state.exercise.correctChoiceId;
+  const tag = correct ? 'correct' : 'incorrect-classification';
+  return withCheckedAnswer(state, correct, tag, feedbackMessage(state, tag, correct));
+}
+
 export function tryAgainPractice(state: AppState): AppState {
   if (
     state.phase !== 'answered' ||
@@ -647,6 +712,7 @@ export function tryAgainPractice(state: AppState): AppState {
         ? null
         : state.submittedCell,
     prediction: state.exercise.type === 'evaluate-formula' ? null : state.prediction,
+    selectedChoiceId: state.exercise.type === 'classify-choice' ? null : state.selectedChoiceId,
     proofDerivedFormula: null,
     hintVisible: false,
     feedback: state.feedback,
@@ -814,6 +880,9 @@ export function isExerciseComplete(state: AppState): boolean {
     return state.feedback?.correct === true;
   }
   if (state.exercise.type === 'classify-tautology') return tautologySubmissionCorrect(state) === true;
+  if (state.exercise.type === 'classify-choice') {
+    return state.feedback?.correct === true;
+  }
   if (state.exercise.type === 'proof-fill-step') {
     return state.feedback?.correct === true;
   }
@@ -826,6 +895,7 @@ export function practiceDraftSnapshot(state: AppState): PracticeDraft {
     phase: state.phase,
     prediction: state.prediction,
     selectedNodeId: state.selectedNodeId,
+    selectedChoiceId: state.selectedChoiceId,
     submittedCell: state.submittedCell,
     proofRule: state.proofRule,
     proofCites: state.proofCites,

@@ -1,4 +1,5 @@
 import type { Locale } from './locale';
+import { SOURCE_LESSONS } from './source';
 
 export type CardLessonCopy = {
   title: string;
@@ -65,6 +66,17 @@ export type LearnUiCopy = {
   openExplore: string;
   modeExploreAria: string;
   watchGridAria: (formula: string) => string;
+  routeLabel: string;
+  routeFoundations: string;
+  routeSobel: string;
+  sourceLocator: string;
+  readingDepth: string;
+  masteryDepth: string;
+  depthGroupAria: string;
+  beforeYouContinue: string;
+  plannerSkip: string;
+  plannerRetrieve: string;
+  plannerTeach: string;
 };
 
 const REFERENCE: Record<Locale, ReferenceEntry[]> = {
@@ -189,6 +201,17 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     openExplore: 'Explore formulas',
     modeExploreAria: 'Explore',
     watchGridAria: (formula) => `Truth grid for ${formula}`,
+    routeLabel: 'Learning route',
+    routeFoundations: 'Logic foundations',
+    routeSobel: 'Logic and Theism',
+    sourceLocator: 'Source',
+    readingDepth: 'Reading',
+    masteryDepth: 'Mastery',
+    depthGroupAria: 'Section depth',
+    beforeYouContinue: 'Before you continue',
+    plannerSkip: 'Already demonstrated — no detour.',
+    plannerRetrieve: 'A short check before the source example.',
+    plannerTeach: 'A brief bridge for a missing prerequisite.',
   },
   fr: {
     learn: 'Cours',
@@ -234,6 +257,17 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     openExplore: 'Explorer les formules',
     modeExploreAria: 'Explorer',
     watchGridAria: (formula) => `Grille de vérité de ${formula}`,
+    routeLabel: 'Parcours',
+    routeFoundations: 'Fondements de la logique',
+    routeSobel: 'Logic and Theism',
+    sourceLocator: 'Source',
+    readingDepth: 'Lecture',
+    masteryDepth: 'Maîtrise',
+    depthGroupAria: 'Profondeur de la section',
+    beforeYouContinue: 'Avant de poursuivre',
+    plannerSkip: 'Déjà établi — pas de détour.',
+    plannerRetrieve: 'Un contrôle bref avant l’exemple du texte.',
+    plannerTeach: 'Un pont court pour un prérequis manquant.',
   },
 };
 
@@ -889,7 +923,7 @@ export function learnUi(locale: Locale): LearnUiCopy {
 }
 
 export function getLessonCopy(locale: Locale, lessonId: string): LessonCopy {
-  const copy = LESSONS[locale][lessonId];
+  const copy = LESSONS[locale][lessonId] ?? SOURCE_LESSONS[locale][lessonId];
   if (!copy) {
     throw new Error(`Missing lesson copy for ${lessonId} (${locale})`);
   }

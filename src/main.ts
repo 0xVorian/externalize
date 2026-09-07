@@ -27,6 +27,21 @@ import {
   lessonUnit,
 } from './app/lessons';
 import {
+  LOGIC_AND_THEISM_READING_ROUTE_ID,
+  LOGIC_FOUNDATIONS_ROUTE_ID,
+} from './app/routes';
+import {
+  completeSourceItem,
+  currentSourceItemId,
+  plannedSourceItems,
+  routeDepth,
+  setActiveRoute,
+  setRouteDepth,
+  sourcePlan,
+  sourceItemKind,
+} from './app/source-route';
+import { renderSourceLearnView } from './app/source-learn-render';
+import {
   createState,
   selectNode,
   checkScope,
@@ -48,6 +63,8 @@ import {
   showHint,
   tryAgainPractice,
   practiceDraftSnapshot,
+  selectClassificationChoice,
+  checkClassification,
   type AppState,
 } from './app/state';
 import {
@@ -111,6 +128,7 @@ let mode: AppMode = resolveInitialMode(progress);
 
 let lessonState: LessonState = loadLessonFromProgress(progress);
 let practiceState: AppState | null = null;
+let sourcePracticeState: AppState | null = null;
 let exploreState: ExploreState = createExploreState(locale);
 let onboardingStep = 0;
 let importNotice: { kind: 'success' | 'error'; message: string } | null = null;
@@ -148,7 +166,19 @@ function resolveInitialMode(store: ProgressStore): AppMode {
   return 'learn';
 }
 
+function isSourceLearn(store: ProgressStore = progress): boolean {
+  return store.activeRouteId === LOGIC_AND_THEISM_READING_ROUTE_ID;
+}
+
 function loadLessonFromProgress(store: ProgressStore): LessonState {
+  if (isSourceLearn(store)) {
+    const itemId = currentSourceItemId(store);
+    const lesson = getLessonDefinition(itemId);
+    if (lesson) {
+      return createLessonState(locale, lesson);
+    }
+    return createLessonState(locale, getLessonDefinition('lat-ii-26-context')!);
+  }
   const lessonId = store.resume.lessonId ?? firstIncompleteLesson(store.lessonsCompleted).id;
   const lesson = getLessonDefinition(lessonId) ?? firstIncompleteLesson(store.lessonsCompleted);
   return createLessonState(locale, lesson, {
@@ -158,6 +188,23 @@ function loadLessonFromProgress(store: ProgressStore): LessonState {
     guidedAssignment: store.resume.guidedAssignment,
     guidedComplete: store.resume.guidedComplete,
   });
+}
+
+function loadSourcePracticeState(): AppState | null {
+  if (!isSourceLearn()) {
+    return null;
+  }
+  const itemId = currentSourceItemId(progress);
+  if (sourceItemKind(itemId) !== 'exercise') {
+    return null;
+  }
+  const exercise = getExerciseDefinition(itemId);
+  if (!exercise) {
+    return null;
+  }
+  const withAttempt = beginPracticeAttempt(progress, itemId);
+  persistProgress(withAttempt);
+  return createState(locale, exercise, withAttempt.practiceDraft);
 }
 
 function unitCompleteMessage(unit: 0 | 1 | 2): string {
@@ -288,11 +335,40 @@ function render(): void {
   }
 
   if (mode === 'learn') {
+    if (isSourceLearn()) {
+      const items = plannedSourceItems(progress);
+      const itemId = currentSourceItemId(progress);
+      if (sourceItemKind(itemId) === 'exercise') {
+        sourcePracticeState = sourcePracticeState?.exercise.id === itemId
+          ? sourcePracticeState
+          : loadSourcePracticeState();
+      } else {
+        sourcePracticeState = null;
+        if (lessonState.lesson.id !== itemId) {
+          lessonState = loadLessonFromProgress(progress);
+        }
+      }
+      const itemIndex = Math.max(1, items.indexOf(itemId) + 1);
+      root.innerHTML = renderSourceLearnView({
+        locale,
+        practiceUnlocked,
+        activeRouteId: progress.activeRouteId,
+        depth: routeDepth(progress),
+        plan: sourcePlan(progress),
+        itemIndex,
+        itemTotal: items.length,
+        lessonState: sourcePracticeState ? undefined : lessonState,
+        practiceState: sourcePracticeState ?? undefined,
+      });
+      practiceUi = disarmLiveAnnouncements(practiceUi);
+      return;
+    }
     root.innerHTML = renderLessonView(lessonState, {
       practiceUnlocked,
       level0Complete: progress.level0Complete,
       level1Complete: progress.level1Complete,
       learnPathComplete: isLearnPathComplete(progress.lessonsCompleted),
+      activeRouteId: progress.activeRouteId,
       learnProgress: deriveLearnProgress(lessonState.lesson.id, progress.lessonsCompleted),
       unitCompleteNotice: practiceUi.unitCompleteNotice,
       unitCompleteNoticeLive: practiceUi.unitCompleteNoticeLive,
@@ -316,6 +392,9 @@ function setLocale(nextLocale: Locale): void {
   exploreState = applyExploreLocale(exploreState, locale);
   if (practiceState) {
     practiceState = applyLocale(practiceState, locale);
+  }
+  if (sourcePracticeState) {
+    sourcePracticeState = applyLocale(sourcePracticeState, locale);
   }
   render();
 }
@@ -345,7 +424,10 @@ function setMode(nextMode: AppMode): void {
     persistProgress(updateResume(progress, { mode: 'explore' }));
   } else {
     lessonState = loadLessonFromProgress(progress);
-    persistLessonResume();
+    sourcePracticeState = loadSourcePracticeState();
+    if (!isSourceLearn()) {
+      persistLessonResume();
+    }
   }
   render();
 }
@@ -421,6 +503,13 @@ function completeCurrentLesson(): void {
 }
 
 function handleLessonNext(): void {
+  if (isSourceLearn()) {
+    persistProgress(completeSourceItem(progress, currentSourceItemId(progress)));
+    sourcePracticeState = null;
+    lessonState = loadLessonFromProgress(progress);
+    render();
+    return;
+  }
   if (lessonState.lesson.type === 'watch' && !lessonState.complete) {
     lessonState = advanceWatchStep(lessonState);
     persistLessonResume();
@@ -552,6 +641,70 @@ root.addEventListener('click', (event) => {
     if (unit !== null && mode === 'learn' && lessonUnit(lessonState.lesson.id) !== unit) {
       switchLearnUnit(unit);
     }
+    return;
+  }
+
+  if (action === 'set-route') {
+    const routeId = button.dataset.routeId;
+    if (!routeId || (routeId !== LOGIC_FOUNDATIONS_ROUTE_ID && routeId !== LOGIC_AND_THEISM_READING_ROUTE_ID)) {
+      return;
+    }
+    persistProgress(setActiveRoute(progress, routeId));
+    sourcePracticeState = null;
+    lessonState = loadLessonFromProgress(progress);
+    sourcePracticeState = loadSourcePracticeState();
+    mode = 'learn';
+    render();
+    return;
+  }
+
+  if (action === 'set-route-depth') {
+    const depth = button.dataset.depth;
+    if (depth !== 'reading' && depth !== 'mastery') {
+      return;
+    }
+    persistProgress(setRouteDepth(progress, depth));
+    sourcePracticeState = null;
+    lessonState = loadLessonFromProgress(progress);
+    render();
+    return;
+  }
+
+  if (action === 'select-choice') {
+    const choiceId = button.dataset.choiceId;
+    if (!choiceId) {
+      return;
+    }
+    if (isSourceLearn() && sourcePracticeState) {
+      sourcePracticeState = selectClassificationChoice(sourcePracticeState, choiceId);
+      persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(sourcePracticeState)));
+      render();
+      return;
+    }
+    updatePracticeState((state) => selectClassificationChoice(state, choiceId));
+    return;
+  }
+
+  if (action === 'check-classification') {
+    if (isSourceLearn() && sourcePracticeState) {
+      const next = checkClassification(sourcePracticeState);
+      sourcePracticeState = next;
+      persistProgress(recordCheckedPracticeState(progress, practiceDraftSnapshot(next)));
+      if (progress.practiceDraft) {
+        sourcePracticeState = { ...next, attempt: progress.practiceDraft.attempt };
+      }
+      render();
+      return;
+    }
+    checkPracticeState(checkClassification);
+    return;
+  }
+
+  if (action === 'source-next') {
+    persistProgress(completeSourceItem(progress, currentSourceItemId(progress)));
+    sourcePracticeState = null;
+    lessonState = loadLessonFromProgress(progress);
+    render();
     return;
   }
 

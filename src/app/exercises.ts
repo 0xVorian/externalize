@@ -6,6 +6,7 @@ export type ExerciseType =
   | 'fill-truth-table-cell'
   | 'find-counterexample'
   | 'classify-tautology'
+  | 'classify-choice'
   | 'translate-en-to-formula'
   | 'proof-fill-step';
 
@@ -16,6 +17,8 @@ export type ExerciseDefinition = {
   initialAssignment?: Assignment;
   hiddenRowIndex?: number;
   targetValue?: boolean;
+  choiceIds?: string[];
+  correctChoiceId?: string;
 };
 
 export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
@@ -79,6 +82,68 @@ export const EXERCISE_DEFINITIONS: ExerciseDefinition[] = [
   { id: 'translate-006', type: 'translate-en-to-formula' },
   { id: 'nd-001', type: 'proof-fill-step' },
   { id: 'nd-002', type: 'proof-fill-step' },
+  {
+    id: 'lat-retrieve-conditional',
+    type: 'classify-choice',
+    choiceIds: ['vacuous-true', 'existential'],
+    correctChoiceId: 'vacuous-true',
+  },
+  {
+    id: 'lat-check-universal',
+    type: 'classify-choice',
+    formula: '∀x (F(x) → G(x))',
+    choiceIds: ['universal', 'existential'],
+    correctChoiceId: 'universal',
+  },
+  {
+    id: 'lat-check-existential',
+    type: 'classify-choice',
+    formula: '∃x (F(x) ∧ G(x))',
+    choiceIds: ['universal', 'existential'],
+    correctChoiceId: 'existential',
+  },
+  {
+    id: 'lat-classify-triangle',
+    type: 'classify-choice',
+    choiceIds: ['universal', 'existential'],
+    correctChoiceId: 'universal',
+  },
+  {
+    id: 'lat-classify-visitor',
+    type: 'classify-choice',
+    choiceIds: ['universal', 'existential'],
+    correctChoiceId: 'existential',
+  },
+  {
+    id: 'lat-formalize-readings',
+    type: 'classify-choice',
+    choiceIds: ['universal-conditional', 'existential-conjunctive'],
+    correctChoiceId: 'universal-conditional',
+  },
+  {
+    id: 'lat-predict-descartes',
+    type: 'classify-choice',
+    choiceIds: ['universal', 'existential'],
+    correctChoiceId: 'existential',
+  },
+  {
+    id: 'lat-interrogate-premises',
+    type: 'classify-choice',
+    choiceIds: ['instance', 'universal-hypothetical'],
+    correctChoiceId: 'universal-hypothetical',
+  },
+  {
+    id: 'lat-transfer-kind',
+    type: 'classify-choice',
+    choiceIds: ['proves-instance', 'no-instance'],
+    correctChoiceId: 'no-instance',
+  },
+  {
+    id: 'lat-mastery-empty-domain',
+    type: 'classify-choice',
+    choiceIds: ['universal-can-hold', 'existential-holds'],
+    correctChoiceId: 'universal-can-hold',
+  },
 ];
 
 export function getExerciseDefinition(id: string): ExerciseDefinition | undefined {

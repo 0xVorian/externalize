@@ -10,10 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Adaptive curriculum Phase A: the existing three-unit logic course now runs as the explicit `logic-foundations` route, with canonical concept × capability evidence on graded exercises, per-route progress, and a conservative v6 → v7 progress migration that preserves skills, SRS, resume, and existing learner evidence
+- Adaptive curriculum Phase B: a Learn route for *Logic and Theism* Chapter II §§2.6–2.8 (pp. 35–40) over the same portable concept state, using a `classify-choice` interaction, source anchors without reproducing book text, and Reading vs Mastery depth
+- Adaptive curriculum Phase C: a deterministic skip / retrieve / teach planner that injects the smallest prerequisite detour from `conceptEvidence`, so already-demonstrated conditionals skip the Sobel bridge while unseen quantifiers still get a short teach sequence
 
 ### Changed
 
 - Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion
+- Learn shows a route picker between Logic foundations and Logic and Theism; switching routes does not create duplicate concept IDs. Source exercises enter the Practice pool only after a checked pass
 
 ## [0.4.0] - 2026-09-07
 

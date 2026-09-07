@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISE_DEFINITIONS } from './exercises';
 import { ALL_LEARN_LESSONS } from './lessons';
+import { SOURCE_LESSONS } from './source-lessons';
 import { usesLiveTruthRow, usesWatchGrid } from './truth-table-render';
 
 const PRESENTATION: Record<string, string> = {
@@ -93,11 +94,27 @@ const PRESENTATION: Record<string, string> = {
   'translate-006': 'translation-palette',
   'nd-001': 'proof-fill-step',
   'nd-002': 'proof-fill-step',
+  'lat-ii-26-context': 'card',
+  'lat-conditional-bridge': 'card',
+  'lat-quantifier-universal': 'card',
+  'lat-quantifier-existential': 'card',
+  'lat-ii-26-return': 'card',
+  'lat-retrieve-conditional': 'choice',
+  'lat-check-universal': 'choice',
+  'lat-check-existential': 'choice',
+  'lat-classify-triangle': 'choice',
+  'lat-classify-visitor': 'choice',
+  'lat-formalize-readings': 'choice',
+  'lat-predict-descartes': 'choice',
+  'lat-interrogate-premises': 'choice',
+  'lat-transfer-kind': 'choice',
+  'lat-mastery-empty-domain': 'choice',
 };
 
 describe('presentation inventory', () => {
   it('covers every lesson and exercise', () => {
     for (const lesson of ALL_LEARN_LESSONS) expect(PRESENTATION[lesson.id], lesson.id).toBeTruthy();
+    for (const lesson of SOURCE_LESSONS) expect(PRESENTATION[lesson.id], lesson.id).toBeTruthy();
     for (const exercise of EXERCISE_DEFINITIONS) expect(PRESENTATION[exercise.id], exercise.id).toBeTruthy();
   });
 

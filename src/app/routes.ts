@@ -1,4 +1,5 @@
 import logicFoundationsRoute from '../../content/routes/logic-foundations.json';
+import logicAndTheismReadingRoute from '../../content/routes/logic-and-theism-reading.json';
 import {
   ALL_LEARN_LESSONS,
   LEVEL_0_LESSONS,
@@ -16,11 +17,16 @@ import type {
   RouteProgress,
   RouteStep,
 } from './curriculum';
+export type { RouteDefinition, RouteProgress, RouteStep };
 import type { ResumePoint } from './progress-tracker';
 
 export const LOGIC_FOUNDATIONS_ROUTE_ID = 'logic-foundations';
+export const LOGIC_AND_THEISM_READING_ROUTE_ID = 'logic-and-theism-reading';
 
-const ROUTES: RouteDefinition[] = [logicFoundationsRoute as RouteDefinition];
+const ROUTES: RouteDefinition[] = [
+  logicFoundationsRoute as RouteDefinition,
+  logicAndTheismReadingRoute as RouteDefinition,
+];
 
 const ROUTES_BY_ID = new Map(ROUTES.map((route) => [route.id, route]));
 

@@ -3,6 +3,7 @@ import { lessonsForUnit, lessonUnit, ALL_LEARN_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
 import { renderShellHeader } from './shell-render';
+import { renderRoutePicker } from './route-picker-render';
 import { renderLiveTruthRow, renderTruthTable, renderWatchGrid, usesWatchGrid } from './truth-table-render';
 import { renderAtomPanel } from './atom-toggles-render';
 
@@ -15,7 +16,7 @@ function renderGuidedToggles(state: LessonState): string {
   });
 }
 
-function renderCardLesson(state: LessonState): string {
+export function renderCardLesson(state: LessonState): string {
   const copy = getLessonCopy(state.locale, state.lesson.id);
   const card = copy.card!;
   return `
@@ -137,6 +138,7 @@ export function renderLessonView(
     level0Complete: boolean;
     level1Complete: boolean;
     learnPathComplete: boolean;
+    activeRouteId?: string;
     learnProgress: {
       unit: 0 | 1 | 2;
       lessonPosition: number;
@@ -224,6 +226,7 @@ export function renderLessonView(
         </div>
       </section>
 
+      ${options.activeRouteId ? renderRoutePicker(state.locale, options.activeRouteId) : ''}
       ${renderUnitPicker(state, options.level0Complete, options.level1Complete)}
       ${unitCompleteCard}
       ${renderCompletionToast(state)}

@@ -6,7 +6,8 @@ export type PracticeErrorTag =
   | 'incorrect-evaluation'
   | 'incorrect-intermediate'
   | 'incorrect-truth-table-cell'
-  | 'incorrect-tautology';
+  | 'incorrect-tautology'
+  | 'incorrect-classification';
 
 export type PracticeAttempt = {
   id: string;
@@ -27,6 +28,7 @@ export type PracticeDraft = {
   assignment?: Assignment;
   prediction?: boolean | null;
   selectedNodeId?: string | null;
+  selectedChoiceId?: string | null;
   submittedCell?: boolean | null;
   builderTokens?: BuilderToken[];
   proofRule?: RuleId | null;

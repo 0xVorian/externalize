@@ -1,6 +1,6 @@
 # Adaptive curriculum: canonical concepts, source routes, and context packs
 
-**Status:** proposed product direction, grounded in the existing prerequisite graph  
+**Status:** Phase A–C pilot implemented (logic-foundations route, Chapter II Sobel slice, skip/retrieve/teach planner); remaining book chapters stay out of scope until the pilot is used  
 **Created:** 2026-09-07  
 **Origin:** discussion prompted by using Jordan Howard Sobel's *Logic and Theism* as a reading target
 
