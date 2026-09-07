@@ -10,47 +10,47 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Where this sits in the book',
         body: [
-          'This route prepares Chapter II §§2.6–2.8 (pp. 35–40), where Sobel examines Descartes’ ontological argument.',
-          'The local logical issue is not whether existence is a property. It is whether a general or hypothetical claim about perfect beings already says that any such being exists.',
-          'English “A F is G” can report a rule covering whatever is F, or it can report that at least one F is present. Those readings come apart.',
+          'This short preparation is for Chapter II §§2.6–2.8 (pp. 35–40), where Sobel examines Descartes’ ontological argument.',
+          'The local issue is not whether existence is a property. It is whether a covering claim about perfect beings already says that one exists.',
+          'You have just seen the two readings: a rule for whatever would be F, versus a report that at least one F is present. Those readings come apart.',
         ],
       },
     },
     'lat-conditional-bridge': {
-      title: 'Conditionals without instances',
-      subtitle: 'A true conditional need not supply an example.',
+      title: 'An empty club',
+      subtitle: 'A covering claim when nobody is there.',
       card: {
-        title: 'If–then does not invent an object',
+        title: 'Nobody signed — and nobody failed to sign',
         body: [
-          'A material conditional P → Q is true whenever P is false. That is the vacuous case: the implication holds without P being realized.',
-          'In predicate form, ∀x (F(x) → G(x)) can be true in a domain that contains no F. Every F is G is then true because there is no counterexample F that fails to be G.',
-          'That is why a definition can constrain anything that would satisfy it without guaranteeing that anything does.',
+          'Imagine a club that currently has no members. Consider the claim: every member signed the register.',
+          'There is nobody who signed, and there is also nobody who failed to sign. Nothing in the situation contradicts the covering claim.',
+          'A general claim of that shape can still hold when there is nothing of the relevant kind around, because nothing stands as a counterexample.',
         ],
-        example: '∀x (F(x) → G(x))  can hold when nothing is F',
+        example: 'Club membership: (empty)\nClaim: every member signed.',
       },
     },
     'lat-quantifier-universal': {
-      title: 'Universal quantification',
-      subtitle: 'What ∀x says, and what it does not.',
+      title: 'Every F is G — without producing an F',
+      subtitle: 'Naming the empty-class case, then writing it.',
       card: {
-        title: '“Every F is G” as a universal conditional',
+        title: 'From the empty club to a standard form',
         body: [
-          'The universal quantifier ∀x φ(x) says that the open formula φ holds of every object in the domain.',
-          'The standard reading of “Every F is G” is ∀x (F(x) → G(x)): anything that is F is G. It does not, by itself, say that the domain contains an F.',
-          'If the domain is empty of Fs, the universal conditional is still true. No existing F is required.',
+          'Return to the empty club. “Every member signed” can still hold, because nobody failed to sign.',
+          'Logicians call this truth by vacuity: the covering claim is true because there is no counterexample, not because an example was produced.',
+          'The same idea is written with the universal quantifier ∀. “Every F is G” becomes ∀x (F(x) → G(x)): anything that is F is G. That form does not, by itself, say that an F exists.',
         ],
         example: '∀x (F(x) → G(x))',
       },
     },
     'lat-quantifier-existential': {
-      title: 'Existential quantification',
-      subtitle: 'At least one object in the domain.',
+      title: 'At least one',
+      subtitle: 'A claim that does produce an example.',
       card: {
-        title: '“Some F is G” reports an instance',
+        title: '“Some F is G” asks for a witness',
         body: [
-          'The existential quantifier ∃x φ(x) says that at least one object in the domain satisfies φ. Existential commitment comes from that quantifier: it asserts a witness.',
-          '“Some F is G” is ∃x (F(x) ∧ G(x)). Conjunction does not create existence; it requires that the same witness be both F and G.',
-          'By contrast, ∀x (F(x) → G(x)) does not assert that an F exists. If the domain contains no F, the existential sentence is false, while the universal conditional can still hold.',
+          'Some claims are different. “Some member signed” says there is at least one member who signed. If the club is empty, that claim is false.',
+          'Logicians call this an existential claim. We write it with ∃: ∃x (F(x) ∧ G(x)). Existential commitment comes from that quantifier: it asserts a witness.',
+          'Conjunction then requires that the same object be both F and G. It does not create existence. By contrast, ∀x (F(x) → G(x)) can hold when nothing is F.',
         ],
         example: '∃x (F(x) ∧ G(x))',
       },
@@ -75,47 +75,47 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Où l’on se trouve dans l’ouvrage',
         body: [
-          'Ce parcours prépare les §§2.6–2.8 du chapitre II (p. 35–40), où Sobel examine l’argument ontologique cartésien.',
-          'La difficulté logique locale n’est pas de savoir si l’existence est une propriété. C’est de savoir si une assertion générale ou hypothétique sur les êtres parfaits dit déjà qu’il en existe un.',
-          'En français comme en anglais, « Un F est G » peut énoncer une règle portant sur tout F, ou rapporter qu’il y a au moins un F. Ces lectures se séparent.',
+          'Cette préparation courte vise les §§2.6–2.8 du chapitre II (p. 35–40), où Sobel examine l’argument ontologique cartésien.',
+          'La difficulté locale n’est pas de savoir si l’existence est une propriété. C’est de savoir si une assertion couvrante sur les êtres parfaits dit déjà qu’il en existe un.',
+          'Vous venez de voir les deux lectures : une règle portant sur tout ce qui serait F, contre le rapport qu’il y a au moins un F. Ces lectures se séparent.',
         ],
       },
     },
     'lat-conditional-bridge': {
-      title: 'Implication sans instance',
-      subtitle: 'Une implication vraie n’exhibe pas un exemple.',
+      title: 'Un club sans membres',
+      subtitle: 'Une assertion couvrante quand personne n’est là.',
       card: {
-        title: 'Le si–alors n’introduit pas d’objet',
+        title: 'Personne n’a signé — et personne n’a manqué de signer',
         body: [
-          'Une implication matérielle P → Q est vraie dès que P est faux. C’est le cas de vérité par vacuité : l’implication tient sans que P soit réalisé.',
-          'Sous forme prédicative, ∀x (F(x) → G(x)) peut être vraie dans un domaine qui ne contient aucun F. « Tout F est G » est alors vrai faute de contre-exemple.',
-          'Une définition peut donc contraindre tout ce qui la satisferait, sans garantir qu’il existe un tel objet.',
+          'Imaginez un club qui, pour l’heure, n’a aucun membre. Considérez l’assertion : tout membre a signé le registre.',
+          'Personne n’a signé, et personne non plus n’a manqué de signer. Rien dans la situation ne contredit l’assertion couvrante.',
+          'Une assertion générale de cette forme peut encore valoir lorsqu’il n’y a rien du genre pertinent, faute de contre-exemple.',
         ],
-        example: '∀x (F(x) → G(x))  peut valoir sans aucun F',
+        example: 'Membres du club : (aucun)\nAssertion : tout membre a signé.',
       },
     },
     'lat-quantifier-universal': {
-      title: 'Quantification universelle',
-      subtitle: 'Ce que dit ∀x, et ce qu’il ne dit pas.',
+      title: 'Tout F est G — sans produire de F',
+      subtitle: 'Nommer le cas du club vide, puis l’écrire.',
       card: {
-        title: '« Tout F est G » comme implication universelle',
+        title: 'Du club vide à une forme canonique',
         body: [
-          'Le quantificateur universel ∀x φ(x) affirme que la formule ouverte φ vaut pour tout objet du domaine.',
-          'La lecture standard de « Tout F est G » est ∀x (F(x) → G(x)) : tout objet qui est F est G. Cela n’affirme pas, à soi seul, qu’il existe un F.',
-          'Si le domaine ne contient aucun F, l’implication universelle reste vraie. Aucune instance n’est exigée.',
+          'Revenez au club vide. « Tout membre a signé » peut encore valoir, parce que personne n’a manqué de signer.',
+          'On appelle cela un cas de vérité par vacuité : l’assertion couvrante est vraie faute de contre-exemple, non parce qu’un exemple a été produit.',
+          'La même idée s’écrit avec le quantificateur universel ∀. « Tout F est G » devient ∀x (F(x) → G(x)) : tout objet qui est F est G. Cette forme n’affirme pas, à soi seul, qu’il existe un F.',
         ],
         example: '∀x (F(x) → G(x))',
       },
     },
     'lat-quantifier-existential': {
-      title: 'Quantification existentielle',
-      subtitle: 'Au moins un objet du domaine.',
+      title: 'Au moins un',
+      subtitle: 'Une assertion qui produit un exemple.',
       card: {
-        title: '« Quelque F est G » rapporte une instance',
+        title: '« Quelque F est G » demande un témoin',
         body: [
-          'Le quantificateur existentiel ∃x φ(x) affirme qu’au moins un objet du domaine satisfait φ. L’engagement existentiel vient de ce quantificateur : il pose l’existence d’un témoin.',
-          '« Quelque F est G » s’écrit ∃x (F(x) ∧ G(x)). La conjonction n’instaure pas l’existence ; elle exige que ce même témoin soit à la fois F et G.',
-          'À l’inverse, ∀x (F(x) → G(x)) n’affirme pas qu’il existe un F. Sans F dans le domaine, l’énoncé existentiel est faux, alors que l’implication universelle peut encore valoir.',
+          'D’autres assertions sont d’un autre type. « Quelque membre a signé » dit qu’il y a au moins un membre qui a signé. Si le club est vide, cette assertion est fausse.',
+          'On parle alors d’une assertion existentielle. On l’écrit avec ∃ : ∃x (F(x) ∧ G(x)). L’engagement existentiel vient de ce quantificateur : il pose l’existence d’un témoin.',
+          'La conjonction exige ensuite que ce même objet soit à la fois F et G. Elle n’instaure pas l’existence. À l’inverse, ∀x (F(x) → G(x)) peut valoir sans aucun F.',
         ],
         example: '∃x (F(x) ∧ G(x))',
       },
@@ -139,16 +139,16 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
   en: {
     'lat-retrieve-conditional': {
       prompt:
-        'If nothing in the domain is F, can ∀x (F(x) → G(x)) still be true?',
+        'The club has no members. Is “every member signed the register” still true?',
       choices: {
-        'vacuous-true': 'Yes — there is no F that fails to be G, so the universal conditional holds.',
-        existential: 'No — a true universal claim requires at least one F in the domain.',
+        'vacuous-true': 'Yes — nobody failed to sign, so nothing contradicts the claim.',
+        existential: 'No — a true covering claim requires at least one member.',
       },
       choiceWrong:
-        'A universal conditional can hold vacuously. Absence of Fs is not a counterexample; an F that is not G would be.',
+        'Absence of members is not a counterexample. A counterexample would be a member who did not sign.',
       feedback: {
         correct:
-          'Correct. With no F in the domain, ∀x (F(x) → G(x)) has no falsifying instance.',
+          'Correct. With nobody there who failed to sign, the covering claim stands.',
       },
     },
     'lat-check-universal': {
@@ -273,17 +273,17 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
   fr: {
     'lat-retrieve-conditional': {
       prompt:
-        'Si le domaine ne contient aucun F, ∀x (F(x) → G(x)) peut-elle encore être vraie ?',
+        'Le club n’a aucun membre. L’assertion « tout membre a signé le registre » reste-t-elle vraie ?',
       choices: {
         'vacuous-true':
-          'Oui — aucun F n’échoue à être G, donc l’implication universelle tient.',
-        existential: 'Non — une assertion universelle vraie exige au moins un F dans le domaine.',
+          'Oui — personne n’a manqué de signer, donc rien ne contredit l’assertion.',
+        existential: 'Non — une assertion couvrante vraie exige au moins un membre.',
       },
       choiceWrong:
-        'Une implication universelle peut valoir à vide. L’absence de F n’est pas un contre-exemple ; un F qui ne serait pas G en serait un.',
+        'L’absence de membres n’est pas un contre-exemple. Un contre-exemple serait un membre qui n’a pas signé.',
       feedback: {
         correct:
-          'Exact. Sans F dans le domaine, ∀x (F(x) → G(x)) n’a pas d’instance falsifiante.',
+          'Exact. Personne n’a manqué de signer : l’assertion couvrante tient.',
       },
     },
     'lat-check-universal': {

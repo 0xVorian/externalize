@@ -265,7 +265,7 @@ describe('source EN/FR copy', () => {
   it('keeps route labels in both locales', () => {
     expect(learnUi('en').routeFoundations).not.toBe(learnUi('fr').routeFoundations);
     expect(learnUi('en').routeSobel).toBeTruthy();
-    expect(learnUi('fr').beforeYouContinue).toBeTruthy();
+    expect(learnUi('fr').routeSobel).toBeTruthy();
   });
 });
 
