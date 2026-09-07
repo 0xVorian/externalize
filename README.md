@@ -2,7 +2,7 @@
 
 A local-first, mobile-first web application for learning symbolic logic through short lessons, immediate feedback, and visible intermediate steps. Optimized for phone browsers; scales up to tablet and desktop.
 
-The primary user is the repository owner. The design compensates for difficulty holding large symbolic structures in working memory rather than assuming the learner can mentally retain an entire derivation.
+The primary user is the repository owner. The design compensates for difficulty holding large symbolic structures in working memory rather than assuming that the learner can mentally retain an entire derivation.
 
 ## Documentation
 
@@ -10,15 +10,16 @@ Start here:
 
 | Document | Purpose |
 |----------|---------|
+| [Agent operating guide](AGENTS.md) | Repository-wide instructions, current execution boundary, tests, and multi-agent coordination rules |
 | [Vision & brief](docs/vision.md) | Original concept, learning path, exercise types, success criterion |
-| [Adaptive curriculum](docs/adaptive-curriculum.md) | Proposed concept-graph + route + source-pack architecture for book-driven learning |
+| [Roadmap](docs/roadmap.md) | Current shipped baseline, authorized adaptive pilot, and validation gates |
+| [Adaptive curriculum implementation roadmap](docs/adaptive-curriculum-implementation.md) | Authoritative execution plan for routes, portable evidence, migration, Sobel pilot, and prerequisite planner |
+| [Adaptive curriculum](docs/adaptive-curriculum.md) | Concept-graph + route + source-pack architecture and rationale |
+| [Adaptive curriculum multi-agent brief](docs/agent-brief-adaptive-curriculum.md) | Ready-to-use execution brief for a primary agent coordinating subagents |
 | [Logic and Theism curriculum map](docs/curricula/logic-and-theism.md) | First real source map and proving ground for adaptive routing |
-| [Logic and Theism — Chapter III](docs/curricula/logic-and-theism/chapter-03.md) | Detailed source-driven map for modal ontological arguments, possibility, S5, and conceivability |
-| [Logic and Theism — Chapter IV](docs/curricula/logic-and-theism/chapter-04.md) | Detailed source-driven map for Gödel, higher-order modal logic, interpretation, and modal collapse |
+| [Logic and Theism detailed maps](docs/curricula/logic-and-theism/README.md) | Section-level chapter maps and reusable machinery inventory |
 | [Design principles](docs/design-principles.md) | Non-negotiable UX and pedagogical constraints |
 | [Technical decisions](docs/decisions.md) | Platform, architecture, notation, and open questions with current answers |
-| [Roadmap](docs/roadmap.md) | Current priorities, shipped phases, and validation gates |
-| [Future work plan](docs/future-work-plan.md) | Proactive content/engine prep and agent batch plan (not the app roadmap) |
 | [Content model](docs/content-model.md) | How exercises, lessons, and progress are represented as data |
 | [Progress visibility](docs/progress-visibility.md) | Capability states, practice sessions, and progress moments |
 | [Authoring guide](docs/authoring.md) | How to add lessons and exercises (worked examples, checklist) |
@@ -26,18 +27,18 @@ Start here:
 | [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |
 | [Testing](docs/testing.md) | Vitest unit tests and Playwright smoke suite |
 | [Presentation](docs/presentation.md) | When to use truth tables vs parse trees, layout rules |
-| [Predicate logic (Phase 6 prep)](docs/predicate-logic.md) | AST extension, notation, engine impact — design only |
+| [Predicate logic (Phase 6 prep)](docs/predicate-logic.md) | AST extension, notation, engine impact — design/engine groundwork only |
 | [Changelog](CHANGELOG.md) | Record of released and unreleased changes |
 
-For current state, treat this README and the roadmap as authoritative. Design briefs, phase plans, and agent briefs record scoped or historical decisions and may intentionally describe pre-implementation states.
+For current adaptive-curriculum implementation work, treat `AGENTS.md`, the adaptive implementation roadmap, and `docs/roadmap.md` as the controlling execution documents. Older design briefs and phase plans may intentionally describe pre-implementation states.
 
 ## Status
 
-**Implemented:** Three propositional-logic learning units; sequential graded practice for evaluation, scope, truth tables, counterexamples, tautologies, translation, and introductory proof steps; local progress, SRS, and export/import.
+**Implemented:** Three propositional-logic learning units; sequential graded practice for evaluation, scope, truth tables, counterexamples, tautologies, translation, and introductory proof steps; local progress, SRS, export/import, Explore mode, PWA support, and evidence-backed progress visibility.
 
 **Experimental:** The small natural-deduction exercise set and predicate-logic AST/parser spike. Predicate-logic curriculum remains design-only.
 
-**Current focus:** Sustained personal use and validation of retention, transfer, repaired-attempt semantics, and whether the product is worth returning to.
+**Current focus:** Bounded adaptive-curriculum pilot: first refactor the existing course into an explicit `logic-foundations` route without changing learner behavior, then validate portable concept/capability evidence with a narrow *Logic and Theism* Chapter II source-driven slice. See [`docs/adaptive-curriculum-implementation.md`](docs/adaptive-curriculum-implementation.md).
 
 ## Development
 
@@ -47,6 +48,15 @@ npm test          # Vitest unit tests
 npm run test:e2e  # Playwright smoke tests (build + preview)
 npm run dev       # dev server (mobile-friendly viewport)
 npm run build     # typecheck + production build
+```
+
+For a clean full verification run:
+
+```bash
+npm ci
+npm test
+npm run build
+npm run test:e2e
 ```
 
 See [Testing](docs/testing.md) for dev-server e2e mode, CI notes, and smoke coverage.
@@ -61,9 +71,9 @@ Connect the GitHub repository in Cloudflare Pages with:
 | Build output directory | `dist` |
 | Node.js version | `22` (or set `NODE_VERSION=22`) |
 
-No environment variables required for MVP-0. Progress is stored in the browser (`localStorage`).
+No environment variables required. Progress is stored in the browser (`localStorage`).
 
-After deploy, open the Pages URL on your phone to run the week test.
+After deploy, open the Pages URL on your phone to run the real-use validation.
 
 ## Install as PWA (home screen)
 
@@ -79,4 +89,4 @@ Requires HTTPS (or `localhost` during development). After install, the app opens
 
 ## Success criterion
 
-The project succeeds if it makes symbolic reasoning easier to practise regularly and reduces the amount of state the learner must retain mentally. A small application that reliably supports its creator's propositional-logic practice is sufficient; it does not need to become a commercial platform. Predicate-logic teaching remains future work.
+The project succeeds if it makes formal reasoning easier to practise and use in the material the learner actually wants to understand, while reducing the amount of intermediate state the learner must retain mentally. The adaptive-curriculum direction earns its additional complexity only if it reuses demonstrated knowledge across routes, supplies missing prerequisites just in time, and gets the learner back into the chosen source faster than a separate fixed syllabus would.
