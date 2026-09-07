@@ -18,7 +18,7 @@ export type FeedbackResult = {
 };
 
 const DEFAULT_TEMPLATES: Record<ScopeFeedbackTag, string> = {
-  correct: 'Correct.',
+  correct: 'Correct — {label} has the widest scope, so it is the main connective.',
   'wrong-main-connective':
     'That is not the main connective of the whole formula. The main connective has the widest scope.',
   'selected-subconnective':
@@ -34,6 +34,16 @@ export function resolveFeedback(
 ): string {
   const template = templates[tag] ?? DEFAULT_TEMPLATES[tag];
   return template.replace(/\{(\w+)\}/g, (_, key: string) => vars[key] ?? `{${key}}`);
+}
+
+function logicalLabel(node: TreeNode): string {
+  if (node.kind === 'not') {
+    return '¬';
+  }
+  if (node.kind === 'pred' || node.kind === 'forall' || node.kind === 'exists') {
+    return node.label;
+  }
+  return connectiveLabel(node.kind);
 }
 
 export function checkMainConnectiveSelection(
@@ -56,7 +66,7 @@ export function checkMainConnectiveSelection(
     return {
       correct: true,
       tag: 'correct',
-      message: resolveFeedback('correct', templates),
+      message: resolveFeedback('correct', templates, { label: logicalLabel(selected) }),
     };
   }
 
@@ -69,12 +79,12 @@ export function checkMainConnectiveSelection(
   }
 
   if (selected.id !== tree.id) {
-    const label =
-      selected.kind === 'not' ? '¬' : (selected.kind === 'pred' || selected.kind === 'forall' || selected.kind === 'exists' ? selected.label : connectiveLabel(selected.kind));
     return {
       correct: false,
       tag: 'selected-subconnective',
-      message: resolveFeedback('selected-subconnective', templates, { label }),
+      message: resolveFeedback('selected-subconnective', templates, {
+        label: logicalLabel(selected),
+      }),
     };
   }
 
