@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Content JSON imports declare `type: json` so Playwright helpers can load progress modules under native Node ESM
 - Source-route classification items can be repaired in place: Try again is handled in Learn (it previously sat behind a Practice-only early return)
 - Source-route Reading completion is now durable: finishing the last item persists `completedAt`, shows Done / return to the book instead of endless Continue, and revisiting a completed route does not restart at item 1. Mastery work remains reachable after that terminal state
+- After that terminal action, the Done / return-to-the-book button is removed; the completed banner and Sobel locator remain, so the same completion click cannot be repeated
 - Source-route checks stay on the current item (with feedback and Next) until the learner continues; a correct retrieve no longer jumps away because the planner dropped the item
 - Existential-quantifier lessons (EN and FR) now attribute existential commitment to `∃`, not to conjunction
 - The prerequisite planner no longer treats a missing bridge as skip; unmet requirements without authored material are an explicit `unsupported` outcome

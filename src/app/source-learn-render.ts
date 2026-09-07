@@ -66,12 +66,13 @@ export function renderSourceLearnView(options: {
   let actions = '';
   let title = learn.routeSobel;
   const terminalButton = `<button type="button" class="primary" data-action="source-complete" data-testid="source-complete">${learn.returnToBook}</button>`;
+  const terminalActions = options.isTerminal && !options.routeComplete ? terminalButton : '';
   if (options.lessonState) {
     const copy = getLessonCopy(options.locale, options.lessonState.lesson.id);
     title = copy.title;
     body = renderCardLesson(options.lessonState);
     actions = options.isTerminal
-      ? terminalButton
+      ? terminalActions
       : `<button type="button" class="primary" data-action="lesson-next">${learn.nextStep}</button>`;
   } else if (options.practiceState) {
     const copy = getExerciseCopy(options.locale, options.practiceState.exercise.id);
@@ -82,7 +83,7 @@ export function renderSourceLearnView(options: {
     body = `<article class="lesson-card"><p class="exercise-prompt">${copy.prompt}</p>${renderClassifyChoiceBody(options.practiceState)}${feedback}</article>`;
     if (options.practiceState.attempt.status === 'finalized') {
       actions = options.isTerminal
-        ? terminalButton
+        ? terminalActions
         : `<button type="button" class="primary" data-action="source-next">${learn.nextStep}</button>`;
     } else {
       actions = renderClassifyChoiceActions(options.practiceState, true).replace(

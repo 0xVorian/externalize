@@ -98,6 +98,11 @@ test.describe('Logic and Theism source route', () => {
         break;
       }
       if (await page.locator('[data-testid="source-complete"]').count()) {
+        await expect(page.locator('[data-testid="source-complete"]')).toBeVisible();
+        await expect(page.locator('[data-testid="source-complete"]')).toContainText(
+          'return to the book',
+        );
+        await expect(page.locator('[data-testid="source-route-complete"]')).toHaveCount(0);
         await page.locator('[data-testid="source-complete"]').click();
         break;
       }
@@ -113,8 +118,11 @@ test.describe('Logic and Theism source route', () => {
     }
 
     await expect(page.locator('[data-testid="source-route-complete"]')).toBeVisible();
-    await expect(page.locator('[data-testid="source-complete"]')).toContainText('return to the book');
+    await expect(page.locator('[data-testid="source-complete"]')).toHaveCount(0);
     await expect(page.locator('h1')).toContainText('Return to the passage');
+    await expect(page.locator('[data-testid="source-route-complete"]')).toContainText(
+      'Continue in Sobel',
+    );
 
     await page
       .locator(`[data-action="set-route"][data-route-id="${LOGIC_FOUNDATIONS_ROUTE_ID}"]`)
@@ -125,6 +133,7 @@ test.describe('Logic and Theism source route', () => {
       .click();
     await expect(page.locator('[data-testid="source-route-complete"]')).toBeVisible();
     await expect(page.locator('h1')).toContainText('Return to the passage');
+    await expect(page.locator('[data-testid="source-complete"]')).toHaveCount(0);
 
     await page.locator('[data-action="set-route-depth"][data-depth="mastery"]').click();
     await expect(page.locator('.exercise-prompt')).toBeVisible();
