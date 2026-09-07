@@ -1,6 +1,6 @@
 # Adaptive curriculum implementation assessment
 
-**Status:** Phases A–C implemented in the runtime for the Chapter II pilot; stop before Phase D (Chapter III–XIII renderers, PDF, generic generator)  
+**Status:** Phases A–C **implementation** is in the runtime for the Chapter II pilot; the Phase B **product-validation** gate remains pending usage/manual confirmation. Stop before Phase D (Chapter III–XIII renderers, PDF, generic generator)  
 **Created:** 2026-09-07  
 **Updated:** 2026-09-07  
 **Scope:** turn the source-driven curriculum idea into a small, testable extension of the existing application without rewriting Externalize
@@ -25,7 +25,7 @@ Do **not** build a generic AI curriculum generator, PDF reader, universal activi
 
 ## Observed current state
 
-The notes below described the runtime **before** Phases A–C. They remain as the rationale for the refactor. After the pilot, the logic course runs as `logic-foundations`, progress is v7, the Chapter II Sobel slice is `logic-and-theism-reading`, and a skip/retrieve/teach planner injects prerequisite items from portable `conceptEvidence`.
+The notes below described the runtime **before** Phases A–C. They remain as the rationale for the refactor. After the pilot implementation, the logic course runs as `logic-foundations`, progress is v7, the Chapter II Sobel slice is `logic-and-theism-reading`, and a skip/retrieve/teach planner injects prerequisite items from portable `conceptEvidence`. The Phase B experiential gate is not closed by that implementation alone.
 
 ### What is already reusable
 
@@ -292,7 +292,13 @@ Sobel II.2.6–2.8
     -> return to book
 ```
 
-**Gate:** using this route gets the learner back into Sobel faster and with better understanding than manually switching between the book and the canonical logic track. **Met in code** for the authorized slice: `content/routes/logic-and-theism-reading.json` plus `content/sources/logic-and-theism.json` (anchors and paraphrases only), a `classify-choice` interaction, portable `existential-import` evidence, Reading vs Mastery depth, and tests in `src/app/source-route.test.ts`. Independent full-suite verification belongs with the assignment close-out.
+**Gate:** using this route gets the learner back into Sobel faster and with better understanding than manually switching between the book and the canonical logic track.
+
+**Implementation:** complete for the authorized slice (`content/routes/logic-and-theism-reading.json` plus `content/sources/logic-and-theism.json`, a `classify-choice` interaction, portable `existential-import` evidence, Reading vs Mastery depth, explicit route-completion state, and tests in `src/app/source-route.test.ts` plus `e2e/smoke/source-route.spec.ts`).
+
+**Automated verification:** unit and browser walkthrough coverage for the slice, including terminal completion and revisit. Independent full-suite verification belongs with the assignment close-out.
+
+**Product / usage validation:** still pending. The gate is experiential — whether the route actually returns a learner to Sobel faster and with better understanding — and is not met merely because the implementation and automated checks exist.
 
 Implemented items (not a full predicate curriculum):
 
@@ -317,12 +323,13 @@ The planner should return an explicit plan the UI can display and tests can snap
 type PlannedIntervention =
   | { kind: 'skip'; requirement: Requirement }
   | { kind: 'retrieve'; itemId: string }
-  | { kind: 'teach'; itemIds: string[] };
+  | { kind: 'teach'; itemIds: string[] }
+  | { kind: 'unsupported'; requirement: Requirement; reason: 'missing-bridge' };
 ```
 
 Avoid opaque recommendations that cannot be inspected.
 
-**Gate:** planner decisions are explicit and testable. **Met in code** (`src/app/planner.ts`): `skip` when evidence is consistent and not stale; `retrieve` when some attempts exist but are weak/stale; `teach` when unseen. Bridges are listed in `PREREQUISITE_BRIDGES`. The Learn UI shows the non-skip interventions. Tests cover skip/retrieve/teach and portable-mastery suppression of the conditional bridge.
+**Gate:** planner decisions are explicit and testable. **Implementation complete** (`src/app/planner.ts`): `skip` when evidence is consistent and not stale; `retrieve` when some attempts exist but are weak, stale, or of unknown recency; `teach` when unseen; `unsupported` when an unmet requirement has no authored bridge. Missing `lastSeenAt` on migrated evidence is not treated as fresh. Bridges are listed in `PREREQUISITE_BRIDGES`. The Learn UI shows the non-skip interventions. Tests cover skip/retrieve/teach/unsupported, unknown-age retrieve, and portable-mastery suppression of the conditional bridge.
 
 ## Phase D — expand only when the representation changes
 
@@ -420,6 +427,6 @@ The pilot is specifically intended to answer these questions with usage evidence
 
 ## Recommendation
 
-Phases A–C of the Chapter II pilot are implemented. Stop there before Chapter III–XIII interaction families, a PDF reader, a generic curriculum generator, a server/backend, cloud accounts, a universal reasoning engine, or merging lessons and exercises into a generic `ActivityDefinition`.
+Phases A–C of the Chapter II pilot are **implemented**. The Phase B **product** gate (does the route get a learner back into Sobel faster and with better understanding?) is not closed by that implementation; it still needs usage/manual validation. Stop before Chapter III–XIII interaction families, a PDF reader, a generic curriculum generator, a server/backend, cloud accounts, a universal reasoning engine, or merging lessons and exercises into a generic `ActivityDefinition`.
 
 The conceptual direction has enough merit to justify refactoring curriculum orchestration. It does **not** yet justify turning Externalize into a general educational platform. The next proof should be brutally concrete: can the same learner state and the same concept graph move smoothly between the existing logic course and Sobel, with less redundant work and better comprehension?

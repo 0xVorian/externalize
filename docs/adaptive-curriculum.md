@@ -1,6 +1,6 @@
 # Adaptive curriculum: canonical concepts, source routes, and context packs
 
-**Status:** Phase A–C pilot implemented (logic-foundations route, Chapter II Sobel slice, skip/retrieve/teach planner); remaining book chapters stay out of scope until the pilot is used  
+**Status:** Phase A–C pilot **implementation** is in the runtime (logic-foundations route, Chapter II Sobel slice, skip/retrieve/teach planner). Remaining book chapters stay out of scope until the pilot is used. The Phase B **product** gate — whether the slice actually returns a learner to Sobel faster and with better understanding — remains pending usage/manual validation.  
 **Created:** 2026-09-07  
 **Origin:** discussion prompted by using Jordan Howard Sobel's *Logic and Theism* as a reading target
 

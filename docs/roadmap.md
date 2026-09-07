@@ -38,7 +38,7 @@ The implementation contract is [`adaptive-curriculum-implementation.md`](adaptiv
 The authorized sequence is:
 
 1. **Phase A — route refactor:** make the current logic course the explicit `logic-foundations` route with zero intended learner-visible change; add portable concept × capability evidence and conservative progress migration. **Implemented** (v7 progress, route parity tests).
-2. **Phase B — narrow Sobel vertical slice:** implement only the Chapter II §§2.6–2.8 existential-import/Descartes route using the same learner model. **Implemented** (`logic-and-theism-reading`, `classify-choice`, source isolation / portable mastery tests).
+2. **Phase B — narrow Sobel vertical slice:** implement only the Chapter II §§2.6–2.8 existential-import/Descartes route using the same learner model. **Implementation complete** (`logic-and-theism-reading`, `classify-choice`, source isolation / portable mastery tests, source-route E2E walkthrough). **Product-validation gate pending** usage/manual confirmation that the route returns the learner to Sobel faster and with better understanding.
 3. **Phase C — deterministic prerequisite planner:** if justified by the vertical slice, extract a small inspectable skip/retrieve/teach policy. **Implemented** (`src/app/planner.ts`).
 
 **Pilot gate:** the architecture earns its complexity only if existing learner progress survives, current course behavior remains stable, already-demonstrated knowledge suppresses redundant prerequisite teaching, and the source-driven slice gets the learner back into the book with better comprehension.

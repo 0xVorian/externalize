@@ -30,8 +30,8 @@ src/app/
   concepts.ts          — canonical concept lookup (prerequisites + extras)
   evidence.ts          — load evidence tags; record/backfill conceptEvidence
   routes.ts            — route loader and selectors
-  planner.ts           — skip / retrieve / teach prerequisite policy
-  source-route.ts      — Sobel route sequencing and completion
+  planner.ts           — skip / retrieve / teach / unsupported prerequisite policy
+  source-route.ts      — Sobel route sequencing, completion, and revisit
   presentation.test.ts — presentation inventory (must stay in sync)
   lesson-render.ts     — card, watch table, guided live row
   classify-choice-render.ts — tap-to-classify source items
@@ -221,7 +221,7 @@ One opened exercise session is one attempt. Wrong checks keep that attempt activ
 
 Graded exercises declare what a successful attempt should strengthen in `content/exercise-evidence.json`. Interaction families (`evaluate-formula`, translation, etc.) remain `SkillId`s; portable learner state uses concept × capability pairs (`recognize`, `apply`, `debug`, `transfer`). Source-route items tag the same canonical concepts (including extras such as `existential-import`); they must not invent source-specific duplicates.
 
-The `logic-and-theism-reading` route’s skip / retrieve / teach detours are produced by `src/app/planner.ts` from `conceptEvidence`, then sequenced by `src/app/source-route.ts`. Reading depth omits the Mastery empty-domain item; Mastery includes it without splitting concept identity.
+The `logic-and-theism-reading` route’s skip / retrieve / teach detours are produced by `src/app/planner.ts` from `conceptEvidence`, then sequenced by `src/app/source-route.ts`. An unmet requirement with no authored bridge is `unsupported`, not skip. Evidence with attempts but missing/invalid `lastSeenAt` (including v6→v7 backfill) is retrieved rather than treated as fresh. Completing the final planned Reading item persists `routes[id].completedAt` and a terminal Done / return-to-book action; revisiting does not restart at item 1. Reading depth omits the Mastery empty-domain item; Mastery includes it without splitting concept identity. `practice:classify-choice` is SRS/telemetry only — it is not on the Progress capability list (`TRACKED_SKILL_IDS`); portable source mastery lives in concept × capability evidence.
 
 ## Feedback tag taxonomy
 

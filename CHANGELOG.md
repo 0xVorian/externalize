@@ -10,18 +10,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Adaptive curriculum Phase A: the existing three-unit logic course now runs as the explicit `logic-foundations` route, with canonical concept × capability evidence on graded exercises, per-route progress, and a conservative v6 → v7 progress migration that preserves skills, SRS, resume, and existing learner evidence
-- Adaptive curriculum Phase B: a Learn route for *Logic and Theism* Chapter II §§2.6–2.8 (pp. 35–40) over the same portable concept state, using a `classify-choice` interaction, source anchors without reproducing book text, and Reading vs Mastery depth
+- Adaptive curriculum Phase B: a Learn route for *Logic and Theism* Chapter II §§2.6–2.8 (pp. 35–40) over the same portable concept state, using a `classify-choice` interaction, source anchors without reproducing book text, Reading vs Mastery depth, and a browser walkthrough through terminal completion
 - Adaptive curriculum Phase C: a deterministic skip / retrieve / teach planner that injects the smallest prerequisite detour from `conceptEvidence`, so already-demonstrated conditionals skip the Sobel bridge while unseen quantifiers still get a short teach sequence
-
-### Changed
-
-- Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion
-- Learn shows a route picker between Logic foundations and Logic and Theism; switching routes does not create duplicate concept IDs. Source exercises enter the Practice pool only after a checked pass
 
 ### Fixed
 
 - Content JSON imports declare `type: json` so Playwright helpers can load progress modules under native Node ESM
-- Source-route classification items can be repaired in place: Try again re-enables the choice list instead of leaving the attempt stuck
+- Source-route classification items can be repaired in place: Try again is handled in Learn (it previously sat behind a Practice-only early return)
+- Source-route Reading completion is now durable: finishing the last item persists `completedAt`, shows Done / return to the book instead of endless Continue, and revisiting a completed route does not restart at item 1. Mastery work remains reachable after that terminal state
+- Source-route checks stay on the current item (with feedback and Next) until the learner continues; a correct retrieve no longer jumps away because the planner dropped the item
+- Existential-quantifier lessons (EN and FR) now attribute existential commitment to `∃`, not to conjunction
+- The prerequisite planner no longer treats a missing bridge as skip; unmet requirements without authored material are an explicit `unsupported` outcome
+- v6→v7 backfilled concept evidence with unknown recency prompts retrieve rather than counting as definitely fresh
+- French source copy uses « cas de vérité par vacuité » rather than the English loan « vacuous »
+
+### Changed
+
+- Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion, and without fabricating `lastSeenAt`
+- Learn shows a route picker between Logic foundations and Logic and Theism; switching routes does not create duplicate concept IDs. Source exercises enter the Practice pool only after a checked pass
+- `practice:classify-choice` remains SRS/telemetry for the Sobel classification UI and is deliberately kept off the Progress interaction-family capability list; portable mastery stays in concept × capability evidence
 
 ## [0.4.0] - 2026-09-07
 
