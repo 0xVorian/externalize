@@ -48,16 +48,25 @@ describe('Sobel meaning before terminology', () => {
     for (const locale of ['en', 'fr'] as const) {
       const visible = firstVisible(locale, 'lat-conditional-bridge');
       expect(visible).not.toMatch(JARGON);
-      const exercise = SOURCE_EXERCISES[locale]['lat-retrieve-conditional'];
+      expect(visible).not.toMatch(/counterexample|contre-exemple|vacuity|vacuité/i);
+      expect(visible).not.toMatch(/nobody failed|personne n’a manqué|can still hold|peut encore valoir/i);
+      const exercise = SOURCE_EXERCISES[locale]['lat-predict-empty-club'];
       const exerciseVisible = [
         exercise.prompt,
         ...Object.values(exercise.choices ?? {}),
       ].join(' ');
-      expect(exerciseVisible).not.toMatch(/∀|∃|vacuous|vacuité/i);
+      expect(exerciseVisible).not.toMatch(/∀|∃|vacuous|vacuité|→/i);
     }
     expect(SOURCE_LESSONS.en['lat-conditional-bridge'].card?.body[0]).not.toBe(
       SOURCE_LESSONS.fr['lat-conditional-bridge'].card?.body[0],
     );
+  });
+
+  it('keeps the empty-club setup free of the later explanation', () => {
+    const en = firstVisible('en', 'lat-conditional-bridge');
+    const fr = firstVisible('fr', 'lat-conditional-bridge');
+    expect(en).not.toMatch(/no counterexample|nothing stands against|true because/i);
+    expect(fr).not.toMatch(/aucun contre-exemple|rien .* ne s’oppose|vraie faute/i);
   });
 
   it('explains the missing counterexample before naming vacuity', () => {
@@ -71,6 +80,34 @@ describe('Sobel meaning before terminology', () => {
     expect(vacuity).not.toContain('∀');
     expect(firstVisible('fr', 'lat-name-vacuity')).toMatch(/cas de vérité par vacuité/);
     expect(firstVisible('fr', 'lat-name-vacuity')).not.toContain('∀');
+  });
+
+  it('introduces ordinary if–then before the arrow, and the arrow before ∀', () => {
+    const meaningEn = firstVisible('en', 'lat-conditional-meaning');
+    const meaningFr = firstVisible('fr', 'lat-conditional-meaning');
+    expect(meaningEn).toMatch(/if someone is a member, then that person signed/i);
+    expect(meaningEn).not.toMatch(/∀|∃|→|material conditional/i);
+    expect(meaningFr).toMatch(/si quelqu’un est membre, alors cette personne a signé/i);
+    expect(meaningFr).not.toMatch(/∀|∃|→|implication matérielle/i);
+
+    const notationEn = firstVisible('en', 'lat-conditional-notation');
+    const notationFr = firstVisible('fr', 'lat-conditional-notation');
+    expect(notationEn).toContain('→');
+    expect(notationEn).toMatch(/F\(x\) → G\(x\)/);
+    expect(notationEn).not.toContain('∀');
+    expect(notationEn).not.toMatch(/material conditional/i);
+    expect(notationFr).toContain('→');
+    expect(notationFr).toMatch(/F\(x\) → G\(x\)/);
+    expect(notationFr).not.toContain('∀');
+    expect(notationFr).not.toMatch(/implication matérielle/i);
+
+    const universalMeaning = firstVisible('en', 'lat-universal-meaning');
+    expect(universalMeaning).not.toContain('∀');
+    expect(universalMeaning).toMatch(/for each object/i);
+
+    const forallEn = firstVisible('en', 'lat-quantifier-universal');
+    expect(forallEn).toContain('∀x (F(x) → G(x))');
+    expect(forallEn).toMatch(/universal quantifier/i);
   });
 
   it('introduces ∀ only after vacuity has been named', () => {
@@ -99,15 +136,16 @@ describe('Sobel meaning before terminology', () => {
     expect(nameFr).not.toContain('∃');
   });
 
-  it('introduces ∃ after existential meaning, without the conjunction bundle', () => {
+  it('introduces ∃ after existential meaning, without witness or commitment jargon', () => {
     const en = firstVisible('en', 'lat-quantifier-existential');
     const fr = firstVisible('fr', 'lat-quantifier-existential');
     expect(en).toContain('∃');
-    expect(en).toMatch(/existential commitment comes from that quantifier/i);
-    expect(en).not.toMatch(/F\(x\) ∧ G\(x\)/);
+    expect(en).toMatch(/existential quantifier/i);
+    expect(en).toMatch(/at least one F/i);
+    expect(en).not.toMatch(/witness|existential commitment|F\(x\) ∧ G\(x\)/i);
     expect(fr).toContain('∃');
-    expect(fr).toMatch(/engagement existentiel vient de ce quantificateur/i);
-    expect(fr).not.toMatch(/F\(x\) ∧ G\(x\)/);
+    expect(fr).toMatch(/quantificateur existentiel/);
+    expect(fr).not.toMatch(/témoin|engagement existentiel|F\(x\) ∧ G\(x\)/i);
   });
 
   it('teaches same-witness conjunction only after ∃', () => {
@@ -115,8 +153,10 @@ describe('Sobel meaning before terminology', () => {
     const fr = firstVisible('fr', 'lat-existential-conjunction');
     expect(en).toMatch(/F\(x\) ∧ G\(x\)/);
     expect(en).toMatch(/same witness/i);
+    expect(en).toMatch(/existential commitment is in ∃/i);
     expect(fr).toMatch(/F\(x\) ∧ G\(x\)/);
     expect(fr).toMatch(/même témoin/);
+    expect(fr).toMatch(/engagement existentiel vient de ∃/i);
   });
 
   it('returns to Descartes after the logical distinction', () => {

@@ -40,6 +40,7 @@ function withLearnResume(
 export const LOGIC_AND_THEISM_SOURCE_PACK = sourcePack as SourcePack;
 
 export const SOURCE_EXERCISE_IDS = [
+  'lat-predict-empty-club',
   'lat-retrieve-conditional',
   'lat-check-universal',
   'lat-check-existential',

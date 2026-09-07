@@ -314,15 +314,17 @@ Start in ordinary language, e.g. a case with no members of the relevant class, a
 Possible progression:
 
 1. ordinary-language empty-class example;
-2. learner prediction;
+2. learner prediction (checked);
 3. feedback: no counterexample exists;
 4. introduce the name for the phenomenon;
-5. show the universal notation and then name `∀`;
-6. contrast with a claim that explicitly asserts an example exists;
-7. introduce `∃` after the existential meaning is understood;
-8. transfer to a fresh neutral example;
-9. return to the Sobel/Descartes question;
-10. source locator only when it helps the learner resume reading.
+5. ordinary if–then meaning, then `→`, then a checked conditional application;
+6. universal meaning, then `∀`, then the name `universal quantifier`;
+7. contrast with a claim that explicitly asserts an example exists;
+8. introduce `∃` after the existential meaning is understood, then name the existential quantifier;
+9. same-witness conjunction (witness / existential commitment only here);
+10. transfer to a fresh neutral example;
+11. return to the Sobel/Descartes question;
+12. source locator only when it helps the learner resume reading.
 
 Do not copy these exact words blindly; EN and FR must be independently authored and academically idiomatic.
 
@@ -366,7 +368,7 @@ Required:
 - independently authored EN/FR copy;
 - preserve actual formal terms and notation, introduced progressively rather than deleted.
 
-**Gate:** the opening and Sobel preparation flow no longer requires the learner to understand route/planner vocabulary or multiple new technical terms before doing the first useful reasoning step. **Implemented** (planner copy removed from `learnUi`; Sobel empty-class → counterexample → vacuity name → ∀ → existential meaning → name → ∃ → same-witness conjunction → transfer → return to Descartes; session chrome hides route/depth). The experiential product-validation gate remains pending real use.
+**Gate:** the opening and Sobel preparation flow no longer requires the learner to understand route/planner vocabulary or multiple new technical terms before doing the first useful reasoning step. **Implemented** (planner copy removed from `learnUi`; Sobel empty-class setup → checked prediction → counterexample explanation → vacuity name → if–then → `→` → conditional check → universal meaning → ∀ → existential meaning → name → ∃ → same-witness conjunction → transfer → return to Descartes; session chrome hides route/depth). The experiential product-validation gate remains pending real use.
 
 ## Phase UX-C — learning-aligned re-entry
 

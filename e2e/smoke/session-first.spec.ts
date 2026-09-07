@@ -192,7 +192,7 @@ test.describe('session-first UX', () => {
     await expect(page.getByTestId('session-watch-unit')).toBeVisible();
   });
 
-  test('Sobel screens name vacuity and symbols only after ordinary meaning', async ({ page }) => {
+  test('Sobel requires a checked prediction before the counterexample explanation', async ({ page }) => {
     await gotoWithProgress(
       page,
       setActiveRoute(emptyProgress(), LOGIC_AND_THEISM_READING_ROUTE_ID),
@@ -201,11 +201,52 @@ test.describe('session-first UX', () => {
     const active = page.getByTestId('session-active');
     expect(await active.innerText()).not.toMatch(QUANTIFIER_JARGON);
     await expect(active).toContainText('club');
+    expect(await active.innerText()).not.toMatch(/counterexample|contre-exemple/i);
     await lessonNext(page).click();
-    expect(await active.innerText()).not.toMatch(/∀|∃|vacuous|vacuité|quantifier|quantificateur/i);
+
+    await expect(page.locator('[data-action="select-choice"]').first()).toBeVisible();
+    await expect(page.locator('[data-action="lesson-next"]')).toHaveCount(0);
+    await expect(page.locator('[data-action="source-next"]')).toHaveCount(0);
+    expect(await active.innerText()).not.toMatch(/vacuity|vacuité|∀|∃/i);
+    expect(await active.innerText()).not.toMatch(/What would disprove it|Ce qui la ferait chuter/i);
+
+    await page.locator('[data-action="select-choice"][data-choice-id="needs-instance"]').click();
+    await page.locator('[data-action="check-classification"]').click();
+    await expect(page.locator('.feedback-wrong')).toBeVisible();
+    await expect(page.getByTestId('try-again')).toBeVisible();
+    await expect(page.locator('[data-action="lesson-next"]')).toHaveCount(0);
+    await page.getByTestId('try-again').click();
+    await page.locator('[data-action="select-choice"][data-choice-id="still-true"]').click();
+    await page.locator('[data-action="check-classification"]').click();
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+    await page.locator('[data-action="source-next"]').click();
+
+    expect(await active.innerText()).toMatch(/counterexample|contre-exemple/i);
+    expect(await active.innerText()).not.toMatch(/vacuity|vacuité|∀|∃/i);
     await lessonNext(page).click();
     await expect(active).toContainText(/vacuity|vacuité/i);
     expect(await active.innerText()).not.toMatch(/∀|∃/);
+  });
+
+  test('Sobel teaches if–then, then →, then ∀x (F(x) → G(x))', async ({ page }) => {
+    await gotoWithProgress(
+      page,
+      setActiveRoute(emptyProgress(), LOGIC_AND_THEISM_READING_ROUTE_ID),
+    );
+    await beginOfferedSession(page);
+    const active = page.getByTestId('session-active');
+    await lessonNext(page).click();
+    await page.locator('[data-action="select-choice"][data-choice-id="still-true"]').click();
+    await page.locator('[data-action="check-classification"]').click();
+    await page.locator('[data-action="source-next"]').click();
+    await lessonNext(page).click();
+    await lessonNext(page).click();
+    expect(await active.innerText()).toMatch(/if someone is a member, then that person signed/i);
+    expect(await active.innerText()).not.toMatch(/∀|→/);
+    await lessonNext(page).click();
+    expect(await active.innerText()).toContain('→');
+    expect(await active.innerText()).toContain('F(x) → G(x)');
+    expect(await active.innerText()).not.toContain('∀');
   });
 
   test('mid-course stale evidence is offered as lapse recovery before new lessons', async ({ page }) => {

@@ -239,6 +239,18 @@
       "concept": "conditional"
     },
     {
+      "id": "lat-conditional-meaning",
+      "concept": "conditional"
+    },
+    {
+      "id": "lat-conditional-notation",
+      "concept": "conditional"
+    },
+    {
+      "id": "lat-universal-meaning",
+      "concept": "universal-quantifier"
+    },
+    {
       "id": "lat-quantifier-universal",
       "concept": "universal-quantifier"
     },
@@ -717,9 +729,14 @@
       ]
     },
     {
+      "id": "lat-predict-empty-club",
+      "concept": "existential-import",
+      "requiresLessons": ["lat-conditional-bridge"]
+    },
+    {
       "id": "lat-retrieve-conditional",
       "concept": "conditional",
-      "requiresLessons": ["lat-empty-no-counterexample"]
+      "requiresLessons": ["lat-conditional-notation"]
     },
     {
       "id": "lat-check-universal",

@@ -70,6 +70,7 @@
     ],
     "nd-001": [{ "concept": "conditional", "capability": "apply", "role": "primary" }],
     "nd-002": [{ "concept": "conjunction", "capability": "apply", "role": "primary" }],
+    "lat-predict-empty-club": [{ "concept": "existential-import", "capability": "recognize", "role": "primary" }],
     "lat-retrieve-conditional": [{ "concept": "conditional", "capability": "apply", "role": "primary" }],
     "lat-check-universal": [{ "concept": "universal-quantifier", "capability": "recognize", "role": "primary" }],
     "lat-check-existential": [{ "concept": "existential-quantifier", "capability": "recognize", "role": "primary" }],

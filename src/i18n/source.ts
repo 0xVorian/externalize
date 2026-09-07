@@ -10,8 +10,8 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Every member signed',
         body: [
-          'Imagine a club that currently has no members. Consider the claim: every member signed the register.',
-          'Nobody signed, because there is nobody there to sign. Does that make the claim false, or can it still hold?',
+          'Imagine a club that currently has no members.',
+          'Someone claims: every member signed the register.',
           'Stay with the situation as it is: the club is empty.',
         ],
         example: 'Club membership: (empty)\nClaim: every member signed.',
@@ -41,14 +41,51 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         ],
       },
     },
+    'lat-conditional-meaning': {
+      title: 'If a member, then signed',
+      subtitle: 'The general claim in ordinary language.',
+      card: {
+        title: 'What “every member signed” amounts to',
+        body: [
+          'Return to the empty club. “Every member signed” is a claim about members, if there are any.',
+          'In ordinary language: if someone is a member, then that person signed. With nobody in the club, the “if” is never met.',
+          'That is why the general claim can still hold: it does not require a member; it only constrains members, should there be any.',
+        ],
+      },
+    },
+    'lat-conditional-notation': {
+      title: 'Writing “if … then …”',
+      subtitle: 'A symbol for the ordinary if–then.',
+      card: {
+        title: 'The arrow →',
+        body: [
+          'We write “if … then …” with an arrow: →.',
+          'If x is F, then x is G becomes F(x) → G(x). For the club: if x is a member, then x signed.',
+          'The arrow records the if–then you already used. It does not yet say that an F exists.',
+        ],
+        example: 'F(x) → G(x)',
+      },
+    },
+    'lat-universal-meaning': {
+      title: 'For every object',
+      subtitle: 'The same if–then, covering each object.',
+      card: {
+        title: 'The general claim covers each object',
+        body: [
+          '“Every member signed” now has a precise reading: for each object, if it is a member, then it signed.',
+          'That is the if–then you already wrote, required of every object in the domain.',
+          'It still does not say that a member exists. It only says the if–then holds throughout.',
+        ],
+      },
+    },
     'lat-quantifier-universal': {
       title: 'Writing “every”',
-      subtitle: 'A symbol for the general claim.',
+      subtitle: 'A symbol for covering the whole domain.',
       card: {
         title: 'The job of ∀',
         body: [
-          'The same general claim is written with ∀. “Every F is G” becomes ∀x (F(x) → G(x)): anything that is F is G.',
-          'Logicians call ∀ the universal quantifier. Its job is to cover the whole domain: whatever is F, it is G.',
+          'We write that covering-every-object claim with ∀. “Every F is G” becomes ∀x (F(x) → G(x)).',
+          'Logicians call ∀ the universal quantifier. Its job is to say the if–then holds for every object.',
           'That form does not, by itself, say that an F exists.',
         ],
         example: '∀x (F(x) → G(x))',
@@ -86,8 +123,8 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         title: 'The job of ∃',
         body: [
           'We write “there is at least one F” with ∃. It looks like this: ∃x F(x).',
-          'Logicians call ∃ the existential quantifier. Existential commitment comes from that quantifier: it asserts a witness.',
-          'The symbol’s job is existence. Do not yet add extra structure.',
+          'Logicians call ∃ the existential quantifier. It requires at least one F.',
+          'The symbol’s job is existence. Extra structure comes later.',
         ],
         example: '∃x F(x)',
       },
@@ -100,7 +137,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Sometimes we need more than bare existence. ∃x (F(x) ∧ G(x)) says there is at least one object that is both F and G.',
           'Conjunction requires that the same witness have both properties. It does not create existence; ∃ already did that.',
-          'By contrast, ∀x (F(x) → G(x)) can still hold when nothing is F.',
+          'The existential commitment is in ∃. Conjunction only says that this same witness is both F and G.',
         ],
         example: '∃x (F(x) ∧ G(x))',
       },
@@ -137,8 +174,8 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Tout membre a signé',
         body: [
-          'Imaginez un club qui, pour l’heure, n’a aucun membre. On avance que tout membre a signé le registre.',
-          'Personne n’a signé, puisqu’il n’y a personne. Cela rend-il la phrase fausse, ou peut-elle encore valoir ?',
+          'Imaginez un club qui, pour l’heure, n’a aucun membre.',
+          'On avance que tout membre a signé le registre.',
           'Tenez-vous-en à la situation telle qu’elle est : le club est vide.',
         ],
         example: 'Membres du club : (aucun)\nPhrase : tout membre a signé.',
@@ -168,14 +205,51 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         ],
       },
     },
+    'lat-conditional-meaning': {
+      title: 'Si membre, alors a signé',
+      subtitle: 'La phrase générale en langue ordinaire.',
+      card: {
+        title: 'Ce que dit « tout membre a signé »',
+        body: [
+          'Revenez au club vide. « Tout membre a signé » porte sur les membres, s’il y en a.',
+          'En langue ordinaire : si quelqu’un est membre, alors cette personne a signé. Personne n’étant dans le club, le « si » n’est jamais rempli.',
+          'Voilà pourquoi la phrase générale peut encore valoir : elle n’exige pas un membre ; elle ne contraint que les membres, s’il y en a.',
+        ],
+      },
+    },
+    'lat-conditional-notation': {
+      title: 'Écrire « si … alors … »',
+      subtitle: 'Un symbole pour le si-alors ordinaire.',
+      card: {
+        title: 'La flèche →',
+        body: [
+          'On note « si … alors … » par une flèche : →.',
+          'Si x est F, alors x est G s’écrit F(x) → G(x). Pour le club : si x est membre, alors x a signé.',
+          'La flèche consigne le si-alors déjà employé. Elle n’affirme pas encore qu’il existe un F.',
+        ],
+        example: 'F(x) → G(x)',
+      },
+    },
+    'lat-universal-meaning': {
+      title: 'Pour tout objet',
+      subtitle: 'Le même si-alors, sur chaque objet.',
+      card: {
+        title: 'La phrase générale porte sur chaque objet',
+        body: [
+          '« Tout membre a signé » a maintenant une lecture précise : pour chaque objet, s’il est membre, alors il a signé.',
+          'C’est le si-alors déjà écrit, exigé de tout objet du domaine.',
+          'Cela ne dit toujours pas qu’il existe un membre. Cela dit seulement que le si-alors vaut partout.',
+        ],
+      },
+    },
     'lat-quantifier-universal': {
       title: 'Écrire « tout »',
-      subtitle: 'Un symbole pour la phrase générale.',
+      subtitle: 'Un symbole pour couvrir le domaine entier.',
       card: {
         title: 'Le rôle de ∀',
         body: [
-          'La même phrase générale s’écrit avec ∀. « Tout F est G » devient ∀x (F(x) → G(x)) : tout objet qui est F est G.',
-          'On appelle ∀ le quantificateur universel. Il porte sur le domaine tout entier : ce qui est F est G.',
+          'On écrit cette couverture de tout objet avec ∀. « Tout F est G » devient ∀x (F(x) → G(x)).',
+          'On appelle ∀ le quantificateur universel. Il dit que le si-alors vaut pour tout objet.',
           'Cette forme n’affirme pas, à soi seul, qu’il existe un F.',
         ],
         example: '∀x (F(x) → G(x))',
@@ -213,8 +287,8 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         title: 'Le rôle de ∃',
         body: [
           'On écrit « il existe au moins un F » avec ∃. Cela donne ∃x F(x).',
-          'On appelle ∃ le quantificateur existentiel. L’engagement existentiel vient de ce quantificateur : il pose l’existence d’un témoin.',
-          'Le symbole sert à l’existence. N’ajoutez pas encore de structure supplémentaire.',
+          'On appelle ∃ le quantificateur existentiel. Il exige au moins un F.',
+          'Le symbole sert à l’existence. La structure supplémentaire viendra ensuite.',
         ],
         example: '∃x F(x)',
       },
@@ -227,7 +301,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Parfois l’existence ne suffit pas. ∃x (F(x) ∧ G(x)) dit qu’il y a au moins un objet à la fois F et G.',
           'La conjonction exige que le même témoin ait les deux propriétés. Elle n’instaure pas l’existence ; ∃ l’a déjà posée.',
-          'À l’inverse, ∀x (F(x) → G(x)) peut encore valoir sans aucun F.',
+          'L’engagement existentiel vient de ∃. La conjonction dit seulement que ce même témoin est à la fois F et G.',
         ],
         example: '∃x (F(x) ∧ G(x))',
       },
@@ -261,18 +335,33 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
 
 export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
   en: {
-    'lat-retrieve-conditional': {
+    'lat-predict-empty-club': {
       prompt:
         'The club has no members. Is “every member signed the register” still true?',
       choices: {
-        'vacuous-true': 'Yes — nobody failed to sign, so nothing contradicts the claim.',
-        existential: 'No — a true general claim requires at least one member.',
+        'still-true': 'Yes — nobody failed to sign, so nothing contradicts the claim.',
+        'needs-instance': 'No — a true general claim requires at least one member.',
       },
       choiceWrong:
         'Absence of members is not a counterexample. A counterexample would be a member who did not sign.',
       feedback: {
         correct:
           'Correct. With nobody there who failed to sign, the general claim stands.',
+      },
+    },
+    'lat-retrieve-conditional': {
+      prompt:
+        'Alex is not a club member. F stands for “is a member” and G for “signed”. What follows for F(a) → G(a), where a is Alex?',
+      choices: {
+        holds:
+          'F(a) → G(a) can still be true: Alex is not a member, so this is not a member who failed to sign.',
+        fails: 'F(a) → G(a) is false, because Alex did not sign.',
+      },
+      choiceWrong:
+        'The arrow fails only when the if-clause holds and the then-clause fails. Alex is not a member, so the if-clause does not hold.',
+      feedback: {
+        correct:
+          'Correct. When the if-clause is not met, F(a) → G(a) is not a counterexample to the rule.',
       },
     },
     'lat-check-universal': {
@@ -395,19 +484,34 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
     },
   },
   fr: {
-    'lat-retrieve-conditional': {
+    'lat-predict-empty-club': {
       prompt:
         'Le club n’a aucun membre. L’assertion « tout membre a signé le registre » reste-t-elle vraie ?',
       choices: {
-        'vacuous-true':
+        'still-true':
           'Oui — personne n’a manqué de signer, donc rien ne contredit l’assertion.',
-        existential: 'Non — une phrase générale vraie exige au moins un membre.',
+        'needs-instance': 'Non — une phrase générale vraie exige au moins un membre.',
       },
       choiceWrong:
         'L’absence de membres n’est pas un contre-exemple. Un contre-exemple serait un membre qui n’a pas signé.',
       feedback: {
         correct:
           'Exact. Personne n’a manqué de signer : la phrase générale tient.',
+      },
+    },
+    'lat-retrieve-conditional': {
+      prompt:
+        'Alex n’est pas membre du club. F signifie « est membre » et G « a signé ». Que s’ensuit-il pour F(a) → G(a), où a désigne Alex ?',
+      choices: {
+        holds:
+          'F(a) → G(a) peut encore être vraie : Alex n’est pas membre, ce n’est donc pas un membre qui n’aurait pas signé.',
+        fails: 'F(a) → G(a) est fausse, parce qu’Alex n’a pas signé.',
+      },
+      choiceWrong:
+        'La flèche échoue seulement lorsque le « si » est rempli et que le « alors » échoue. Alex n’est pas membre : le « si » n’est pas rempli.',
+      feedback: {
+        correct:
+          'Exact. Lorsque le « si » n’est pas rempli, F(a) → G(a) n’est pas un contre-exemple à la règle.',
       },
     },
     'lat-check-universal': {

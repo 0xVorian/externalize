@@ -8,6 +8,8 @@ import {
 } from '../helpers/app';
 import { emptyProgress, progressReadyForExercise } from '../helpers/progress';
 import { beginOfferedSession, sessionOpening, sessionPosition, sessionPrimary } from '../helpers/session';
+import { setActiveRoute } from '../../src/app/source-route';
+import { LOGIC_AND_THEISM_READING_ROUTE_ID } from '../../src/app/routes';
 
 async function expectNoPageOverflow(page: Page): Promise<void> {
   expect(
@@ -118,4 +120,24 @@ test('session opening and one-tap start fit a narrow phone', async ({ page }) =>
     await expect(sessionPosition(page)).toHaveText('1 / 6');
   await expectNoPageOverflow(page);
   await expect(page.getByTestId('session-exit')).toBeVisible();
+});
+
+test('Sobel empty-club prediction remains usable on a narrow phone', async ({ page }) => {
+  await gotoWithProgress(
+    page,
+    setActiveRoute(emptyProgress(), LOGIC_AND_THEISM_READING_ROUTE_ID),
+  );
+  await beginOfferedSession(page);
+  await lessonNext(page).click();
+  await expect(page.locator('[data-action="select-choice"]').first()).toBeVisible();
+  await expectNoPageOverflow(page);
+  await page.locator('[data-action="select-choice"][data-choice-id="needs-instance"]').click();
+  await page.locator('[data-action="check-classification"]').click();
+  await expect(page.getByTestId('try-again')).toBeVisible();
+  await expectNoPageOverflow(page);
+  await page.getByTestId('try-again').click();
+  await page.locator('[data-action="select-choice"][data-choice-id="still-true"]').click();
+  await page.locator('[data-action="check-classification"]').click();
+  await expect(page.locator('.feedback-correct')).toBeVisible();
+  await expectNoPageOverflow(page);
 });
