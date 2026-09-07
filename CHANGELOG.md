@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-07
+
 ### Added
 
 - Capability-first progress: derived Ready / Developing / Consistent states, compact Learn unit/lesson meters, Practice session `n / 5` with a real completion boundary, and one-time progress moments for consistency, unlocks, and nested-evaluation scaffold withdrawal
@@ -14,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated the GitHub Actions checkout/setup runtime actions to v7, removing the deprecated Node 20 action-runtime warning
 - Consolidated transient Practice progress/session announcements into a dedicated state module and unified draft-vs-checked practice mutations, reducing orchestration duplication without changing learner behavior
 - Renamed the short-horizon capability state from **Reliable** to **Consistent so far** so three recent clean attempts are not presented as delayed mastery evidence
 - Standardized development, CI, and Cloudflare deployment on Node 22; release checks now include the Playwright suite
@@ -21,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Made the maximum-scaffold browser regression follow the active system-chosen evaluation case instead of assuming one fixed intermediate truth value
 - Progress imports now reject unsupported internal progress versions instead of silently resetting to a blank store; failed local loads preserve the raw payload under a recovery key
 - Unit 2 completion is shown once on the first Practice screen after the Learn path, then clears when the learner continues
 - Practice capability name and state are available once as visible text, without a duplicate screen-reader announcement
@@ -224,6 +228,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile-first design constraint and MVP-0 sequencing
 - Versioning policy and Cursor rule
 
-[Unreleased]: https://github.com/0xVorian/externalize/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/0xVorian/externalize/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/0xVorian/externalize/releases/tag/v0.4.0
 [0.2.0]: https://github.com/0xVorian/externalize/releases/tag/v0.2.0
 [0.1.0]: https://github.com/0xVorian/externalize/releases/tag/v0.1.0
