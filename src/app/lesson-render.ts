@@ -6,6 +6,7 @@ import { renderShellHeader } from './shell-render';
 import { renderRoutePicker } from './route-picker-render';
 import { renderLiveTruthRow, renderTruthTable, renderWatchGrid, usesWatchGrid } from './truth-table-render';
 import { renderAtomPanel } from './atom-toggles-render';
+import { renderSessionFrame } from './session-chrome-render';
 
 function renderGuidedToggles(state: LessonState): string {
   return renderAtomPanel({
@@ -147,6 +148,7 @@ export function renderLessonView(
     };
     unitCompleteNotice?: string | null;
     unitCompleteNoticeLive?: boolean;
+    session?: { current: number; total: number };
   },
 ): string {
   const learn = learnUi(state.locale);
@@ -197,6 +199,20 @@ export function renderLessonView(
       )
     : '';
 
+  const nextButton = showNext
+    ? `<button type="button" class="primary" data-action="lesson-next">${nextLabel}</button>`
+    : '';
+
+  if (options.session) {
+    return renderSessionFrame({
+      locale: state.locale,
+      current: options.session.current,
+      total: options.session.total,
+      body,
+      actions: nextButton,
+    });
+  }
+
   return `
     <main class="app" lang="${state.locale}">
       ${renderShellHeader({
@@ -235,9 +251,7 @@ export function renderLessonView(
 
       <div class="actions">
         ${
-          showNext
-            ? `<button type="button" class="primary" data-action="lesson-next">${nextLabel}</button>`
-            : ''
+          nextButton
         }
       </div>
     </main>

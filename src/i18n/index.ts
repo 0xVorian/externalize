@@ -28,6 +28,8 @@ export {
   getLessonCopy,
   getReference,
 } from './lessons';
+export { sessionUi } from './session';
+export type { SessionUiCopy } from './session';
 export type {
   LessonCopy,
   LearnUiCopy,
