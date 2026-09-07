@@ -287,7 +287,7 @@ describe('storage v3', () => {
     const store = loadProgress();
     const raw = JSON.stringify(store);
     const { progress: restored } = importProgress(raw);
-    expect(restored.version).toBe(6);
+    expect(restored.version).toBe(7);
   });
 
   it('migrates v5 completion as exposure and resets contaminated metrics', () => {
@@ -351,21 +351,21 @@ describe('storage v3', () => {
         lastVisitedAt: new Date().toISOString(),
       }),
     );
-    expect(store.version).toBe(6);
+    expect(store.version).toBe(7);
     expect(store.level2Complete).toBe(false);
   });
 
-  it('migrates v4 through v6', () => { const {progress:store}=importProgress(JSON.stringify({version:4,lessonsCompleted:['level0-01-letters'],level0Complete:false,level1Complete:false,queue:[],completed:[],resume:{mode:'learn',lessonId:'level0-02-truth',updatedAt:new Date().toISOString()},skills:{},exerciseStats:{},errorCounts:{},lastVisitedAt:new Date().toISOString()})); expect(store.version).toBe(6); expect(store.onboardingComplete).toBe(true); });
+  it('migrates v4 through v7', () => { const {progress:store}=importProgress(JSON.stringify({version:4,lessonsCompleted:['level0-01-letters'],level0Complete:false,level1Complete:false,queue:[],completed:[],resume:{mode:'learn',lessonId:'level0-02-truth',updatedAt:new Date().toISOString()},skills:{},exerciseStats:{},errorCounts:{},lastVisitedAt:new Date().toISOString()})); expect(store.version).toBe(7); expect(store.onboardingComplete).toBe(true); });
   it('new store needs onboarding', () => expect(loadProgress().onboardingComplete).toBe(false));
   it('rejects invalid import data', () => {
     expect(() => importProgress('not json')).toThrow();
     expect(() => importProgress('{"kind":"externalize-progress-export","exportVersion":99}')).toThrow();
-    expect(() => importProgress('{"version":7}')).toThrow('Unsupported progress version: 7');
+    expect(() => importProgress('{"version":8}')).toThrow('Unsupported progress version: 8');
     expect(() =>
       importProgress(
-        '{"kind":"externalize-progress-export","exportVersion":1,"progress":{"version":7}}',
+        '{"kind":"externalize-progress-export","exportVersion":1,"progress":{"version":8}}',
       ),
-    ).toThrow('Unsupported progress version: 7');
+    ).toThrow('Unsupported progress version: 8');
     expect(() => importProgress('{}')).toThrow('Invalid progress data: missing version');
   });
 });

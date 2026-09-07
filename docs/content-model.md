@@ -9,17 +9,23 @@ How lessons, exercises, and progress are represented in the codebase today.
 - Skill tags and error tags drive spaced repetition (see progress record below)
 - Exercise UIs must be completable on a phone browser (tap-first; no hover-only steps)
 
-Future direction: YAML/JSON authoring under `content/` may replace hand-edited TypeScript arrays. `content/prerequisites.json` is the first content file; lesson/exercise definitions remain in TypeScript until migrated. Follow [Authoring guide](authoring.md).
+Future direction: YAML/JSON authoring under `content/` may replace hand-edited TypeScript arrays. `content/prerequisites.json` remains the canonical concept graph for the logic course; routes and evidence live as additional content files. Lesson/exercise definitions remain in TypeScript until migrated. Follow [Authoring guide](authoring.md).
 
 ## File layout (current)
 
 ```
 content/
-  prerequisites.json   — concept graph (lessons → exercises prerequisites)
+  prerequisites.json        — concept graph (lessons → exercises prerequisites)
+  exercise-evidence.json    — explicit concept × capability tags on graded exercises
+  routes/logic-foundations.json — canonical Learn/Practice sequence
 
 src/app/
   lessons.ts           — Unit 0/1/2 lessons and sequential practice order
   exercises.ts         — EXERCISE_DEFINITIONS
+  curriculum.ts        — route, capability, and evidence types
+  concepts.ts          — canonical concept lookup
+  evidence.ts          — load evidence tags; record/backfill conceptEvidence
+  routes.ts            — route loader and selectors
   presentation.test.ts — presentation inventory (must stay in sync)
   lesson-render.ts     — card, watch table, guided live row
   render.ts            — practice tree + toggles
@@ -28,7 +34,7 @@ src/app/
   concept-map-render.ts
   prerequisites.ts     — loads content/prerequisites.json
   practice-attempt.ts  — one-session attempt and repair state
-  storage.ts           — v6 progress persistence and centralized finalization
+  storage.ts           — v7 progress persistence and centralized finalization
   progress-visibility.ts — derived capability states and progress-moment diffs
   practice-session.ts  — ephemeral 5-attempt practice session (not mastery)
   evaluation-scaffold.ts — nested evaluation intermediate-value withdrawal
@@ -140,7 +146,7 @@ Explore mode (`AppMode: explore`) lets learners manipulate assignments with live
 
 ### Gated unlock
 
-`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines the order within each unit. Exposure alone does not unlock the next exercise: the preceding exercise ID must be in the v6 `passed` list.
+`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines the order within each unit. Exposure alone does not unlock the next exercise: the preceding exercise ID must be in the `passed` list. The `logic-foundations` route reproduces this order; route-aware unlock currently delegates to the same Unit 0 / clustered Unit 1 / Unit 2 policy.
 
 ## Presentation routing
 
@@ -167,11 +173,11 @@ scope-and-parens     → all connectives
 
 ## Progress record (local storage)
 
-Stored in browser `localStorage` (see `src/app/storage.ts`). Version 6 separates exposure from successful completion and persists the current practice attempt/draft.
+Stored in browser `localStorage` (see `src/app/storage.ts`). Version 7 keeps every v6 field and adds portable concept evidence plus per-route progress. Version 6 exports migrate conservatively.
 
 ```typescript
 interface ProgressRecord {
-  version: 6;
+  version: 7;
   lessonsCompleted: string[];
   attempted: string[]; // at least one checked answer
   passed: string[];    // eventually answered correctly
@@ -182,17 +188,25 @@ interface ProgressRecord {
   exerciseStats: Record<string, ExerciseStat>;
   errorCounts: Record<PracticeErrorTag, number>;
   queue: SrsEntry[];
+  activeRouteId: string; // default 'logic-foundations'
+  routes: Record<string, RouteProgress>;
+  conceptEvidence: Record<string, ConceptCapabilityStat>; // key: `${conceptId}:${capability}`
 }
 ```
 
-One opened exercise session is one attempt. Wrong checks keep that attempt active; the first correct check finalizes it. Only centralized finalization increments attempt/skill/error totals, updates SRS, and adds `passed`.
+One opened exercise session is one attempt. Wrong checks keep that attempt active; the first correct check finalizes it. Only centralized finalization increments attempt/skill/error totals, updates SRS, adds `passed`, and records `conceptEvidence`.
 
 - A clean pass is correct on the first checked answer and advances the normal SRS interval.
 - A repaired pass follows one or more errors, still adds `passed`, records the encountered errors, and remains due immediately with reduced ease.
 - Nested evaluate-formula exercises may store optional `exerciseStats[id].scaffoldLevel`. A clean pass increments it when the next level hides additional intermediate values. This is pedagogical support withdrawal, not a separate mastery score.
 - Capability states (Ready / Developing / Consistent) are **derived** from unlocks and `SkillStat` evidence. See [`progress-visibility.md`](progress-visibility.md).
 - The five-attempt practice session lives in app memory only. It must not be written into progress export/import.
+- v6 → v7 migration preserves skills, exerciseStats, passed, drafts, queue, and resume. It sets `activeRouteId` to `logic-foundations`, initializes that route from lesson/resume state, and backfills `conceptEvidence` only from `exerciseStats` plus explicit evidence tags. Lesson completion alone is not mastery evidence.
 - v5 migration preserves old `completed` IDs only as `attempted` exposure. It resets contaminated practice statistics, errors, and SRS, and requires fresh correct evidence for `passed`.
+
+## Evidence tags
+
+Graded exercises declare what a successful attempt should strengthen in `content/exercise-evidence.json`. Interaction families (`evaluate-formula`, translation, etc.) remain `SkillId`s; portable learner state uses concept × capability pairs (`recognize`, `apply`, `debug`, `transfer`).
 
 ## Feedback tag taxonomy
 

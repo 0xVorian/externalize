@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Adaptive curriculum Phase A: the existing three-unit logic course now runs as the explicit `logic-foundations` route, with canonical concept × capability evidence on graded exercises, per-route progress, and a conservative v6 → v7 progress migration that preserves skills, SRS, resume, and existing learner evidence
+
+### Changed
+
+- Progress storage is version 7. v6 exports still import; historical concept evidence is backfilled only from tagged `exerciseStats`, never from lesson completion
+
 ## [0.4.0] - 2026-09-07
 
 ### Added

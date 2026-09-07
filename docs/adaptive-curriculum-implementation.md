@@ -1,7 +1,8 @@
 # Adaptive curriculum implementation assessment
 
-**Status:** proposed implementation plan  
+**Status:** Phase A implemented in the runtime; Phases B–C remain the authorized next gates  
 **Created:** 2026-09-07  
+**Updated:** 2026-09-07  
 **Scope:** turn the source-driven curriculum idea into a small, testable extension of the existing application without rewriting Externalize
 
 ## Executive conclusion
@@ -248,7 +249,9 @@ Goal: prove the current logic course can run through the new route abstraction.
 7. Migrate v6 conservatively and derive whatever historical concept evidence is defensible from `exerciseStats` + exercise evidence tags.
 8. Regression-test that existing users see the same Learn/Practice sequence after migration.
 
-**Gate:** current course behavior and existing progress survive unchanged.
+**Gate:** current course behavior and existing progress survive unchanged. **Met in code** (route-parity, v6→v7 migration, and existing Learn/Practice regression tests). Independent full-suite verification belongs with the assignment close-out.
+
+Canonical concepts for the existing course remain in `content/prerequisites.json`. Explicit evidence tags live in `content/exercise-evidence.json`. The route file is `content/routes/logic-foundations.json`. Progress v7 adds `activeRouteId`, `routes`, and `conceptEvidence` without deleting v6 fields.
 
 ## Phase B — one *Logic and Theism* vertical slice
 

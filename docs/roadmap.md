@@ -37,7 +37,7 @@ The implementation contract is [`adaptive-curriculum-implementation.md`](adaptiv
 
 The authorized sequence is:
 
-1. **Phase A — route refactor:** make the current logic course the explicit `logic-foundations` route with zero intended learner-visible change; add portable concept × capability evidence and conservative progress migration.
+1. **Phase A — route refactor:** make the current logic course the explicit `logic-foundations` route with zero intended learner-visible change; add portable concept × capability evidence and conservative progress migration. **Implemented** (v7 progress, route parity tests).
 2. **Phase B — narrow Sobel vertical slice:** implement only the Chapter II §§2.6–2.8 existential-import/Descartes route using the same learner model.
 3. **Phase C — deterministic prerequisite planner:** if justified by the vertical slice, extract a small inspectable skip/retrieve/teach policy.
 

@@ -1,0 +1,138 @@
+{
+  "id": "logic-foundations",
+  "kind": "canonical",
+  "label": {
+    "en": "Logic foundations",
+    "fr": "Fondements de la logique"
+  },
+  "steps": [
+    {
+      "id": "unit-0-learn",
+      "kind": "learn",
+      "items": [
+        "level0-01-letters",
+        "level0-02-truth",
+        "level0-03-and",
+        "level0-04-watch",
+        "level0-05-guided"
+      ]
+    },
+    {
+      "id": "unit-0-practice",
+      "kind": "practice",
+      "unlock": "sequential",
+      "requiresStep": "unit-0-learn",
+      "items": ["eval-001", "eval-011", "tt-001", "counter-001"]
+    },
+    {
+      "id": "unit-1-learn",
+      "kind": "learn",
+      "requiresStep": "unit-0-learn",
+      "items": [
+        "level1-01-neg",
+        "level1-02-neg-watch",
+        "level1-03-neg-guided",
+        "level1-04-or",
+        "level1-05-or-watch",
+        "level1-06-or-guided",
+        "level1-07-imp",
+        "level1-08-imp-watch",
+        "level1-09-imp-guided",
+        "level1-10-iff",
+        "level1-11-iff-watch",
+        "level1-12-iff-guided",
+        "level1-13-nesting",
+        "level1-14-nesting-guided",
+        "level1-15-translate"
+      ]
+    },
+    {
+      "id": "unit-1-practice",
+      "kind": "practice",
+      "unlock": "clustered",
+      "requiresStep": "unit-1-learn",
+      "items": [
+        "eval-010",
+        "eval-019",
+        "eval-003",
+        "eval-013",
+        "eval-014",
+        "eval-004",
+        "eval-015",
+        "eval-016",
+        "eval-005",
+        "eval-017",
+        "eval-018",
+        "eval-012",
+        "tt-002",
+        "tt-003",
+        "tt-004",
+        "tt-005",
+        "counter-002",
+        "counter-003",
+        "counter-004",
+        "eval-020",
+        "eval-002",
+        "eval-006",
+        "eval-007",
+        "eval-008",
+        "eval-009",
+        "scope-003",
+        "scope-009",
+        "scope-004",
+        "scope-007",
+        "scope-001",
+        "scope-005",
+        "scope-006",
+        "scope-008",
+        "scope-010",
+        "scope-011",
+        "scope-002",
+        "val-001",
+        "val-002",
+        "val-003",
+        "val-004",
+        "val-005",
+        "translate-001",
+        "translate-002",
+        "translate-003",
+        "translate-004",
+        "translate-005",
+        "translate-006",
+        "nd-001",
+        "nd-002"
+      ]
+    },
+    {
+      "id": "unit-2-learn",
+      "kind": "learn",
+      "requiresStep": "unit-1-learn",
+      "items": [
+        "level2-01-nesting",
+        "level2-02-double-neg",
+        "level2-03-double-neg-watch",
+        "level2-04-double-neg-guided",
+        "level2-05-precedence",
+        "level2-06-demorgan",
+        "level2-07-demorgan-watch",
+        "level2-08-demorgan-guided",
+        "level2-09-de-morgan-guided"
+      ]
+    },
+    {
+      "id": "unit-2-practice",
+      "kind": "practice",
+      "unlock": "sequential",
+      "requiresStep": "unit-2-learn",
+      "items": [
+        "eval-021",
+        "scope-012",
+        "scope-013",
+        "eval-022",
+        "counter-005",
+        "scope-014",
+        "tt-006"
+      ]
+    }
+  ]
+}
