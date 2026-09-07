@@ -48,9 +48,9 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: '“Some F is G” reports an instance',
         body: [
-          'The existential quantifier ∃x φ(x) says that at least one object in the domain satisfies φ.',
-          '“Some F is G” is ∃x (F(x) ∧ G(x)): there is an object that is both F and G. Conjunction, not implication, carries the existential commitment.',
-          'If the domain contains no F, that existential sentence is false. That is the contrast with the universal conditional.',
+          'The existential quantifier ∃x φ(x) says that at least one object in the domain satisfies φ. Existential commitment comes from that quantifier: it asserts a witness.',
+          '“Some F is G” is ∃x (F(x) ∧ G(x)). Conjunction does not create existence; it requires that the same witness be both F and G.',
+          'By contrast, ∀x (F(x) → G(x)) does not assert that an F exists. If the domain contains no F, the existential sentence is false, while the universal conditional can still hold.',
         ],
         example: '∃x (F(x) ∧ G(x))',
       },
@@ -87,7 +87,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Le si–alors n’introduit pas d’objet',
         body: [
-          'Une implication matérielle P → Q est vraie dès que P est faux. C’est le cas vacuous : l’implication tient sans que P soit réalisé.',
+          'Une implication matérielle P → Q est vraie dès que P est faux. C’est le cas de vérité par vacuité : l’implication tient sans que P soit réalisé.',
           'Sous forme prédicative, ∀x (F(x) → G(x)) peut être vraie dans un domaine qui ne contient aucun F. « Tout F est G » est alors vrai faute de contre-exemple.',
           'Une définition peut donc contraindre tout ce qui la satisferait, sans garantir qu’il existe un tel objet.',
         ],
@@ -113,9 +113,9 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: '« Quelque F est G » rapporte une instance',
         body: [
-          'Le quantificateur existentiel ∃x φ(x) affirme qu’au moins un objet du domaine satisfait φ.',
-          '« Quelque F est G » s’écrit ∃x (F(x) ∧ G(x)) : il y a un objet à la fois F et G. C’est la conjonction, non l’implication, qui porte l’engagement existentiel.',
-          'Si le domaine ne contient aucun F, cette phrase existentielle est fausse. Tel est le contraste avec l’implication universelle.',
+          'Le quantificateur existentiel ∃x φ(x) affirme qu’au moins un objet du domaine satisfait φ. L’engagement existentiel vient de ce quantificateur : il pose l’existence d’un témoin.',
+          '« Quelque F est G » s’écrit ∃x (F(x) ∧ G(x)). La conjonction n’instaure pas l’existence ; elle exige que ce même témoin soit à la fois F et G.',
+          'À l’inverse, ∀x (F(x) → G(x)) n’affirme pas qu’il existe un F. Sans F dans le domaine, l’énoncé existentiel est faux, alors que l’implication universelle peut encore valoir.',
         ],
         example: '∃x (F(x) ∧ G(x))',
       },
@@ -128,7 +128,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Une définition peut dire ce qui vaudrait de tout être souverainement parfait, sans établir que le domaine en contient un.',
           'Si les prémisses n’étayent que la lecture universelle-hypothétique, elles ne donnent pas d’import existentiel. Un domaine sans être parfait peut laisser ces prémisses vraies et la conclusion existentielle fausse.',
-          'Reprenez le livre au chapitre II, §§2.6–2.8, en visée de ce défaut de validité, plutôt que de la question latérale de savoir si l’existence est une perfection.',
+          'Reprenez le livre au chapitre II, §§2.6–2.8, en visant ce défaut de validité, plutôt que la question latérale de savoir si l’existence est une perfection.',
         ],
       },
     },
@@ -170,7 +170,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'There is at least one object that is both F and G.',
       },
       choiceWrong:
-        'The conjunction inside the existential quantifier requires an actual F that is G. That is not the universal-hypothetical reading.',
+        'The existential quantifier asserts a witness. Conjunction then requires that this same object be both F and G — unlike the universal-hypothetical reading.',
       feedback: {
         correct: 'Correct. ∃x (F(x) ∧ G(x)) reports an instance.',
       },
@@ -307,7 +307,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'Il y a au moins un objet à la fois F et G.',
       },
       choiceWrong:
-        'La conjonction sous le quantificateur existentiel exige un F qui est G. Ce n’est pas la lecture universelle-hypothétique.',
+        'Le quantificateur existentiel pose un témoin. La conjonction exige ensuite que ce même objet soit à la fois F et G, contrairement à la lecture universelle-hypothétique.',
       feedback: {
         correct: 'Exact. ∃x (F(x) ∧ G(x)) rapporte une instance.',
       },
