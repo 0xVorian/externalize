@@ -339,8 +339,8 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'The club has no members. Is “every member signed the register” still true?',
       choices: {
-        'still-true': 'Yes — nobody failed to sign, so nothing contradicts the claim.',
-        'needs-instance': 'No — a true general claim requires at least one member.',
+        'still-true': 'Yes — it is still true.',
+        'needs-instance': 'No — there must be at least one member.',
       },
       choiceWrong:
         'Absence of members is not a counterexample. A counterexample would be a member who did not sign.',
@@ -351,17 +351,16 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'lat-retrieve-conditional': {
       prompt:
-        'Alex is not a club member. F stands for “is a member” and G for “signed”. What follows for F(a) → G(a), where a is Alex?',
+        'Alex is not a club member and did not sign. F stands for “is a member” and G for “signed”. Is F(a) → G(a) true or false, where a is Alex?',
       choices: {
-        holds:
-          'F(a) → G(a) can still be true: Alex is not a member, so this is not a member who failed to sign.',
-        fails: 'F(a) → G(a) is false, because Alex did not sign.',
+        holds: 'True',
+        fails: 'False',
       },
       choiceWrong:
-        'The arrow fails only when the if-clause holds and the then-clause fails. Alex is not a member, so the if-clause does not hold.',
+        'A conditional is false only when the if-clause is true and the then-clause is false. Here F(a) is false, so F(a) → G(a) is true.',
       feedback: {
         correct:
-          'Correct. When the if-clause is not met, F(a) → G(a) is not a counterexample to the rule.',
+          'Correct. F(a) is false, so the conditional is true. A conditional is false only when the if-clause is true and the then-clause is false.',
       },
     },
     'lat-check-universal': {
@@ -488,9 +487,8 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt:
         'Le club n’a aucun membre. L’assertion « tout membre a signé le registre » reste-t-elle vraie ?',
       choices: {
-        'still-true':
-          'Oui — personne n’a manqué de signer, donc rien ne contredit l’assertion.',
-        'needs-instance': 'Non — une phrase générale vraie exige au moins un membre.',
+        'still-true': 'Oui — elle reste vraie.',
+        'needs-instance': 'Non — il faut au moins un membre.',
       },
       choiceWrong:
         'L’absence de membres n’est pas un contre-exemple. Un contre-exemple serait un membre qui n’a pas signé.',
@@ -501,17 +499,16 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'lat-retrieve-conditional': {
       prompt:
-        'Alex n’est pas membre du club. F signifie « est membre » et G « a signé ». Que s’ensuit-il pour F(a) → G(a), où a désigne Alex ?',
+        'Alex n’est pas membre du club et n’a pas signé. F signifie « est membre » et G « a signé ». F(a) → G(a) est-elle vraie ou fausse, où a désigne Alex ?',
       choices: {
-        holds:
-          'F(a) → G(a) peut encore être vraie : Alex n’est pas membre, ce n’est donc pas un membre qui n’aurait pas signé.',
-        fails: 'F(a) → G(a) est fausse, parce qu’Alex n’a pas signé.',
+        holds: 'Vraie',
+        fails: 'Fausse',
       },
       choiceWrong:
-        'La flèche échoue seulement lorsque le « si » est rempli et que le « alors » échoue. Alex n’est pas membre : le « si » n’est pas rempli.',
+        'Une implication est fausse seulement lorsque son « si » est vrai et son « alors » est faux. Ici F(a) est faux : F(a) → G(a) est donc vraie.',
       feedback: {
         correct:
-          'Exact. Lorsque le « si » n’est pas rempli, F(a) → G(a) n’est pas un contre-exemple à la règle.',
+          'Exact. F(a) est faux : l’implication est donc vraie. Une implication est fausse seulement lorsque le « si » est vrai et le « alors » est faux.',
       },
     },
     'lat-check-universal': {
