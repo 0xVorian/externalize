@@ -11,6 +11,8 @@ Start here:
 | Document | Purpose |
 |----------|---------|
 | [Vision & brief](docs/vision.md) | Original concept, learning path, exercise types, success criterion |
+| [Adaptive curriculum](docs/adaptive-curriculum.md) | Proposed concept-graph + route + source-pack architecture for book-driven learning |
+| [Logic and Theism curriculum map](docs/curricula/logic-and-theism.md) | First real source map and proving ground for adaptive routing |
 | [Design principles](docs/design-principles.md) | Non-negotiable UX and pedagogical constraints |
 | [Technical decisions](docs/decisions.md) | Platform, architecture, notation, and open questions with current answers |
 | [Roadmap](docs/roadmap.md) | Current priorities, shipped phases, and validation gates |
