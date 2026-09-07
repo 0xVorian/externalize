@@ -1,7 +1,6 @@
 export type { Locale } from './locale';
 export { loadLocale, saveLocale, otherLocale } from './locale';
 export {
-  ui,
   progressUi,
   onboardingUi,
   formatResumeTime,
@@ -13,15 +12,14 @@ export {
   getCellFeedback,
   getCounterFeedback,
   getTautologyFeedback,
-  getFeedbackTemplates,
   getFeedbackDefaults,
   formatTruthValue,
   formatAssignmentLine,
-  formatEvaluationFeedback,
   translationUi,
   proofUi,
   visibilityUi,
 } from './messages';
+export { ui, getFeedbackTemplates, formatEvaluationFeedback } from './feedback';
 export type { ExerciseCopy, UiCopy, ProgressUiCopy, TranslationUiCopy, OnboardingUiCopy, ProofUiCopy, VisibilityUiCopy } from './messages';
 export {
   learnUi,
