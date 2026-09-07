@@ -8,7 +8,7 @@ Externalize now has three propositional-logic learning units, graded practice ac
 
 v0.4.0 establishes the current validation baseline: progress visibility is shipped, progress persistence/PWA failure modes are hardened, and the main Practice orchestration has been simplified without changing learner semantics.
 
-The main unresolved question is no longer whether the core interactions can be built, or whether progress can be made perceptible without inventing arbitrary gamification. It is whether sustained use makes symbolic-logic practice meaningfully easier and worth returning to.
+The main unresolved question is no longer whether the core interactions can be built, or whether progress can be made perceptible without inventing arbitrary gamification. It is whether Externalize helps with the real learning task that motivated it: acquiring enough formal machinery, with low working-memory burden, to understand difficult material and transfer that understanding.
 
 ### Current validation priority — sustained personal use
 
@@ -25,11 +25,25 @@ Implemented scope:
 - [x] EN/FR, accessibility, reduced-motion, and ~320px mobile coverage
 - [x] Unit and browser regression tests for progress derivation and transition behavior
 
-**Validation criterion now:** use the current application repeatedly in ordinary phone sessions and determine whether the learner can tell what they are working on, notice meaningful progress, retain and transfer symbolic-logic skills, and want to return without being prompted by product-development work.
+**Validation criterion now:** use the application on actual learning work and determine whether the learner can understand what they are working on, notice meaningful progress, retain and transfer formal skills, and return to the source with less friction.
 
-Progress claims must remain evidence-backed. Explore, time spent, and session completion are motivational/contextual signals only and must not masquerade as mastery.
+Progress claims must remain evidence-backed. Explore, time spent, reading completion, hints, and session completion are motivational/contextual signals only and must not masquerade as mastery.
 
-Until sustained use produces evidence for a concrete change, **product validation takes priority over curriculum expansion**.
+### Authorized adaptive-curriculum pilot
+
+A concrete sustained-use case has now justified one bounded architectural extension: using Externalize while reading Jordan Howard Sobel's *Logic and Theism*.
+
+The implementation contract is [`adaptive-curriculum-implementation.md`](adaptive-curriculum-implementation.md). The conceptual model is [`adaptive-curriculum.md`](adaptive-curriculum.md). Repository-wide agent rules are in [`../AGENTS.md`](../AGENTS.md).
+
+The authorized sequence is:
+
+1. **Phase A — route refactor:** make the current logic course the explicit `logic-foundations` route with zero intended learner-visible change; add portable concept × capability evidence and conservative progress migration.
+2. **Phase B — narrow Sobel vertical slice:** implement only the Chapter II §§2.6–2.8 existential-import/Descartes route using the same learner model.
+3. **Phase C — deterministic prerequisite planner:** if justified by the vertical slice, extract a small inspectable skip/retrieve/teach policy.
+
+**Pilot gate:** the architecture earns its complexity only if existing learner progress survives, current course behavior remains stable, already-demonstrated knowledge suppresses redundant prerequisite teaching, and the source-driven slice gets the learner back into the book with better comprehension.
+
+Do not treat this authorization as general curriculum expansion. Chapter III+ renderers, PDF ingestion, runtime AI route generation, backend/cloud accounts, and universal activity/engine abstractions remain out of scope until the pilot is used and evaluated.
 
 ## Phase 0 — Documentation
 
@@ -110,7 +124,7 @@ The original “full propositional MVP” feature list is now substantially impl
 - [x] Accessible EN/FR UI and course content
 - [x] Evidence-backed progress visibility in ordinary Learn/Practice use
 
-**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, repaired attempt semantics, retention, and transfer. Do not expand curriculum scope merely to satisfy an old checkbox list or because additional engine work is technically possible.
+**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, repaired attempt semantics, retention, transfer, and now source-driven use through the bounded adaptive-curriculum pilot. Do not expand curriculum scope merely to satisfy an old checkbox list or because additional engine work is technically possible.
 
 ## Phase 5 — Natural deduction
 
@@ -123,7 +137,7 @@ Implemented groundwork:
 - [x] Two fill-one-step proof exercises (`nd-001`, `nd-002`)
 - [x] Natural-deduction design document
 
-Deferred until propositional practice is validated:
+Deferred until real use justifies expansion:
 
 - [ ] Full Fitch-style proof editor with scope highlighting
 - [ ] Broader rule set and prerequisite-aware rule picker
@@ -142,11 +156,11 @@ Implemented groundwork:
 - [x] Free-variable / predicate-symbol helpers
 - [x] Predicate-logic design document
 
-Deferred:
+Deferred as a general curriculum. The adaptive pilot may reuse the minimum existing quantifier machinery needed for the Sobel Chapter II slice without implementing this whole phase.
 
 - [ ] Predicate-logic learning units
-- [ ] Translation exercises for quantified statements
-- [ ] Models and countermodels
+- [ ] General translation exercises for quantified statements
+- [ ] General models and countermodels
 - [ ] Quantifier natural-deduction rules and UI
 
 ## Recommended session structure (for content authoring)
@@ -160,14 +174,19 @@ When writing lessons, follow this loop:
 5. Small transfer challenge
 6. Schedule weak concepts for later review
 
+Source-driven routes may compress or reorder this loop when prerequisite evidence shows that parts are unnecessary; they must still finish important learning sequences with genuine transfer rather than source-specific pattern matching.
+
 ## What we are explicitly not building yet
 
 - Native mobile app
 - User accounts or cloud sync
 - Full natural-deduction editor
-- Predicate-logic curriculum/UI
+- Full predicate-logic curriculum/UI
 - Multiple textbook notation systems
 - Achievements, leaderboards, arbitrary XP/account levels, or heavy decorative gamification
 - Hover-only or mouse-only interactions
+- PDF ingestion / synchronized ebook reader
+- Runtime LLM curriculum generation or opaque prerequisite recommendation
+- Chapter III+ source-specific interaction families before the adaptive pilot is validated
 
-The next major decision should follow evidence from using the existing product, not the existence of additional technically possible features.
+The next major expansion decision should follow evidence from using the existing product and the Chapter II source-driven pilot, not the existence of additional technically possible features.
