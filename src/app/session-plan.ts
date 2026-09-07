@@ -1,4 +1,3 @@
-import { getExerciseDefinition } from './exercises';
 import {
   LEVEL_0_LESSONS,
   LEVEL_1_LESSONS,
@@ -23,6 +22,7 @@ import {
   type SessionPlan,
   type SessionStep,
 } from './session-types';
+import { expandItemsToUnits } from './session-units';
 
 export {
   SESSION_MAX,
@@ -38,7 +38,7 @@ export type {
   SessionStep,
 } from './session-types';
 
-export function takeEnvelope(items: string[]): string[] {
+export function takeEnvelope<T>(items: T[]): T[] {
   if (items.length === 0) {
     return [];
   }
@@ -55,28 +55,19 @@ export function estimateMinutes(stepCount: number): number {
   return Math.max(2, Math.round(stepCount * 0.5));
 }
 
-function stepsForItemIds(itemIds: string[]): SessionStep[] {
-  return itemIds.map((itemId) => ({
-    id: itemId,
-    source: getExerciseDefinition(itemId) ? 'practice' : 'route',
-    itemId,
-  }));
-}
-
-function planId(kind: SessionKind, itemIds: string[]): string {
-  return `plan-${kind}-${itemIds.join('|')}`;
+function planId(kind: SessionKind, steps: SessionStep[]): string {
+  return `plan-${kind}-${steps.map((step) => step.id).join('|')}`;
 }
 
 export function composeSessionPlan(
-  _store: ProgressStore,
+  store: ProgressStore,
   kind: SessionKind,
   itemIds: string[],
   options?: { preparation?: boolean },
 ): SessionPlan {
-  const enveloped = takeEnvelope(itemIds);
-  const steps = stepsForItemIds(enveloped);
+  const steps = takeEnvelope(expandItemsToUnits(itemIds, store));
   return {
-    id: planId(kind, enveloped),
+    id: planId(kind, steps),
     kind,
     steps,
     estimatedMinutes: estimateMinutes(steps.length),
@@ -202,6 +193,27 @@ export function offerOpening(
     }
   }
 
+  if (hasStaleEvidence(store, now)) {
+    const remaining = remainingRouteItems(store);
+    const remainingIds = new Set(remaining.items);
+    const lapse = lapseItemIds(store, now).filter((itemId) => {
+      if (store.activeRouteId === LOGIC_AND_THEISM_READING_ROUTE_ID && remainingIds.has(itemId)) {
+        return false;
+      }
+      return true;
+    });
+    if (lapse.length > 0) {
+      return withReview(
+        {
+          kind: 'lapse-recovery',
+          plan: composeSessionPlan(store, 'lapse-recovery', lapse),
+        },
+        store,
+        now,
+      );
+    }
+  }
+
   const remaining = remainingRouteItems(store);
   if (remaining.items.length > 0) {
     const kind: SessionKind = isFreshLearner(store) ? 'start' : 'continue';
@@ -217,20 +229,6 @@ export function offerOpening(
     );
   }
 
-  if (isPracticeUnlocked(store) && hasStaleEvidence(store, now)) {
-    const lapse = lapseItemIds(store, now);
-    if (lapse.length > 0) {
-      return withReview(
-        {
-          kind: 'lapse-recovery',
-          plan: composeSessionPlan(store, 'lapse-recovery', lapse),
-        },
-        store,
-        now,
-      );
-    }
-  }
-
   return withReview({ kind: 'idle', plan: null }, store, now);
 }
 
@@ -242,12 +240,24 @@ export function startSession(plan: SessionPlan, nowIso: string): PersistedSessio
     },
     currentIndex: 0,
     startedAt: nowIso,
+    segmentStartedAt: nowIso,
     status: 'active',
   };
 }
 
-export function resumeSession(persisted: PersistedSession): PersistedSession {
-  return persisted;
+export function resumeSession(persisted: PersistedSession, nowIso?: string): PersistedSession {
+  if (!nowIso) {
+    return persisted;
+  }
+  return { ...persisted, segmentStartedAt: nowIso };
+}
+
+export function sessionSegmentMs(session: PersistedSession, now = Date.now()): number {
+  const start = Date.parse(session.segmentStartedAt ?? session.startedAt);
+  if (!Number.isFinite(start)) {
+    return 0;
+  }
+  return Math.max(0, now - start);
 }
 
 export function currentSessionStep(persisted: PersistedSession): SessionStep | undefined {

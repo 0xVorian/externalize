@@ -231,11 +231,31 @@
       "concept": "conditional"
     },
     {
+      "id": "lat-empty-no-counterexample",
+      "concept": "conditional"
+    },
+    {
+      "id": "lat-name-vacuity",
+      "concept": "conditional"
+    },
+    {
       "id": "lat-quantifier-universal",
       "concept": "universal-quantifier"
     },
     {
+      "id": "lat-existential-meaning",
+      "concept": "existential-quantifier"
+    },
+    {
+      "id": "lat-name-existential",
+      "concept": "existential-quantifier"
+    },
+    {
       "id": "lat-quantifier-existential",
+      "concept": "existential-quantifier"
+    },
+    {
+      "id": "lat-existential-conjunction",
       "concept": "existential-quantifier"
     },
     {
@@ -699,7 +719,7 @@
     {
       "id": "lat-retrieve-conditional",
       "concept": "conditional",
-      "requiresLessons": ["lat-conditional-bridge"]
+      "requiresLessons": ["lat-empty-no-counterexample"]
     },
     {
       "id": "lat-check-universal",
@@ -709,42 +729,42 @@
     {
       "id": "lat-check-existential",
       "concept": "existential-quantifier",
-      "requiresLessons": ["lat-quantifier-existential"]
+      "requiresLessons": ["lat-existential-conjunction"]
     },
     {
       "id": "lat-classify-triangle",
       "concept": "existential-import",
-      "requiresLessons": ["lat-ii-26-context"]
+      "requiresLessons": ["lat-existential-conjunction"]
     },
     {
       "id": "lat-classify-visitor",
       "concept": "existential-import",
-      "requiresLessons": ["lat-ii-26-context"]
+      "requiresLessons": ["lat-classify-triangle"]
     },
     {
       "id": "lat-formalize-readings",
       "concept": "existential-import",
-      "requiresLessons": ["lat-ii-26-context"]
+      "requiresLessons": ["lat-classify-triangle"]
     },
     {
       "id": "lat-predict-descartes",
       "concept": "existential-import",
-      "requiresLessons": ["lat-ii-26-context"]
+      "requiresLessons": ["lat-classify-triangle"]
     },
     {
       "id": "lat-interrogate-premises",
       "concept": "existential-import",
-      "requiresLessons": ["lat-ii-26-context"]
+      "requiresLessons": ["lat-classify-triangle"]
     },
     {
       "id": "lat-transfer-kind",
       "concept": "existential-import",
-      "requiresLessons": ["lat-ii-26-context"]
+      "requiresLessons": ["lat-classify-triangle"]
     },
     {
       "id": "lat-mastery-empty-domain",
       "concept": "existential-import",
-      "requiresLessons": ["lat-ii-26-context"]
+      "requiresLessons": ["lat-classify-triangle"]
     }
   ]
 }

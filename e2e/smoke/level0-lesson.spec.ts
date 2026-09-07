@@ -13,7 +13,7 @@ test.describe('Level 0 lesson completion', () => {
     await gotoFresh(page);
     await beginOfferedSession(page);
 
-    await expect(sessionPosition(page)).toContainText('1 / 5');
+    await expect(sessionPosition(page)).toContainText('1 / 6');
     await expect(page.locator('.lesson-card-title')).toContainText('One letter for a whole statement');
 
     for (let card = 0; card < 3; card += 1) {
@@ -22,9 +22,14 @@ test.describe('Level 0 lesson completion', () => {
 
     await expect(page.locator('.exercise-prompt')).toBeVisible();
     await expect(page.locator('.watch-grid')).toBeVisible();
-    for (let step = 0; step < 5; step += 1) {
+    for (let step = 0; step < 3; step += 1) {
       await lessonNext(page).click();
     }
+
+    await expect(page.getByTestId('round-complete')).toBeVisible();
+    await page.getByTestId('session-another').click();
+    await expect(page.getByTestId('session-active')).toBeVisible();
+    await lessonNext(page).click();
 
     await completeGuidedStep(page, 'P', true);
     await completeGuidedStep(page, 'Q', false);

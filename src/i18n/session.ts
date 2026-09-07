@@ -68,11 +68,11 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
         case 'continue':
           return 'Pick up the next useful bit of the argument.';
         case 'quick-review':
-          return 'A short retrieval round on work that is due.';
+          return 'A short check on work that is due.';
         case 'lapse-recovery':
           return 'A brief check on ideas that have gone quiet.';
         case 'resume':
-          return 'The same bounded round, where you left it.';
+          return 'The same short round, where you left it.';
         case 'idle':
           return 'Nothing useful is due right now.';
       }
@@ -138,15 +138,15 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     detail: (kind) => {
       switch (kind) {
         case 'start':
-          return 'Quelques étapes bornées. Inutile de configurer un parcours d’abord.';
+          return 'Quelques petites étapes. Pas besoin de régler un cours d’abord.';
         case 'continue':
           return 'Reprendre le prochain fragment utile du raisonnement.';
         case 'quick-review':
-          return 'Une récupération courte sur ce qui arrive à échéance.';
+          return 'Une petite révision sur ce qui est dû.';
         case 'lapse-recovery':
           return 'Un contrôle bref sur des idées devenues lointaines.';
         case 'resume':
-          return 'La même séance bornée, à l’endroit où elle s’était arrêtée.';
+          return 'La même courte séance, là où vous l’aviez laissée.';
         case 'idle':
           return 'Rien d’utile n’est dû pour le moment.';
       }

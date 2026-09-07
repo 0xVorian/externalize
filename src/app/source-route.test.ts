@@ -123,7 +123,10 @@ describe('prerequisite planner', () => {
     expect(plannedItemIds(plan)).toEqual([
       'lat-quantifier-universal',
       'lat-check-universal',
+      'lat-existential-meaning',
+      'lat-name-existential',
       'lat-quantifier-existential',
+      'lat-existential-conjunction',
       'lat-check-existential',
     ]);
   });
@@ -397,6 +400,8 @@ describe('source EN/FR pedagogical copy', () => {
     const frLessons = JSON.stringify(SOURCE_LESSON_COPY.fr);
     expect(frLessons).toMatch(/cas de vérité par vacuité/);
     expect(frLessons).not.toMatch(/vacuous/i);
+    expect(frLessons).not.toMatch(/assertion couvrante/i);
+    expect(frLessons).not.toMatch(/Quelque membre a signé/);
     expect(frLessons).not.toMatch(/\bwitness\b/i);
     expect(frLessons).not.toMatch(/if–then/i);
     for (const copy of Object.values(SOURCE_EXERCISES.fr)) {

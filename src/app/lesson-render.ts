@@ -46,7 +46,7 @@ function renderWatchTruthTable(
   );
 }
 
-function renderWatchLesson(state: LessonState): string {
+function renderWatchLesson(state: LessonState, sessionUnit = false): string {
   const learn = learnUi(state.locale);
   const copy = getLessonCopy(state.locale, state.lesson.id);
   const steps = copy.watchSteps ?? [];
@@ -55,11 +55,14 @@ function renderWatchLesson(state: LessonState): string {
   const presentation = grid
     ? renderWatchGrid(state.locale, formula, steps[state.watchStep]?.assignment ?? {})
     : renderWatchTruthTable(state, steps, formula);
+  const caseMeta = sessionUnit
+    ? ''
+    : `<p class="step-meta">${learn.stepLabel(state.watchStep + 1, steps.length)}</p>`;
   return `
-    <article class="lesson-card">
+    <article class="lesson-card"${sessionUnit ? ' data-testid="session-watch-unit"' : ''}>
       <p class="exercise-prompt">${grid ? learn.watchGridPrompt : learn.watchPrompt}</p>
       <p class="formula-display" aria-label="${ui(state.locale).formulaDisplayAria}">${formula}</p>
-      <p class="step-meta">${learn.stepLabel(state.watchStep + 1, steps.length)}</p>
+      ${caseMeta}
       ${presentation}
       ${state.message ? `<p class="feedback feedback-info" role="status">${state.message}</p>` : ''}
     </article>
@@ -168,7 +171,7 @@ export function renderLessonView(
   if (state.lesson.type === 'card') {
     body = renderCardLesson(state);
   } else if (state.lesson.type === 'watch') {
-    body = renderWatchLesson(state);
+    body = renderWatchLesson(state, Boolean(options.session));
   } else {
     body = renderGuidedLesson(state);
   }

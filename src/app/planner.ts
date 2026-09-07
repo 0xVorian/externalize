@@ -23,7 +23,12 @@ export type PrerequisiteBridge = {
 export const PREREQUISITE_BRIDGES: Record<string, PrerequisiteBridge> = {
   'conditional:apply': {
     retrieve: 'lat-retrieve-conditional',
-    teach: ['lat-conditional-bridge', 'lat-retrieve-conditional'],
+    teach: [
+      'lat-conditional-bridge',
+      'lat-empty-no-counterexample',
+      'lat-name-vacuity',
+      'lat-retrieve-conditional',
+    ],
   },
   'universal-quantifier:recognize': {
     retrieve: 'lat-check-universal',
@@ -31,7 +36,13 @@ export const PREREQUISITE_BRIDGES: Record<string, PrerequisiteBridge> = {
   },
   'existential-quantifier:recognize': {
     retrieve: 'lat-check-existential',
-    teach: ['lat-quantifier-existential', 'lat-check-existential'],
+    teach: [
+      'lat-existential-meaning',
+      'lat-name-existential',
+      'lat-quantifier-existential',
+      'lat-existential-conjunction',
+      'lat-check-existential',
+    ],
   },
 };
 

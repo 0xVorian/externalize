@@ -9,7 +9,9 @@ import {
   completeCurrentStep,
   composeSessionPlan,
   offerOpening,
+  resumeSession,
   sessionPosition,
+  sessionSegmentMs,
   startSession,
   takeEnvelope,
 } from './session-plan';
@@ -44,15 +46,21 @@ describe('session envelope', () => {
 });
 
 describe('offerOpening', () => {
-  it('offers a start round of the five Unit 0 lessons for a fresh learner', () => {
+  it('offers a start round of honest micro-units for a fresh learner', () => {
     const store = loadProgress();
     const offer = offerOpening(store, null);
     expect(offer.kind).toBe('start');
-    expect(offer.plan?.steps.map((step) => step.itemId)).toEqual(
-      LEVEL_0_LESSONS.map((lesson) => lesson.id),
-    );
-    expect(offer.plan?.steps).toHaveLength(5);
+    expect(offer.plan?.steps.map((step) => step.id)).toEqual([
+      'level0-01-letters',
+      'level0-02-truth',
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+    ]);
+    expect(offer.plan?.steps).toHaveLength(6);
     expect(offer.plan?.estimatedMinutes).toBe(3);
+    expect(offer.plan?.steps.filter((step) => step.itemId === 'level0-04-watch')).toHaveLength(3);
   });
 
   it('continues with unseen Unit 1 lessons after Unit 0', () => {
@@ -171,6 +179,70 @@ describe('offerOpening', () => {
     expect(offer.nextReviewAt).toBe('2026-09-10T12:00:00.000Z');
   });
 
+  it('offers lapse recovery before remaining route content', () => {
+    let store = withLevel0Complete(loadProgress());
+    store = completeLesson(store, LEVEL_1_LESSONS[0]!.id);
+    store = {
+      ...store,
+      passed: ['eval-001', 'eval-011'],
+      queue: [],
+      conceptEvidence: {
+        [evidenceKey('conditional', 'apply')]: {
+          attempts: 4,
+          cleanPasses: 4,
+          transferPasses: 0,
+          recentErrors: [],
+          lastSeenAt: '2025-01-01T00:00:00.000Z',
+        },
+      },
+    };
+    const offer = offerOpening(store, null, Date.parse('2026-09-07T12:00:00.000Z'));
+    expect(offer.kind).toBe('lapse-recovery');
+    expect(offer.plan?.steps.some((step) => step.itemId === 'lat-retrieve-conditional')).toBe(true);
+  });
+
+  it('does not classify a fresh learner as lapse recovery', () => {
+    const store = loadProgress();
+    expect(offerOpening(store, null).kind).toBe('start');
+  });
+
+  it('continues a strong fresh-evidence learner into remaining material', () => {
+    const store = withLevel0Complete(loadProgress());
+    store.conceptEvidence = {
+      [evidenceKey('conditional', 'apply')]: {
+        attempts: 4,
+        cleanPasses: 4,
+        transferPasses: 0,
+        recentErrors: [],
+        lastSeenAt: '2026-09-07T11:00:00.000Z',
+      },
+    };
+    const offer = offerOpening(store, null, Date.parse('2026-09-07T12:00:00.000Z'));
+    expect(offer.kind).toBe('continue');
+    expect(offer.plan?.steps[0]?.itemId).toBe(LEVEL_1_LESSONS[0]!.id);
+  });
+
+  it('lets Sobel preparation retrieve a stale prerequisite without a duplicate lapse round', () => {
+    let store = setActiveRoute(loadProgress(), LOGIC_AND_THEISM_READING_ROUTE_ID);
+    store = {
+      ...store,
+      conceptEvidence: {
+        [evidenceKey('conditional', 'apply')]: {
+          attempts: 4,
+          cleanPasses: 4,
+          transferPasses: 0,
+          recentErrors: [],
+          lastSeenAt: '2025-01-01T00:00:00.000Z',
+        },
+      },
+    };
+    const offer = offerOpening(store, null, Date.parse('2026-09-07T12:00:00.000Z'));
+    expect(offer.kind).toBe('start');
+    expect(offer.plan?.preparation).toBe(true);
+    const retrieveCount = offer.plan?.steps.filter((step) => step.itemId === 'lat-retrieve-conditional').length;
+    expect(retrieveCount).toBe(1);
+  });
+
   it('offers lapse recovery from stale evidence when nothing remains or is due', () => {
     let store = loadProgress();
     for (const lesson of ALL_LEARN_LESSONS) {
@@ -203,5 +275,34 @@ describe('composeSessionPlan', () => {
     composeSessionPlan(store, 'start', LEVEL_0_LESSONS.map((lesson) => lesson.id));
     expect(store).toEqual(before);
     expect(store.activeRouteId).toBe(LOGIC_FOUNDATIONS_ROUTE_ID);
+  });
+
+  it('expands a watch lesson into one unit per separately advanced case', () => {
+    const store = loadProgress();
+    const plan = composeSessionPlan(store, 'start', ['level0-04-watch', 'level0-05-guided']);
+    expect(plan.steps.map((step) => step.id)).toEqual([
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-05-guided',
+    ]);
+    expect(plan.steps.every((step) => step.itemId === 'level0-04-watch' ? step.unitIndex !== undefined : true)).toBe(
+      true,
+    );
+  });
+});
+
+describe('session duration segments', () => {
+  it('does not count time spent away between interrupt and resume', () => {
+    const store = loadProgress();
+    const plan = offerOpening(store, null).plan!;
+    const started = startSession(plan, '2026-09-07T12:00:00.000Z');
+    const interruptedMs = sessionSegmentMs(started, Date.parse('2026-09-07T12:03:00.000Z'));
+    const resumed = resumeSession(started, '2026-09-08T12:00:00.000Z');
+    const completedMs = sessionSegmentMs(resumed, Date.parse('2026-09-08T12:01:00.000Z'));
+    expect(interruptedMs).toBe(3 * 60 * 1000);
+    expect(completedMs).toBe(60 * 1000);
+    expect(completedMs).toBeLessThan(24 * 60 * 60 * 1000);
   });
 });

@@ -924,6 +924,11 @@ export function getLessonCopy(locale: Locale, lessonId: string): LessonCopy {
   return copy;
 }
 
+/** Watch-case count is locale-independent; EN is the canonical length. */
+export function watchCaseCount(lessonId: string): number {
+  return LESSONS.en[lessonId]?.watchSteps?.length ?? 0;
+}
+
 export function getReference(locale: Locale): ReferenceEntry[] {
   return REFERENCE[locale];
 }

@@ -4,55 +4,117 @@ import type { LessonCopy } from './lessons';
 
 export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
   en: {
+    'lat-conditional-bridge': {
+      title: 'An empty club',
+      subtitle: 'A general claim when nobody is there.',
+      card: {
+        title: 'Every member signed',
+        body: [
+          'Imagine a club that currently has no members. Consider the claim: every member signed the register.',
+          'Nobody signed, because there is nobody there to sign. Does that make the claim false, or can it still hold?',
+          'Stay with the situation as it is: the club is empty.',
+        ],
+        example: 'Club membership: (empty)\nClaim: every member signed.',
+      },
+    },
+    'lat-empty-no-counterexample': {
+      title: 'What would disprove it',
+      subtitle: 'Looking for a member who failed to sign.',
+      card: {
+        title: 'Nobody failed to sign',
+        body: [
+          'A counterexample would be a member who did not sign. That would show the general claim to be false.',
+          'This club has no members, so there is nobody who failed to sign. Nothing in the situation stands against the claim.',
+          'That is why a general claim of this shape can still hold when there is nothing of the relevant kind around.',
+        ],
+      },
+    },
+    'lat-name-vacuity': {
+      title: 'A name for this case',
+      subtitle: 'After the empty club, a term of art.',
+      card: {
+        title: 'Truth by vacuity',
+        body: [
+          'Return to the empty club. “Every member signed” can still hold, because nobody failed to sign.',
+          'Logicians call this truth by vacuity: the general claim is true because there is no counterexample, not because an example was produced.',
+          'The name labels an idea you already have. It does not add a new requirement.',
+        ],
+      },
+    },
+    'lat-quantifier-universal': {
+      title: 'Writing “every”',
+      subtitle: 'A symbol for the general claim.',
+      card: {
+        title: 'The job of ∀',
+        body: [
+          'The same general claim is written with ∀. “Every F is G” becomes ∀x (F(x) → G(x)): anything that is F is G.',
+          'Logicians call ∀ the universal quantifier. Its job is to cover the whole domain: whatever is F, it is G.',
+          'That form does not, by itself, say that an F exists.',
+        ],
+        example: '∀x (F(x) → G(x))',
+      },
+    },
+    'lat-existential-meaning': {
+      title: 'At least one',
+      subtitle: 'A claim that needs an example.',
+      card: {
+        title: 'At least one member signed',
+        body: [
+          'Some claims are different. “At least one member signed” says there is an actual member who signed.',
+          'If the club is empty, that claim is false. There is no one to point to.',
+          'Unlike the general claim, this one requires an example in the situation.',
+        ],
+        example: 'Club membership: (empty)\nClaim: at least one member signed.',
+      },
+    },
+    'lat-name-existential': {
+      title: 'Naming the demand for an example',
+      subtitle: 'After the empty-club contrast.',
+      card: {
+        title: 'An existential claim',
+        body: [
+          'Logicians call a claim of that shape an existential claim: it reports that at least one such thing is there.',
+          'The point is the demand for an example, not a new puzzle. You already saw it fail in the empty club.',
+          'Keep that contrast: a general rule can hold with nobody there; an existential claim cannot.',
+        ],
+      },
+    },
+    'lat-quantifier-existential': {
+      title: 'Writing “at least one”',
+      subtitle: 'A symbol for the existential claim.',
+      card: {
+        title: 'The job of ∃',
+        body: [
+          'We write “there is at least one F” with ∃. It looks like this: ∃x F(x).',
+          'Logicians call ∃ the existential quantifier. Existential commitment comes from that quantifier: it asserts a witness.',
+          'The symbol’s job is existence. Do not yet add extra structure.',
+        ],
+        example: '∃x F(x)',
+      },
+    },
+    'lat-existential-conjunction': {
+      title: 'One and the same',
+      subtitle: 'Existence first, then both properties.',
+      card: {
+        title: 'The same witness for two properties',
+        body: [
+          'Sometimes we need more than bare existence. ∃x (F(x) ∧ G(x)) says there is at least one object that is both F and G.',
+          'Conjunction requires that the same witness have both properties. It does not create existence; ∃ already did that.',
+          'By contrast, ∀x (F(x) → G(x)) can still hold when nothing is F.',
+        ],
+        example: '∃x (F(x) ∧ G(x))',
+      },
+    },
     'lat-ii-26-context': {
       title: 'Descartes and existential import',
       subtitle: 'Sobel, Logic and Theism, II.2.6–2.8',
       card: {
         title: 'Where this sits in the book',
         body: [
-          'This short preparation is for Chapter II §§2.6–2.8 (pp. 35–40), where Sobel examines Descartes’ ontological argument.',
-          'The local issue is not whether existence is a property. It is whether a covering claim about perfect beings already says that one exists.',
-          'You have just seen the two readings: a rule for whatever would be F, versus a report that at least one F is present. Those readings come apart.',
+          'This preparation was for Chapter II §§2.6–2.8 (pp. 35–40), where Sobel examines Descartes’ ontological argument.',
+          'The local issue is not whether existence is a property. It is whether a general claim about perfect beings already says that one exists.',
+          'You have the two readings: a rule for whatever would be F, versus a report that at least one F is present. Those readings come apart.',
         ],
-      },
-    },
-    'lat-conditional-bridge': {
-      title: 'An empty club',
-      subtitle: 'A covering claim when nobody is there.',
-      card: {
-        title: 'Nobody signed — and nobody failed to sign',
-        body: [
-          'Imagine a club that currently has no members. Consider the claim: every member signed the register.',
-          'There is nobody who signed, and there is also nobody who failed to sign. Nothing in the situation contradicts the covering claim.',
-          'A general claim of that shape can still hold when there is nothing of the relevant kind around, because nothing stands as a counterexample.',
-        ],
-        example: 'Club membership: (empty)\nClaim: every member signed.',
-      },
-    },
-    'lat-quantifier-universal': {
-      title: 'Every F is G — without producing an F',
-      subtitle: 'Naming the empty-class case, then writing it.',
-      card: {
-        title: 'From the empty club to a standard form',
-        body: [
-          'Return to the empty club. “Every member signed” can still hold, because nobody failed to sign.',
-          'Logicians call this truth by vacuity: the covering claim is true because there is no counterexample, not because an example was produced.',
-          'The same idea is written with the universal quantifier ∀. “Every F is G” becomes ∀x (F(x) → G(x)): anything that is F is G. That form does not, by itself, say that an F exists.',
-        ],
-        example: '∀x (F(x) → G(x))',
-      },
-    },
-    'lat-quantifier-existential': {
-      title: 'At least one',
-      subtitle: 'A claim that does produce an example.',
-      card: {
-        title: '“Some F is G” asks for a witness',
-        body: [
-          'Some claims are different. “Some member signed” says there is at least one member who signed. If the club is empty, that claim is false.',
-          'Logicians call this an existential claim. We write it with ∃: ∃x (F(x) ∧ G(x)). Existential commitment comes from that quantifier: it asserts a witness.',
-          'Conjunction then requires that the same object be both F and G. It does not create existence. By contrast, ∀x (F(x) → G(x)) can hold when nothing is F.',
-        ],
-        example: '∃x (F(x) ∧ G(x))',
       },
     },
     'lat-ii-26-return': {
@@ -69,55 +131,117 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     },
   },
   fr: {
+    'lat-conditional-bridge': {
+      title: 'Un club sans membres',
+      subtitle: 'Une phrase générale quand personne n’est là.',
+      card: {
+        title: 'Tout membre a signé',
+        body: [
+          'Imaginez un club qui, pour l’heure, n’a aucun membre. On avance que tout membre a signé le registre.',
+          'Personne n’a signé, puisqu’il n’y a personne. Cela rend-il la phrase fausse, ou peut-elle encore valoir ?',
+          'Tenez-vous-en à la situation telle qu’elle est : le club est vide.',
+        ],
+        example: 'Membres du club : (aucun)\nPhrase : tout membre a signé.',
+      },
+    },
+    'lat-empty-no-counterexample': {
+      title: 'Ce qui la ferait chuter',
+      subtitle: 'Chercher un membre qui n’aurait pas signé.',
+      card: {
+        title: 'Personne n’a manqué de signer',
+        body: [
+          'Un contre-exemple serait un membre qui n’a pas signé. Cela montrerait que la phrase générale est fausse.',
+          'Ce club n’a aucun membre : personne n’a donc manqué de signer. Rien dans la situation ne s’oppose à la phrase.',
+          'Voilà pourquoi une phrase générale de cette forme peut encore valoir lorsqu’il n’y a rien du genre pertinent.',
+        ],
+      },
+    },
+    'lat-name-vacuity': {
+      title: 'Un nom pour ce cas',
+      subtitle: 'Après le club vide, un terme de métier.',
+      card: {
+        title: 'Vérité par vacuité',
+        body: [
+          'Revenez au club vide. « Tout membre a signé » peut encore valoir, parce que personne n’a manqué de signer.',
+          'On appelle cela un cas de vérité par vacuité : la phrase générale est vraie faute de contre-exemple, non parce qu’un exemple a été produit.',
+          'Le mot nomme une idée que vous avez déjà. Il n’ajoute pas une exigence nouvelle.',
+        ],
+      },
+    },
+    'lat-quantifier-universal': {
+      title: 'Écrire « tout »',
+      subtitle: 'Un symbole pour la phrase générale.',
+      card: {
+        title: 'Le rôle de ∀',
+        body: [
+          'La même phrase générale s’écrit avec ∀. « Tout F est G » devient ∀x (F(x) → G(x)) : tout objet qui est F est G.',
+          'On appelle ∀ le quantificateur universel. Il porte sur le domaine tout entier : ce qui est F est G.',
+          'Cette forme n’affirme pas, à soi seul, qu’il existe un F.',
+        ],
+        example: '∀x (F(x) → G(x))',
+      },
+    },
+    'lat-existential-meaning': {
+      title: 'Au moins un',
+      subtitle: 'Une phrase qui a besoin d’un exemple.',
+      card: {
+        title: 'Au moins un membre a signé',
+        body: [
+          'D’autres phrases sont d’un autre type. « Au moins un membre a signé » dit qu’il y a bel et bien un membre qui a signé.',
+          'Si le club est vide, cette phrase est fausse. On n’a personne à désigner.',
+          'Contrairement à la phrase générale, celle-ci exige un exemple dans la situation.',
+        ],
+        example: 'Membres du club : (aucun)\nPhrase : au moins un membre a signé.',
+      },
+    },
+    'lat-name-existential': {
+      title: 'Nommer l’exigence d’un exemple',
+      subtitle: 'Après le contraste du club vide.',
+      card: {
+        title: 'Une assertion existentielle',
+        body: [
+          'On parle alors d’une assertion existentielle : elle rapporte qu’il y a au moins une chose de ce genre.',
+          'L’enjeu est l’exigence d’un exemple, non une énigme nouvelle. Vous l’avez déjà vue échouer dans le club vide.',
+          'Gardez le contraste : une règle générale peut valoir sans personne ; une assertion existentielle, non.',
+        ],
+      },
+    },
+    'lat-quantifier-existential': {
+      title: 'Écrire « au moins un »',
+      subtitle: 'Un symbole pour l’assertion existentielle.',
+      card: {
+        title: 'Le rôle de ∃',
+        body: [
+          'On écrit « il existe au moins un F » avec ∃. Cela donne ∃x F(x).',
+          'On appelle ∃ le quantificateur existentiel. L’engagement existentiel vient de ce quantificateur : il pose l’existence d’un témoin.',
+          'Le symbole sert à l’existence. N’ajoutez pas encore de structure supplémentaire.',
+        ],
+        example: '∃x F(x)',
+      },
+    },
+    'lat-existential-conjunction': {
+      title: 'Un seul et même objet',
+      subtitle: 'D’abord l’existence, puis les deux propriétés.',
+      card: {
+        title: 'Le même témoin pour deux propriétés',
+        body: [
+          'Parfois l’existence ne suffit pas. ∃x (F(x) ∧ G(x)) dit qu’il y a au moins un objet à la fois F et G.',
+          'La conjonction exige que le même témoin ait les deux propriétés. Elle n’instaure pas l’existence ; ∃ l’a déjà posée.',
+          'À l’inverse, ∀x (F(x) → G(x)) peut encore valoir sans aucun F.',
+        ],
+        example: '∃x (F(x) ∧ G(x))',
+      },
+    },
     'lat-ii-26-context': {
       title: 'Descartes et l’import existentiel',
       subtitle: 'Sobel, Logic and Theism, II.2.6–2.8',
       card: {
         title: 'Où l’on se trouve dans l’ouvrage',
         body: [
-          'Cette préparation courte vise les §§2.6–2.8 du chapitre II (p. 35–40), où Sobel examine l’argument ontologique cartésien.',
-          'La difficulté locale n’est pas de savoir si l’existence est une propriété. C’est de savoir si une assertion couvrante sur les êtres parfaits dit déjà qu’il en existe un.',
-          'Vous venez de voir les deux lectures : une règle portant sur tout ce qui serait F, contre le rapport qu’il y a au moins un F. Ces lectures se séparent.',
+          'Cette préparation vise les §§2.6–2.8 du chapitre II (p. 35–40), où Sobel examine l’argument ontologique cartésien.',
+          'La difficulté locale n’est pas de savoir si l’existence est une propriété. C’est de savoir si une règle générale sur les êtres parfaits dit déjà qu’il en existe un.',
+          'Vous avez les deux lectures : une règle portant sur tout ce qui serait F, contre le rapport qu’il y a au moins un F. Ces lectures se séparent.',
         ],
-      },
-    },
-    'lat-conditional-bridge': {
-      title: 'Un club sans membres',
-      subtitle: 'Une assertion couvrante quand personne n’est là.',
-      card: {
-        title: 'Personne n’a signé — et personne n’a manqué de signer',
-        body: [
-          'Imaginez un club qui, pour l’heure, n’a aucun membre. Considérez l’assertion : tout membre a signé le registre.',
-          'Personne n’a signé, et personne non plus n’a manqué de signer. Rien dans la situation ne contredit l’assertion couvrante.',
-          'Une assertion générale de cette forme peut encore valoir lorsqu’il n’y a rien du genre pertinent, faute de contre-exemple.',
-        ],
-        example: 'Membres du club : (aucun)\nAssertion : tout membre a signé.',
-      },
-    },
-    'lat-quantifier-universal': {
-      title: 'Tout F est G — sans produire de F',
-      subtitle: 'Nommer le cas du club vide, puis l’écrire.',
-      card: {
-        title: 'Du club vide à une forme canonique',
-        body: [
-          'Revenez au club vide. « Tout membre a signé » peut encore valoir, parce que personne n’a manqué de signer.',
-          'On appelle cela un cas de vérité par vacuité : l’assertion couvrante est vraie faute de contre-exemple, non parce qu’un exemple a été produit.',
-          'La même idée s’écrit avec le quantificateur universel ∀. « Tout F est G » devient ∀x (F(x) → G(x)) : tout objet qui est F est G. Cette forme n’affirme pas, à soi seul, qu’il existe un F.',
-        ],
-        example: '∀x (F(x) → G(x))',
-      },
-    },
-    'lat-quantifier-existential': {
-      title: 'Au moins un',
-      subtitle: 'Une assertion qui produit un exemple.',
-      card: {
-        title: '« Quelque F est G » demande un témoin',
-        body: [
-          'D’autres assertions sont d’un autre type. « Quelque membre a signé » dit qu’il y a au moins un membre qui a signé. Si le club est vide, cette assertion est fausse.',
-          'On parle alors d’une assertion existentielle. On l’écrit avec ∃ : ∃x (F(x) ∧ G(x)). L’engagement existentiel vient de ce quantificateur : il pose l’existence d’un témoin.',
-          'La conjonction exige ensuite que ce même objet soit à la fois F et G. Elle n’instaure pas l’existence. À l’inverse, ∀x (F(x) → G(x)) peut valoir sans aucun F.',
-        ],
-        example: '∃x (F(x) ∧ G(x))',
       },
     },
     'lat-ii-26-return': {
@@ -142,13 +266,13 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'The club has no members. Is “every member signed the register” still true?',
       choices: {
         'vacuous-true': 'Yes — nobody failed to sign, so nothing contradicts the claim.',
-        existential: 'No — a true covering claim requires at least one member.',
+        existential: 'No — a true general claim requires at least one member.',
       },
       choiceWrong:
         'Absence of members is not a counterexample. A counterexample would be a member who did not sign.',
       feedback: {
         correct:
-          'Correct. With nobody there who failed to sign, the covering claim stands.',
+          'Correct. With nobody there who failed to sign, the general claim stands.',
       },
     },
     'lat-check-universal': {
@@ -182,7 +306,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'As a report that at least one triangle is present.',
       },
       choiceWrong:
-        'The geometric claim is a covering rule for the kind, not an announcement that a triangle occupies the room.',
+        'The geometric claim is a general rule for the kind, not an announcement that a triangle occupies the room.',
       feedback: {
         correct:
           'Correct. Here “a triangle” is generic: it constrains the kind, and does not by itself produce an instance.',
@@ -195,7 +319,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'As a report that at least one visitor is present.',
       },
       choiceWrong:
-        'This is not a covering generalization about visitors. It locates a particular: someone is at the door.',
+        'This is not a general rule about visitors. It locates a particular: someone is at the door.',
       feedback: {
         correct: 'Correct. Here the indefinite reports existence, not a mere hypothetical about visitors.',
       },
@@ -209,7 +333,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       choiceWrong:
         'The existential-conjunctive form already asserts an instance. The hypothetical reading uses implication under a universal quantifier.',
       feedback: {
-        correct: 'Correct. The covering reading is the universal conditional, not the existential conjunction.',
+        correct: 'Correct. The universal-hypothetical reading is the universal conditional, not the existential conjunction.',
       },
     },
     'lat-predict-descartes': {
@@ -220,7 +344,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'The existential reading: there is at least one supremely perfect being.',
       },
       choiceWrong:
-        'A mere covering claim about perfect beings would not yet say that the domain contains one. The conclusion Descartes wants is existential.',
+        'A mere general claim about perfect beings would not yet say that the domain contains one. The conclusion Descartes wants is existential.',
       feedback: {
         correct:
           'Correct. The intended conclusion is existential. A general constraint on the kind would not yet deliver it.',
@@ -266,7 +390,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'With nothing in the domain that is perfect, an existential conclusion is false. The universal conditionals can still hold vacuously.',
       feedback: {
         correct:
-          'Correct. That assignment is a countermodel: the covering premises survive, the existential conclusion does not.',
+          'Correct. That assignment is a countermodel: the universal-hypothetical premises survive, the existential conclusion does not.',
       },
     },
   },
@@ -277,13 +401,13 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       choices: {
         'vacuous-true':
           'Oui — personne n’a manqué de signer, donc rien ne contredit l’assertion.',
-        existential: 'Non — une assertion couvrante vraie exige au moins un membre.',
+        existential: 'Non — une phrase générale vraie exige au moins un membre.',
       },
       choiceWrong:
         'L’absence de membres n’est pas un contre-exemple. Un contre-exemple serait un membre qui n’a pas signé.',
       feedback: {
         correct:
-          'Exact. Personne n’a manqué de signer : l’assertion couvrante tient.',
+          'Exact. Personne n’a manqué de signer : la phrase générale tient.',
       },
     },
     'lat-check-universal': {
@@ -332,7 +456,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'Comme le rapport qu’il y a au moins un visiteur présent.',
       },
       choiceWrong:
-        'Ce n’est pas une généralisation couvrante sur les visiteurs. Cela localise un particulier : quelqu’un est à la porte.',
+        'Ce n’est pas une règle générale sur les visiteurs. Cela localise un particulier : quelqu’un est à la porte.',
       feedback: {
         correct:
           'Exact. Ici l’indéfini rapporte une existence, non une simple hypothèse sur les visiteurs.',
@@ -348,7 +472,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'La forme existentielle-conjonctive affirme déjà une instance. La lecture hypothétique use de l’implication sous un quantificateur universel.',
       feedback: {
         correct:
-          'Exact. La lecture couvrante est l’implication universelle, non la conjonction existentielle.',
+          'Exact. La lecture universelle-hypothétique est l’implication universelle, non la conjonction existentielle.',
       },
     },
     'lat-predict-descartes': {
@@ -361,7 +485,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
           'La lecture existentielle : il y a au moins un être souverainement parfait.',
       },
       choiceWrong:
-        'Une simple contrainte couvrante sur les êtres parfaits ne dit pas encore que le domaine en contient un. La conclusion visée est existentielle.',
+        'Une simple contrainte générale sur les êtres parfaits ne dit pas encore que le domaine en contient un. La conclusion visée est existentielle.',
       feedback: {
         correct:
           'Exact. La conclusion visée est existentielle. Une contrainte générale sur le genre ne la livre pas encore.',
@@ -409,7 +533,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'Sans rien de parfait dans le domaine, une conclusion existentielle est fausse. Les implications universelles peuvent encore valoir à vide.',
       feedback: {
         correct:
-          'Exact. Cette interprétation est un contre-modèle : les prémisses couvrantes survivent, la conclusion existentielle non.',
+          'Exact. Cette interprétation est un contre-modèle : les prémisses universelles-hypothétiques survivent, la conclusion existentielle non.',
       },
     },
   },

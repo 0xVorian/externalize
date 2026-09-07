@@ -1,6 +1,6 @@
 # Session-first, low-intimidation UX
 
-**Status:** Implemented on `feat/session-first-ux`; awaiting independent review.  
+**Status:** Implementation present on `feat/session-first-ux`; awaiting independent re-review. The experiential UX gate is not itself validated by tests passing.  
 **Created:** 2026-09-07  
 **Scope:** reduce initiation cost, intimidation, and re-entry friction without weakening the logic, learner model, SRS, or adaptive-curriculum semantics.
 
@@ -223,13 +223,15 @@ Use progressive disclosure:
 
 The opening action should derive from actual learner state rather than an arbitrary daily demand.
 
-Candidate deterministic states:
+Candidate deterministic states, in this order:
 
 - unfinished bounded session → **Resume this round**;
-- meaningful due review → **Quick review**;
+- genuinely due SRS review → **Quick review**;
+- meaningful stale-evidence retrieval → **See what stuck**;
 - active route with useful next material → **Continue**;
-- return after a lapse with stale evidence → **See what stuck**;
 - nothing useful due → **You're good for now** + next useful review estimate.
+
+If a source-route plan already injects retrieve for the same stale prerequisite, that preparation round is used once instead of a second lapse envelope of the same items.
 
 A lapse is not a punishment state. Do not say “you missed N days” or reset a visible achievement counter as part of this work.
 
@@ -268,6 +270,7 @@ type SessionStep = {
   id: string;
   source: 'route' | 'practice';
   itemId: string;
+  unitIndex?: number; // watch-case index when one lesson has several separately advanced cases
 };
 
 type SessionPlan = {
@@ -279,6 +282,8 @@ type SessionPlan = {
 ```
 
 This is illustrative, not a required schema. Reuse existing route/SRS selectors and activity IDs wherever possible.
+
+A session unit is one learner-perceived micro-activity: one principal intellectual demand and one local completion transition. Cards, guided lessons, and practice items are one unit each. A watch lesson with separately advanced cases contributes one unit per case, so “N steps” is not a multi-case lesson counted as one tap-through. The plan is frozen after start and does not expand.
 
 Important invariants:
 
@@ -361,7 +366,7 @@ Required:
 - independently authored EN/FR copy;
 - preserve actual formal terms and notation, introduced progressively rather than deleted.
 
-**Gate:** the opening and Sobel preparation flow no longer requires the learner to understand route/planner vocabulary or multiple new technical terms before doing the first useful reasoning step. **Implemented** (planner copy removed from `learnUi`; Sobel empty-class opening; session chrome hides route/depth; Unit 0 still introduces “sentence letter” after the schematic idea).
+**Gate:** the opening and Sobel preparation flow no longer requires the learner to understand route/planner vocabulary or multiple new technical terms before doing the first useful reasoning step. **Implemented** (planner copy removed from `learnUi`; Sobel empty-class → counterexample → vacuity name → ∀ → existential meaning → name → ∃ → same-witness conjunction → transfer → return to Descartes; session chrome hides route/depth). The experiential product-validation gate remains pending real use.
 
 ## Phase UX-C — learning-aligned re-entry
 
@@ -374,7 +379,7 @@ Required:
 - next-useful-review indication after a completed round when derivable from existing SRS state;
 - no notifications, conventional streak, XP, or backend required.
 
-**Gate:** returning after a gap produces one obvious, bounded, pedagogically justified next action. **Implemented** (`offerOpening` derives resume / quick-review / continue / lapse-recovery / idle from existing SRS and route state).
+**Gate:** returning after a gap produces one obvious, bounded, pedagogically justified next action. **Implemented** (`offerOpening` derives resume → due review → lapse recovery → continue → idle). A mid-course learner with remaining lessons and stale evidence is offered lapse recovery before new material.
 
 ## Phase UX-D — validation instrumentation
 
@@ -442,3 +447,5 @@ The UX gate is deliberately experiential:
 > **Can a learner open Externalize and feel that doing one round is trivially reasonable, even when the reasoning inside the round is genuinely difficult?**
 
 If the answer is no, do not reach for streaks or rewards first. Reduce initiation and intimidation friction further while protecting the rigor of the learning task.
+
+Automated tests can show that the envelope is honest and the terminology sequence is ordered. They cannot prove this experiential gate.

@@ -115,7 +115,7 @@ test('session opening and one-tap start fit a narrow phone', async ({ page }) =>
   await sessionPrimary(page).focus();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('session-active')).toBeVisible();
-  await expect(sessionPosition(page)).toHaveText('1 / 5');
+    await expect(sessionPosition(page)).toHaveText('1 / 6');
   await expectNoPageOverflow(page);
   await expect(page.getByTestId('session-exit')).toBeVisible();
 });

@@ -12,6 +12,11 @@ export type SessionStep = {
   id: string;
   source: SessionStepSource;
   itemId: string;
+  /**
+   * Watch-case index when this unit is one separately advanced case of a
+   * watch lesson. Absent for cards, guided lessons, and practice items.
+   */
+  unitIndex?: number;
 };
 
 export type SessionPlan = {
@@ -37,7 +42,13 @@ export type PersistedSessionStatus = 'active' | 'completed';
 export type PersistedSession = {
   plan: SessionPlan;
   currentIndex: number;
+  /** When the bounded round first started. Not used for duration. */
   startedAt: string;
+  /**
+   * When the current active segment began. Resume starts a new segment so
+   * time spent away is not counted.
+   */
+  segmentStartedAt?: string;
   status: PersistedSessionStatus;
 };
 

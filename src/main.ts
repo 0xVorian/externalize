@@ -121,10 +121,12 @@ import { currentScaffoldLevel } from './app/evaluation-scaffold';
 import {
   offerOpening,
   startSession,
+  resumeSession,
   completeCurrentStep,
   currentSessionStep,
   sessionPosition,
   isSessionComplete,
+  sessionSegmentMs,
   type PersistedSession,
 } from './app/session-plan';
 import {
@@ -135,6 +137,7 @@ import {
 import { recordSessionEvent } from './app/session-telemetry';
 import { renderSessionOpening } from './app/session-opening-render';
 import { renderRoundComplete } from './app/session-complete-render';
+import { isLastWatchUnit } from './app/session-units';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) {
@@ -275,7 +278,7 @@ function isSourceSessionItem(): boolean {
   return Boolean(step && isSourceItemId(step.itemId));
 }
 
-function loadStepItem(itemId: string): void {
+function loadStepItem(itemId: string, unitIndex?: number): void {
   if (getExerciseDefinition(itemId)) {
     if (isSourceExerciseId(itemId) || isSourceItemId(itemId)) {
       const exercise = getExerciseDefinition(itemId)!;
@@ -294,7 +297,11 @@ function loadStepItem(itemId: string): void {
   }
   const lesson = getLessonDefinition(itemId);
   if (lesson) {
-    lessonState = createLessonState(locale, lesson);
+    lessonState = createLessonState(
+      locale,
+      lesson,
+      unitIndex !== undefined ? { watchStep: unitIndex } : undefined,
+    );
     sourcePracticeState = null;
     mode = 'learn';
     if (!isSourceItemId(itemId)) {
@@ -316,7 +323,7 @@ function enterSession(session: PersistedSession, action: 'started' | 'interrupte
   surface = 'session';
   const step = currentSessionStep(session);
   if (step) {
-    loadStepItem(step.itemId);
+    loadStepItem(step.itemId, step.unitIndex);
   }
 }
 
@@ -326,7 +333,7 @@ function beginOfferedSession(): void {
     return;
   }
   if (offer.kind === 'resume' && activeSession) {
-    enterSession(activeSession);
+    enterSession(resumeSession(activeSession, new Date().toISOString()));
     render();
     return;
   }
@@ -340,7 +347,7 @@ function finishSessionRound(): void {
       kind: activeSession.plan.kind,
       action: 'completed',
       stepCount: activeSession.plan.steps.length,
-      durationMs: Date.now() - Date.parse(activeSession.startedAt),
+      durationMs: sessionSegmentMs(activeSession),
     });
   }
   surface = 'complete';
@@ -360,16 +367,30 @@ function advanceActiveSession(): void {
   }
   const step = currentSessionStep(activeSession);
   if (step) {
-    loadStepItem(step.itemId);
+    loadStepItem(step.itemId, step.unitIndex);
   }
   render();
 }
 
 function completeSessionItem(itemId: string): void {
+  const step = activeSession ? currentSessionStep(activeSession) : undefined;
+  const unitIndex = step?.itemId === itemId ? step.unitIndex : undefined;
+  const lesson = getLessonDefinition(itemId);
   if (isSourceItemId(itemId) || isSourceExerciseId(itemId)) {
     persistProgress(completeSourceItem(progress, itemId));
-  } else if (getLessonDefinition(itemId) && !getExerciseDefinition(itemId)) {
-    persistProgress(completeLesson(progress, itemId));
+  } else if (lesson && !getExerciseDefinition(itemId)) {
+    if (lesson.type === 'watch' && unitIndex !== undefined && !isLastWatchUnit(itemId, unitIndex)) {
+      persistProgress(
+        updateResume(progress, {
+          mode: 'learn',
+          lessonId: itemId,
+          watchStep: unitIndex + 1,
+          watchComplete: false,
+        }),
+      );
+    } else {
+      persistProgress(completeLesson(progress, itemId));
+    }
   }
   advanceActiveSession();
 }
@@ -381,7 +402,7 @@ function exitActiveSession(): void {
       kind: activeSession.plan.kind,
       action: 'interrupted',
       stepCount: activeSession.plan.steps.length,
-      durationMs: Date.now() - Date.parse(activeSession.startedAt),
+      durationMs: sessionSegmentMs(activeSession),
     });
   }
   surface = 'opening';
@@ -739,12 +760,6 @@ function handleLessonNext(): void {
     if (!step) {
       return;
     }
-    if (!isSourceItemId(step.itemId) && lessonState.lesson.type === 'watch' && !lessonState.complete) {
-      lessonState = advanceWatchStep(lessonState);
-      persistLessonResume();
-      render();
-      return;
-    }
     completeSessionItem(step.itemId);
     return;
   }
@@ -816,7 +831,14 @@ function exportProgressFile(): void {
   URL.revokeObjectURL(url);
 }
 
+function invalidateEphemeralSession(): void {
+  clearActiveSession();
+  activeSession = null;
+  recordedOpeningOffer = false;
+}
+
 function applyImportedProgress(imported: ProgressStore, importedLocale?: Locale): void {
+  invalidateEphemeralSession();
   progress = saveProgress(imported);
   lessonState = loadLessonFromProgress(progress);
   practiceState = null;
@@ -837,6 +859,7 @@ function handleImportRaw(raw: string): void {
     const { progress: imported, locale: importedLocale } = importProgress(raw);
     applyImportedProgress(imported, importedLocale);
     importNotice = { kind: 'success', message: copy.importSuccess };
+    surface = 'browse';
     mode = 'progress';
     persistProgress(updateResume(progress, { mode: 'progress' }));
     render();
