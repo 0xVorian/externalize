@@ -1,6 +1,7 @@
 export type LessonType = 'card' | 'watch' | 'guided';
 
 import { flattenUnit1Clusters } from './practice-clusters';
+import { getSourceLesson } from './source-lessons';
 
 export type LessonDefinition = {
   id: string;
@@ -94,7 +95,7 @@ export function practiceTier(exerciseId: string): PracticeTier {
 const LESSON_BY_ID = new Map(ALL_LEARN_LESSONS.map((lesson) => [lesson.id, lesson]));
 
 export function getLessonDefinition(id: string): LessonDefinition | undefined {
-  return LESSON_BY_ID.get(id);
+  return LESSON_BY_ID.get(id) ?? getSourceLesson(id);
 }
 
 export function lessonsForUnit(unit: 0 | 1 | 2): LessonDefinition[] {

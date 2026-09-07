@@ -36,6 +36,7 @@ export const SRS_SKILL_PROFILES: Record<SkillId, SrsSkillProfile> = {
   'practice:translate-prose-to-formula': { ...DEFAULT_PROFILE, intervalScale: 0.5 },
   'practice:find-counterexample': { ...DEFAULT_PROFILE, intervalScale: 0.55 },
   'practice:classify-tautology': { ...DEFAULT_PROFILE, intervalScale: 0.55 },
+  'practice:classify-choice': { ...DEFAULT_PROFILE, intervalScale: 0.7 },
   'practice:proof-fill-step': { ...DEFAULT_PROFILE, intervalScale: 0.75 },
 };
 

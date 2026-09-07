@@ -1,0 +1,43 @@
+{
+  "id": "logic-and-theism-reading",
+  "kind": "source",
+  "sourcePackId": "logic-and-theism",
+  "defaultDepth": "reading",
+  "label": {
+    "en": "Logic and Theism",
+    "fr": "Logic and Theism"
+  },
+  "steps": [
+    {
+      "id": "ii-26-28",
+      "kind": "source",
+      "anchor": "sobel-ii-26-28",
+      "depth": "reading",
+      "requires": [
+        { "concept": "conditional", "capability": "apply" },
+        { "concept": "universal-quantifier", "capability": "recognize" },
+        { "concept": "existential-quantifier", "capability": "recognize" }
+      ],
+      "items": [
+        "lat-ii-26-context",
+        "lat-classify-triangle",
+        "lat-classify-visitor",
+        "lat-formalize-readings",
+        "lat-predict-descartes",
+        "lat-interrogate-premises",
+        "lat-transfer-kind",
+        "lat-ii-26-return"
+      ]
+    },
+    {
+      "id": "ii-26-28-mastery",
+      "kind": "source",
+      "anchor": "sobel-ii-26-28",
+      "depth": "mastery",
+      "requires": [
+        { "concept": "existential-import", "capability": "apply" }
+      ],
+      "items": ["lat-mastery-empty-domain"]
+    }
+  ]
+}

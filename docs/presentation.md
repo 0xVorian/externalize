@@ -143,6 +143,10 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 **When not to use a tree:** flat binary formulas shown only to enumerate truth cases (use table instead).
 
+## Logic and Theism Chapter II slice
+
+Source-route cards (`lat-ii-26-*`, quantifier bridges) use the existing card lesson renderer. Graded `lat-*` items use **classify-choice**: labelled options, select then check, repair in place. They are not in the Unit 0/1/2 unlock tables above.
+
 ## Locale and notation
 
 - Tree cells, toggles, and table cells must use the same labels per locale (`ui(locale).trueLabel` / `falseLabel`).
@@ -161,6 +165,7 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 - `src/app/truth-table-render.ts` — truth table, live row, watch grid
 - `src/app/atom-toggles-render.ts` — shared V/F segment controls
 - `src/app/lesson-render.ts` — watch table/grid, guided live row
+- `src/app/classify-choice-render.ts` — select-then-check classification
 - `src/app/render.ts` — practice tree + toggles
 - `src/i18n/messages.ts` — `formatTruthValue`, `formatAssignmentLine`
 - `src/styles/main.css` — `.truth-table-*`, `.watch-grid-*`, `.tree-*`, `.node-value-*`

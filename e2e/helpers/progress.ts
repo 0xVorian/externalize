@@ -17,12 +17,13 @@ import {
 } from '../../src/app/lessons';
 import { scaffoldMaxLevel } from '../../src/app/evaluation-scaffold';
 import type { SkillId } from '../../src/app/progress-tracker';
+import { LOGIC_FOUNDATIONS_ROUTE_ID } from '../../src/app/routes';
 
 export const STORAGE_KEY = 'externalize-progress-v1';
 
 export function emptyProgress(): ProgressStore {
   return {
-    version: 6,
+    version: 7,
     lessonsCompleted: [],
     level0Complete: false,
     level1Complete: false,
@@ -41,6 +42,14 @@ export function emptyProgress(): ProgressStore {
     exerciseStats: {},
     errorCounts: {},
     lastVisitedAt: new Date().toISOString(),
+    activeRouteId: LOGIC_FOUNDATIONS_ROUTE_ID,
+    routes: {
+      [LOGIC_FOUNDATIONS_ROUTE_ID]: {
+        currentStepId: 'unit-0-learn',
+        seenItems: [],
+      },
+    },
+    conceptEvidence: {},
   };
 }
 

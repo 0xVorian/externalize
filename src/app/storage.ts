@@ -38,10 +38,20 @@ import {
   type PracticeDraft,
   type PracticeErrorTag,
 } from './practice-attempt';
+import type { ConceptCapabilityStat, RouteProgress } from './curriculum';
+import {
+  LOGIC_FOUNDATIONS_ROUTE_ID,
+  LOGIC_AND_THEISM_READING_ROUTE_ID,
+  initialRouteProgress,
+  markRouteItemSeen,
+  setRouteCurrentItem,
+} from './routes';
+import { backfillConceptEvidence, evidenceForExercise, recordConceptEvidence } from './evidence';
+import { isSourceExerciseId } from './source-route';
 
 export type { SrsEntry };
 
-export type ProgressStore = {
+type ProgressStoreV6 = {
   version: 6;
   lessonsCompleted: string[];
   level0Complete: boolean;
@@ -59,6 +69,13 @@ export type ProgressStore = {
   errorCounts: Partial<Record<PracticeErrorTag, number>>;
   lastVisitedAt: string;
   onboardingComplete: boolean;
+};
+
+export type ProgressStore = Omit<ProgressStoreV6, 'version'> & {
+  version: 7;
+  activeRouteId: string;
+  routes: Record<string, RouteProgress>;
+  conceptEvidence: Record<string, ConceptCapabilityStat>;
 };
 
 const STORAGE_KEY = 'externalize-progress-v1';
@@ -87,9 +104,27 @@ function defaultResume(): ResumePoint {
   };
 }
 
-function defaultStore(): ProgressStore {
+function defaultV7Fields(store: Pick<ProgressStoreV6, 'lessonsCompleted' | 'passed' | 'resume' | 'exerciseStats'>): Pick<
+  ProgressStore,
+  'activeRouteId' | 'routes' | 'conceptEvidence'
+> {
   return {
-    version: 6,
+    activeRouteId: LOGIC_FOUNDATIONS_ROUTE_ID,
+    routes: {
+      [LOGIC_FOUNDATIONS_ROUTE_ID]: initialRouteProgress({
+        lessonsCompleted: store.lessonsCompleted,
+        passed: store.passed,
+        resume: store.resume,
+      }),
+    },
+    conceptEvidence: backfillConceptEvidence(store.exerciseStats),
+  };
+}
+
+function defaultStore(): ProgressStore {
+  const resume = defaultResume();
+  return {
+    version: 7,
     lessonsCompleted: [],
     level0Complete: false,
     level1Complete: false,
@@ -98,12 +133,18 @@ function defaultStore(): ProgressStore {
     attempted: [],
     passed: [],
     practiceDrafts: {},
-    resume: defaultResume(),
+    resume,
     skills: {},
     exerciseStats: {},
     errorCounts: {},
     lastVisitedAt: nowIso(),
     onboardingComplete: false,
+    ...defaultV7Fields({
+      lessonsCompleted: [],
+      passed: [],
+      resume,
+      exerciseStats: {},
+    }),
   };
 }
 
@@ -142,19 +183,20 @@ function migrateStore(raw: unknown): ProgressStore {
   }
   const store = raw as Record<string, unknown>;
 
-  if (store.version === 6) return normalizeV6(store);
-  if (store.version === 5) return migrateV5ToV6(store);
-  if (store.version === 4) return migrateV5ToV6(migrateV4ToV5(store));
+  if (store.version === 7) return normalizeV7(store);
+  if (store.version === 6) return migrateV6ToV7(normalizeV6(store));
+  if (store.version === 5) return migrateV6ToV7(migrateV5ToV6(store));
+  if (store.version === 4) return migrateV6ToV7(migrateV5ToV6(migrateV4ToV5(store)));
 
   if (store.version === 3) {
-    return migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(store)));
+    return migrateV6ToV7(migrateV5ToV6(migrateV4ToV5(migrateV3ToV4(store))));
   }
 
   if (store.version === 2) {
     const lessonsCompleted = (store.lessonsCompleted as string[] | undefined) ?? [];
     const level0Complete = (store.level0Complete as boolean | undefined) ?? false;
     const lastExerciseId = store.lastExerciseId as string | undefined;
-    return migrateV5ToV6(migrateV4ToV5(migrateV3ToV4({
+    return migrateV6ToV7(migrateV5ToV6(migrateV4ToV5(migrateV3ToV4({
       version: 3,
       lessonsCompleted,
       level0Complete,
@@ -171,7 +213,7 @@ function migrateStore(raw: unknown): ProgressStore {
       exerciseStats: {},
       errorCounts: {},
       lastVisitedAt: nowIso(),
-    })));
+    }))));
   }
 
   if (store.version === 1) {
@@ -185,7 +227,7 @@ function migrateStore(raw: unknown): ProgressStore {
   throw new Error(`Unsupported progress version: ${String(version)}`);
 }
 
-function normalizeV6(store: Record<string, unknown>): ProgressStore {
+function normalizeV6(store: Record<string, unknown>): ProgressStoreV6 {
   const storedLevel1Complete = store.level1Complete as boolean | undefined;
   const lessonsCompleted = grandfatherLevel1Lessons(
     (store.lessonsCompleted as string[] | undefined) ?? [],
@@ -222,7 +264,42 @@ function normalizeV6(store: Record<string, unknown>): ProgressStore {
   };
 }
 
-function migrateV5ToV6(store: Record<string, unknown>): ProgressStore {
+function migrateV6ToV7(store: ProgressStoreV6): ProgressStore {
+  return {
+    ...store,
+    version: 7,
+    ...defaultV7Fields(store),
+  };
+}
+
+function normalizeV7(store: Record<string, unknown>): ProgressStore {
+  const v6 = normalizeV6({ ...store, version: 6 });
+  const activeRouteId =
+    (store.activeRouteId as string | undefined) ?? LOGIC_FOUNDATIONS_ROUTE_ID;
+  const storedRoutes = (store.routes as Record<string, RouteProgress> | undefined) ?? {};
+  const routes = storedRoutes[LOGIC_FOUNDATIONS_ROUTE_ID]
+    ? storedRoutes
+    : {
+        ...storedRoutes,
+        [LOGIC_FOUNDATIONS_ROUTE_ID]: initialRouteProgress({
+          lessonsCompleted: v6.lessonsCompleted,
+          passed: v6.passed,
+          resume: v6.resume,
+        }),
+      };
+  const conceptEvidence =
+    (store.conceptEvidence as Record<string, ConceptCapabilityStat> | undefined) ??
+    backfillConceptEvidence(v6.exerciseStats);
+  return {
+    ...v6,
+    version: 7,
+    activeRouteId,
+    routes,
+    conceptEvidence,
+  };
+}
+
+function migrateV5ToV6(store: Record<string, unknown>): ProgressStoreV6 {
   const storedLevel1Complete = store.level1Complete as boolean | undefined;
   const lessonsCompleted = grandfatherLevel1Lessons(
     (store.lessonsCompleted as string[] | undefined) ?? [],
@@ -401,6 +478,16 @@ function progressiveUnlock(order: readonly string[], passed: string[]): string[]
 }
 
 export function getUnlockedExerciseIds(store: ProgressStore): string[] {
+  const foundations = unlockedLogicFoundationsExercises(store);
+  const sourcePassed = store.passed.filter((id) => isSourceExerciseId(id));
+  if (sourcePassed.length === 0) {
+    return foundations;
+  }
+  const seen = new Set(foundations);
+  return [...foundations, ...sourcePassed.filter((id) => !seen.has(id))];
+}
+
+function unlockedLogicFoundationsExercises(store: ProgressStore): string[] {
   if (!store.level0Complete) {
     return [];
   }
@@ -476,13 +563,27 @@ export function completeLesson(store: ProgressStore, lessonId: string): Progress
   const level2Complete = isLevel2Complete(lessonsCompleted);
   const learnPathComplete = isLearnPathComplete(lessonsCompleted);
   const nextLesson = firstIncompleteLesson(lessonsCompleted);
-  const nextStore = { ...store, lessonsCompleted, level0Complete, level1Complete, level2Complete };
+  let nextStore: ProgressStore = {
+    ...store,
+    lessonsCompleted,
+    level0Complete,
+    level1Complete,
+    level2Complete,
+    routes: markRouteItemSeen(store.routes, store.activeRouteId, lessonId),
+  };
 
-  return updateResume(nextStore, {
+  nextStore = updateResume(nextStore, {
     mode: learnPathComplete ? 'practice' : 'learn',
     lessonId: nextLesson.id,
     exerciseId: learnPathComplete ? getUnlockedExerciseIds(nextStore)[0] : undefined,
   });
+  const currentItem = learnPathComplete
+    ? (nextStore.resume.exerciseId ?? nextLesson.id)
+    : nextLesson.id;
+  return {
+    ...nextStore,
+    routes: setRouteCurrentItem(nextStore.routes, nextStore.activeRouteId, currentItem),
+  };
 }
 
 export function seedQueue(store: ProgressStore, exerciseIds: string[]): ProgressStore {
@@ -768,6 +869,19 @@ export function finalizePracticeAttempt(
         },
       },
       errorCounts,
+      conceptEvidence: recordConceptEvidence(
+        store.conceptEvidence,
+        evidenceForExercise(exerciseId),
+        {
+          cleanPass,
+          errorTags: attempt.errorTags,
+          at: nowIso(),
+        },
+      ),
+      routes:
+        store.activeRouteId === LOGIC_AND_THEISM_READING_ROUTE_ID
+          ? store.routes
+          : markRouteItemSeen(store.routes, store.activeRouteId, exerciseId),
     },
     { mode: 'practice', exerciseId },
   );

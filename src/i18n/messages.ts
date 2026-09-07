@@ -1,6 +1,7 @@
 import type { FeedbackTag, FeedbackTemplate, EvaluationFeedbackResult } from '../../engine';
 import type { Locale } from './locale';
 import type { ResumePoint } from '../app/progress-tracker';
+import { SOURCE_EXERCISES } from './source';
 
 export type ExerciseCopy = {
   prompt: string;
@@ -8,6 +9,8 @@ export type ExerciseCopy = {
   hint?: string;
   atoms?: Record<string, string>;
   feedback?: FeedbackTemplate;
+  choices?: Record<string, string>;
+  choiceWrong?: string;
   cellCorrect?: string;
   cellWrong?: string;
   counterCorrect?: string;
@@ -802,7 +805,7 @@ export function formatAssignmentLine(
 
 export type TranslationUiCopy={atomKeyTitle:string;previewTitle:string;previewAria:string;previewEmpty:string;check:string;compileHint:(c:string)=>string};const TRANSLATION_UI:Record<Locale,TranslationUiCopy>={en:{atomKeyTitle:'Sentence letters',previewTitle:'Your formula',previewAria:'Preview',previewEmpty:'Tap symbols below.',check:'Check',compileHint:(c)=>c==='unbalanced-parens'?'Unbalanced parentheses.':'Keep building.'},fr:{atomKeyTitle:'Variables',previewTitle:'Votre formule',previewAria:'Aperçu',previewEmpty:'Touchez les symboles.',check:'Vérifier',compileHint:(c)=>c==='unbalanced-parens'?'Parenthèses déséquilibrées.':'Continuez.'}};export type ProofUiCopy={panelAria:string;ruleTitle:string;ruleMp:string;ruleAndElim:string;premise:string;missingLine:string;citeHint:string;check:string};const PROOF_UI:Record<Locale,ProofUiCopy>={en:{panelAria:'Proof',ruleTitle:'Inference rule',ruleMp:'→E (modus ponens)',ruleAndElim:'∧E (left conjunct)',premise:'Premise',missingLine:'Fill this line',citeHint:'Tap line numbers to cite, then check.',check:'Check step'},fr:{panelAria:'Démonstration',ruleTitle:"Règle d'inférence",ruleMp:'→E (modus ponens)',ruleAndElim:'∧E (conjoint gauche)',premise:'Prémisse',missingLine:'Compléter cette ligne',citeHint:'Touchez les numéros de ligne à citer, puis vérifiez.',check:"Vérifier l'étape"}};export function proofUi(locale:Locale){return PROOF_UI[locale];}export function translationUi(l:Locale){return TRANSLATION_UI[l];}
 export function getExerciseCopy(locale: Locale, exerciseId: string): ExerciseCopy {
-  const copy = EXERCISE_COPY[locale][exerciseId];
+  const copy = EXERCISE_COPY[locale][exerciseId] ?? SOURCE_EXERCISES[locale][exerciseId];
   if (!copy) {
     throw new Error(`Missing exercise copy for ${exerciseId} (${locale})`);
   }
@@ -1006,8 +1009,10 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
         ? 'Evaluating formulas'
         : id === 'practice:fill-truth-table-cell'
           ? 'Truth-table cells'
-          : id === 'practice:classify-tautology'
+            : id === 'practice:classify-tautology'
             ? 'Tautology check'
+          : id === 'practice:classify-choice'
+            ? 'Classifying claims'
           : id === 'practice:translate-prose-to-formula'
             ? 'Prose to formula'
             : id === 'practice:translate-en-to-formula'
@@ -1089,6 +1094,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
               ? 'Énoncé → formule'
             : id === 'practice:classify-tautology'
               ? 'Reconnaissance des tautologies'
+              : id === 'practice:classify-choice'
+                ? 'Classement d’énoncés'
               : id === 'practice:find-counterexample'
                 ? 'Contre-exemples'
                 : id === 'practice:proof-fill-step'

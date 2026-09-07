@@ -9,32 +9,46 @@ How lessons, exercises, and progress are represented in the codebase today.
 - Skill tags and error tags drive spaced repetition (see progress record below)
 - Exercise UIs must be completable on a phone browser (tap-first; no hover-only steps)
 
-Future direction: YAML/JSON authoring under `content/` may replace hand-edited TypeScript arrays. `content/prerequisites.json` is the first content file; lesson/exercise definitions remain in TypeScript until migrated. Follow [Authoring guide](authoring.md).
+Future direction: YAML/JSON authoring under `content/` may replace hand-edited TypeScript arrays. `content/prerequisites.json` remains the canonical concept graph for the logic course; routes and evidence live as additional content files. Lesson/exercise definitions remain in TypeScript until migrated. Follow [Authoring guide](authoring.md).
 
 ## File layout (current)
 
 ```
 content/
-  prerequisites.json   — concept graph (lessons → exercises prerequisites)
+  prerequisites.json        — concept graph (lessons → exercises prerequisites)
+  concepts-extra.json       — additional canonical concepts used by source routes (not on the Progress map)
+  exercise-evidence.json    — explicit concept × capability tags on graded exercises
+  routes/logic-foundations.json — canonical Learn/Practice sequence
+  routes/logic-and-theism-reading.json — Chapter II §§2.6–2.8 source route
+  sources/logic-and-theism.json — source pack (anchors, citation; no book text)
 
 src/app/
   lessons.ts           — Unit 0/1/2 lessons and sequential practice order
+  source-lessons.ts    — source-route card lessons (not in ALL_LEARN_LESSONS)
   exercises.ts         — EXERCISE_DEFINITIONS
+  curriculum.ts        — route, capability, and evidence types
+  concepts.ts          — canonical concept lookup (prerequisites + extras)
+  evidence.ts          — load evidence tags; record/backfill conceptEvidence
+  routes.ts            — route loader and selectors
+  planner.ts           — skip / retrieve / teach / unsupported prerequisite policy
+  source-route.ts      — Sobel route sequencing, completion, and revisit
   presentation.test.ts — presentation inventory (must stay in sync)
   lesson-render.ts     — card, watch table, guided live row
+  classify-choice-render.ts — tap-to-classify source items
   render.ts            — practice tree + toggles
   truth-table-render.ts
   progress-render.ts   — progress tab + concept map
   concept-map-render.ts
   prerequisites.ts     — loads content/prerequisites.json
   practice-attempt.ts  — one-session attempt and repair state
-  storage.ts           — v6 progress persistence and centralized finalization
+  storage.ts           — v7 progress persistence and centralized finalization
   progress-visibility.ts — derived capability states and progress-moment diffs
   practice-session.ts  — ephemeral 5-attempt practice session (not mastery)
   evaluation-scaffold.ts — nested evaluation intermediate-value withdrawal
 
 src/i18n/
   lessons.ts           — lesson copy, learn UI, reference panel
+  source.ts            — Logic and Theism lesson/exercise copy (EN + FR)
   messages.ts          — exercise prompts, feedback, practice UI
   locale.ts            — preference load/save
   *.test.ts            — parity checks for both locales
@@ -66,7 +80,7 @@ Copy shape in `src/i18n/lessons.ts`:
 | `watchSteps[]` with `{ assignment, explanation }` | `watch` | Truth-table walkthrough |
 | `guidedSteps[]` with `{ kind: 'hint' \| 'done', text }` | `guided` | Step-by-step learner try |
 
-Lessons live in `LEVEL_0_LESSONS`, `LEVEL_1_LESSONS`, and `LEVEL_2_LESSONS`. Combined navigation uses `ALL_LEARN_LESSONS`.
+Lessons live in `LEVEL_0_LESSONS`, `LEVEL_1_LESSONS`, and `LEVEL_2_LESSONS`. Combined navigation uses `ALL_LEARN_LESSONS`. Source-route cards live in `src/app/source-lessons.ts` and are **not** part of that sequence.
 
 ## Exercise schema
 
@@ -79,6 +93,7 @@ type ExerciseType =
   | 'fill-truth-table-cell'
   | 'find-counterexample'
   | 'classify-tautology'
+  | 'classify-choice'
   | 'translate-en-to-formula'
   | 'proof-fill-step';
 
@@ -89,6 +104,8 @@ type ExerciseDefinition = {
   initialAssignment?: Assignment;
   hiddenRowIndex?: number;
   targetValue?: boolean;
+  choiceIds?: string[];
+  correctChoiceId?: string;
 };
 ```
 
@@ -100,6 +117,7 @@ type ExerciseCopy = {
   assessmentPrompt?: string;   // neutral graded instruction (evaluate-formula uses this)
   hint?: string;               // optional support, not shown until requested or after error
   atoms?: Record<string, string>; // locale-authored translation glosses
+  choices?: Record<string, string>; // locale labels for classify-choice ids
   feedback?: FeedbackTemplate;   // overrides per-tag defaults
 };
 ```
@@ -115,6 +133,7 @@ type ExerciseCopy = {
 | `classify-tautology` | Classify from a complete truth table | Answer matches finite truth-table classification |
 | `translate-en-to-formula` | Build a formula with the tap palette | AST structure/equivalence and misconception classifier |
 | `proof-fill-step` | Select a rule and cite lines | Configured natural-deduction rule validates the step |
+| `classify-choice` | Select one labelled reading, then check | Selected id matches `correctChoiceId` (not formula string equality) |
 
 ### Truth-table exercises
 
@@ -140,7 +159,7 @@ Explore mode (`AppMode: explore`) lets learners manipulate assignments with live
 
 ### Gated unlock
 
-`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines the order within each unit. Exposure alone does not unlock the next exercise: the preceding exercise ID must be in the v6 `passed` list.
+`PRACTICE_UNLOCK_ORDER` in `lessons.ts` defines the order within each unit. Exposure alone does not unlock the next exercise: the preceding exercise ID must be in the `passed` list. The `logic-foundations` route reproduces this order; route-aware unlock currently delegates to the same Unit 0 / clustered Unit 1 / Unit 2 policy. Source-route `lat-*` exercises are not in that unlock order; they enter the global Practice pool only after a checked pass.
 
 ## Presentation routing
 
@@ -167,11 +186,11 @@ scope-and-parens     → all connectives
 
 ## Progress record (local storage)
 
-Stored in browser `localStorage` (see `src/app/storage.ts`). Version 6 separates exposure from successful completion and persists the current practice attempt/draft.
+Stored in browser `localStorage` (see `src/app/storage.ts`). Version 7 keeps every v6 field and adds portable concept evidence plus per-route progress. Version 6 exports migrate conservatively.
 
 ```typescript
 interface ProgressRecord {
-  version: 6;
+  version: 7;
   lessonsCompleted: string[];
   attempted: string[]; // at least one checked answer
   passed: string[];    // eventually answered correctly
@@ -182,17 +201,27 @@ interface ProgressRecord {
   exerciseStats: Record<string, ExerciseStat>;
   errorCounts: Record<PracticeErrorTag, number>;
   queue: SrsEntry[];
+  activeRouteId: string; // default 'logic-foundations'
+  routes: Record<string, RouteProgress>;
+  conceptEvidence: Record<string, ConceptCapabilityStat>; // key: `${conceptId}:${capability}`
 }
 ```
 
-One opened exercise session is one attempt. Wrong checks keep that attempt active; the first correct check finalizes it. Only centralized finalization increments attempt/skill/error totals, updates SRS, and adds `passed`.
+One opened exercise session is one attempt. Wrong checks keep that attempt active; the first correct check finalizes it. Only centralized finalization increments attempt/skill/error totals, updates SRS, adds `passed`, and records `conceptEvidence`.
 
 - A clean pass is correct on the first checked answer and advances the normal SRS interval.
 - A repaired pass follows one or more errors, still adds `passed`, records the encountered errors, and remains due immediately with reduced ease.
 - Nested evaluate-formula exercises may store optional `exerciseStats[id].scaffoldLevel`. A clean pass increments it when the next level hides additional intermediate values. This is pedagogical support withdrawal, not a separate mastery score.
 - Capability states (Ready / Developing / Consistent) are **derived** from unlocks and `SkillStat` evidence. See [`progress-visibility.md`](progress-visibility.md).
 - The five-attempt practice session lives in app memory only. It must not be written into progress export/import.
+- v6 → v7 migration preserves skills, exerciseStats, passed, drafts, queue, and resume. It sets `activeRouteId` to `logic-foundations`, initializes that route from lesson/resume state, and backfills `conceptEvidence` only from `exerciseStats` plus explicit evidence tags. Lesson completion alone is not mastery evidence. A v6 export does not invent `logic-and-theism-reading` route state.
 - v5 migration preserves old `completed` IDs only as `attempted` exposure. It resets contaminated practice statistics, errors, and SRS, and requires fresh correct evidence for `passed`.
+
+## Evidence tags
+
+Graded exercises declare what a successful attempt should strengthen in `content/exercise-evidence.json`. Interaction families (`evaluate-formula`, translation, etc.) remain `SkillId`s; portable learner state uses concept × capability pairs (`recognize`, `apply`, `debug`, `transfer`). Source-route items tag the same canonical concepts (including extras such as `existential-import`); they must not invent source-specific duplicates.
+
+The `logic-and-theism-reading` route’s skip / retrieve / teach detours are produced by `src/app/planner.ts` from `conceptEvidence`, then sequenced by `src/app/source-route.ts`. An unmet requirement with no authored bridge is `unsupported`, not skip. Evidence with attempts but missing/invalid `lastSeenAt` (including v6→v7 backfill) is retrieved rather than treated as fresh. Completing the final planned Reading item persists `routes[id].completedAt` and a terminal Done / return-to-book action; revisiting does not restart at item 1. Reading depth omits the Mastery empty-domain item; Mastery includes it without splitting concept identity. `practice:classify-choice` is SRS/telemetry only — it is not on the Progress capability list (`TRACKED_SKILL_IDS`); portable source mastery lives in concept × capability evidence.
 
 ## Feedback tag taxonomy
 
