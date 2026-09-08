@@ -52,15 +52,13 @@ const TRANSLATION_REPAIR = {
   },
 } as const;
 
-export function truthChoiceLabel(locale: Locale, value: boolean): string {
-  if (locale === 'fr') return value ? 'Vrai' : 'Faux';
-  return value ? 'True' : 'False';
-}
-
 export function ui(locale: Locale) {
   const copy = baseUi(locale);
   return {
     ...copy,
+    // Answer controls use ordinary words; formal displays continue to use formatTruthValue.
+    trueLabel: locale === 'fr' ? 'Vrai' : 'True',
+    falseLabel: locale === 'fr' ? 'Faux' : 'False',
     evaluationCorrect:
       locale === 'fr'
         ? 'Exact — les valeurs intermédiaires conduisent bien à ce résultat.'
