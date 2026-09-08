@@ -1,6 +1,6 @@
-# Phase 6 — Predicate logic (design prep)
+# Phase 6 — Predicate logic — historical design prep
 
-Design for extending the engine and content model with **quantifiers, predicates, variables, and constants** before any predicate-logic UI ships. **Prep only** — no implementation in this phase. See [roadmap](roadmap.md) Phase 6, [future work plan](future-work-plan.md) (Tier 3), and [decisions](decisions.md) (notation, AST-first).
+**Status:** the AST/parser/free-variable groundwork described here is implemented, and the Chapter II source pilot uses a narrow quantifier teaching slice. A general predicate-logic curriculum, model UI, and quantifier proof system remain deferred. The detailed body below is the pre-implementation design record; see [roadmap](roadmap.md) for current scope.
 
 ## Goal
 

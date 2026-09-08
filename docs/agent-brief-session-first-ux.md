@@ -1,8 +1,8 @@
 # Multi-agent execution brief — session-first UX
 
-**Status:** Authorized implementation brief.  
-**Repository:** `0xVorian/externalize`  
-**Base:** current `master`  
+**Status:** Historical execution brief. The work described here shipped via PR #14 and subsequent PR #16 remediation; use `AGENTS.md` and `docs/roadmap.md` for current authorization.
+**Repository:** `0xVorian/externalize`
+**Base:** current `master`
 **Primary contract:** `AGENTS.md` + `docs/session-first-ux.md`
 
 ## Mission

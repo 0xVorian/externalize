@@ -1,6 +1,8 @@
-# Level 1 integration notes
+# Level 1 integration notes — historical
 
-Unit 1 (connectives beyond ∧) is **content-complete** and **minimally wired** in the app.
+**Status:** historical integration record. Unit 1 is fully shipped and has since been extended with nesting, translation, clustered Practice, session-first orchestration, and progress v7. Use `docs/content-model.md`, `docs/presentation.md`, and `docs/roadmap.md` for current behavior.
+
+Unit 1 (connectives beyond ∧) was **content-complete** and **minimally wired** at the time of this record.
 
 ## What ships in this batch
 
@@ -41,12 +43,9 @@ Unit 1 (connectives beyond ∧) is **content-complete** and **minimally wired** 
 
 New exercise IDs: **`eval-010`**, **`scope-012`**.
 
-## Remaining work (future batches)
+## Historical follow-ups
 
-1. **`level1Complete` flag** in progress storage (optional; currently inferred from `lessonsCompleted`).
-2. **Resume migration** — `guidedAssignment` resume snapshot still stores `{ P, Q }` only; sufficient for current formulas but should become formula-aware if atoms beyond P/Q appear.
-3. **Unit picker in Learn tab** — let learners jump between Unit 0 and Unit 1 when both are unlocked.
-4. **Completion toast** — surface `level0Complete` / Unit 1 complete messages from `learnUi` (copy exists for Unit 0; Unit 1 message TBD).
+The original follow-up list is superseded: formula-aware guided state, unit navigation/completion surfaces, and later persistence/session changes have all moved on. Do not use this file as a backlog.
 
 ## Key files
 

@@ -179,3 +179,22 @@ Consequences:
 Do **not** achieve visual simplicity by hiding intermediate reasoning state. The desired pattern is **quiet chrome, explicit reasoning**.
 
 See `docs/session-first-ux.md`.
+
+## 14. Separate the logical object from the response operation
+
+A graded screen should make the learner's cognitive operation visually obvious:
+
+> **logical object / stimulus → response workspace → explicit Check → reason-bearing feedback**
+
+The distinction should come from composition and whitespace before decorative chrome. Avoid one large undifferentiated card in which formula, controls, feedback, and actions compete for attention.
+
+For select-then-check interactions:
+
+- selection is provisional;
+- the learner may see **what they selected**, but not whether it worked before Check;
+- Check is the point at which correctness is revealed and graded evidence may change;
+- wrong answers remain repairable in place where possible.
+
+For beginner truth-value choices, ordinary-language controls (**True / False**, **Vrai / Faux**) may bridge into compact formal notation (**T/F**, **V/F**) in the reasoning surface. Formal notation is sequenced, not removed.
+
+See `docs/presentation.md`.

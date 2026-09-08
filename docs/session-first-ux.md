@@ -1,7 +1,7 @@
 # Session-first, low-intimidation UX
 
-**Status:** Implementation present on `feat/session-first-ux`; awaiting independent re-review. The experiential UX gate is not itself validated by tests passing.  
-**Created:** 2026-09-07  
+**Status:** Implemented on `master` (session-first PR #14; exercise visual-grammar follow-up PR #16). Automated gates are green; the experiential UX gate remains pending real use.
+**Created:** 2026-09-07
 **Scope:** reduce initiation cost, intimidation, and re-entry friction without weakening the logic, learner model, SRS, or adaptive-curriculum semantics.
 
 ## Executive principle
@@ -18,7 +18,7 @@ Two companion rules follow:
 
 The reasoning state should remain highly visible. The application architecture should not.
 
-## Why this work is authorized now
+## Why this work was authorized
 
 The August engagement/durable-learning research does **not** justify a gamification sprint. It does support reducing session-initiation friction and keeping cognitively useful acts at the center of engagement. The strongest learning mechanisms remain retrieval, spacing, informative feedback, generation/self-explanation, worked examples with fading, calibration, and transfer.
 
@@ -37,7 +37,7 @@ See `docs/research/engagement-learning/synthesis.md` for the research basis and 
 
 ## Canonical anti-example
 
-The current Chapter II Sobel pilot can expose a screen roughly like:
+Before the session-first refactor, the Chapter II Sobel pilot could expose a screen roughly like:
 
 - top-level choices: `Cours`, `Explorer les formules`, `Exercices`, `Parcours`;
 - route choices: `Fondements de la logique`, `Logic and Theism`;

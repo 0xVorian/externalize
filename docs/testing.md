@@ -7,6 +7,18 @@ Externalize has two test layers:
 | Unit / integration | `npm test` | Engine, storage, render helpers, i18n (Vitest) |
 | Browser smoke | `npm run test:e2e` | Critical integration flows plus a targeted mobile matrix (Playwright) |
 
+## Repository inventory drift check
+
+`docs/generated-inventory.md` is generated from the current lesson/exercise/practice-chain source. Verify it during housekeeping/content changes with:
+
+```bash
+npm run inventory:check
+```
+
+If lesson/exercise inventory intentionally changes, refresh it with `npm run inventory:update` and commit the generated file.
+
+`npm run release:check` also includes this inventory check before unit/build/E2E verification.
+
 ## Unit tests (Vitest)
 
 ```bash
@@ -59,7 +71,13 @@ npm run test:e2e:ui
 | `e2e/smoke/biconditional-symmetry.spec.ts` | Swapped biconditional operands accepted through the UI |
 | `e2e/smoke/french-content.spec.ts` | French-authored prompt and atom gloss rendering |
 | `e2e/mobile/high-risk.spec.ts` | Watch, evaluation, scope, translation, truth table, and proof at 320px and 390px |
-| `e2e/smoke/progress-visibility.spec.ts` | Learn meters, Unit 1 lesson count, practice session counting, reliability/scaffold moments, Unit 2 completion one-shot (including announcement lifecycle), session complete, Progress capability summary |
+| `e2e/smoke/progress-visibility.spec.ts` | Learn meters, Unit 1 lesson count, practice session counting, consistency/scaffold moments, Unit 2 completion one-shot, session complete, Progress capability summary |
+| `e2e/smoke/session-first.spec.ts` | Opening offer, bounded-round start/resume/completion, effort contract, import invalidation, re-entry and telemetry boundaries |
+| `e2e/smoke/source-route.spec.ts` | Logic and Theism route planning, repair, terminal completion/revisit, and source-return behavior |
+| `e2e/smoke/guided-evaluation.spec.ts` | Guided unset/partial assignment semantics, True/False → formal notation bridge, provisional selection, explicit Check and repair |
+| `e2e/smoke/ui-remediation.spec.ts` | Exercise stimulus/response/action visual contract and feedback-facing regressions |
+| `e2e/smoke/pwa-offline.spec.ts` | Installed/offline navigation shell reload |
+| `e2e/smoke/repaired-review-priority.spec.ts` | Immediately due repaired reviews are not starved by frontier work |
 
 Helpers under `e2e/helpers/` seed `localStorage` with the same progress shapes the app uses in production.
 
@@ -84,12 +102,13 @@ To reproduce locally:
 
 ```bash
 npm ci
+npm run inventory:check
 npm test && npm run build
 npx playwright install --with-deps chromium
 CI=1 npm run test:e2e
 ```
 
-If browser smoke tests prove flaky on GitHub runners, disable the `e2e` job temporarily (comment it out or add `if: false`) while keeping `test-and-build` required.
+If browser smoke tests become flaky on GitHub runners, investigate and isolate the flaky case. Do not weaken or disable the E2E merge gate as routine housekeeping; any temporary CI bypass should be an explicit, separately reviewed decision.
 
 ### First-time setup
 

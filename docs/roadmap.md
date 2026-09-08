@@ -2,17 +2,19 @@
 
 This document tracks the shipped application and the remaining validation gates. It is intentionally conservative: implemented prototypes are not promoted to “done” merely because code exists.
 
-## Current status — v0.4.0 + unreleased adaptive pilot
+## Current status — v0.4.0 + unreleased adaptive/session UX baseline
 
-Externalize now has three propositional-logic learning units, graded practice across multiple skills, local progress/SRS, EN/FR course material, Explore mode, export/import, a concept map, PWA support, browser regression coverage, evidence-backed progress visibility, explicit learning routes, portable concept × capability evidence, and a narrow *Logic and Theism* Chapter II source-driven pilot with deterministic prerequisite planning.
+Externalize now has three propositional-logic learning units, graded practice across multiple skills, local progress/SRS, EN/FR course material, Explore mode, export/import, a concept map, PWA support, browser regression coverage, evidence-backed progress visibility, explicit learning routes, portable concept × capability evidence, a narrow *Logic and Theism* Chapter II source-driven pilot with deterministic prerequisite planning, and the session-first low-intimidation UX on `master`.
 
-v0.4.0 established the validation baseline for progress visibility, persistence/PWA hardening, and simplified Practice orchestration. The adaptive-curriculum pilot is now merged on top of that baseline but remains unreleased and product-validation is still pending.
+v0.4.0 established the released baseline for progress visibility, persistence/PWA hardening, and simplified Practice orchestration. The adaptive-curriculum pilot, bounded-session shell, reason-bearing feedback, and exercise visual-grammar work are merged on top of that baseline under `[Unreleased]`. Their implementation is complete; the experiential/product-validation gates remain open.
 
 The main unresolved question is no longer whether the core interactions can be built. It is whether Externalize can make difficult formal material **easy to start, finite to engage with, understandable without product-taxonomy overhead, and useful enough to return to** while preserving rigorous mastery evidence and transfer.
 
-### Current validation priority — session-first, low-intimidation use
+### Current validation priority — experiential validation of the shipped interaction model
 
-The next authorized product pass is [`session-first-ux.md`](session-first-ux.md).
+[`session-first-ux.md`](session-first-ux.md) is implemented. PR #16 also established the current exercise grammar: a clear logical stimulus, one response workspace, ordinary-language truth choices that bridge into formal T/F or V/F notation, and explicit Check before correctness is revealed.
+
+The next work is **use, observation, and bounded remediation**. Do not reopen a broad redesign merely because the implementation plan has finished.
 
 The governing product principle is:
 
@@ -20,9 +22,9 @@ The governing product principle is:
 
 The normal learner should not have to choose among app modes, routes, depth, planner state, or reference machinery before doing one useful reasoning step. Externalize should instead offer one obvious bounded round, show the approximate effort before start, keep the round finite, and make completion a legitimate stopping point.
 
-The canonical current failure mode is the Sobel Chapter II screen that can simultaneously expose mode navigation, route/depth controls, source/reference metadata, planner language such as `Un pont court pour un prérequis manquant`, and several new logic terms/symbols before the first useful reasoning action. This is now an explicit UX anti-pattern, not merely a copy-polish issue.
+The canonical pre-refactor anti-example was the Sobel Chapter II screen exposing mode navigation, route/depth controls, source/reference metadata, planner language such as `Un pont court pour un prérequis manquant`, and several new logic terms/symbols before the first useful reasoning action. That pattern remains explicitly prohibited.
 
-Authorized sequence:
+Implemented sequence:
 
 1. **UX-A — session shell and finite contract:** one-action entry, fixed 5–7 step envelope where content permits, visible effort, no silent expansion, interruption/resume, explicit completion. **Implemented.**
 2. **UX-B — low-intimidation beginner surface:** planner internals removed from learner copy; progressive disclosure of route/depth/reference/source controls; Sobel opening rebuilt around meaning → use → name → notation → independent use; earliest foundations audited for the same failure mode. **Implemented.**
@@ -31,7 +33,7 @@ Authorized sequence:
 
 **UX gate:** a learner can open Externalize and feel that doing one round is trivially reasonable even when the reasoning inside that round is genuinely difficult.
 
-Do not interpret this authorization as permission for XP, hearts, reset streaks, currencies, leaderboards, backend notifications, runtime AI session generation, framework migration, or a universal workflow engine.
+The implemented baseline does not authorize XP, hearts, reset streaks, currencies, leaderboards, backend notifications, runtime AI session generation, framework migration, or a universal workflow engine.
 
 ### Progress visibility baseline
 
@@ -66,7 +68,7 @@ The authorized adaptive sequence is now implemented through Phase C:
 
 **Pilot gate:** the architecture earns its complexity only if existing learner progress survives, current course behavior remains stable, already-demonstrated knowledge suppresses redundant prerequisite teaching, and the source-driven slice gets the learner back into the book with better comprehension.
 
-The session-first UX pass is now the next way to test that gate: the route/planner substrate should become quieter and more useful to the learner rather than more visible.
+The shipped session-first UX is now part of that test: the route/planner substrate is intentionally quieter and should be judged by whether it gets the learner into useful reasoning and back to the source with less friction.
 
 Do not treat the adaptive authorization as general curriculum expansion. Chapter III+ renderers, PDF ingestion, runtime AI route generation, backend/cloud accounts, and universal activity/engine abstractions remain out of scope until the pilot is used and evaluated.
 
@@ -152,7 +154,7 @@ The original “full propositional MVP” feature list is now substantially impl
 - [x] Accessible EN/FR UI and course content
 - [x] Evidence-backed progress visibility in ordinary Learn/Practice use
 
-**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, repaired attempt semantics, retention, transfer, and source-driven use. The immediate authorized work is to reduce initiation/intimidation friction through the session-first UX rather than expand curriculum scope.
+**Current gate:** sustained personal use and validation of the learning loop, exercise quality, progression, repaired-attempt semantics, retention, transfer, source-driven use, and whether the shipped session-first/visual-grammar changes actually reduce initiation and interface friction. Curriculum expansion remains deferred.
 
 ## Phase 5 — Natural deduction
 

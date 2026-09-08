@@ -1,6 +1,6 @@
 # Progress visibility
 
-Status: **current product priority after v0.3.5**.
+Status: **implemented baseline since v0.4.0**. Retained as the design record for evidence-backed progress; the session-first UX now sits above this older five-attempt Practice episode.
 
 Externalize already stores substantial learning state: completed lessons, attempted/passed exercises, skill statistics, SRS state, error history, diagnostic-case coverage, prerequisites, and per-exercise scaffold level. The problem is experiential rather than informational: most of that movement is invisible while the learner is actually learning or practising.
 

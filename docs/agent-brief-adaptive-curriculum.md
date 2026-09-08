@@ -3,7 +3,7 @@
 **Audience:** a primary coding agent with access to subagents / multi-agent delegation  
 **Repository:** `0xVorian/externalize`  
 **Primary roadmap:** [`adaptive-curriculum-implementation.md`](adaptive-curriculum-implementation.md)  
-**Status:** ready for execution
+**Status:** historical execution brief. Adaptive Phases A–C shipped via PR #13; use `AGENTS.md`, `docs/roadmap.md`, and `docs/adaptive-curriculum-implementation.md` for current authorization.
 
 ## Mission
 

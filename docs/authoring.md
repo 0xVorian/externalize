@@ -1,455 +1,307 @@
 # Authoring guide
 
-How to add lessons and exercises to Externalize. Content is **TypeScript data** in `src/app/` (language-neutral structure) plus **parallel locale copy** in `src/i18n/` (English and French written independently).
+How to add or change learning content in Externalize without breaking the learner model, presentation contract, or EN/FR parity.
 
-## Quick reference
+Externalize currently uses **TypeScript data** for lesson/exercise structure, **parallel locale copy** under `src/i18n/`, and JSON content files for routes, concept/evidence metadata, and source packs. Do not introduce a new authoring format merely to avoid editing these files.
 
-| What | Structure | Copy |
-|------|-----------|------|
-| Level 0/1 lesson | `src/app/lessons.ts` | `src/i18n/lessons.ts` |
-| Practice exercise | `src/app/exercises.ts` | `src/i18n/messages.ts` |
-| Presentation routing | `src/app/presentation.test.ts` | — |
+## Current sources of truth
 
-Run `npm test` after every content change. The i18n and presentation inventory tests fail if you forget a locale or a presentation entry.
+| What | Structure | Copy / metadata |
+|------|-----------|-----------------|
+| Foundations lessons (Units 0–2) | `src/app/lessons.ts` | `src/i18n/lessons.ts` |
+| Practice exercises | `src/app/exercises.ts` | `src/i18n/messages.ts` |
+| Logic and Theism source lessons | `src/app/source-lessons.ts` | `src/i18n/source.ts` |
+| Practice unlock sequencing | `src/app/lessons.ts`, `src/app/practice-clusters.ts` | — |
+| Portable concept evidence | — | `content/exercise-evidence.json` |
+| Routes | — | `content/routes/*.json` |
+| Source anchors | — | `content/sources/*.json` |
+| Presentation coverage | `src/app/presentation.test.ts` | `docs/presentation.md` |
 
----
-
-## 1. Adding a Level 0 or Level 1 lesson
-
-Level 0 is the introductory unit (`LEVEL_0_LESSONS`). Level 1 (connectives `¬`, `∨`, `→`, `↔`) will follow the same pattern in a future `LEVEL_1_LESSONS` array — the steps below apply to both.
-
-### Step 1 — Choose lesson type and presentation
-
-| `type` | Purpose | When to use | Presentation |
-|--------|---------|-------------|--------------|
-| `card` | Read-only prose + optional example block | Introduce a concept | `card` |
-| `watch` | Instructor walks through fixed cases | Enumerate all truth assignments for a small formula | `truth-table-multi` |
-| `guided` | Learner sets assignments step by step | Hands-on try on a small formula | `truth-table-live` |
-
-See [Presentation rules](presentation.md) for the full decision table (table vs live row vs tree). **Do not** use a parse tree to enumerate the four cases of `P ∧ Q` — use a truth table.
-
-Set `formula` on `watch` and `guided` lessons. Card lessons omit it.
-
-### Step 2 — Register in `src/app/lessons.ts`
-
-Append to `LEVEL_0_LESSONS` (or the future Level 1 array) in teaching order:
-
-```typescript
-{ id: 'level0-06-disjunction', type: 'card' },
-{ id: 'level0-07-watch-or', type: 'watch', formula: 'P ∨ Q' },
-{ id: 'level0-08-guided-or', type: 'guided', formula: 'P ∨ Q' },
-```
-
-**ID convention:** `level0-NN-slug` or `level1-NN-slug` — kebab-case, stable once shipped (progress records store lesson IDs).
-
-### Step 3 — Add copy in `src/i18n/lessons.ts`
-
-Add the same lesson key under **both** `en` and `fr` in the `LESSONS` object. Shape depends on type:
-
-- **Card:** `title`, optional `subtitle`, `card: { title, body[], example? }`
-- **Watch:** `title`, optional `subtitle`, `watchSteps: [{ assignment, explanation }]`
-- **Guided:** `title`, optional `subtitle`, `guidedSteps: [{ kind: 'hint', mode: 'instruct' | 'goal', text, atom, value }, { kind: 'done', text }]`. Instruct steps name the requested value; goal steps state a visible logical aim that uniquely determines it.
-
-Write each locale from scratch — see [i18n rules](i18n.md).
-
-### Step 4 — Register presentation
-
-Add an entry to `PRESENTATION` in `src/app/presentation.test.ts`:
-
-```typescript
-'level0-07-watch-or': 'truth-table-multi',
-'level0-08-guided-or': 'truth-table-live',
-```
-
-Allowed values today: `card`, `truth-table-multi`, `truth-table-live`, `tree-eval`, `tree-scope`.
-
-### Step 5 — Verify
-
-```bash
-npm test
-```
-
-`src/i18n/lessons.test.ts` asserts every lesson in `LEVEL_0_LESSONS` has copy in both locales. Watch lessons must have exactly 4 steps; guided lessons must have exactly 3 steps (current convention for binary connectives).
+Run `npm run inventory` for the current lesson/exercise/practice-chain inventory. `docs/generated-inventory.md` is generated from source and can be verified with `npm run inventory:check`; do not hand-edit it.
 
 ---
 
-## 2. Adding a practice exercise
+## 1. Foundations lessons
 
-### Step 1 — Choose type
+### Lesson schema
 
-| `type` | Learner action | Typical presentation |
-|--------|----------------|----------------------|
-| `identify-main-connective` | Tap the main connective in the tree | `tree-scope` |
-| `evaluate-formula` | Set atom truth values; read computed nodes | `truth-table-live` (flat formulas) or `tree-eval` |
-| `fill-truth-table-cell` | Fill one masked cell in a partial truth table | `truth-table-partial` |
+`src/app/lessons.ts` defines:
 
-### Step 2 — Register in `src/app/exercises.ts`
+```ts
+type LessonType = 'card' | 'watch' | 'guided';
 
-```typescript
-{
-  id: 'scope-004',
-  type: 'identify-main-connective',
-  formula: 'P ∨ (Q ∧ R)',
-},
+type LessonDefinition = {
+  id: string;
+  type: LessonType;
+  formula?: string;
+  watchLayout?: 'grid' | 'table';
+};
 ```
 
-For evaluation exercises, set `initialAssignment` so the first screen is meaningful:
+Lessons live in `LEVEL_0_LESSONS`, `LEVEL_1_LESSONS`, and `LEVEL_2_LESSONS`, then combine into `ALL_LEARN_LESSONS`.
 
-```typescript
+Use stable IDs: progress records persist lesson IDs.
+
+### Card lesson
+
+Use for one compact explanatory step. Copy lives under the same lesson ID in both locales:
+
+```ts
 {
-  id: 'eval-003',
-  type: 'evaluate-formula',
-  formula: 'P ∨ Q',
-  initialAssignment: { P: true, Q: false },
-},
-```
-
-**ID convention:** `scope-NNN`, `eval-NNN`, or `tt-NNN`.
-
-For fill-truth-table exercises, set `hiddenRowIndex` (0-based row in the full table):
-
-```typescript
-{
-  id: 'tt-006',
-  type: 'fill-truth-table-cell',
-  formula: 'P ∨ Q',
-  hiddenRowIndex: 3,
-},
-```
-
-### Step 3 — Add unlock order (if gated)
-
-Append the ID to `PRACTICE_UNLOCK_ORDER` in `src/app/lessons.ts` where it should unlock. Exercises not in this list are unreachable in the gated practice flow. Sequential progression advances only after the preceding exercise is in v6 `passed`; attempted exposure is not sufficient.
-
-### Step 4 — Add copy in `src/i18n/messages.ts`
-
-Add the exercise key under **both** `en` and `fr` in `EXERCISE_COPY`:
-
-```typescript
-'scope-004': {
-  prompt: 'Select the main connective of the formula.',
-  feedback: {
-    'selected-subconnective':
-      '∧ binds tighter here; the outer connective governs the whole formula.',
+  title: '...',
+  subtitle: '...',
+  card: {
+    title: '...',
+    body: ['...'],
+    example: '...', // optional
   },
-},
+}
 ```
 
-- `prompt` is required.
-- `feedback` is optional; per-exercise tags override defaults from `FEEDBACK_DEFAULTS_*`.
-- Available tags: `correct`, `wrong-main-connective`, `selected-subconnective`, `selected-atom`, `selected-operand-not-connective`.
+For beginner material follow the shipped progression where practical:
 
-### Step 5 — Register presentation
+> **meaning → use → name → notation → independent use**
 
-Add to `PRESENTATION` in `src/app/presentation.test.ts`:
+Do not lead with implementation taxonomy or several undefined technical terms merely because the terms are academically correct.
 
-```typescript
-'scope-004': 'tree-scope',
-'eval-003': 'tree-eval',   // not truth-table-live unless formula is exactly 'P ∧ Q'
+### Watch lesson
+
+Use to walk through authored cases while the engine computes the result.
+
+Copy:
+
+```ts
+watchSteps: [
+  { assignment: { P: true, Q: false }, explanation: '...' },
+]
 ```
 
-**Auto-routing note:** `usesLiveTruthRow()` returns true for flat formulas (`P ∧ Q`, `¬P`, `P ∨ Q`, `P → Q`, `P ↔ Q`). Nested formulas use `tree-eval`; fill-truth-table exercises use `truth-table-partial`.
+Binary flat formulas normally use the 2×2 watch grid; single-atom/fallback cases use rows. The renderer, not locale copy, formats `T/F` or `V/F`.
 
-### Step 6 — Verify
+### Guided lesson
 
-```bash
-npm test
+Use when the learner should build or infer one assignment value at a time.
+
+```ts
+guidedSteps: [
+  {
+    kind: 'hint',
+    mode: 'instruct', // or 'goal'
+    text: 'Set P to true.',
+    atom: 'P',
+    value: true,
+  },
+  { kind: 'done', text: '...' },
+]
 ```
 
-`src/i18n/messages.test.ts` asserts every exercise in `EXERCISE_DEFINITIONS` has a prompt and feedback templates in both locales.
+Two legitimate guided modes exist:
+
+- **`instruct`** — the text explicitly names the requested value;
+- **`goal`** — the visible logical goal uniquely determines the requested value.
+
+Never store a secret expected value behind copy such as “Choose P” when both truth values would otherwise be legitimate.
+
+Guided state distinguishes **unset**, **true**, and **false**. Unset/future atoms render as unknown, not as hidden false defaults. A provisional choice appears in the active target but must not reveal whether it satisfies the goal before **Check**.
+
+Learner-facing choices use **True / False** and **Vrai / Faux**. Formal tables/trees use compact **T/F** and **V/F**.
 
 ---
 
-## 3. Exercise template generator (scope, eval, fill-truth-table)
+## 2. Practice exercises
 
-For bulk additions of the three structural patterns (~28 exercises today), use the generator instead of hand-typing every field. It **prints snippets for review** — it does not overwrite `src/app/exercises.ts`.
+Definitions live in `src/app/exercises.ts`:
 
-### Template bank
+```ts
+type ExerciseType =
+  | 'identify-main-connective'
+  | 'evaluate-formula'
+  | 'fill-truth-table-cell'
+  | 'find-counterexample'
+  | 'classify-tautology'
+  | 'classify-choice'
+  | 'translate-en-to-formula'
+  | 'proof-fill-step';
+```
 
-Edit `content/exercise-templates.json`:
+### Current interaction contract
 
-| Key | Pattern | Fields |
-|-----|---------|--------|
-| `scope` | Main connective | `formula` |
-| `eval` | Evaluate under one assignment | `formula`, `initialAssignment` |
-| `fillTruthTable` | Mask one table cell | `formula`, `hiddenRowIndex` |
+| Type | Learner action | Validation / presentation |
+|------|----------------|---------------------------|
+| `identify-main-connective` | Select a connective, then Check | Root connective in vertical tree; repair in place |
+| `evaluate-formula` | Read the **system-chosen, read-only assignment**, predict True/False, then Check | Flat formulas use a live row; nested formulas use a parse tree; the assessed root is hidden until Check |
+| `fill-truth-table-cell` | Choose True/False for one blank result cell, then Check | Selection provisionally fills the target in formal notation; no grading until Check |
+| `find-counterexample` | Build an assignment that makes the target truth value hold | Engine evaluates the learner assignment; root correctness stays assessment-safe until Check |
+| `classify-tautology` | Classify from the complete truth table | Finite truth-table classification |
+| `classify-choice` | Select one authored reading/claim, then Check | Choice ID comparison; used by the source pilot and repairable in place |
+| `translate-en-to-formula` | Build a formula with the symbol palette | AST structure/equivalence + misconception classifier |
+| `proof-fill-step` | Select a rule and cited lines | Natural-deduction step validator |
 
-Optional explicit `id` on any entry (e.g. `"id": "scope-013"`) overrides auto-numbering for that row.
+**Do not turn graded `evaluate-formula` back into learner-controlled assignment toggling.** Explore is the place for manipulating assignments freely; Explore writes no mastery/SRS evidence.
 
-Schema: `tools/exercise-generator/exercise-templates.schema.json`.
+### Definition fields
 
-### Generate snippets
+```ts
+type ExerciseDefinition = {
+  id: string;
+  type: ExerciseType;
+  formula?: string;
+  initialAssignment?: Assignment;
+  hiddenRowIndex?: number;
+  targetValue?: boolean;
+  choiceIds?: string[];
+  correctChoiceId?: string;
+};
+```
+
+Common conventions:
+
+- `scope-NNN` — main-connective exercise;
+- `eval-NNN` — evaluation;
+- `tt-NNN` — fill truth-table;
+- stable IDs once shipped;
+- formula correctness belongs in the engine, not in locale copy.
+
+### Copy
+
+Practice copy lives in both locale blocks in `src/i18n/messages.ts`.
+
+```ts
+type ExerciseCopy = {
+  prompt: string;
+  assessmentPrompt?: string;
+  hint?: string;
+  atoms?: Record<string, string>;
+  choices?: Record<string, string>;
+  feedback?: FeedbackTemplate;
+};
+```
+
+Correct feedback should give the shortest useful logical reason, not fall back to a bare “Correct.” when the app knows why the answer is correct. Wrong feedback should identify the local misconception and preserve repair where possible.
+
+### Unlock order
+
+Foundations Practice is not one hand-edited linear list anymore:
+
+- Unit 0: `LEVEL_0_PRACTICE_UNLOCK_ORDER`;
+- Unit 1: clustered policy in `src/app/practice-clusters.ts` / `LEVEL_1_PRACTICE_UNLOCK_ORDER`;
+- Unit 2: `LEVEL_2_PRACTICE_UNLOCK_ORDER`;
+- `PRACTICE_UNLOCK_ORDER` is the combined compatibility view.
+
+Progress v7 unlocks from **passed** graded evidence, not mere exposure. Repaired passes can unlock but remain conservative SRS/evidence; clean-pass semantics must remain intact.
+
+### Portable evidence
+
+When a graded exercise demonstrates reusable knowledge, tag it in `content/exercise-evidence.json` with canonical concept × capability evidence (`recognize`, `apply`, `debug`, `transfer`).
+
+Do not invent source-specific duplicate concepts for knowledge that should transfer between routes.
+
+---
+
+## 3. Logic and Theism source-route content
+
+The Chapter II pilot is deliberately narrow.
+
+- source lesson structure: `src/app/source-lessons.ts`;
+- EN/FR copy: `src/i18n/source.ts`;
+- route order/requirements: `content/routes/logic-and-theism-reading.json`;
+- anchors/citation metadata: `content/sources/logic-and-theism.json`;
+- evidence: `content/exercise-evidence.json`.
+
+Use source locators, bibliographic metadata, paraphrase, and only short necessary quotations. Do not reproduce substantial book text.
+
+The deterministic planner may choose `skip`, `retrieve`, `teach`, or `unsupported`, but planner categories are **not learner-facing copy**.
+
+Do not add Chapter III+ runtime interaction families without explicit authorization; the existing later-chapter maps are research/design material.
+
+---
+
+## 4. Presentation
+
+Presentation is inferred from exercise/lesson type and formula; it is not a free-form authoring field.
+
+`src/app/presentation.test.ts` must cover every lesson and exercise. Current presentation families include:
+
+- `card`
+- `watch-grid`
+- `truth-table-multi`
+- `truth-table-live`
+- `truth-table-partial`
+- `truth-table-tautology`
+- `tree-eval`
+- `tree-scope`
+- `translation-palette`
+- `proof-fill-step`
+- `choice`
+
+See `docs/presentation.md` for the pedagogical rule behind each representation.
+
+The learner-facing visual grammar for graded work is:
+
+> **logical object / stimulus → response workspace → explicit Check → feedback**
+
+Do not add boxes merely for decoration; separation should clarify the cognitive operation.
+
+---
+
+## 5. Structural exercise generator
+
+`content/exercise-templates.json` and `tools/exercise-generator/` support the repetitive structural patterns (`scope`, `eval`, `fillTruthTable`). The generator prints snippets for review; it does not replace authored EN/FR copy or evidence tagging.
 
 ```bash
 npm run generate:exercises
-```
-
-Outputs TypeScript lines to paste into `EXERCISE_DEFINITIONS`, plus commented `PRESENTATION` hints.
-
-Common flags:
-
-| Flag | Purpose |
-|------|---------|
-| `--json` | JSON array instead of TypeScript |
-| `--both` | TypeScript then JSON |
-| `--pattern=scope` | One pattern only (repeatable) |
-| `--start-scope=N` | First auto `scope-NNN` index (same for `--start-eval`, `--start-tt`) |
-| `--diff` | Compare templates to current `exercises.ts` |
-| `--unlock-hint` | Append suggested `PRACTICE_UNLOCK_ORDER` lines |
-| `--templates=PATH` | Alternate template file |
-
-Examples:
-
-```bash
-# New scope exercises starting at scope-013
-npm run generate:exercises -- --pattern=scope --start-scope=13
-
-# Check whether templates match the shipped bank
 npm run generate:exercises -- --diff
-
-# JSON for external tooling
-npm run generate:exercises -- --json --pattern=eval
+npm run generate:exercises -- --pattern=scope
 ```
 
-### After generating
+Useful flags include `--json`, `--both`, `--pattern=...`, `--start-scope=N`, `--start-eval=N`, `--start-tt=N`, `--diff`, `--unlock-hint`, and `--templates=PATH`.
 
-1. Paste reviewed definitions into `src/app/exercises.ts`.
-2. Add EN/FR copy in `src/i18n/messages.ts` (prompts still hand-authored).
-3. Register `PRESENTATION` entries and update unlock order in `src/app/lessons.ts`.
-4. Run `npm test`.
+After generation:
 
-The generator validates formulas (parser), assignment atoms, and `hiddenRowIndex` bounds via the truth-table engine.
+1. review/paste the definition;
+2. add independently authored EN and FR copy;
+3. place it in the correct unlock/cluster policy if applicable;
+4. add evidence tags where justified;
+5. ensure presentation coverage;
+6. refresh/check the generated inventory.
 
 ---
 
-## 4. Internationalization
+## 6. Internationalization
 
-Full policy: **[docs/i18n.md](i18n.md)**
+English and French are **parallel academic materials**, not a translation pair.
 
-Summary for authors:
+- author both locales in the same change;
+- use standard terminology for each academic tradition;
+- introduce formal terms progressively for novices rather than permanently avoiding them;
+- formulas stay symbolic;
+- truth-value answer controls may use words while formal representations use locale-aware compact notation.
 
-- English and French are **independent course materials**, not translations.
-- **EN:** analytic / introductory logic tradition — sentence letter, truth assignment, main connective, T/F.
-- **FR:** logique propositionnelle — variable propositionnelle, interprétation, connecteur principal, portée, V/F.
-- Formulas stay symbolic (`P ∧ Q`); only surrounding prose changes.
-- Always add both locales in the same change. Never ship English-only copy.
-- Cursor rule: `.cursor/rules/i18n-academic.mdc`
-
----
-
-## 5. Presentation
-
-Full inventory and layout rules: **[docs/presentation.md](presentation.md)**
-
-| Pedagogical goal | Presentation |
-|------------------|--------------|
-| Show all cases of a small formula (demo) | Truth table, highlighted rows (`truth-table-multi`) |
-| Learner sets one assignment on a small formula | Live table row, one target at a time (`truth-table-live`) |
-| Propagate values under one assignment (complex formula) | Vertical parse tree with values (`tree-eval`) |
-| Tap main connective / scope | Vertical parse tree, no values (`tree-scope`) |
-| Introduce a concept in prose | Card (`card`) |
-
-When adding content, update `PRESENTATION` in `presentation.test.ts` and the inventory table in `docs/presentation.md`.
+See `docs/i18n.md` and `.cursor/rules/i18n-academic.mdc`.
 
 ---
 
-## 6. Worked examples
-
-### Example A — Watch lesson step (`P ∧ Q`)
-
-**Goal:** Add a fifth watch lesson demonstrating `P ∨ Q` (hypothetical Level 1 content).
-
-**1. `src/app/lessons.ts`**
-
-```typescript
-{ id: 'level1-01-watch-or', type: 'watch', formula: 'P ∨ Q' },
-```
-
-**2. `src/i18n/lessons.ts` — English**
-
-```typescript
-'level1-01-watch-or': {
-  title: 'Worked cases: P ∨ Q',
-  subtitle: 'Four assignments, displayed explicitly.',
-  watchSteps: [
-    {
-      assignment: { P: true, Q: true },
-      explanation:
-        'At least one disjunct is true; P ∨ Q evaluates to T.',
-    },
-    {
-      assignment: { P: true, Q: false },
-      explanation:
-        'P alone is true, so the disjunction is T — only both false makes ∨ false.',
-    },
-    {
-      assignment: { P: false, Q: true },
-      explanation:
-        'Q is true; the disjunction evaluates to T.',
-    },
-    {
-      assignment: { P: false, Q: false },
-      explanation:
-        'Both disjuncts false; P ∨ Q evaluates to F.',
-    },
-  ],
-},
-```
-
-**3. `src/i18n/lessons.ts` — French (written fresh, not translated)**
-
-```typescript
-'level1-01-watch-or': {
-  title: 'Cas typiques : P ∨ Q',
-  subtitle: 'Quatre interprétations, présentées une à une.',
-  watchSteps: [
-    {
-      assignment: { P: true, Q: true },
-      explanation:
-        'Au moins un argument est vrai : P ∨ Q vaut V.',
-    },
-    {
-      assignment: { P: true, Q: false },
-      explanation:
-        'P seul suffit ; la disjonction est V — seul le cas V/F/F rend ∨ fausse.',
-    },
-    {
-      assignment: { P: false, Q: true },
-      explanation:
-        'Q est vrai ; la disjonction vaut V.',
-    },
-    {
-      assignment: { P: false, Q: false },
-      explanation:
-        'Les deux arguments sont faux ; P ∨ Q est F.',
-    },
-  ],
-},
-```
-
-**4. `src/app/presentation.test.ts`**
-
-```typescript
-'level1-01-watch-or': 'truth-table-multi',
-```
-
-**Note:** The current truth-table renderer computes results for `P ∧ Q` only. Adding watch lessons for other connectives requires extending `truth-table-render.ts` — document that in `docs/presentation.md` when you do.
-
----
-
-### Example B — Scope exercise (`(P → Q) ∧ R`)
-
-**Goal:** Add a main-connective exercise (copy-paste template based on existing `scope-001`).
-
-**1. `src/app/exercises.ts`**
-
-```typescript
-{
-  id: 'scope-001',
-  type: 'identify-main-connective',
-  formula: '(P → Q) ∧ R',
-},
-```
-
-**2. `src/app/lessons.ts` — unlock order**
-
-```typescript
-export const PRACTICE_UNLOCK_ORDER = [
-  'eval-001',
-  'eval-002',
-  'scope-003',
-  'scope-001',   // ← add or reorder here
-  'scope-002',
-] as const;
-```
-
-**3. `src/i18n/messages.ts` — English**
-
-```typescript
-'scope-001': {
-  prompt: 'Select the main connective of the formula.',
-  feedback: {
-    'selected-subconnective':
-      '→ is the main connective of (P → Q), but the formula as a whole is a conjunction. The outermost connective has widest scope.',
-  },
-},
-```
-
-**4. `src/i18n/messages.ts` — French**
-
-```typescript
-'scope-001': {
-  prompt: 'Indiquez le connecteur principal de la formule.',
-  feedback: {
-    'selected-subconnective':
-      "L'implication → structure (P → Q), mais la formule entière est une conjonction : le connecteur le plus externe a la portée maximale.",
-  },
-},
-```
-
-**5. `src/app/presentation.test.ts`**
-
-```typescript
-'scope-001': 'tree-scope',
-```
-
-**6. Verify and mobile-check**
+## 7. Verification and pre-PR checklist
 
 ```bash
+npm run inventory:update   # only when lesson/exercise inventory changed
+npm run inventory:check
 npm test
-npm run dev
+npm run build
+npm run test:e2e
 ```
 
-Open the exercise on a ~320px viewport. Confirm tap targets on the tree align with the formula (see `docs/presentation.md` § Vertical parse tree).
+Before opening a PR:
 
----
-
-## 7. Changelog and versioning
-
-Full policy: **[docs/versioning.md](versioning.md)**
-
-When you ship user-visible content:
-
-1. Add a bullet under `## [Unreleased]` → `### Added` (or `Changed` / `Fixed`) in `CHANGELOG.md`.
-2. Write past tense, learner-facing when possible.
-3. Do **not** bump `package.json` version until cutting a release.
-
-Good entry:
-
-```markdown
-### Added
-- Level 1 watch lesson for disjunction (P ∨ Q), EN and FR
-- Practice exercise `scope-004` (main connective of P ∨ (Q ∧ R))
-```
-
-Bad entry:
-
-```markdown
-### Changed
-- misc content updates
-```
-
-Release workflow (when asked): move `[Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`, bump `package.json`, commit `release: vX.Y.Z`.
-
-Cursor rule: `.cursor/rules/versioning-changelog.mdc`
-
----
-
-## Checklist (copy before opening a PR)
-
-- [ ] Lesson/exercise registered in `src/app/lessons.ts` or `src/app/exercises.ts`
-- [ ] Both `en` and `fr` copy added in the matching `src/i18n/*.ts` file
-- [ ] `PRESENTATION` entry in `src/app/presentation.test.ts`
-- [ ] `PRACTICE_UNLOCK_ORDER` updated (exercises only)
-- [ ] `docs/presentation.md` inventory updated (if presentation is new or noteworthy)
-- [ ] `CHANGELOG.md` `[Unreleased]` updated
-- [ ] `npm test` passes
-- [ ] Mobile spot-check at ~320px width
-
-## Related docs
-
-- [Content model](content-model.md) — schema reference and file layout
-- [Internationalization](i18n.md) — EN analytic vs FR logique propositionnelle
-- [Presentation](presentation.md) — truth table vs live row vs tree
-- [Design principles](design-principles.md) — mobile-first, tap-only, visible steps
-- [Versioning](versioning.md) — semver and release workflow
+- [ ] stable ID chosen;
+- [ ] EN and FR authored independently;
+- [ ] no hidden correctness leak before Check;
+- [ ] wrong answers remain repairable where the interaction supports repair;
+- [ ] no lesson/session completion masquerades as mastery;
+- [ ] SRS/evidence semantics preserved;
+- [ ] `presentation.test.ts` covers new content;
+- [ ] `docs/generated-inventory.md` refreshed if inventory changed;
+- [ ] ~320px/tap-first behavior considered;
+- [ ] accessibility does not rely on colour alone;
+- [ ] source text boundary respected;
+- [ ] user-visible changes recorded under `[Unreleased]`.

@@ -11,8 +11,8 @@ Start here:
 | Document | Purpose |
 |----------|---------|
 | [Agent operating guide](AGENTS.md) | Repository-wide instructions, current execution boundary, tests, and multi-agent coordination rules |
-| [Session-first UX plan](docs/session-first-ux.md) | Current authorized product/UX direction: bounded sessions, low-intimidation entry, progressive terminology, and re-entry |
-| [Session-first multi-agent brief](docs/agent-brief-session-first-ux.md) | Ready-to-use implementation brief for a coordinator + subagents |
+| [Session-first UX plan](docs/session-first-ux.md) | Shipped UX baseline: bounded sessions, low-intimidation entry, progressive terminology, and re-entry; experiential validation remains open |
+| [Session-first multi-agent brief](docs/agent-brief-session-first-ux.md) | Historical execution brief for the implemented session-first pass |
 | [Vision & brief](docs/vision.md) | Original concept, learning path, exercise types, success criterion |
 | [Roadmap](docs/roadmap.md) | Current shipped baseline, authorized UX/adaptive work, and validation gates |
 | [Adaptive curriculum implementation roadmap](docs/adaptive-curriculum-implementation.md) | Implemented route/evidence/migration/Sobel/planner architecture that the UX work must preserve |
@@ -29,11 +29,12 @@ Start here:
 | [Versioning & changelog](docs/versioning.md) | Semver policy and release workflow |
 | [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |
 | [Testing](docs/testing.md) | Vitest unit tests and Playwright smoke suite |
+| [Generated inventory](docs/generated-inventory.md) | Source-derived lesson/exercise/practice-chain inventory; refreshed with `npm run inventory:update` |
 | [Presentation](docs/presentation.md) | When to use truth tables vs parse trees, layout rules |
 | [Predicate logic (Phase 6 prep)](docs/predicate-logic.md) | AST extension, notation, engine impact — design/engine groundwork only |
 | [Changelog](CHANGELOG.md) | Record of released and unreleased changes |
 
-For current implementation work, treat `AGENTS.md`, `docs/session-first-ux.md`, the adaptive implementation roadmap, and `docs/roadmap.md` as the controlling documents. Older design briefs and phase plans may intentionally describe pre-implementation states.
+For current work, treat `AGENTS.md`, `docs/roadmap.md`, `docs/session-first-ux.md`, and the adaptive implementation roadmap as the controlling documents. The session-first and exercise-visual-grammar work is already on `master`; older execution briefs and phase plans are retained as historical rationale and must not be read as fresh authorization.
 
 ## Status
 
@@ -41,12 +42,13 @@ For current implementation work, treat `AGENTS.md`, `docs/session-first-ux.md`, 
 
 **Experimental:** The small natural-deduction exercise set and predicate-logic AST/parser spike. Predicate-logic curriculum remains design-only beyond the narrow Chapter II teaching slice.
 
-**Current focus:** Session-first, low-intimidation UX. The normal learner experience should become one obvious bounded round whose effort is visible before start, with quieter chrome, planner internals hidden, meaning introduced before intimidating terminology where possible, and learning-aligned re-entry after a gap. See [`docs/session-first-ux.md`](docs/session-first-ux.md).
+**Current focus:** experiential validation of the shipped session-first and exercise-interaction baseline. The app now opens on one bounded round, hides planner/product taxonomy during active work, sequences beginner terminology more gently, and uses a clearer stimulus → response workspace → Check grammar for graded interactions. The next changes should come from concrete use and observed friction, not from another broad feature pass. See [`docs/roadmap.md`](docs/roadmap.md) and [`docs/session-first-ux.md`](docs/session-first-ux.md).
 
 ## Development
 
 ```bash
 npm install
+npm run inventory:check  # verify checked-in lesson/exercise inventory
 npm test          # Vitest unit tests
 npm run test:e2e  # Playwright smoke tests (build + preview)
 npm run dev       # dev server (mobile-friendly viewport)
@@ -57,6 +59,7 @@ For a clean full verification run:
 
 ```bash
 npm ci
+npm run inventory:check
 npm test
 npm run build
 npm run test:e2e

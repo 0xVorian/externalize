@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Reconciled controlling/contributor documentation with the shipped adaptive, session-first, and exercise visual-grammar baseline; historical execution/design briefs are now labelled as such instead of presenting completed work as current authorization.
+- Added a generated lesson/exercise/practice-chain inventory with `inventory:update` / `inventory:check`, and removed the duplicate root copy of the archived GPT-5.6 Sol engagement-learning report.
 - Guided evaluation with one current target now reads formula → blank table cell → True/False (Vrai/Faux) → Check. Selection fills the target with compact T/F or V/F; the formula result stays undetermined (`—`) until Check. Only Check validates; wrong answers stay repairable in place. The generic Truth assignment panel remains for Explore, counterexamples, and given-assignment practice.
 - The default learner journey is the session offer rather than a four-way Learn / Explore / Practice / Progress choice. Those modes remain reachable under More, outside an active round
 - A session “step” is one learner-perceived micro-activity. Watch lessons with separately advanced cases count as one step per case, so the advertised envelope matches the work inside the round
