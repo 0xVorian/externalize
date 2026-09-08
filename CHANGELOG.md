@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-08
+
 ### Added
 
 - Session-first default: opening the app offers one bounded round with visible step count and approximate time, then Start / Continue / Resume. Active chrome is Exit plus `n / m`. Finishing the envelope is a stopping point (`Done for now`, with `Do another short round` secondary)
