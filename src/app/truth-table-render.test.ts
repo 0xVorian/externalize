@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { getExerciseDefinition } from './exercises';
+import { createState } from './state';
 import {
   evaluateFormula,
   formulaAtoms,
   renderLiveTruthRow,
+  renderPartialTruthTable,
   renderTruthTable,
   renderWatchGrid,
   usesLiveTruthRow,
@@ -60,6 +63,44 @@ describe('truth-table-render', () => {
         { assignment: { P: true, Q: false }, active: false },
       ]);
       expect(html).toContain('truth-table-wrap');
+    });
+  });
+
+  describe('renderPartialTruthTable', () => {
+    const state = createState('en', getExerciseDefinition('tt-001')!);
+    const table = state.partialTable!;
+
+    it('starts with a blank target and a separate unselected answer tray', () => {
+      const html = renderPartialTruthTable('en', 'P ∧ Q', table, {
+        hiddenRowIndex: 2,
+        submitted: null,
+        answered: false,
+      });
+      expect(html).toContain('truth-table-drop-slot empty');
+      expect(html).toContain('truth-table-answer-tray');
+      expect(html).toContain('aria-pressed="false"');
+    });
+
+    it('shows a provisional selection in both the target cell and answer tray before checking', () => {
+      const html = renderPartialTruthTable('en', 'P ∧ Q', table, {
+        hiddenRowIndex: 2,
+        submitted: true,
+        answered: false,
+      });
+      expect(html).toContain('truth-table-drop-slot filled');
+      expect(html).toContain('>T</span>');
+      expect(html).toContain('cell-segment true selected');
+      expect(html).toContain('aria-pressed="true"');
+      expect(html).toContain('truth-table-answer-tray');
+    });
+
+    it('removes the answer tray after the answer has been checked', () => {
+      const html = renderPartialTruthTable('en', 'P ∧ Q', table, {
+        hiddenRowIndex: 2,
+        submitted: true,
+        answered: true,
+      });
+      expect(html).not.toContain('truth-table-answer-tray');
     });
   });
 
