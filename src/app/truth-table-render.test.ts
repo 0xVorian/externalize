@@ -70,7 +70,7 @@ describe('truth-table-render', () => {
     const state = createState('en', getExerciseDefinition('tt-001')!);
     const table = state.partialTable!;
 
-    it('starts with a blank target and a separate unselected answer tray', () => {
+    it('starts with a blank target, semantic answer words, and disabled Check', () => {
       const html = renderPartialTruthTable('en', 'P ∧ Q', table, {
         hiddenRowIndex: 2,
         submitted: null,
@@ -78,10 +78,13 @@ describe('truth-table-render', () => {
       });
       expect(html).toContain('truth-table-drop-slot empty');
       expect(html).toContain('truth-table-answer-tray');
-      expect(html).toContain('aria-pressed="false"');
+      expect(html).toContain('>True</button>');
+      expect(html).toContain('>False</button>');
+      expect(html).toContain('data-action="select-evaluation-prediction"');
+      expect(html).toMatch(/truth-table-check[^>]*disabled/);
     });
 
-    it('shows a provisional selection in both the target cell and answer tray before checking', () => {
+    it('moves a provisional semantic choice into the formal target before checking', () => {
       const html = renderPartialTruthTable('en', 'P ∧ Q', table, {
         hiddenRowIndex: 2,
         submitted: true,
@@ -92,15 +95,18 @@ describe('truth-table-render', () => {
       expect(html).toContain('cell-segment true selected');
       expect(html).toContain('aria-pressed="true"');
       expect(html).toContain('truth-table-answer-tray');
+      expect(html).toContain('data-action="check-evaluation"');
+      expect(html).not.toMatch(/truth-table-check[^>]*disabled/);
     });
 
-    it('removes the answer tray after the answer has been checked', () => {
+    it('removes the response workspace after the answer has been checked', () => {
       const html = renderPartialTruthTable('en', 'P ∧ Q', table, {
         hiddenRowIndex: 2,
         submitted: true,
         answered: true,
       });
       expect(html).not.toContain('truth-table-answer-tray');
+      expect(html).not.toContain('truth-table-check');
     });
   });
 
@@ -119,7 +125,7 @@ describe('truth-table-render', () => {
       expect(renderWatchGrid('en', 'P ∨ Q', { P: true, Q: false })).toContain('aria-current="true"');
     });
 
-    it('uses locale truth labels in grid cells', () => {
+    it('uses locale truth notation in grid cells', () => {
       expect(renderWatchGrid('en', 'P ∧ Q', { P: true, Q: true })).toContain('>T<');
       expect(renderWatchGrid('fr', 'P ∧ Q', { P: true, Q: true })).toContain('>V<');
     });
