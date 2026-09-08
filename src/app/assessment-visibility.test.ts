@@ -77,8 +77,12 @@ describe('assessment root visibility', () => {
   });
   it('restores reason-bearing evaluation feedback after reload', () => {
     const exercise = getExerciseDefinition('eval-001')!;
-    let state = createState('en', exercise);
-    state = selectEvaluationPrediction(state, state.tree.value!);
+    const store = beginPracticeAttempt(loadProgress(), exercise.id);
+    let state = createState('en', exercise, {
+      ...store.practiceDraft!,
+      assignment: { P: true, Q: false },
+    });
+    state = selectEvaluationPrediction(state, false);
     state = checkEvaluation(state);
     expect(state.message).toMatch(/conjunction is true only when both conjuncts are true/i);
 
