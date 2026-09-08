@@ -1,6 +1,6 @@
-# Phase 5 — Natural deduction (prep)
+# Phase 5 — Natural deduction — historical design prep
 
-Design prep for Fitch-style proof exercises on mobile. **No proof UI in this document's scope** — record constraints, rule-set options, and exercise patterns so Phase 5 implementation does not stall on unknowns. See [roadmap](roadmap.md) Phase 5, [decisions](decisions.md) (proof system), and [design principles](design-principles.md) (externalized state, repairable feedback).
+**Status:** the repository now contains proof-validation groundwork and two mobile fill-one-step exercises (`nd-001`, `nd-002`). The full Fitch editor, subproof interaction, and broader rule set remain deferred. The body below preserves the earlier design plan and should not be read as current implementation state. See [roadmap](roadmap.md) for current scope.
 
 ## Goal
 

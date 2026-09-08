@@ -1,14 +1,14 @@
-# Cursor implementation brief — progress visibility
+# Cursor implementation brief — progress visibility — historical
 
-## Task
+**Status:** this was the execution brief for the progress-visibility pass that shipped in v0.4.0. It is retained for rationale and regression context, not as current authorization. See `docs/roadmap.md`.
+
+## Historical task
 
 Implement the **progress visibility pass** for Externalize.
 
-The current application already tracks meaningful learning state, but the learner does not strongly perceive movement while using Learn or Practice. The objective is to make progress continuously visible and emotionally legible **without adding arbitrary XP, account levels, decorative rewards, or false mastery claims**.
+At the time, the application already tracked meaningful learning state but the learner did not strongly perceive movement while using Learn or Practice. The objective was to make progress continuously visible and emotionally legible **without adding arbitrary XP, account levels, decorative rewards, or false mastery claims**.
 
-This is the current product priority after v0.3.5.
-
-Read this brief as the implementation contract. You may inspect the rest of the repository for details, but you should not need prior conversation context to understand the intended behavior.
+Read the remainder as the historical implementation contract, not a backlog to rerun.
 
 ---
 

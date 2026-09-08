@@ -6,7 +6,7 @@ Repository-wide operating instructions for coding agents working on Externalize.
 
 Externalize is a local-first, mobile-first learning application whose defining idea is to **externalize intermediate reasoning state** so the learner does not have to hold large symbolic structures in working memory.
 
-The current authorized product direction is the **session-first, low-intimidation UX refactor**: preserve the adaptive learner model and rigorous logic while making the normal experience a small, finite, one-tap learning round whose effort is obvious before the learner starts.
+The **session-first, low-intimidation UX and exercise visual grammar are now the shipped baseline on `master`**. Current work should validate that baseline through real use and make bounded, evidence-driven remediations without weakening the adaptive learner model or rigorous logic.
 
 Core product rules:
 
@@ -16,10 +16,10 @@ Core product rules:
 
 > **Quiet chrome, explicit reasoning.**
 
-The implementation contract for this work is:
+The current product/architecture contract is:
 
 - **[`docs/session-first-ux.md`](docs/session-first-ux.md)** — product/UX plan, phases, gates, anti-example, invariants, and non-goals.
-- **[`docs/agent-brief-session-first-ux.md`](docs/agent-brief-session-first-ux.md)** — current multi-agent execution brief.
+- **[`docs/agent-brief-session-first-ux.md`](docs/agent-brief-session-first-ux.md)** — historical execution brief for the completed session-first implementation.
 - [`docs/adaptive-curriculum-implementation.md`](docs/adaptive-curriculum-implementation.md) — implemented adaptive architecture and learner-state contract that the UX work must preserve.
 - [`docs/adaptive-curriculum.md`](docs/adaptive-curriculum.md) — conceptual route/source architecture.
 - [`docs/research/engagement-learning/synthesis.md`](docs/research/engagement-learning/synthesis.md) — research basis and cautions around engagement mechanics.
@@ -28,19 +28,19 @@ Do not substitute an older phase plan or a generic educational-platform architec
 
 ## Source-of-truth order
 
-When documents conflict, use this order for the current work:
+When documents conflict, use this order for current work:
 
 1. `AGENTS.md`
-2. `docs/session-first-ux.md`
-3. `docs/adaptive-curriculum-implementation.md`
-4. `docs/adaptive-curriculum.md`
-5. `docs/roadmap.md`
+2. `docs/roadmap.md`
+3. `docs/session-first-ux.md`
+4. `docs/adaptive-curriculum-implementation.md`
+5. current runtime behavior and tests
 6. `docs/design-principles.md`
-7. current runtime behavior and tests
+7. `docs/adaptive-curriculum.md`
 8. `docs/content-model.md`, `docs/decisions.md`, `docs/authoring.md`, and other scoped design notes
 9. historical agent briefs / old phase plans
 
-`docs/agent-brief-session-first-ux.md` is the current execution brief, but it does not override the product contract above it.
+Historical execution briefs explain why a change was made; they are not fresh authorization to rerun that project.
 
 When a document describes pre-implementation state, inspect the code before assuming it is still current.
 
@@ -62,62 +62,31 @@ Current properties include:
 
 The Chapter II implementation is complete, but its experiential product-validation gate remains pending real use.
 
-## Current execution boundary — session-first UX
+## Current execution boundary — validation and bounded remediation
 
-Prosecute the UX plan in order and respect its gates.
+The adaptive pilot, UX-A–D session-first work, reason-bearing feedback pass, and exercise visual grammar are implemented on `master`.
 
-### Phase UX-A — session shell and finite contract
+Current work should therefore begin from observed product behavior, not from an old implementation checklist. Prefer:
 
-Make the normal entry path one obvious useful action with a finite commitment.
+- real-use validation of initiation friction, comprehension, repair, retention, transfer, and source-route usefulness;
+- narrow fixes for concrete learner-facing friction or logical/pedagogical inconsistencies;
+- keeping the default interaction grammar clear: **logical object → response workspace → Check → reason-bearing feedback**;
+- sequencing beginner truth-value language as ordinary meaning (`True` / `False`, `Vrai` / `Faux`) into formal notation (`T/F`, `V/F`) rather than demanding notation fluency too early;
+- preserving explicit intermediate reasoning state while removing product chrome and hidden defaults;
+- updating controlling documentation whenever the shipped contract changes.
 
-Required properties include:
+Do not create work simply to finish an old phase label. If real use does not justify a change, leave the shipped baseline alone.
 
-- a narrow deterministic session plan/selector over existing concrete route/SRS items;
-- one-tap normal initiation;
-- visible step count and approximate effort before starting;
-- a fixed 5–7 step envelope where current content permits, with 6 as the default design target rather than a universal law;
-- no silent session expansion;
-- interruption/resume of the same bounded round;
-- explicit completion with `Done for now` primary and another round secondary;
-- the four functional modes remain reachable outside the active session;
-- session completion itself creates no mastery evidence.
+### Implemented baseline
 
-Do not add a fifth top-level `Session` mode.
-
-### Phase UX-B — low-intimidation beginner surface
-
-Remove avoidable product and terminology load before the first useful reasoning step.
-
-Required properties include:
-
-- planner/debug state never appears as learner-facing copy;
-- progressive disclosure of route/depth/reference/source controls;
-- the Sobel Chapter II pilot is the canonical first content rewrite;
-- meaning precedes terminology where possible: **meaning → use → name → notation → independent use**;
-- normal beginner screens introduce at most one genuinely new technical term unless terms are inseparable;
-- the earliest `logic-foundations` material is audited for the same terminology-before-meaning failure mode;
-- proper academic terms and notation are eventually taught, not permanently hidden;
-- reasoning/intermediate state remains explicit.
-
-### Phase UX-C — learning-aligned re-entry
-
-Use actual learner state to make return cheap and purposeful.
-
-Candidate opening states:
-
-- interrupted bounded round → resume;
-- meaningful due review → quick review;
-- active route → continue;
-- stale evidence after a lapse → see what stuck;
-- nothing useful due → you're good for now + next useful review when derivable.
-
-Do not add missed-day punishment, reset streaks, XP, or a second reward economy.
-
-### Phase UX-D — minimal local validation telemetry
-
-Only if it remains small and clearly separated from mastery, local telemetry may record offered session kind, start/completion/interruption, step count, coarse duration, and timestamp.
-
-If this materially complicates persistence or migration, defer it rather than expanding the blast radius.
+- one obvious bounded opening action with a frozen session envelope;
+- interruption/resume and explicit completion;
+- planner/debug language hidden from the learner;
+- meaning → use → name → notation → independent use for novice material where practicable;
+- learning-aligned re-entry and separate local session telemetry;
+- stimulus/response/action visual separation for graded interactions;
+- select-then-Check truth-value interactions with provisional state that reveals no correctness before Check;
+- guided truth-table state distinguishes unknown from false and never computes from hidden defaults.
 
 ### Stop boundary
 
@@ -125,7 +94,7 @@ Do **not** implement Chapter III–XIII interaction families, a generic curricul
 
 ## Canonical UX anti-pattern
 
-The current Sobel pilot has demonstrated a learner-facing failure mode where the application can simultaneously expose:
+The pre-session-first Sobel pilot demonstrated a learner-facing failure mode where the application could simultaneously expose:
 
 - Learn / Explore / Practice / Progress;
 - route choice;
@@ -162,7 +131,7 @@ Preserve these unless the current UX plan explicitly changes their presentation:
 
 ## Learner-state semantics to protect
 
-The current runtime has carefully defined attempt semantics. Do not casually rewrite them while adding session orchestration.
+The current runtime has carefully defined attempt semantics. Do not casually rewrite them while remediating the shipped interaction model.
 
 - A practice attempt finalizes only after a checked correct answer.
 - A clean pass means the first checked answer was correct.
@@ -245,9 +214,9 @@ Keep the roadmap, session-first plan, content model, and actual runtime aligned.
 
 The repository may contain source maps for copyrighted books, but should not reproduce source text. For *Logic and Theism* use chapter/section/page anchors, paraphrased instructional material, and only short necessary quotations. If the map does not support a source-specific claim, mark it unresolved rather than inventing Sobel's position.
 
-## Definition of done for the current assignment
+## Validation criteria for the current baseline
 
-The assignment is successful when:
+Treat the shipped baseline as successful only insofar as real use supports these criteria:
 
 1. a normal learner can open Externalize and begin one useful bounded round with one obvious tap;
 2. the learner knows the approximate effort before starting and the session cannot silently expand;

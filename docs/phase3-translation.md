@@ -1,6 +1,6 @@
-# Phase 3 — Translation prototype
+# Phase 3 — Translation prototype — historical design
 
-Design for ordinary language ↔ propositional symbols, building on the Phase 2 tree renderer and feedback loop. **Spike only** — no full exercise flow yet. See [roadmap](roadmap.md) Phase 3 and [decisions](decisions.md) (input modalities, AST-first, equivalence).
+**Status:** the palette-based translation flow is implemented and graded in the current app (six authored exercises with repair and equivalence handling). This document preserves the original design rationale; statements below about a missing/full exercise flow describe the pre-implementation plan. See [roadmap](roadmap.md), [content model](content-model.md), and [authoring](authoring.md) for current behavior.
 
 ## Goal
 

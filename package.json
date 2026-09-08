@@ -10,6 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "generate:exercises": "tsx tools/exercise-generator/cli.ts",
+    "inventory": "tsx scripts/generate-inventory.ts",
+    "inventory:update": "tsx scripts/generate-inventory.ts --write",
+    "inventory:check": "tsx scripts/generate-inventory.ts --check",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "release:check": "npm test && npm run build && npm run test:e2e"

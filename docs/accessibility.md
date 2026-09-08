@@ -7,9 +7,11 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 | Surface | Location |
 |---------|----------|
 | Parse trees | `src/app/render.ts` |
-| Truth tables (watch + live row) | `src/app/truth-table-render.ts` |
-| V/F assignment segments | `src/app/atom-toggles-render.ts` |
-| Symbol palette (Phase 3 stub) | `src/app/translation/palette-render.ts` |
+| Truth tables (watch + live row + partial fill) | `src/app/truth-table-render.ts` |
+| Truth-value response workspaces | `src/app/truth-table-render.ts`, `src/app/lesson-render.ts`, `src/app/render.ts` |
+| Assignment segments | `src/app/atom-toggles-render.ts` |
+| Symbol palette | `src/app/translation/palette-render.ts` |
+| Session opening/chrome/completion | `src/app/session-*-render.ts` |
 | Mode navigation + language toggle | `src/app/shell-render.ts` |
 | Progress cards | `src/app/progress-render.ts` |
 
@@ -27,10 +29,18 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 - Watch-mode highlighted row uses `aria-current="step"`.
 - Screen-reader row labels (`sr-only` `th scope="row"`) unchanged.
 
-### V/F segments
+### Truth-value controls
 
-- Each segment button has an explicit `aria-label` (e.g. “Set P to true”) in EN and FR.
-- `aria-pressed` and `role="group"` per atom were already present; retained.
+- Full-assignment segments keep explicit localized `aria-label`s (for example, “Set P to true”) plus `aria-pressed` and grouped semantics.
+- Single-target answer workspaces use native buttons with ordinary-language labels (True/False, Vrai/Faux); the selected provisional answer exposes `aria-pressed` without grading.
+- Explicit Check remains a separate native button. A provisional guided/truth-table selection does not reveal the derived correctness state before Check.
+
+### Session shell
+
+- The opening has one primary native action; secondary mode navigation stays outside the active round.
+- Active-session position is exposed as readable text in addition to visual placement.
+- Exit, Check, Continue, Done for now, and Do another remain native keyboard/touch controls.
+- Session completion is contextual UI, not a mastery announcement beyond the visible completion state.
 
 ### Mode navigation
 

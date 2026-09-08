@@ -30,13 +30,13 @@ Recorded decisions and rationale from planning conversations. Revisit entries ma
 
 **Rationale:** Keeps one comparison path for exercises (AST-first), aligns with Phase 3 palette/builder patterns, and avoids truth-table misuse for quantifiers.
 
-**Details:** [predicate-logic.md](predicate-logic.md). Implementation deferred until Phase 6; open questions (α-equivalence default, quantifier display colon, max arity) marked provisional there.
+**Details:** [predicate-logic.md](predicate-logic.md). AST/parser/free-variable groundwork is now implemented; general predicate-logic curriculum/model UI remains deferred. Open questions for the broader phase remain provisional there.
 
-### Proof system (future)
+### Proof system
 
-**Decision:** Fitch-style natural deduction (likely target) — line numbers, indented subproofs, visible scope boxes. Exact rule set TBD.
+**Decision:** Fitch-style natural deduction remains the likely full-editor target — line numbers, indented subproofs, visible scope boxes. The current runtime contains only proof-validation groundwork and two fill-one-step exercises; the broader rule set/editor remains deferred.
 
-**Note:** Choose rule details after propositional translation, evaluation, and truth-table interactions feel solid. Proof UI is high complexity.
+**Note:** Do not infer authorization for the full proof editor from the existence of the prototype. Proof UI remains high complexity.
 
 **Prep doc:** [natural-deduction.md](natural-deduction.md) — mobile layout constraints, minimal rule-set options (Option C → A lean), fill-one-step vs repair-step patterns, subproof UI at ~320px, Phase 4 dependencies. Update this entry when the starter rule set is finalized.
 
@@ -80,7 +80,7 @@ No authentication, no server sync, until there is a concrete need.
 
 ### Evaluation presentation: truth table vs parse tree
 
-**Decision:** Use **truth-table rows** for watch/demo lessons that enumerate all assignments on a small formula (e.g. four cases of `P ∧ Q`). Use a **live single-row table plus toggles** for guided try on the same flat formula. Use the **vertical parse tree** for practice eval on nested formulas and for scope-tap tasks.
+**Decision:** Use **truth-table rows** for watch/demo lessons that enumerate all assignments on a small formula (e.g. four cases of `P ∧ Q`). Use a **live single-row table with one blank target plus a distinct True/False response workspace and explicit Check** for guided work on the same flat formula. Use the **vertical parse tree** for practice evaluation on nested formulas and for scope-tap tasks.
 
 **Rationale:** A tree for `P ∧ Q` alone reads as a misaligned list and hides the 2×2 pattern. Tables match standard logic pedagogy and the card-lesson notation (`T ∧ T ⇒ T`, …). Trees remain essential once propagation or scope matters.
 
@@ -165,8 +165,8 @@ Pair each exercise with a structural check (main connective, scope boundary) and
 | Testing strategy | Unit tests on engine; manual phone testing for UI | **Decided** for MVP-0 |
 | SRS algorithm | Simplified interval queue in localStorage | **Decided** for MVP-0 |
 | Multiple valid translations | Accept semantically equivalent formulas where English is ambiguous; flag non-canonical but valid answers | **Provisional** |
-| PWA manifest | Add when MVP-0 is stable | **Defer** |
-| Accessibility | Screen-reader labels for all symbols; keyboard navigation on desktop | **Required** — details TBD |
+| PWA manifest | Manifest + service worker shell shipped | **Implemented** |
+| Accessibility | Screen-reader labels, native controls, keyboard tree navigation, reduced-motion/mobile regression coverage | **Implemented baseline; continue manual checks** |
 
 ## Risks to monitor
 

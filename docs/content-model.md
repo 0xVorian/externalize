@@ -133,8 +133,8 @@ type ExerciseCopy = {
 | `type` | Learner action | Engine checks |
 |--------|----------------|---------------|
 | `identify-main-connective` | Tap the main operator in the tree | Selected node matches root connective |
-| `evaluate-formula` | Read the system-chosen assignment, inspect intermediate values, predict the hidden root, check T/F or V/F | Prediction matches AST evaluation under the assigned case |
-| `fill-truth-table-cell` | Fill one masked result cell | Submitted Boolean matches evaluation |
+| `evaluate-formula` | Read the system-chosen assignment, inspect intermediate values, choose True/False (Vrai/Faux), then Check; formal displays remain T/F or V/F | Prediction matches AST evaluation under the assigned case |
+| `fill-truth-table-cell` | Choose True/False for one masked result cell, place the provisional formal value in the target, then Check | Submitted Boolean matches evaluation |
 | `find-counterexample` | Build an assignment for a target value | Assignment makes the formula match the target |
 | `classify-tautology` | Classify from a complete truth table | Answer matches finite truth-table classification |
 | `translate-en-to-formula` | Build a formula with the tap palette | AST structure/equivalence and misconception classifier |

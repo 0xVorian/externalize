@@ -2,81 +2,18 @@
 
 How we choose **what** to show on screen for evaluation and structure — separate from the engine (which always uses an AST + per-node values).
 
-## Inventory (current content)
+## Inventory and drift control
 
-Use this when adding exercises or wondering what UI you will see.
+The canonical per-item presentation inventory lives in `src/app/presentation.test.ts`; that test must cover every foundations lesson, source lesson, and exercise. The current lesson/exercise/practice-chain counts are generated into [`generated-inventory.md`](generated-inventory.md) by `npm run inventory:update` and checked by `npm run inventory:check`.
 
-### Level 0 — Course
+Do **not** maintain a second hand-written exhaustive ID table here. This document records the presentation rules; the test and generated inventory record the exhaustive current bank.
 
-| ID | Title (EN) | Presentation | Notes |
-|----|------------|--------------|-------|
-| `level0-01-letters` | Sentence letters | Card (text) | No formula tree |
-| `level0-02-truth` | Truth assignments | Card (text) | |
-| `level0-03-and` | Conjunction ∧ | Card (text) | Truth-table notation in example block |
-| `level0-04-watch` | Worked cases: P ∧ Q | **2×2 truth grid** | Highlight steps 1–4; P rows, Q columns |
-| `level0-05-guided` | Guided: P ∧ Q | **Live row + True/False workspace** | One blank target at a time |
+Current broad surfaces:
 
-### Level 1 — Connectives
-
-| ID | Title (EN) | Presentation | Notes |
-|----|------------|--------------|-------|
-| `level1-01-neg` | Negation | Card (text) | |
-| `level1-02-neg-watch` | Worked cases: ¬P | **2-row truth table** | Single atom |
-| `level1-03-neg-guided` | Guided: ¬P | **Live row + True/False workspace** | One atom column |
-| `level1-04-or` | Disjunction ∨ | Card (text) | |
-| `level1-05-or-watch` | Worked cases: P ∨ Q | **2×2 truth grid** | |
-| `level1-06-or-guided` | Guided: P ∨ Q | **Live row + True/False workspace** | |
-| `level1-07-imp` | Material conditional → | Card (text) | |
-| `level1-08-imp-watch` | Worked cases: P → Q | **2×2 truth grid** | |
-| `level1-09-imp-guided` | Guided: P → Q | **Live row + True/False workspace** | |
-| `level1-10-iff` | Biconditional ↔ | Card (text) | |
-| `level1-11-iff-watch` | Worked cases: P ↔ Q | **2×2 truth grid** | |
-| `level1-12-iff-guided` | Guided: P ↔ Q | **Live row + True/False workspace** | |
-
-### Practice — tiered unlock (22 exercises)
-
-**Unit 0** (after introductory unit complete):
-
-| Order | ID | Formula | Type | Presentation |
-|-------|-----|---------|------|--------------|
-| 1 | `eval-001` | `P ∧ Q` | Evaluate | **Toggles + live row** |
-| 2 | `scope-012` | `(P ∧ Q) ∧ R` | Main connective | **Tree (tap only)** |
-
-**Unit 1** (after all 12 Level 1 lessons):
-
-| Order | ID | Formula | Type | Presentation | Likely issues |
-|-------|-----|---------|------|--------------|---------------|
-| 1 | `eval-010` | `¬P` | Evaluate | **Toggles + live row** | |
-| 2 | `eval-003` | `P ∨ Q` | Evaluate | **Toggles + live row** | |
-| 3 | `eval-004` | `P → Q` | Evaluate | **Toggles + live row** | |
-| 4 | `eval-005` | `P ↔ Q` | Evaluate | **Toggles + live row** | |
-| 5 | `scope-003` | `¬(P ∧ Q)` | Main connective | **Tree (tap only)** | |
-| 6 | `scope-009` | `¬P ∧ Q` | Main connective | **Tree (tap only)** | |
-| 7 | `scope-004` | `P ∨ (Q ∧ R)` | Main connective | **Tree (tap only)** | |
-| 8 | `scope-007` | `(P ∧ Q) ∨ R` | Main connective | **Tree (tap only)** | |
-| 9 | `eval-002` | `(P → Q) ↔ ¬R` | Evaluate | **Tree + toggles (P,Q,R)** | Nested tree |
-| 10 | `eval-006` | `(P ∨ Q) → R` | Evaluate | **Tree + toggles** | |
-| 11 | `eval-007` | `P ∧ (Q ∨ R)` | Evaluate | **Tree + toggles** | |
-| 12 | `eval-008` | `¬(P ∧ Q)` | Evaluate | **Tree + toggles** | |
-| 13 | `eval-009` | `(P → Q) ∧ R` | Evaluate | **Tree + toggles** | |
-| 14 | `scope-001` | `(P → Q) ∧ R` | Main connective | **Tree (tap only)** | Classic “pick ∧ not →” |
-| 15 | `scope-005` | `(P ∨ Q) → R` | Main connective | **Tree (tap only)** | |
-| 16 | `scope-006` | `¬(P → Q)` | Main connective | **Tree (tap only)** | |
-| 17 | `scope-008` | `P → (Q ∨ R)` | Main connective | **Tree (tap only)** | |
-| 18 | `scope-010` | `(P → Q) → R` | Main connective | **Tree (tap only)** | |
-| 19 | `scope-011` | `P ↔ (Q → R)` | Main connective | **Tree (tap only)** | |
-| 20 | `scope-002` | `(P → Q) ↔ ¬R` | Main connective | **Tree (tap only)** | Deepest scope tree |
-
-### Other screens
-
-| Screen | Presentation |
-|--------|--------------|
-| Progress | Checklists, stats, export/import — no formulas |
-
-### Auto-routing rule (code)
-
-- `usesLiveTruthRow(formula)` → true for flat lesson/practice formulas: `P ∧ Q`, `¬P`, `P ∨ Q`, `P → Q`, `P ↔ Q` (`src/app/truth-table-render.ts`).
-- Nested or multi-atom formulas stay on parse-tree eval; add new flat formulas to the set explicitly when authoring.
+- foundations: three propositional units (`ALL_LEARN_LESSONS`);
+- source route: narrow *Logic and Theism* Chapter II cards + `classify-choice` checks;
+- Practice: evaluation, scope, fill-truth-table, counterexample, tautology, translation, proof-step, and source classification activities;
+- Explore: free assignment manipulation, explicitly ungraded.
 
 ## Rule of thumb
 
