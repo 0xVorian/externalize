@@ -114,7 +114,7 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     doneForNow: 'C’est tout pour maintenant',
     doAnother: 'Enchaîner une courte séance',
     more: 'Autres outils',
-    moreAria: 'Cours, exploration, exercices et parcours',
+    moreAria: 'Cours, exploration, exercices et suivi',
     position: (current, total) => `${current} / ${total}`,
     positionAria: (current, total) => `Étape ${current} sur ${total} de cette séance`,
     effort: (steps, minutes) =>
@@ -177,7 +177,7 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     browseLearn: 'Cours',
     browseExplore: 'Explorer les formules',
     browsePractice: 'Exercices',
-    browseProgress: 'Parcours',
+    browseProgress: 'Suivi',
   },
 };
 

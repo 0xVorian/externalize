@@ -5,7 +5,7 @@ import { renderRoundComplete } from './session-complete-render';
 import { renderSessionChrome, renderSessionFrame } from './session-chrome-render';
 import { renderSessionOpening } from './session-opening-render';
 import { renderSourceLearnView } from './source-learn-render';
-import { renderLanguageToggle } from './shell-render';
+import { renderLanguageToggle, renderModeNav } from './shell-render';
 import { getSourceLesson } from './source-lessons';
 import type { OpeningOffer } from './session-types';
 
@@ -103,4 +103,13 @@ describe('language toggle accessibility copy', () => {
     expect(fr).toContain('aria-label="Langue"');
     expect(fr).toContain('aria-label="Passer en anglais"');
   });
+  it('keeps browse navigation accessible names aligned with the active locale', () => {
+    const en = renderModeNav('en', 'learn', true);
+    const fr = renderModeNav('fr', 'progress', true);
+    expect(en).toContain('aria-label="Activity mode"');
+    expect(en).toContain('aria-label="Course"');
+    expect(fr).toContain('aria-label="Mode d’activité"');
+    expect(fr).toMatch(/>\s*Suivi\s*<\/button>/);
+  });
+
 });

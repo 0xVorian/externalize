@@ -166,6 +166,8 @@ describe('truth-table-render', () => {
       expect(html).toContain('>True</button>');
       expect(html).toContain('>False</button>');
       expect(html).toContain('data-action="select-evaluation-prediction"');
+      expect(html).toContain('>Check</button>');
+      expect(html).not.toContain('Check selection');
       expect(html).toMatch(/truth-table-check[^>]*disabled/);
     });
 

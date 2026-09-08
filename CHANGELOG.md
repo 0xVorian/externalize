@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Reconciled a third independent learner-facing audit: translation tasks keep the sentence that determines the formula visible; onboarding reflects the session-first entry; Progress hides internal capability language; evaluation prompts stop duplicating visible assignments; and several source/accessibility labels are corrected.
 - Club examples now consistently say what was signed (the club register), including the F/G conditional check; the conditional facts, predicate key, and question are now authored as separate readable pieces.
 
 ## [0.5.0] - 2026-09-08

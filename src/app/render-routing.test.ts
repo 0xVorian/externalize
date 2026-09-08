@@ -44,6 +44,16 @@ describe('practice presentation routing', () => {
     }
   });
 
+  it('renders the object-language sentence for structurally constrained translations', () => {
+    const en2 = renderApp(createState('en', EXERCISE_DEFINITIONS.find((e) => e.id === 'translate-002')!), 0, true);
+    const en6 = renderApp(createState('en', EXERCISE_DEFINITIONS.find((e) => e.id === 'translate-006')!), 0, true);
+    const fr2 = renderApp(createState('fr', EXERCISE_DEFINITIONS.find((e) => e.id === 'translate-002')!), 0, true);
+    expect(en2).toContain('It is not the case that both the gate is open and the alarm is on.');
+    expect(en6).toContain('It is not the case that the gate is open or the window is open.');
+    expect(fr2).toContain("Il n'est pas le cas que la porte soit ouverte et l'alarme activée.");
+    expect(en2).not.toContain('Translate the sentence into a formula that preserves its connective structure');
+  });
+
   it('provides translation configs for translate-002 through translate-006', () => {
     for (const id of ['translate-002', 'translate-003', 'translate-004', 'translate-005', 'translate-006']) {
       expect(getTranslationExerciseConfig(id)?.expected.formula).toBeTruthy();

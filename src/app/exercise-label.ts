@@ -9,5 +9,6 @@ export function exerciseLabel(locale: Locale, exerciseId: string): string {
   if (exercise.formula) {
     return `${skill} — ${exercise.formula}`;
   }
-  return `${skill} — ${getExerciseCopy(locale, exerciseId).prompt}`;
+  const copy = getExerciseCopy(locale, exerciseId);
+  return copy.progressLabel ? `${skill} — ${copy.progressLabel}` : skill;
 }

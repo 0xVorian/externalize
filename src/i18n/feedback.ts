@@ -27,7 +27,7 @@ const TRANSLATION_SUCCESS: Record<Locale, Record<string, string>> = {
     'translate-002':
       'Exact — ¬ porte sur toute la conjonction, ce qui donne ¬(P ∧ Q).',
     'translate-003':
-      'Exact — l’implication P → Q forme un conjoint, relié à R par la conjonction ∧ extérieure.',
+      'Exact — l’implication P → Q forme une partie de la conjonction, reliée à R par le ∧ extérieur.',
     'translate-004':
       'Exact — P → Q place le déclenchement de l’alarme en antécédent et la présence de fumée en conséquent.',
     'translate-005':
@@ -105,9 +105,9 @@ function evaluationReason(locale: Locale, result: EvaluationFeedbackResult): str
   if (locale === 'fr') {
     switch (result.connectiveKind) {
       case 'and':
-        return `${joined}. Une conjonction n’est vraie que si les deux conjoints le sont ; la formule entière vaut donc ${root}.`;
+        return `${joined}. Une conjonction n’est vraie que si les deux parties le sont ; la formule entière vaut donc ${root}.`;
       case 'or':
-        return `${joined}. Une disjonction est vraie dès qu’au moins un disjonct est vrai ; la formule entière vaut donc ${root}.`;
+        return `${joined}. Une disjonction est vraie dès que l’une des deux parties est vraie ; la formule entière vaut donc ${root}.`;
       case 'imp':
         return `${joined}. Une implication matérielle n’est fausse que si l’antécédent est vrai et le conséquent faux ; la formule entière vaut donc ${root}.`;
       case 'iff':

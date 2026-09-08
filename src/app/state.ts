@@ -146,13 +146,10 @@ function feedbackMessage(
   correct: boolean,
 ): string {
   if (state.exercise.type === 'evaluate-formula') {
-    if (correct) {
-      return ui(state.locale).evaluationCorrect;
-    }
     if (state.prediction !== null) {
       return formatEvaluationFeedback(state.locale, buildEvaluationFeedback(state.tree, state.prediction));
     }
-    return ui(state.locale).evaluationWrong;
+    return correct ? ui(state.locale).evaluationCorrect : ui(state.locale).evaluationWrong;
   }
   if (state.exercise.type === 'fill-truth-table-cell') {
     return getCellFeedback(state.locale, state.exercise.id, correct);

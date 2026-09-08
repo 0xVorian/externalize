@@ -42,7 +42,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       },
     },
     'lat-conditional-meaning': {
-      title: 'If a member, then signed the register',
+      title: 'If someone is a member, they signed the register',
       subtitle: 'The general claim in ordinary language.',
       card: {
         title: 'What “every member signed the register” amounts to',
@@ -206,7 +206,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       },
     },
     'lat-conditional-meaning': {
-      title: 'Si membre, alors a signé le registre',
+      title: 'Si quelqu’un est membre, il a signé le registre',
       subtitle: 'La phrase générale en langue ordinaire.',
       card: {
         title: 'Ce que dit « tout membre a signé le registre »',
@@ -336,6 +336,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
 export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
   en: {
     'lat-predict-empty-club': {
+      progressLabel: 'Empty-club general claim',
       prompt:
         'The club has no members. Is “every member signed the register” still true?',
       choices: {
@@ -373,7 +374,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'At least one F exists and is G.',
       },
       choiceWrong:
-        'The main operator is universal implication, not existential conjunction. ∀x (F(x) → G(x)) does not assert that any F exists.',
+        'The outer quantifier is universal; inside its scope is an implication. ∀x (F(x) → G(x)) does not assert that any F exists.',
       feedback: {
         correct: 'Correct. This is the universal-hypothetical reading: any F, if there is one, is G.',
       },
@@ -391,6 +392,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-classify-triangle': {
+      progressLabel: 'Generic “a” — triangle',
       prompt: 'How does “A triangle has three sides” typically function?',
       choices: {
         universal: 'As a general rule: anything that is a triangle has three sides.',
@@ -404,6 +406,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-classify-visitor': {
+      progressLabel: 'Existential “a” — visitor',
       prompt: 'How does “A visitor is at the door” typically function?',
       choices: {
         universal: 'As a general rule about visitors in general.',
@@ -416,7 +419,8 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-formalize-readings': {
-      prompt: 'Which formula expresses the universal-hypothetical reading of “A F is G”?',
+      progressLabel: 'Universal vs existential form',
+      prompt: 'Which formula expresses the universal-hypothetical reading of “An F is G”?',
       choices: {
         'universal-conditional': '∀x (F(x) → G(x))',
         'existential-conjunctive': '∃x (F(x) ∧ G(x))',
@@ -428,6 +432,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-predict-descartes': {
+      progressLabel: 'Descartes — existential reading',
       context: ['Descartes needs to conclude that a supremely perfect being exists.'],
       prompt: 'Which reading of “A supremely perfect being exists” actually asserts existence?',
       choices: {
@@ -442,6 +447,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-interrogate-premises': {
+      progressLabel: 'Descartes — what the premises entail',
       prompt:
         'From “every perfect being has every perfection” and “existence is a perfection”, what follows?',
       choices: {
@@ -456,6 +462,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-transfer-kind': {
+      progressLabel: 'Definition and existence',
       context: ['A hypergonal is defined as a figure that exists and has seventeen sides.'],
       prompt: 'Does that definition prove that a hypergonal exists?',
       choices: {
@@ -470,6 +477,8 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-mastery-empty-domain': {
+      progressLabel: 'Empty-domain countermodel',
+      context: ['Keep the two premises in view: every perfect being has every perfection, and existence is a perfection.'],
       prompt:
         'Let the domain contain no perfect being. What can remain true?',
       choices: {
@@ -487,6 +496,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
   },
   fr: {
     'lat-predict-empty-club': {
+      progressLabel: 'Phrase générale — club vide',
       prompt:
         'Le club n’a aucun membre. L’assertion « tout membre a signé le registre » reste-t-elle vraie ?',
       choices: {
@@ -525,7 +535,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'Il existe au moins un F, et il est G.',
       },
       choiceWrong:
-        'L’opérateur principal est une implication universelle, non une conjonction existentielle. ∀x (F(x) → G(x)) n’affirme pas qu’un F existe.',
+        'Le quantificateur extérieur est universel ; dans sa portée se trouve une implication. ∀x (F(x) → G(x)) n’affirme pas qu’un F existe.',
       feedback: {
         correct:
           'Exact. C’est la lecture universelle-hypothétique : tout F, s’il y en a un, est G.',
@@ -544,6 +554,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-classify-triangle': {
+      progressLabel: '« Un » générique — triangle',
       prompt: 'Comment fonctionne typiquement « Un triangle a trois côtés » ?',
       choices: {
         universal: 'Comme une règle générale : tout ce qui est triangle a trois côtés.',
@@ -557,6 +568,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-classify-visitor': {
+      progressLabel: '« Un » existentiel — visiteur',
       prompt: 'Comment fonctionne typiquement « Un visiteur est à la porte » ?',
       choices: {
         universal: 'Comme une règle générale sur les visiteurs en général.',
@@ -570,6 +582,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-formalize-readings': {
+      progressLabel: 'Forme universelle ou existentielle',
       prompt: 'Quelle formule formalise la lecture universelle-hypothétique de « Un F est G » ?',
       choices: {
         'universal-conditional': '∀x (F(x) → G(x))',
@@ -583,6 +596,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-predict-descartes': {
+      progressLabel: 'Descartes — lecture existentielle',
       context: ['Descartes doit conclure qu’un être souverainement parfait existe.'],
       prompt: 'Quelle lecture de « Un être souverainement parfait existe » affirme réellement son existence ?',
       choices: {
@@ -599,6 +613,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-interrogate-premises': {
+      progressLabel: 'Descartes — portée des prémisses',
       prompt:
         'De « tout être parfait a toutes les perfections » et « l’existence est une perfection », que s’ensuit-il ?',
       choices: {
@@ -613,6 +628,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-transfer-kind': {
+      progressLabel: 'Définition et existence',
       context: ['Un hypergone est défini comme une figure qui existe et qui a dix-sept côtés.'],
       prompt: 'Cette définition prouve-t-elle qu’un hypergone existe ?',
       choices: {
@@ -629,6 +645,8 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       },
     },
     'lat-mastery-empty-domain': {
+      progressLabel: 'Contre-modèle sans être parfait',
+      context: ['Gardez les deux prémisses en vue : tout être parfait a toutes les perfections, et l’existence est une perfection.'],
       prompt: 'Le domaine ne contient aucun être parfait. Que peut-il rester vrai ?',
       choices: {
         'universal-can-hold':

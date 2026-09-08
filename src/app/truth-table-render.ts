@@ -238,7 +238,7 @@ function renderTruthTableAnswerTray(
     return '';
   }
   const copy = ui(locale);
-  return `<section class="truth-table-response-workspace"><div class="truth-table-answer-tray" role="group" aria-label="${copy.cellFillAria(rowIndex + 1)}"><button type="button" class="cell-segment true${submitted === true ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="true" aria-pressed="${submitted === true}">${copy.trueLabel}</button><button type="button" class="cell-segment false${submitted === false ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="false" aria-pressed="${submitted === false}">${copy.falseLabel}</button></div><button type="button" class="primary truth-table-check" data-action="check-evaluation"${submitted === null ? ' disabled' : ''}>${copy.checkScope}</button></section>`;
+  return `<section class="truth-table-response-workspace"><div class="truth-table-answer-tray" role="group" aria-label="${copy.cellFillAria(rowIndex + 1)}"><button type="button" class="cell-segment true${submitted === true ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="true" aria-pressed="${submitted === true}">${copy.trueLabel}</button><button type="button" class="cell-segment false${submitted === false ? ' selected' : ''}" data-action="select-evaluation-prediction" data-value="false" aria-pressed="${submitted === false}">${copy.falseLabel}</button></div><button type="button" class="primary truth-table-check" data-action="check-evaluation"${submitted === null ? ' disabled' : ''}>${copy.checkAnswer}</button></section>`;
 }
 
 export function renderPartialTruthTable(
