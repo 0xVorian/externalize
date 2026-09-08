@@ -1,4 +1,5 @@
-import { ui, type Locale } from '../i18n';
+import type { Locale } from '../i18n';
+import { ui as formalUi } from '../i18n/messages';
 
 export type AtomToggleRenderOptions = {
   locale: Locale;
@@ -10,7 +11,7 @@ export type AtomToggleRenderOptions = {
 };
 
 export function renderAtomPanel(options: AtomToggleRenderOptions): string {
-  const copy = ui(options.locale);
+  const copy = formalUi(options.locale);
   const atoms = Object.keys(options.assignment).sort();
   const isEnabled = options.isAtomEnabled ?? (() => true);
   const readOnly = options.readOnly ?? false;
