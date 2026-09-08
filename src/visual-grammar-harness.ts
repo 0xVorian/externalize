@@ -29,7 +29,7 @@ const EXAMPLES: Record<ExampleKey, { title: string; detail: string; exerciseId: 
   },
   'truth-table': {
     title: 'Truth-table cell',
-    detail: 'The response stays embedded where its position carries meaning.',
+    detail: 'A blank target stays in the table; True / False choices sit below and move into it.',
     exerciseId: 'tt-001',
   },
 };
