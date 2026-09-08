@@ -22,10 +22,10 @@ describe('atom-toggles-render', () => {
     const fr = renderAtomPanel({ locale: 'fr', assignment: { P: false }, action: 'set-atom-value' });
     const en = renderAtomPanel({ locale: 'en', assignment: { P: false }, action: 'set-atom-value' });
 
-    expect(fr).toContain('>V<');
-    expect(fr).toContain('>F<');
-    expect(en).toContain('>T<');
-    expect(en).toContain('>F<');
+    expect(fr).toMatch(/data-value="true"[\s\S]*?>\s*V\s*<\/button>/);
+    expect(fr).toMatch(/data-value="false"[\s\S]*?>\s*F\s*<\/button>/);
+    expect(en).toMatch(/data-value="true"[\s\S]*?>\s*T\s*<\/button>/);
+    expect(en).toMatch(/data-value="false"[\s\S]*?>\s*F\s*<\/button>/);
     expect(fr).not.toContain('>Vrai<');
     expect(en).not.toContain('>True<');
   });
