@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { ui } from '../i18n';
 import { renderAtomPanel } from './atom-toggles-render';
 
 describe('atom-toggles-render', () => {
@@ -19,18 +18,16 @@ describe('atom-toggles-render', () => {
     expect(qSection).toContain('class="atom-segment false active"');
   });
 
-  it('uses ordinary truth words for interactive controls in both locales', () => {
+  it('keeps compact V/F and T/F notation in assignment controls', () => {
     const fr = renderAtomPanel({ locale: 'fr', assignment: { P: false }, action: 'set-atom-value' });
     const en = renderAtomPanel({ locale: 'en', assignment: { P: false }, action: 'set-atom-value' });
 
-    expect(fr).toContain(ui('fr').trueLabel);
-    expect(fr).toContain(ui('fr').falseLabel);
-    expect(en).toContain(ui('en').trueLabel);
-    expect(en).toContain(ui('en').falseLabel);
-    expect(ui('fr').trueLabel).toBe('Vrai');
-    expect(ui('fr').falseLabel).toBe('Faux');
-    expect(ui('en').trueLabel).toBe('True');
-    expect(ui('en').falseLabel).toBe('False');
+    expect(fr).toContain('>V<');
+    expect(fr).toContain('>F<');
+    expect(en).toContain('>T<');
+    expect(en).toContain('>F<');
+    expect(fr).not.toContain('>Vrai<');
+    expect(en).not.toContain('>True<');
   });
 
   it('disables all rows in read-only mode', () => {
