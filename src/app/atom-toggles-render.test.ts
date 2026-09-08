@@ -3,7 +3,7 @@ import { ui } from '../i18n';
 import { renderAtomPanel } from './atom-toggles-render';
 
 describe('atom-toggles-render', () => {
-  it('marks V/F segments active according to assignment', () => {
+  it('marks truth-value segments active according to assignment', () => {
     const html = renderAtomPanel({
       locale: 'en',
       assignment: { P: true, Q: false },
@@ -19,14 +19,18 @@ describe('atom-toggles-render', () => {
     expect(qSection).toContain('class="atom-segment false active"');
   });
 
-  it('uses V/F labels in French and T/F in English', () => {
+  it('uses ordinary truth words for interactive controls in both locales', () => {
     const fr = renderAtomPanel({ locale: 'fr', assignment: { P: false }, action: 'set-atom-value' });
     const en = renderAtomPanel({ locale: 'en', assignment: { P: false }, action: 'set-atom-value' });
 
     expect(fr).toContain(ui('fr').trueLabel);
+    expect(fr).toContain(ui('fr').falseLabel);
     expect(en).toContain(ui('en').trueLabel);
-    expect(ui('fr').trueLabel).toBe('V');
-    expect(ui('en').trueLabel).toBe('T');
+    expect(en).toContain(ui('en').falseLabel);
+    expect(ui('fr').trueLabel).toBe('Vrai');
+    expect(ui('fr').falseLabel).toBe('Faux');
+    expect(ui('en').trueLabel).toBe('True');
+    expect(ui('en').falseLabel).toBe('False');
   });
 
   it('disables all rows in read-only mode', () => {
