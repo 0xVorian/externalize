@@ -244,7 +244,7 @@ Full inventory and layout rules: **[docs/presentation.md](presentation.md)**
 | Pedagogical goal | Presentation |
 |------------------|--------------|
 | Show all cases of a small formula (demo) | Truth table, highlighted rows (`truth-table-multi`) |
-| Learner sets one assignment on a small formula | Live table row + toggles (`truth-table-live`) |
+| Learner sets one assignment on a small formula | Live table row, one target at a time (`truth-table-live`) |
 | Propagate values under one assignment (complex formula) | Vertical parse tree with values (`tree-eval`) |
 | Tap main connective / scope | Vertical parse tree, no values (`tree-scope`) |
 | Introduce a concept in prose | Card (`card`) |

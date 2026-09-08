@@ -109,4 +109,19 @@ describe('lesson i18n', () => {
       expect(() => getLessonCopy('fr', lesson.id)).not.toThrow();
     }
   });
+
+  it('authors guided prompts without tap-T instructions', () => {
+    for (const lesson of ALL_LEARN_LESSONS) {
+      if (lesson.type !== 'guided') continue;
+      for (const locale of ['en', 'fr'] as const) {
+        for (const step of getLessonCopy(locale, lesson.id).guidedSteps ?? []) {
+          if (step.kind !== 'hint') continue;
+          expect(step.text).not.toMatch(/Tap [TF] for/i);
+          expect(step.text).not.toMatch(/Toucher [VF] pour/i);
+        }
+      }
+    }
+    expect(learnUi('en').chooseValueFor('P')).toBe('Choose the value for P.');
+    expect(learnUi('fr').chooseValueFor('P')).toBe('Choisissez la valeur de P.');
+  });
 });

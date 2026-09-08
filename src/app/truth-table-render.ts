@@ -17,6 +17,14 @@ export type TruthTableRow = {
   assignment: Assignment;
   active: boolean;
   srLabel?: string;
+  targetAtom?: string;
+  targetValue?: boolean | null;
+};
+
+export type LiveTruthRowOptions = {
+  hideResult?: boolean;
+  targetAtom?: string;
+  targetValue?: boolean | null;
 };
 
 export function usesLiveTruthRow(formula: string): boolean {
@@ -31,6 +39,28 @@ function assignmentsMatch(a: Assignment, b: Assignment, atoms: string[]): boolea
   return atoms.every((atom) => (a[atom] ?? false) === (b[atom] ?? false));
 }
 
+function rowAssignment(row: TruthTableRow, atoms: string[]): Assignment {
+  const assignment: Assignment = {};
+  for (const atom of atoms) {
+    if (atom === row.targetAtom && (row.targetValue === true || row.targetValue === false)) {
+      assignment[atom] = row.targetValue;
+    } else {
+      assignment[atom] = row.assignment[atom] ?? false;
+    }
+  }
+  return assignment;
+}
+
+function renderTruthValueSlot(
+  locale: Locale,
+  value: boolean | null,
+  ariaLabel: string,
+): string {
+  const filled = value !== null;
+  const text = filled ? formatTruthValue(locale, value) : '&nbsp;';
+  return `<span class="truth-table-drop-slot ${filled ? 'filled' : 'empty'}" aria-label="${ariaLabel}">${text}</span>`;
+}
+
 export function renderTruthTable(
   locale: Locale,
   formula: string,
@@ -41,9 +71,19 @@ export function renderTruthTable(
   const atoms = formulaAtoms(formula);
   const body = rows
     .map((row) => {
-      const result = evaluateFormula(formula, row.assignment);
+      const displayAssignment = rowAssignment(row, atoms);
+      const result = evaluateFormula(formula, displayAssignment);
       const atomCells = atoms
-        .map((atom) => `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`)
+        .map((atom) => {
+          if (atom === row.targetAtom) {
+            const filled = row.targetValue === true || row.targetValue === false;
+            const aria = filled
+              ? `${learn.guidedTargetAria(atom, true)}: ${formatTruthValue(locale, row.targetValue!)}`
+              : learn.guidedTargetAria(atom, false);
+            return `<td class="blank-cell guided-target-cell" data-testid="guided-target-cell">${renderTruthValueSlot(locale, filled ? row.targetValue! : null, aria)}</td>`;
+          }
+          return `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`;
+        })
         .join('');
       return `
         <tr class="truth-table-row ${row.active ? 'active' : ''}"${row.active ? ' aria-current="step"' : ''}>
@@ -76,14 +116,26 @@ export function renderLiveTruthRow(
   locale: Locale,
   formula: string,
   assignment: Record<string, boolean>,
-  options: { hideResult?: boolean } = {},
+  options: LiveTruthRowOptions = {},
 ): string {
   const atoms = formulaAtoms(formula);
   const row: Assignment = {};
   for (const atom of atoms) {
     row[atom] = assignment[atom] ?? false;
   }
-  return renderTruthTable(locale, formula, [{ assignment: row, active: true }], options);
+  return renderTruthTable(
+    locale,
+    formula,
+    [
+      {
+        assignment: row,
+        active: true,
+        targetAtom: options.targetAtom,
+        targetValue: options.targetValue,
+      },
+    ],
+    { hideResult: options.hideResult },
+  );
 }
 
 export function renderWatchGrid(

@@ -6,7 +6,7 @@ import {
   clickMode,
   enterLearn,
 } from '../helpers/app';
-import { emptyProgress, progressReadyForExercise } from '../helpers/progress';
+import { emptyProgress, progressAtLesson, progressReadyForExercise } from '../helpers/progress';
 import { beginOfferedSession, sessionOpening, sessionPosition, sessionPrimary } from '../helpers/session';
 import { setActiveRoute } from '../../src/app/source-route';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID } from '../../src/app/routes';
@@ -16,6 +16,25 @@ async function expectNoPageOverflow(page: Page): Promise<void> {
     await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
   ).toBe(true);
 }
+
+test('guided evaluation fits a narrow phone with a distinct response workspace', async ({
+  page,
+}) => {
+  await gotoWithProgress(page, progressAtLesson('level0-05-guided'));
+  await beginOfferedSession(page);
+  await expect(page.getByTestId('guided-response-workspace')).toBeVisible();
+  await expect(page.locator('.atom-panel')).toHaveCount(0);
+  await expect(page.getByTestId('guided-target-cell')).toHaveCount(1);
+  const workspaceBox = await page.getByTestId('guided-response-workspace').boundingBox();
+  const tableBox = await page.locator('.truth-table').boundingBox();
+  expect(workspaceBox).toBeTruthy();
+  expect(tableBox).toBeTruthy();
+  expect(workspaceBox!.y).toBeGreaterThan(tableBox!.y + tableBox!.height - 1);
+  await page.locator('[data-action="select-guided-value"][data-value="true"]').click();
+  await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('T');
+  await page.locator('[data-action="check-guided-value"]').click();
+  await expectNoPageOverflow(page);
+});
 
 test('Level 0 watch grid fits a narrow phone', async ({ page }) => {
   await gotoFresh(page);

@@ -54,6 +54,31 @@ describe('truth-table-render', () => {
       const html = renderLiveTruthRow('en', 'P ∧ Q', { P: true, Q: false });
       expect(html).toContain('truth-table-row active');
     });
+
+    it('blanks only the active guided target until a value is chosen', () => {
+      const html = renderLiveTruthRow('en', 'P ∧ Q', { P: false, Q: false }, {
+        targetAtom: 'P',
+        targetValue: null,
+      });
+      expect(html.match(/data-testid="guided-target-cell"/g)).toHaveLength(1);
+      expect(html).toContain('truth-table-drop-slot empty');
+      expect(html).toMatch(/<td>F<\/td>/);
+      expect(html).not.toContain('atom-panel');
+    });
+
+    it('fills the guided target with compact notation after a provisional choice', () => {
+      const en = renderLiveTruthRow('en', 'P ∧ Q', { P: false, Q: false }, {
+        targetAtom: 'P',
+        targetValue: true,
+      });
+      const fr = renderLiveTruthRow('fr', 'P ∧ Q', { P: false, Q: false }, {
+        targetAtom: 'P',
+        targetValue: true,
+      });
+      expect(en).toContain('truth-table-drop-slot filled');
+      expect(en).toContain('>T</span>');
+      expect(fr).toContain('>V</span>');
+    });
   });
 
   describe('renderTruthTable', () => {

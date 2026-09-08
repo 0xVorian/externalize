@@ -12,6 +12,8 @@ export type LessonState = {
   tree: TreeNode;
   message: string | null;
   complete: boolean;
+  guidedSelection: boolean | null;
+  guidedCheckFailed: boolean;
 };
 
 import type { ResumePoint } from './progress-tracker';
@@ -59,6 +61,8 @@ export function createLessonState(
     tree: evaluateWithNodes(parse('P'), { P: false }).tree,
     message: null,
     complete: resume?.guidedComplete ?? false,
+    guidedSelection: null,
+    guidedCheckFailed: false,
   };
 
   if (lesson.type === 'watch' && lesson.formula) {
@@ -87,7 +91,7 @@ export function createLessonState(
       guidedStep: resume?.guidedStep ?? 0,
       complete: resume?.guidedComplete ?? false,
     };
-    return { ...merged, message: currentGuidedHint(merged) };
+    return { ...merged, message: merged.complete ? currentGuidedHint(merged) : null };
   }
 
   return base;
@@ -133,7 +137,7 @@ export function applyLessonLocale(state: LessonState, locale: Locale): LessonSta
       complete: preserved.complete,
       tree,
     };
-    return { ...merged, message: currentGuidedHint(merged) };
+    return { ...merged, message: merged.complete ? currentGuidedHint(merged) : null };
   }
 
   return { ...state, locale };
@@ -195,6 +199,8 @@ function advanceGuidedStep(state: LessonState, assignment: Assignment, tree: Tre
       guidedStep: nextIndex,
       complete: true,
       message: doneStep?.text ?? null,
+      guidedSelection: null,
+      guidedCheckFailed: false,
     };
   }
 
@@ -204,7 +210,9 @@ function advanceGuidedStep(state: LessonState, assignment: Assignment, tree: Tre
     tree,
     guidedStep: nextIndex,
     complete: false,
-    message: nextStep.text,
+    message: null,
+    guidedSelection: null,
+    guidedCheckFailed: false,
   };
 }
 
@@ -232,7 +240,49 @@ export function setGuidedAtom(state: LessonState, atom: string, value: boolean):
     assignment,
     tree,
     message: current?.text ?? null,
+    guidedSelection: null,
+    guidedCheckFailed: false,
   };
+}
+
+export function currentGuidedTarget(state: LessonState): string | null {
+  if (state.lesson.type !== 'guided' || state.complete) {
+    return null;
+  }
+  const copy = getLessonCopy(state.locale, state.lesson.id);
+  const current = copy.guidedSteps?.[state.guidedStep];
+  return current?.kind === 'hint' ? current.atom : null;
+}
+
+export function selectGuidedValue(state: LessonState, value: boolean): LessonState {
+  if (currentGuidedTarget(state) === null) {
+    return state;
+  }
+  return {
+    ...state,
+    guidedSelection: value,
+    guidedCheckFailed: false,
+    message: null,
+  };
+}
+
+export function checkGuidedSelection(state: LessonState): LessonState {
+  const target = currentGuidedTarget(state);
+  if (!target || state.guidedSelection === null || !state.lesson.formula) {
+    return state;
+  }
+  const copy = getLessonCopy(state.locale, state.lesson.id);
+  const current = copy.guidedSteps?.[state.guidedStep];
+  if (current?.kind !== 'hint' || current.atom !== target) {
+    return state;
+  }
+  if (state.guidedSelection !== current.value) {
+    return {
+      ...state,
+      guidedCheckFailed: true,
+    };
+  }
+  return setGuidedAtom(state, target, state.guidedSelection);
 }
 
 export function currentGuidedHint(state: LessonState): string {

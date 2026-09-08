@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Guided evaluation with one current target now reads formula → blank table cell → True/False (Vrai/Faux) → Check. Selection fills the target with compact T/F or V/F and only Check validates; wrong answers stay repairable in place. The generic Truth assignment panel remains for Explore, counterexamples, and given-assignment practice.
 - The default learner journey is the session offer rather than a four-way Learn / Explore / Practice / Progress choice. Those modes remain reachable under More, outside an active round
 - A session “step” is one learner-perceived micro-activity. Watch lessons with separately advanced cases count as one step per case, so the advertised envelope matches the work inside the round
 - Planner diagnostics (`Avant de poursuivre`, missing-prerequisite / short-bridge copy) no longer appear as learner-facing UI. The planner still chooses skip / retrieve / teach internally

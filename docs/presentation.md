@@ -14,7 +14,7 @@ Use this when adding exercises or wondering what UI you will see.
 | `level0-02-truth` | Truth assignments | Card (text) | |
 | `level0-03-and` | Conjunction ∧ | Card (text) | Truth-table notation in example block |
 | `level0-04-watch` | Worked cases: P ∧ Q | **2×2 truth grid** | Highlight steps 1–4; P rows, Q columns |
-| `level0-05-guided` | Guided: P ∧ Q | **Toggles + live row** | Same table as watch, one row |
+| `level0-05-guided` | Guided: P ∧ Q | **Live row + True/False workspace** | One blank target at a time |
 
 ### Level 1 — Connectives
 
@@ -22,16 +22,16 @@ Use this when adding exercises or wondering what UI you will see.
 |----|------------|--------------|-------|
 | `level1-01-neg` | Negation | Card (text) | |
 | `level1-02-neg-watch` | Worked cases: ¬P | **2-row truth table** | Single atom |
-| `level1-03-neg-guided` | Guided: ¬P | **Toggles + live row** | One atom column |
+| `level1-03-neg-guided` | Guided: ¬P | **Live row + True/False workspace** | One atom column |
 | `level1-04-or` | Disjunction ∨ | Card (text) | |
 | `level1-05-or-watch` | Worked cases: P ∨ Q | **2×2 truth grid** | |
-| `level1-06-or-guided` | Guided: P ∨ Q | **Toggles + live row** | |
+| `level1-06-or-guided` | Guided: P ∨ Q | **Live row + True/False workspace** | |
 | `level1-07-imp` | Material conditional → | Card (text) | |
 | `level1-08-imp-watch` | Worked cases: P → Q | **2×2 truth grid** | |
-| `level1-09-imp-guided` | Guided: P → Q | **Toggles + live row** | |
+| `level1-09-imp-guided` | Guided: P → Q | **Live row + True/False workspace** | |
 | `level1-10-iff` | Biconditional ↔ | Card (text) | |
 | `level1-11-iff-watch` | Worked cases: P ↔ Q | **2×2 truth grid** | |
-| `level1-12-iff-guided` | Guided: P ↔ Q | **Toggles + live row** | |
+| `level1-12-iff-guided` | Guided: P ↔ Q | **Live row + True/False workspace** | |
 
 ### Practice — tiered unlock (22 exercises)
 
@@ -83,11 +83,11 @@ Use this when adding exercises or wondering what UI you will see.
 | Goal | Prefer |
 |------|--------|
 | Show **all cases** of a small formula (demo / watch) | **Truth table** (rows) or **2×2 grid** for binary formulas |
-| Show **one assignment** you build step by step (guided try on a small formula) | **Live truth-table row** + toggles |
+| Show **one assignment** you build step by step (guided try on a small formula) | **Live truth-table row** with one blank target and a True/False workspace |
 | Show **how values propagate** under one assignment (practice eval, complex formulas) | **Vertical parse tree** with values on every node |
 | Show **scope / main connective** (practice) | **Vertical parse tree** (tap targets, no values required) |
 
-When the lesson is “here are the four assignments for P ∧ Q”, a parse tree is the wrong shape — it hides the 2×2 pattern and reads like an unrelated list. When the learner **sets** P and Q themselves on the same small formula, a **single live table row** plus toggles is enough. Use a parse tree when the formula has nested structure worth propagating (practice eval exercises).
+When the lesson is “here are the four assignments for P ∧ Q”, a parse tree is the wrong shape — it hides the 2×2 pattern and reads like an unrelated list. When the learner **sets** one letter at a time on the same small formula, a **single live table row** with a blank target is enough. Use a parse tree when the formula has nested structure worth propagating (practice eval exercises).
 
 ## Truth table (watch lessons)
 
@@ -120,11 +120,16 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 ## Live truth-table row (guided lessons)
 
-**Used today:** Level 0 guided lesson `level0-05-guided` (`P ∧ Q`).
+**Used today:** Level 0 guided lesson `level0-05-guided` (`P ∧ Q`), and the other `*-guided` lessons.
 
-- **Toggles first** (interpretation), then a **one-row table** that updates as the learner assigns P and Q.
-- Same column headers and locale labels as the watch table — learner connects “I changed P” to “the row changed”.
-- No parse tree for this lesson: the tree duplicated the toggles and misaligned visually on mobile.
+When exactly one sentence letter is the current target:
+
+- Keep the formula visible.
+- Show that letter as a blank, highlighted cell in the live row. Already-set letters stay in compact T/F (V/F).
+- Do **not** show the generic multi-row Truth assignment panel, and do not show inactive T/F controls for letters the learner is not being asked about.
+- Put True / False (Vrai / Faux) in a distinct response workspace below the row. Choosing a value fills the target with formal notation only; Check / Vérifier grades it. Wrong answers stay repairable in place. After the last correct check, the done explanation appears and Continue is the primary action.
+
+The assignment panel remains for Explore, find-counterexample, and given-assignment practice evaluation, where the learner is editing or inspecting the whole assignment.
 
 **When to use a tree instead:** practice evaluation on non-flat formulas (e.g. `(P → Q) ↔ ¬R`) where subformula values matter.
 
@@ -149,7 +154,8 @@ Source-route cards (`lat-ii-26-*`, quantifier bridges) use the existing card les
 
 ## Locale and notation
 
-- Tree cells, toggles, and table cells must use the same labels per locale (`ui(locale).trueLabel` / `falseLabel`).
+- Formal displays (tables, trees, assignment panels) use compact T/F and V/F via `formatTruthValue()`.
+- Answer controls for a single requested truth value use ordinary words: True / False and Vrai / Faux.
 - Do not hardcode `T`/`F` in renderers — see `docs/i18n.md` and design principle §10.
 
 ## Adding a new presentation mode
