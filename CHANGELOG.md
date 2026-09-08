@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Source-route checks now use a short shell heading and render the exercise question only once; predicate context is separated from the question instead of repeating one long prompt across the page.
 - Audited learner-facing EN/FR examples for natural-language completeness and current interaction wording, including onboarding, the introductory truth-assignment lesson, and truth-table answer instructions.
+- Ran a second app-wide copy pass over session, Progress, source-route, accessibility, and exercise surfaces; shortened prompts where the visual object already carries the facts, removed implementation/grading jargon, and made progress claims match the evidence actually recorded.
 
 ### Fixed
 

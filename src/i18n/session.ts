@@ -50,7 +50,7 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
         case 'start':
           return 'A short logic session';
         case 'continue':
-          return 'Continue your reading';
+          return 'Continue where you left off';
         case 'quick-review':
           return 'Ready for a quick review';
         case 'lapse-recovery':
@@ -64,17 +64,17 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     detail: (kind) => {
       switch (kind) {
         case 'start':
-          return 'A few small steps. No need to set up a course first.';
+          return 'A few small steps. No setup needed.';
         case 'continue':
-          return 'Pick up the next useful bit of the argument.';
+          return 'Pick up the next useful step.';
         case 'quick-review':
-          return 'A short check on work that is due.';
+          return 'A short review of what is due now.';
         case 'lapse-recovery':
-          return 'A brief check on ideas that have gone quiet.';
+          return 'A brief check on ideas you have not seen in a while.';
         case 'resume':
           return 'The same short round, where you left it.';
         case 'idle':
-          return 'Nothing useful is due right now.';
+          return 'Nothing needs review right now.';
       }
     },
     preparationDetail: 'A short preparation round',
@@ -83,7 +83,7 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     nextReview: (when) => `Next useful review: ${when}.`,
     nextReviewUnknown: 'Another short round is available whenever you want it.',
     idleHeading: "You're good for now",
-    idleBody: 'Nothing useful is due right now. Stopping here is the right move.',
+    idleBody: 'Nothing needs review right now. You can stop here.',
     primaryAria: (kind) => {
       switch (kind) {
         case 'resume':
@@ -138,17 +138,17 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     detail: (kind) => {
       switch (kind) {
         case 'start':
-          return 'Quelques petites étapes. Pas besoin de régler un cours d’abord.';
+          return 'Quelques étapes courtes. Rien à configurer avant de commencer.';
         case 'continue':
-          return 'Reprendre le prochain fragment utile du raisonnement.';
+          return 'Reprendre à la prochaine étape utile.';
         case 'quick-review':
-          return 'Une petite révision sur ce qui est dû.';
+          return 'Une courte révision de ce qu’il est utile de revoir maintenant.';
         case 'lapse-recovery':
-          return 'Un contrôle bref sur des idées devenues lointaines.';
+          return 'Une courte vérification des notions que vous n’avez pas revues depuis un moment.';
         case 'resume':
           return 'La même courte séance, là où vous l’aviez laissée.';
         case 'idle':
-          return 'Rien d’utile n’est dû pour le moment.';
+          return 'Rien n’a besoin d’être revu pour le moment.';
       }
     },
     preparationDetail: 'Une courte préparation',
@@ -157,7 +157,7 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     nextReview: (when) => `Prochaine révision utile : ${when}.`,
     nextReviewUnknown: 'Une autre séance courte reste possible, sans obligation.',
     idleHeading: 'Rien de pressé pour l’instant',
-    idleBody: 'Rien d’utile n’est dû. S’arrêter ici est tout à fait légitime.',
+    idleBody: 'Rien n’a besoin d’être revu pour le moment. Vous pouvez vous arrêter ici.',
     primaryAria: (kind) => {
       switch (kind) {
         case 'resume':

@@ -380,7 +380,7 @@ test.describe('progress visibility', () => {
     await clickMode(page, 'progress');
     const summary = page.locator('[data-testid="capability-summary"]');
     await expect(summary).toBeVisible();
-    await expect(summary).toContainText('You can now');
+    await expect(summary).toContainText('Consistent so far');
     await expect(summary).toContainText('In progress');
     await expect(summary).toContainText('Up next');
     await expect(summary).toContainText('Evaluating formulas');

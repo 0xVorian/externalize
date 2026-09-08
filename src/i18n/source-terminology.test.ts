@@ -11,8 +11,8 @@ describe('session UI copy', () => {
     const fr = sessionUi('fr');
     expect(en.heading('start')).toBe('A short logic session');
     expect(fr.heading('start')).toBe('Une courte séance de logique');
-    expect(fr.detail('start')).toContain('petites étapes');
-    expect(fr.detail('quick-review')).toContain('petite révision');
+    expect(fr.detail('start')).toContain('étapes courtes');
+    expect(fr.detail('quick-review')).toContain('courte révision');
     expect(en.heading('start')).not.toBe(fr.heading('start'));
     expect(en.doneForNow).toBe('Done for now');
     expect(fr.doneForNow).toContain('maintenant');

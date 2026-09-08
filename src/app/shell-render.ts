@@ -8,7 +8,7 @@ export function renderLanguageToggle(locale: Locale): string {
   const copy = ui(locale);
   const locales = ['en', 'fr'] as const;
   return `
-    <div class="language-toggle" role="group" aria-label="${copy.languageToggle(locale)}">
+    <div class="language-toggle" role="group" aria-label="${copy.languageGroupAria}">
       ${locales
         .map(
           (code) => `
