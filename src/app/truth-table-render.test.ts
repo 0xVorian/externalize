@@ -79,7 +79,7 @@ describe('truth-table-render', () => {
       expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
     });
 
-    it('shows a result only when the visible partial assignment determines it', () => {
+    it('shows a result only when the committed partial assignment determines it', () => {
       const undetermined = renderLiveTruthRow('en', 'P ∧ Q', { P: true }, {
         targetAtom: 'Q',
         targetValue: null,
@@ -93,6 +93,13 @@ describe('truth-table-render', () => {
       });
       expect(determined).toContain('>F</td>');
       expect(determined).toMatch(/data-testid="truth-result-cell">F<\/td>/);
+
+      const stillCommitted = renderLiveTruthRow('en', 'P ∧ Q', { P: false }, {
+        targetAtom: 'Q',
+        targetValue: true,
+      });
+      expect(stillCommitted).toMatch(/guided-target-cell[\s\S]*?>T<\/span>/);
+      expect(stillCommitted).toMatch(/data-testid="truth-result-cell">F<\/td>/);
     });
 
     it('fills the guided target with compact notation after a provisional choice', () => {
@@ -107,6 +114,30 @@ describe('truth-table-render', () => {
       expect(en).toContain('truth-table-drop-slot filled');
       expect(en).toContain('>T</span>');
       expect(fr).toContain('>V</span>');
+      expect(en).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+    });
+
+    it('does not let a provisional target determine the result', () => {
+      const conjunctionFalse = renderLiveTruthRow('en', 'P ∧ Q', {}, {
+        targetAtom: 'P',
+        targetValue: false,
+      });
+      expect(conjunctionFalse).toMatch(/guided-target-cell[\s\S]*?>F<\/span>/);
+      expect(conjunctionFalse).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+
+      const notPFalse = renderLiveTruthRow('en', '¬P', {}, {
+        targetAtom: 'P',
+        targetValue: false,
+      });
+      expect(notPFalse).toMatch(/guided-target-cell[\s\S]*?>F<\/span>/);
+      expect(notPFalse).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+
+      const notPTrue = renderLiveTruthRow('en', '¬P', {}, {
+        targetAtom: 'P',
+        targetValue: true,
+      });
+      expect(notPTrue).toMatch(/guided-target-cell[\s\S]*?>T<\/span>/);
+      expect(notPTrue).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
     });
   });
 

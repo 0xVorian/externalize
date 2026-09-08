@@ -70,9 +70,20 @@ describe('single-target guided evaluation', () => {
     expect(html).toContain('truth-table-drop-slot filled');
     expect(html).toMatch(/guided-target-cell[\s\S]*?>T<\/span>/);
     expect(html).toContain('cell-segment true selected');
+    expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
     expect(selected.assignment.P).toBeUndefined();
     expect(selected.complete).toBe(false);
     expect(selected.guidedStep).toBe(0);
+    expect(html).not.toContain('feedback-correct');
+    expect(html).not.toContain('feedback-wrong');
+  });
+
+  it('does not reveal a determined P ∧ Q result from a provisional P = F', () => {
+    const initial = createLessonState('en', getLessonDefinition('level0-05-guided')!);
+    const selected = selectGuidedValue(initial, false);
+    const html = renderLessonView(selected, defaultLearnProgress);
+    expect(html).toMatch(/guided-target-cell[\s\S]*?>F<\/span>/);
+    expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
     expect(html).not.toContain('feedback-correct');
     expect(html).not.toContain('feedback-wrong');
   });
@@ -106,6 +117,8 @@ describe('single-target guided evaluation', () => {
     expect(wrongHtml).toContain(learnUi('en').guidedValueWrong('P'));
     expect(wrongHtml).toContain('data-testid="guided-response-workspace"');
     expect(wrongHtml).toContain('data-action="check-guided-value"');
+    expect(wrongHtml).toMatch(/guided-target-cell[\s\S]*?>F<\/span>/);
+    expect(wrongHtml).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
 
     const repaired = checkGuidedSelection(selectGuidedValue(wrong, true));
     expect(repaired.guidedCheckFailed).toBe(false);
@@ -122,6 +135,7 @@ describe('single-target guided evaluation', () => {
     expect(html).not.toContain('data-testid="guided-response-workspace"');
     expect(html).not.toContain('data-testid="guided-target-cell"');
     expect(html).toContain('feedback-correct');
+    expect(html).toMatch(/data-testid="truth-result-cell">F<\/td>/);
     expect(html).toContain('data-action="lesson-next"');
     const done = getLessonCopy('en', 'level0-05-guided').guidedSteps?.find((step) => step.kind === 'done');
     expect(html).toContain(done?.text ?? 'missing done copy');
@@ -156,13 +170,45 @@ describe('single-target guided evaluation', () => {
     expect(html).not.toMatch(/<td>T<\/td>/);
     expect(html).not.toMatch(/<td>F<\/td>/);
     expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+  });
 
-    const selected = selectGuidedValue(state, false);
-    const selectedHtml = renderLessonView(selected, defaultLearnProgress);
-    expect(selectedHtml).toMatch(/guided-target-cell[\s\S]*?>F<\/span>/);
-    expect(selectedHtml).toMatch(/data-testid="truth-result-cell">T<\/td>/);
-    expect(selected.complete).toBe(false);
-    expect(selected.guidedCheckFailed).toBe(false);
+  it('keeps ¬P undetermined while a provisional selection is pending Check', () => {
+    const state = createLessonState('en', getLessonDefinition('level1-03-neg-guided')!);
+
+    const selectedFalse = selectGuidedValue(state, false);
+    const falseHtml = renderLessonView(selectedFalse, defaultLearnProgress);
+    expect(falseHtml).toMatch(/guided-target-cell[\s\S]*?>F<\/span>/);
+    expect(falseHtml).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+    expect(falseHtml).not.toContain('feedback-correct');
+    expect(falseHtml).not.toContain('feedback-wrong');
+    expect(selectedFalse.complete).toBe(false);
+    expect(selectedFalse.guidedCheckFailed).toBe(false);
+
+    const selectedTrue = selectGuidedValue(state, true);
+    const trueHtml = renderLessonView(selectedTrue, defaultLearnProgress);
+    expect(trueHtml).toMatch(/guided-target-cell[\s\S]*?>T<\/span>/);
+    expect(trueHtml).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+    expect(trueHtml).not.toContain('feedback-correct');
+    expect(trueHtml).not.toContain('feedback-wrong');
+  });
+
+  it('reveals the derived ¬P result only after a successful final Check', () => {
+    const initial = createLessonState('en', getLessonDefinition('level1-03-neg-guided')!);
+    const wrong = checkGuidedSelection(selectGuidedValue(initial, false));
+    expect(wrong.guidedCheckFailed).toBe(true);
+    const wrongHtml = renderLessonView(wrong, defaultLearnProgress);
+    expect(wrongHtml).toContain('feedback-wrong');
+    expect(wrongHtml).toContain('data-testid="guided-response-workspace"');
+    expect(wrongHtml).toMatch(/guided-target-cell[\s\S]*?>F<\/span>/);
+    expect(wrongHtml).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+
+    const repaired = checkGuidedSelection(selectGuidedValue(wrong, true));
+    expect(repaired.complete).toBe(true);
+    expect(repaired.assignment).toEqual({ P: true });
+    const doneHtml = renderLessonView(repaired, defaultLearnProgress);
+    expect(doneHtml).toContain('feedback-correct');
+    expect(doneHtml).not.toContain('data-testid="guided-response-workspace"');
+    expect(doneHtml).toMatch(/data-testid="truth-result-cell">F<\/td>/);
   });
 });
 

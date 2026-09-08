@@ -35,6 +35,7 @@ test('guided evaluation fits a narrow phone with a distinct response workspace',
   expect(workspaceBox!.y).toBeGreaterThan(tableBox!.y + tableBox!.height - 1);
   await page.locator('[data-action="select-guided-value"][data-value="true"]').click();
   await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('T');
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
   await page.locator('[data-action="check-guided-value"]').click();
   await expect(page.locator('.guided-prompt')).toContainText('Now set Q to false.');
   await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
@@ -48,10 +49,19 @@ test('guided ¬P on a narrow phone does not treat unset P as false', async ({ pa
   await expect(page.locator('.guided-prompt')).toContainText('Choose P so that ¬P is false.');
   await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
   await page.locator('[data-action="select-guided-value"][data-value="false"]').click();
-  await expect(page.getByTestId('truth-result-cell')).toHaveText('T');
+  await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('F');
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
+  await expect(page.locator('.feedback-wrong')).toHaveCount(0);
   await page.locator('[data-action="check-guided-value"]').click();
   await expect(page.locator('.feedback-wrong')).toBeVisible();
   await expect(page.getByTestId('guided-response-workspace')).toBeVisible();
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
+  await page.locator('[data-action="select-guided-value"][data-value="true"]').click();
+  await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('T');
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
+  await page.locator('[data-action="check-guided-value"]').click();
+  await expect(page.locator('.feedback-correct')).toBeVisible();
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('F');
   await expectNoPageOverflow(page);
 });
 

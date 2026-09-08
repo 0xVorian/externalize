@@ -44,14 +44,17 @@ function assignmentsMatch(a: Assignment, b: Assignment, atoms: string[]): boolea
   return atoms.every((atom) => (a[atom] ?? false) === (b[atom] ?? false));
 }
 
-function visibleRowAssignment(row: TruthTableRow, atoms: string[]): PartialAssignment {
+/**
+ * Committed values only. A provisional target fill is display-only and must
+ * not determine the result before Check.
+ */
+function committedRowAssignment(row: TruthTableRow, atoms: string[]): PartialAssignment {
   const assignment: PartialAssignment = {};
   for (const atom of atoms) {
     if (atom === row.targetAtom) {
-      if (row.targetValue === true || row.targetValue === false) {
-        assignment[atom] = row.targetValue;
-      }
-    } else if (isAtomAssigned(row.assignment, atom)) {
+      continue;
+    }
+    if (isAtomAssigned(row.assignment, atom)) {
       assignment[atom] = row.assignment[atom];
     }
   }
@@ -82,7 +85,7 @@ export function renderTruthTable(
   const atoms = formulaAtoms(formula);
   const body = rows
     .map((row) => {
-      const displayAssignment = visibleRowAssignment(row, atoms);
+      const displayAssignment = committedRowAssignment(row, atoms);
       const determined = options.hideResult
         ? null
         : determinedFormulaValue(formula, displayAssignment);
