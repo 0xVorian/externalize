@@ -18,7 +18,7 @@ Two companion rules follow:
 
 The reasoning state should remain highly visible. The application architecture should not.
 
-## Why this work is authorized now
+## Why this work was authorized
 
 The August engagement/durable-learning research does **not** justify a gamification sprint. It does support reducing session-initiation friction and keeping cognitively useful acts at the center of engagement. The strongest learning mechanisms remain retrieval, spacing, informative feedback, generation/self-explanation, worked examples with fading, calibration, and transfer.
 

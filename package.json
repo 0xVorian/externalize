@@ -15,7 +15,7 @@
     "inventory:check": "tsx scripts/generate-inventory.ts --check",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "release:check": "npm test && npm run build && npm run test:e2e"
+    "release:check": "npm run inventory:check && npm test && npm run build && npm run test:e2e"
   },
   "devDependencies": {
     "tsx": "^4.20.5",

@@ -59,6 +59,7 @@ For a clean full verification run:
 
 ```bash
 npm ci
+npm run inventory:check
 npm test
 npm run build
 npm run test:e2e

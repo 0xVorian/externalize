@@ -17,6 +17,8 @@ npm run inventory:check
 
 If lesson/exercise inventory intentionally changes, refresh it with `npm run inventory:update` and commit the generated file.
 
+`npm run release:check` also includes this inventory check before unit/build/E2E verification.
+
 ## Unit tests (Vitest)
 
 ```bash
@@ -100,6 +102,7 @@ To reproduce locally:
 
 ```bash
 npm ci
+npm run inventory:check
 npm test && npm run build
 npx playwright install --with-deps chromium
 CI=1 npm run test:e2e
