@@ -29,7 +29,7 @@ const EXAMPLES: Record<ExampleKey, { title: string; detail: string; exerciseId: 
   },
   'truth-table': {
     title: 'Truth-table cell',
-    detail: 'A blank target stays in the table; True / False choices sit below and move into it.',
+    detail: 'Select True / False below, see it move into the blank cell, then check.',
     exerciseId: 'tt-001',
   },
 };
@@ -41,6 +41,7 @@ const root = appRoot;
 const locale: Locale = loadLocale();
 let selected: ExampleKey | null = null;
 let state: AppState | null = null;
+let pendingCellValue: boolean | null = null;
 
 function launcher(): string {
   const buttons = (Object.entries(EXAMPLES) as Array<[ExampleKey, (typeof EXAMPLES)[ExampleKey]]>)
@@ -76,12 +77,14 @@ function openExample(key: ExampleKey): void {
   if (!exercise) throw new Error(`Missing experiment exercise: ${EXAMPLES[key].exerciseId}`);
   selected = key;
   state = createState(locale, exercise);
+  pendingCellValue = null;
   render();
 }
 
 function closeExample(): void {
   selected = null;
   state = null;
+  pendingCellValue = null;
   render();
 }
 
@@ -91,7 +94,23 @@ function render(): void {
     root.innerHTML = launcher();
     return;
   }
-  root.innerHTML = renderApp(state, 0, true, context());
+
+  const displayState =
+    selected === 'truth-table' && state.phase === 'ready' && pendingCellValue !== null
+      ? { ...state, submittedCell: pendingCellValue }
+      : state;
+  root.innerHTML = renderApp(displayState, 0, true, context());
+
+  if (selected === 'truth-table' && state.phase === 'ready') {
+    const actions = root.querySelector<HTMLElement>('.session-active > .actions');
+    if (actions) {
+      const label = locale === 'fr' ? 'Vérifier' : 'Check';
+      actions.insertAdjacentHTML(
+        'beforeend',
+        `<button type="button" class="primary" data-action="check-truth-table"${pendingCellValue === null ? ' disabled' : ''}>${label}</button>`,
+      );
+    }
+  }
 }
 
 root.addEventListener('click', (event) => {
@@ -140,13 +159,25 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'submit-cell-value') {
-    state = submitCellValue(state, button.dataset.value === 'true');
-    render();
+    if (selected === 'truth-table' && state.phase === 'ready') {
+      pendingCellValue = button.dataset.value === 'true';
+      render();
+    }
+    return;
+  }
+
+  if (action === 'check-truth-table') {
+    if (selected === 'truth-table' && state.phase === 'ready' && pendingCellValue !== null) {
+      state = submitCellValue(state, pendingCellValue);
+      pendingCellValue = null;
+      render();
+    }
     return;
   }
 
   if (action === 'try-again') {
     state = tryAgainPractice(state);
+    pendingCellValue = null;
     render();
     return;
   }
