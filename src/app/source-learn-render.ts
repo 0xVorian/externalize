@@ -1,4 +1,4 @@
-import { learnUi, getLessonCopy, getExerciseCopy } from '../i18n';
+import { learnUi, getLessonCopy } from '../i18n';
 import type { Locale } from '../i18n';
 import { renderShellHeader } from './shell-render';
 import { renderCardLesson } from './lesson-render';
@@ -42,12 +42,11 @@ function sourceBodyAndActions(options: {
       ? terminalActions
       : `<button type="button" class="primary" data-action="lesson-next">${learn.nextStep}</button>`;
   } else if (options.practiceState) {
-    const copy = getExerciseCopy(options.locale, options.practiceState.exercise.id);
-    title = copy.prompt;
+    title = learn.sourceCheckTitle;
     const feedback = options.practiceState.message
       ? `<p class="feedback ${options.practiceState.feedback?.correct ? 'feedback-correct' : options.practiceState.feedback ? 'feedback-wrong' : 'feedback-info'}" role="status">${options.practiceState.message}</p>`
       : '';
-    body = `<article class="lesson-card"><p class="exercise-prompt">${copy.prompt}</p>${renderClassifyChoiceBody(options.practiceState)}${feedback}</article>`;
+    body = `<article class="lesson-card">${renderClassifyChoiceBody(options.practiceState)}${feedback}</article>`;
     if (options.practiceState.attempt.status === 'finalized') {
       actions = options.isTerminal
         ? terminalActions
@@ -102,7 +101,7 @@ export function renderSourceLearnView(options: {
         mode: 'learn',
         practiceUnlocked: options.practiceUnlocked,
         title,
-        meta: options.routeComplete ? locator : title,
+        meta: options.routeComplete ? locator : undefined,
       })}
       ${renderRoutePicker(options.locale, options.activeRouteId)}
       ${renderDepthToggle(options.locale, options.depth)}

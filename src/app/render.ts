@@ -358,7 +358,7 @@ function renderExerciseCard(
   return `
       <article class="exercise-card">
         ${options.includeFamily ? `<p class="exercise-family">${familyLabel}</p>` : ''}
-        <p class="exercise-prompt">${state.prompt}</p>
+        ${state.exercise.type === 'classify-choice' ? '' : `<p class="exercise-prompt">${state.prompt}</p>`}
         ${state.hintVisible && getExerciseHint(state.locale, state.exercise.id) ? `<aside class="exercise-hint" role="note"><strong>${copy.hintHeading}</strong> ${getExerciseHint(state.locale, state.exercise.id)}</aside>` : ''}
         ${formulaLine}
         ${renderExerciseBody(state)}

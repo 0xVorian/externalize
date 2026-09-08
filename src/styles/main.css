@@ -476,6 +476,20 @@ button {
   fill: var(--border);
 }
 
+.exercise-context {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.exercise-context p {
+  margin: 0 0 0.45rem;
+}
+
+.exercise-context p:last-child {
+  margin-bottom: 0;
+}
+
 .exercise-prompt {
   margin: 0 0 0.75rem;
   font-size: 1rem;

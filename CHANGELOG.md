@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Source-route checks now use a short shell heading and render the exercise question only once; predicate context is separated from the question instead of repeating one long prompt across the page.
+- Audited learner-facing EN/FR examples for natural-language completeness and current interaction wording, including onboarding, the introductory truth-assignment lesson, and truth-table answer instructions.
+
+### Fixed
+
+- Club examples now consistently say what was signed (the club register), including the F/G conditional check; the conditional facts, predicate key, and question are now authored as separate readable pieces.
+
 ## [0.5.0] - 2026-09-08
 
 ### Added

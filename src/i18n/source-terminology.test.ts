@@ -85,9 +85,9 @@ describe('Sobel meaning before terminology', () => {
   it('introduces ordinary if–then before the arrow, and the arrow before ∀', () => {
     const meaningEn = firstVisible('en', 'lat-conditional-meaning');
     const meaningFr = firstVisible('fr', 'lat-conditional-meaning');
-    expect(meaningEn).toMatch(/if someone is a member, then that person signed/i);
+    expect(meaningEn).toMatch(/if someone is a member, then that person signed the register/i);
     expect(meaningEn).not.toMatch(/∀|∃|→|material conditional/i);
-    expect(meaningFr).toMatch(/si quelqu’un est membre, alors cette personne a signé/i);
+    expect(meaningFr).toMatch(/si quelqu’un est membre, alors cette personne a signé le registre/i);
     expect(meaningFr).not.toMatch(/∀|∃|→|implication matérielle/i);
 
     const notationEn = firstVisible('en', 'lat-conditional-notation');
@@ -124,8 +124,8 @@ describe('Sobel meaning before terminology', () => {
     const meaningFr = firstVisible('fr', 'lat-existential-meaning');
     expect(meaningEn).not.toMatch(/∀|∃|quantifier|existential/i);
     expect(meaningFr).not.toMatch(/∀|∃|quantificateur|existentiel/i);
-    expect(meaningEn).toMatch(/at least one member signed/i);
-    expect(meaningFr).toMatch(/au moins un membre a signé/i);
+    expect(meaningEn).toMatch(/at least one member signed the register/i);
+    expect(meaningFr).toMatch(/au moins un membre a signé le registre/i);
     expect(meaningFr).not.toMatch(/Quelque membre a signé/);
 
     const nameEn = firstVisible('en', 'lat-name-existential');
