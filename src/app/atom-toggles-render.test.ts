@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ui } from '../i18n';
 import { renderAtomPanel } from './atom-toggles-render';
 
 describe('atom-toggles-render', () => {
-  it('marks V/F segments active according to assignment', () => {
+  it('marks truth-value segments active according to assignment', () => {
     const html = renderAtomPanel({
       locale: 'en',
       assignment: { P: true, Q: false },
@@ -19,14 +18,16 @@ describe('atom-toggles-render', () => {
     expect(qSection).toContain('class="atom-segment false active"');
   });
 
-  it('uses V/F labels in French and T/F in English', () => {
+  it('keeps compact V/F and T/F notation in assignment controls', () => {
     const fr = renderAtomPanel({ locale: 'fr', assignment: { P: false }, action: 'set-atom-value' });
     const en = renderAtomPanel({ locale: 'en', assignment: { P: false }, action: 'set-atom-value' });
 
-    expect(fr).toContain(ui('fr').trueLabel);
-    expect(en).toContain(ui('en').trueLabel);
-    expect(ui('fr').trueLabel).toBe('V');
-    expect(ui('en').trueLabel).toBe('T');
+    expect(fr).toMatch(/data-value="true"[\s\S]*?>\s*V\s*<\/button>/);
+    expect(fr).toMatch(/data-value="false"[\s\S]*?>\s*F\s*<\/button>/);
+    expect(en).toMatch(/data-value="true"[\s\S]*?>\s*T\s*<\/button>/);
+    expect(en).toMatch(/data-value="false"[\s\S]*?>\s*F\s*<\/button>/);
+    expect(fr).not.toContain('>Vrai<');
+    expect(en).not.toContain('>True<');
   });
 
   it('disables all rows in read-only mode', () => {

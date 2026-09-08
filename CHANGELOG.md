@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Guided evaluation with one current target now reads formula → blank table cell → True/False (Vrai/Faux) → Check. Selection fills the target with compact T/F or V/F; the formula result stays undetermined (`—`) until Check. Only Check validates; wrong answers stay repairable in place. The generic Truth assignment panel remains for Explore, counterexamples, and given-assignment practice.
 - The default learner journey is the session offer rather than a four-way Learn / Explore / Practice / Progress choice. Those modes remain reachable under More, outside an active round
 - A session “step” is one learner-perceived micro-activity. Watch lessons with separately advanced cases count as one step per case, so the advertised envelope matches the work inside the round
 - Planner diagnostics (`Avant de poursuivre`, missing-prerequisite / short-bridge copy) no longer appear as learner-facing UI. The planner still chooses skip / retrieve / teach internally
@@ -30,6 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Guided evaluation no longer treats unset sentence letters as false, and no longer hides a required truth value behind “Choose the value for P.” Each step either names the requested value or states a goal that determines it. Unassigned letters stay blank, and the result column appears only when the committed assignment logically fixes it.
+- A provisional guided True/False selection no longer reveals the derived formula result before Check. The target cell still shows the chosen T/F (V/F); `¬P` with provisional P = F stays `—` rather than flashing T.
 - Content JSON imports declare `type: json` so Playwright helpers can load progress modules under native Node ESM
 - Source-route classification items can be repaired in place: Try again is handled in Learn (it previously sat behind a Practice-only early return)
 - Source-route Reading completion is now durable: finishing the last item persists `completedAt`, shows Done / return to the book instead of endless Continue, and revisiting a completed route does not restart at item 1. Mastery work remains reachable after that terminal state

@@ -593,6 +593,12 @@ export function selectEvaluationPrediction(
   state: AppState,
   prediction: boolean,
 ): AppState {
+  if (state.exercise.type === 'fill-truth-table-cell') {
+    if (!canEditCheckedExercise(state) || state.attempt.status === 'finalized') {
+      return state;
+    }
+    return editableUpdate(state, { submittedCell: prediction });
+  }
   if (
     state.exercise.type !== 'evaluate-formula' ||
     !canEditCheckedExercise(state) ||
@@ -651,6 +657,12 @@ export function showHint(state: AppState): AppState {
 }
 
 export function checkEvaluation(state: AppState): AppState {
+  if (state.exercise.type === 'fill-truth-table-cell') {
+    if (!canEditCheckedExercise(state) || state.submittedCell === null) {
+      return state;
+    }
+    return submitCellValue(state, state.submittedCell);
+  }
   if (
     state.exercise.type !== 'evaluate-formula' ||
     !canEditCheckedExercise(state) ||
@@ -852,7 +864,11 @@ export function applyLocale(state: AppState, locale: Locale): AppState {
 }
 
 export function cellSubmissionCorrect(state: AppState): boolean | null {
-  if (state.exercise.type !== 'fill-truth-table-cell' || state.submittedCell === null) {
+  if (
+    state.exercise.type !== 'fill-truth-table-cell' ||
+    state.phase !== 'answered' ||
+    state.submittedCell === null
+  ) {
     return null;
   }
   const idx = state.exercise.hiddenRowIndex;

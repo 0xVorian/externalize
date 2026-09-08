@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { evaluate, evaluateWithNodes, findNodeById, parse } from '../../engine';
-import { gotoFresh, gotoWithProgress, lessonNext, clickMode, enterLearn } from '../helpers/app';
+import { gotoFresh, gotoWithProgress, lessonNext, clickMode, enterLearn, completeGuidedStep } from '../helpers/app';
 import { LEVEL_1_LESSONS, LEVEL_2_LESSONS } from '../../src/app/lessons';
 import {
   progressAtLesson,
@@ -71,19 +71,21 @@ async function completeEvalWrongThenCorrect(page: Page): Promise<void> {
 }
 
 async function finalizeCurrentPractice(page: Page): Promise<void> {
-  if (await page.locator('[data-action="check-evaluation"]').count()) {
-    await completeEvalCorrect(page);
-    return;
-  }
-  if (await page.locator('[data-action="submit-cell-value"]').count()) {
-    await page.locator('[data-action="submit-cell-value"][data-value="false"]').click();
+  if (await page.locator('.truth-table-answer-tray').count()) {
+    await page.locator('[data-action="select-evaluation-prediction"][data-value="false"]').click();
+    await page.locator('[data-action="check-evaluation"]').click();
     if (await page.locator('.feedback-correct').count()) {
       return;
     }
     await expect(page.locator('.feedback-wrong')).toBeVisible();
     await page.locator('[data-action="try-again"]').click();
-    await page.locator('[data-action="submit-cell-value"][data-value="true"]').click();
+    await page.locator('[data-action="select-evaluation-prediction"][data-value="true"]').click();
+    await page.locator('[data-action="check-evaluation"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();
+    return;
+  }
+  if (await page.locator('[data-action="check-evaluation"]').count()) {
+    await completeEvalCorrect(page);
     return;
   }
   if (await page.locator('[data-action="check-counterexample"]').count()) {
@@ -128,8 +130,8 @@ test.describe('progress visibility', () => {
   test('completing the last Unit 0 lesson makes the unit transition explicit', async ({ page }) => {
     await gotoWithProgress(page, progressAtLesson('level0-05-guided'));
     await enterLearn(page);
-    await page.locator('[data-action="set-atom-value"][data-atom="P"][data-value="true"]').click();
-    await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
+    await completeGuidedStep(page, 'P', true);
+    await completeGuidedStep(page, 'Q', false);
     await expect(page.locator('.feedback-correct')).toBeVisible();
     await lessonNext(page).click();
     await expect(page.locator('[data-testid="unit-complete"]')).toBeVisible();
@@ -196,8 +198,8 @@ test.describe('progress visibility', () => {
     const lastUnit2 = LEVEL_2_LESSONS[LEVEL_2_LESSONS.length - 1]!;
     await gotoWithProgress(page, progressAtLesson(lastUnit2.id));
     await enterLearn(page);
-    await page.locator('[data-action="set-atom-value"][data-atom="P"][data-value="true"]').click();
-    await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
+    await completeGuidedStep(page, 'P', true);
+    await completeGuidedStep(page, 'Q', false);
     await expect(page.locator('.feedback-correct')).toBeVisible();
     await lessonNext(page).click();
 
@@ -356,8 +358,8 @@ test.describe('progress visibility', () => {
     await expect(page.locator('[data-testid="session-complete"]')).toBeVisible();
 
     await clickMode(page, 'learn');
-    await page.locator('[data-action="set-atom-value"][data-atom="P"][data-value="true"]').click();
-    await page.locator('[data-action="set-atom-value"][data-atom="Q"][data-value="false"]').click();
+    await completeGuidedStep(page, 'P', true);
+    await completeGuidedStep(page, 'Q', false);
     await expect(page.locator('.feedback-correct')).toBeVisible();
     await lessonNext(page).click();
 

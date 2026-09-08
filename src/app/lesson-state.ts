@@ -1,17 +1,24 @@
-import type { Locale } from '../i18n';
+import type { Locale, GuidedHintStep } from '../i18n';
 import { getLessonCopy } from '../i18n';
 import type { LessonDefinition } from './lessons';
 import { parse, evaluateWithNodes, collectAtoms, type TreeNode, type Assignment } from '../../engine';
+import { isAtomAssigned } from './partial-assignment';
 
 export type LessonState = {
   locale: Locale;
   lesson: LessonDefinition;
   watchStep: number;
   guidedStep: number;
+  /**
+   * Watch/card: a full assignment.
+   * Guided: only atoms the learner has checked. Missing keys are unknown, not false.
+   */
   assignment: Assignment;
   tree: TreeNode;
   message: string | null;
   complete: boolean;
+  guidedSelection: boolean | null;
+  guidedCheckFailed: boolean;
 };
 
 import type { ResumePoint } from './progress-tracker';
@@ -42,23 +49,61 @@ function assignmentForFormula(formula: string, source?: Assignment): Assignment 
   return assignment;
 }
 
+const UNEVALUATED_TREE = evaluateWithNodes(parse('P'), { P: false }).tree;
+
+function guidedHintSteps(steps: Array<{ kind: string }> | undefined): GuidedHintStep[] {
+  return (steps ?? []).filter((step): step is GuidedHintStep => step.kind === 'hint');
+}
+
+/** Restore only atoms already checked. Stale false defaults on later atoms are ignored. */
+function createGuidedAssignment(
+  steps: Array<{ kind: string; atom?: string; value?: boolean }> | undefined,
+  resume?: LessonResume,
+): Assignment {
+  const hints = guidedHintSteps(steps);
+  const source = resume?.guidedAssignment ?? {};
+  const assignedCount = resume?.guidedComplete
+    ? hints.length
+    : Math.max(0, Math.min(resume?.guidedStep ?? 0, hints.length));
+  const assignment: Assignment = {};
+  for (let index = 0; index < assignedCount; index += 1) {
+    const hint = hints[index];
+    assignment[hint.atom] = typeof source[hint.atom] === 'boolean' ? source[hint.atom] : hint.value;
+  }
+  return assignment;
+}
+
+function treeForAssignment(formula: string, assignment: Assignment): TreeNode {
+  for (const atom of collectAtoms(parse(formula))) {
+    if (!isAtomAssigned(assignment, atom)) {
+      return UNEVALUATED_TREE;
+    }
+  }
+  return evaluateWithNodes(parse(formula), assignment).tree;
+}
+
 export function createLessonState(
   locale: Locale,
   lesson: LessonDefinition,
   resume?: LessonResume,
 ): LessonState {
-  const assignment = lesson.formula
-    ? assignmentForFormula(lesson.formula, resume?.guidedAssignment)
-    : (resume?.guidedAssignment ?? defaultAssignment());
+  const assignment =
+    lesson.type === 'guided'
+      ? createGuidedAssignment(getLessonCopy(locale, lesson.id).guidedSteps, resume)
+      : lesson.formula
+        ? assignmentForFormula(lesson.formula, resume?.guidedAssignment)
+        : (resume?.guidedAssignment ?? defaultAssignment());
   const base: LessonState = {
     locale,
     lesson,
     watchStep: resume?.watchStep ?? 0,
     guidedStep: resume?.guidedStep ?? 0,
     assignment,
-    tree: evaluateWithNodes(parse('P'), { P: false }).tree,
+    tree: UNEVALUATED_TREE,
     message: null,
     complete: resume?.guidedComplete ?? false,
+    guidedSelection: null,
+    guidedCheckFailed: false,
   };
 
   if (lesson.type === 'watch' && lesson.formula) {
@@ -80,14 +125,13 @@ export function createLessonState(
   }
 
   if (lesson.type === 'guided' && lesson.formula) {
-    const { tree } = evaluateWithNodes(parse(lesson.formula), assignment);
     const merged = {
       ...base,
-      tree,
+      tree: treeForAssignment(lesson.formula, assignment),
       guidedStep: resume?.guidedStep ?? 0,
       complete: resume?.guidedComplete ?? false,
     };
-    return { ...merged, message: currentGuidedHint(merged) };
+    return { ...merged, message: merged.complete ? currentGuidedHint(merged) : null };
   }
 
   return base;
@@ -124,16 +168,15 @@ export function applyLessonLocale(state: LessonState, locale: Locale): LessonSta
   }
 
   if (state.lesson.type === 'guided' && state.lesson.formula) {
-    const { tree } = evaluateWithNodes(parse(state.lesson.formula), preserved.assignment);
     const merged: LessonState = {
       ...state,
       locale,
       guidedStep: preserved.guidedStep,
       assignment: preserved.assignment,
       complete: preserved.complete,
-      tree,
+      tree: treeForAssignment(state.lesson.formula, preserved.assignment),
     };
-    return { ...merged, message: currentGuidedHint(merged) };
+    return { ...merged, message: merged.complete ? currentGuidedHint(merged) : null };
   }
 
   return { ...state, locale };
@@ -195,6 +238,8 @@ function advanceGuidedStep(state: LessonState, assignment: Assignment, tree: Tre
       guidedStep: nextIndex,
       complete: true,
       message: doneStep?.text ?? null,
+      guidedSelection: null,
+      guidedCheckFailed: false,
     };
   }
 
@@ -204,7 +249,9 @@ function advanceGuidedStep(state: LessonState, assignment: Assignment, tree: Tre
     tree,
     guidedStep: nextIndex,
     complete: false,
-    message: nextStep.text,
+    message: null,
+    guidedSelection: null,
+    guidedCheckFailed: false,
   };
 }
 
@@ -217,7 +264,7 @@ export function setGuidedAtom(state: LessonState, atom: string, value: boolean):
   const steps = copy.guidedSteps ?? [];
   const current = steps[state.guidedStep];
   const assignment = { ...state.assignment, [atom]: value };
-  const { tree } = evaluateWithNodes(parse(state.lesson.formula), assignment);
+  const tree = treeForAssignment(state.lesson.formula, assignment);
 
   if (
     current?.kind === 'hint' &&
@@ -232,7 +279,49 @@ export function setGuidedAtom(state: LessonState, atom: string, value: boolean):
     assignment,
     tree,
     message: current?.text ?? null,
+    guidedSelection: null,
+    guidedCheckFailed: false,
   };
+}
+
+export function currentGuidedTarget(state: LessonState): string | null {
+  if (state.lesson.type !== 'guided' || state.complete) {
+    return null;
+  }
+  const copy = getLessonCopy(state.locale, state.lesson.id);
+  const current = copy.guidedSteps?.[state.guidedStep];
+  return current?.kind === 'hint' ? current.atom : null;
+}
+
+export function selectGuidedValue(state: LessonState, value: boolean): LessonState {
+  if (currentGuidedTarget(state) === null) {
+    return state;
+  }
+  return {
+    ...state,
+    guidedSelection: value,
+    guidedCheckFailed: false,
+    message: null,
+  };
+}
+
+export function checkGuidedSelection(state: LessonState): LessonState {
+  const target = currentGuidedTarget(state);
+  if (!target || state.guidedSelection === null || !state.lesson.formula) {
+    return state;
+  }
+  const copy = getLessonCopy(state.locale, state.lesson.id);
+  const current = copy.guidedSteps?.[state.guidedStep];
+  if (current?.kind !== 'hint' || current.atom !== target) {
+    return state;
+  }
+  if (state.guidedSelection !== current.value) {
+    return {
+      ...state,
+      guidedCheckFailed: true,
+    };
+  }
+  return setGuidedAtom(state, target, state.guidedSelection);
 }
 
 export function currentGuidedHint(state: LessonState): string {
@@ -246,10 +335,7 @@ export function currentGuidedHint(state: LessonState): string {
 }
 
 export function lessonResumeSnapshot(state: LessonState): LessonResume {
-  const guidedAssignment =
-    state.lesson.type === 'guided' && state.lesson.formula
-      ? assignmentForFormula(state.lesson.formula, state.assignment)
-      : { ...state.assignment };
+  const guidedAssignment = { ...state.assignment };
 
   return {
     watchStep: state.watchStep,

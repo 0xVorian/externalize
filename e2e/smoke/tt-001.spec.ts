@@ -10,7 +10,8 @@ test.describe('tt-001 fill-truth-table exercise', () => {
     await expect(page.locator('.truth-table')).toBeVisible();
     await expect(page.locator('.blank-cell')).toBeVisible();
 
-    await page.locator('[data-action="submit-cell-value"][data-value="false"]').click();
+    await page.locator('[data-action="select-evaluation-prediction"][data-value="false"]').click();
+    await page.locator('[data-action="check-evaluation"]').click();
 
     await expect(page.locator('.feedback-correct')).toBeVisible();
     await expect(page.locator('[data-action="next"]')).toBeVisible();

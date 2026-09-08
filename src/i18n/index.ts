@@ -35,4 +35,5 @@ export type {
   ReferenceEntry,
   WatchStepCopy,
   GuidedStepCopy,
+  GuidedHintStep,
 } from './lessons';

@@ -56,6 +56,9 @@ export function ui(locale: Locale) {
   const copy = baseUi(locale);
   return {
     ...copy,
+    // Answer controls use ordinary words; formal displays continue to use formatTruthValue.
+    trueLabel: locale === 'fr' ? 'Vrai' : 'True',
+    falseLabel: locale === 'fr' ? 'Faux' : 'False',
     evaluationCorrect:
       locale === 'fr'
         ? 'Exact — les valeurs intermédiaires conduisent bien à ce résultat.'

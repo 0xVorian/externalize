@@ -74,8 +74,8 @@ import {
 import {
   createLessonState,
   advanceWatchStep,
-  setGuidedAtom,
-  isGuidedAtomEnabled,
+  selectGuidedValue,
+  checkGuidedSelection,
   applyLessonLocale,
   lessonResumeSnapshot,
   type LessonState,
@@ -1050,6 +1050,26 @@ root.addEventListener('click', (event) => {
     return;
   }
 
+  if (action === 'select-guided-value') {
+    if (mode !== 'learn') {
+      return;
+    }
+    const value = button.dataset.value === 'true';
+    lessonState = selectGuidedValue(lessonState, value);
+    render();
+    return;
+  }
+
+  if (action === 'check-guided-value') {
+    if (mode !== 'learn') {
+      return;
+    }
+    lessonState = checkGuidedSelection(lessonState);
+    persistLessonResume();
+    render();
+    return;
+  }
+
   if (action === 'set-atom-value') {
     const atom = button.dataset.atom;
     const value = button.dataset.value === 'true';
@@ -1057,12 +1077,6 @@ root.addEventListener('click', (event) => {
       return;
     }
     if (mode === 'learn') {
-      if (!isGuidedAtomEnabled(lessonState, atom)) {
-        return;
-      }
-      lessonState = setGuidedAtom(lessonState, atom, value);
-      persistLessonResume();
-      render();
       return;
     }
     if (mode === 'practice') {

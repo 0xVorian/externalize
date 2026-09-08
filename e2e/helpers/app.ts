@@ -75,6 +75,14 @@ export async function completeGuidedStep(
   atom: string,
   value: boolean,
 ): Promise<void> {
+  const guidedChoice = page.locator(
+    `[data-action="select-guided-value"][data-value="${value ? 'true' : 'false'}"]`,
+  );
+  if (await guidedChoice.count()) {
+    await guidedChoice.click();
+    await page.locator('[data-action="check-guided-value"]').click();
+    return;
+  }
   await page
     .locator(`[data-action="set-atom-value"][data-atom="${atom}"][data-value="${value ? 'true' : 'false'}"]`)
     .click();

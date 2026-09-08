@@ -1,20 +1,52 @@
 import { learnUi, getLessonCopy, ui } from '../i18n';
 import { lessonsForUnit, lessonUnit, ALL_LEARN_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
-import { currentGuidedHint, isGuidedAtomEnabled } from './lesson-state';
+import { currentGuidedHint, currentGuidedTarget } from './lesson-state';
 import { renderShellHeader } from './shell-render';
 import { renderRoutePicker } from './route-picker-render';
 import { renderLiveTruthRow, renderTruthTable, renderWatchGrid, usesWatchGrid } from './truth-table-render';
-import { renderAtomPanel } from './atom-toggles-render';
 import { renderSessionFrame } from './session-chrome-render';
 
-function renderGuidedToggles(state: LessonState): string {
-  return renderAtomPanel({
-    locale: state.locale,
-    assignment: state.assignment,
-    action: 'set-atom-value',
-    isAtomEnabled: (atom) => isGuidedAtomEnabled(state, atom),
+function renderGuidedValueWorkspace(state: LessonState, atom: string): string {
+  const learn = learnUi(state.locale);
+  const copy = ui(state.locale);
+  const selected = state.guidedSelection;
+  const checkDisabled = selected === null;
+  const prompt = currentGuidedHint(state);
+  return `
+    <section class="truth-table-response-workspace" data-testid="guided-response-workspace" aria-labelledby="guided-prompt">
+      <p class="guided-prompt" id="guided-prompt">${prompt}</p>
+      <div class="truth-table-answer-tray" role="group" aria-label="${learn.guidedChoiceAria(atom)}">
+        <button type="button" class="cell-segment true${selected === true ? ' selected' : ''}" data-action="select-guided-value" data-atom="${atom}" data-value="true" aria-pressed="${selected === true}">${copy.trueLabel}</button>
+        <button type="button" class="cell-segment false${selected === false ? ' selected' : ''}" data-action="select-guided-value" data-atom="${atom}" data-value="false" aria-pressed="${selected === false}">${copy.falseLabel}</button>
+      </div>
+      <button type="button" class="primary truth-table-check" data-action="check-guided-value"${checkDisabled ? ' disabled' : ''}>${learn.check}</button>
+    </section>
+  `;
+}
+
+function renderGuidedLesson(state: LessonState): string {
+  const formula = state.lesson.formula ?? 'P ∧ Q';
+  const target = currentGuidedTarget(state);
+  const learn = learnUi(state.locale);
+  const row = renderLiveTruthRow(state.locale, formula, state.assignment, {
+    targetAtom: target ?? undefined,
+    targetValue: target ? state.guidedSelection : undefined,
   });
+  const workspace = target ? renderGuidedValueWorkspace(state, target) : '';
+  const wrongMessage =
+    target && state.guidedCheckFailed ? learn.guidedValueWrong(target) : null;
+  const doneMessage = state.complete ? currentGuidedHint(state) : null;
+  const message = doneMessage ?? wrongMessage;
+  const feedbackClass = doneMessage ? 'feedback-correct' : wrongMessage ? 'feedback-wrong' : 'feedback-info';
+  return `
+    <article class="lesson-card">
+      <p class="formula-display" aria-label="${ui(state.locale).formulaDisplayAria}">${formula}</p>
+      ${row}
+      ${workspace}
+      ${message ? `<p class="feedback ${feedbackClass}" role="status">${message}</p>` : ''}
+    </article>
+  `;
 }
 
 export function renderCardLesson(state: LessonState): string {
@@ -65,19 +97,6 @@ function renderWatchLesson(state: LessonState, sessionUnit = false): string {
       ${caseMeta}
       ${presentation}
       ${state.message ? `<p class="feedback feedback-info" role="status">${state.message}</p>` : ''}
-    </article>
-  `;
-}
-
-function renderGuidedLesson(state: LessonState): string {
-  const formula = state.lesson.formula ?? 'P ∧ Q';
-  const hint = currentGuidedHint(state);
-  return `
-    <article class="lesson-card">
-      <p class="formula-display" aria-label="${ui(state.locale).formulaDisplayAria}">${formula}</p>
-      ${renderGuidedToggles(state)}
-      ${renderLiveTruthRow(state.locale, formula, state.assignment)}
-      ${hint ? `<p class="feedback ${state.complete ? 'feedback-correct' : 'feedback-info'}" role="status">${hint}</p>` : ''}
     </article>
   `;
 }
