@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-09-08
+
 ### Changed
 
 - Source-route checks now use a short shell heading and render the exercise question only once; predicate context is separated from the question instead of repeating one long prompt across the page.
