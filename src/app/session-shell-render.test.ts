@@ -5,6 +5,7 @@ import { renderRoundComplete } from './session-complete-render';
 import { renderSessionChrome, renderSessionFrame } from './session-chrome-render';
 import { renderSessionOpening } from './session-opening-render';
 import { renderSourceLearnView } from './source-learn-render';
+import { renderLanguageToggle } from './shell-render';
 import { getSourceLesson } from './source-lessons';
 import type { OpeningOffer } from './session-types';
 
@@ -89,5 +90,17 @@ describe('source learn quiet chrome', () => {
     expect(html).not.toMatch(/missing prerequisite/i);
     expect(html).not.toMatch(/prérequis manquant/i);
     expect(html).not.toMatch(/pont court/i);
+  });
+});
+
+
+describe('language toggle accessibility copy', () => {
+  it('labels the group and target language in the active locale', () => {
+    const en = renderLanguageToggle('en');
+    const fr = renderLanguageToggle('fr');
+    expect(en).toContain('aria-label="Language"');
+    expect(en).toContain('aria-label="Switch to French"');
+    expect(fr).toContain('aria-label="Langue"');
+    expect(fr).toContain('aria-label="Passer en anglais"');
   });
 });

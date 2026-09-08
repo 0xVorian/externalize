@@ -23,13 +23,13 @@ const TRANSLATION_SUCCESS: Record<Locale, Record<string, string>> = {
   },
   fr: {
     'translate-001':
-      'Exact — P → Q garde la pluie comme antécédent et l’annulation du match comme conséquent.',
+      'Exact — P → Q place la pluie en antécédent et l’annulation du match en conséquent.',
     'translate-002':
       'Exact — ¬ porte sur toute la conjonction, ce qui donne ¬(P ∧ Q).',
     'translate-003':
       'Exact — l’implication P → Q forme un conjoint, relié à R par la conjonction ∧ extérieure.',
     'translate-004':
-      'Exact — P → Q garde le déclenchement de l’alarme comme antécédent et la présence de fumée comme conséquent.',
+      'Exact — P → Q place le déclenchement de l’alarme en antécédent et la présence de fumée en conséquent.',
     'translate-005':
       'Exact — « si et seulement si » se note ↔ : P ↔ Q conserve donc la structure de la phrase.',
     'translate-006':
@@ -46,7 +46,7 @@ const TRANSLATION_REPAIR = {
   },
   fr: {
     'wrong-operator':
-      'Un connecteur ne correspond pas à la phrase. Comparez chaque liaison logique de la phrase au symbole qui joue le même rôle dans votre formule.',
+      'Un connecteur ne correspond pas à la phrase. Comparez chaque connecteur logique de l’énoncé au symbole qui joue le même rôle dans votre formule.',
     'wrong-atom':
       'Une variable ne désigne pas la bonne proposition. Revérifiez la correspondance P/Q/R avant de modifier les connecteurs.',
   },

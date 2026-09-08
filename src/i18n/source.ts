@@ -189,7 +189,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Un contre-exemple serait un membre qui n’a pas signé le registre. Cela montrerait que la phrase générale est fausse.',
           'Ce club n’a aucun membre : personne n’a donc manqué de signer le registre. Rien dans la situation ne s’oppose à la phrase.',
-          'Voilà pourquoi une phrase générale de cette forme peut encore valoir lorsqu’il n’y a rien du genre pertinent.',
+          'Voilà pourquoi une phrase générale de cette forme peut encore valoir lorsqu’aucun objet du type concerné n’existe.',
         ],
       },
     },
@@ -274,7 +274,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Une assertion existentielle',
         body: [
-          'On parle alors d’une assertion existentielle : elle affirme qu’il y a au moins une chose de ce genre.',
+          'On parle alors d’une assertion existentielle : elle affirme qu’au moins un objet de ce type existe.',
           'L’enjeu est l’exigence d’un exemple, non une énigme nouvelle. Vous l’avez déjà vue échouer dans le club vide.',
           'Gardez le contraste : une règle générale peut valoir sans personne ; une assertion existentielle, non.',
         ],
@@ -324,7 +324,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Reporter la distinction dans Sobel',
         body: [
-          'Une définition peut dire ce qui vaudrait de tout être souverainement parfait, sans établir que le domaine en contient un.',
+          'Une définition peut préciser ce qui serait vrai de tout être souverainement parfait, sans établir qu’un tel être existe.',
           'Si les prémisses n’étayent que la lecture universelle-hypothétique, elles ne donnent pas d’import existentiel. Un domaine sans être parfait peut laisser ces prémisses vraies et la conclusion existentielle fausse.',
           'Reprenez le livre au chapitre II, §§2.6–2.8, en visant ce défaut de validité, plutôt que la question latérale de savoir si l’existence est une perfection.',
         ],
@@ -373,7 +373,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'At least one F exists and is G.',
       },
       choiceWrong:
-        'The main operator is universal implication, not existential conjunction. ∀x (F(x) → G(x)) does not assert an instance.',
+        'The main operator is universal implication, not existential conjunction. ∀x (F(x) → G(x)) does not assert that any F exists.',
       feedback: {
         correct: 'Correct. This is the universal-hypothetical reading: any F, if there is one, is G.',
       },
@@ -385,9 +385,9 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'There is at least one object that is both F and G.',
       },
       choiceWrong:
-        'The existential quantifier asserts a witness. Conjunction then requires that this same object be both F and G — unlike the universal-hypothetical reading.',
+        'The existential quantifier says that at least one object satisfies what follows. The conjunction then requires that same object to be both F and G — unlike the universal-hypothetical reading.',
       feedback: {
-        correct: 'Correct. ∃x (F(x) ∧ G(x)) reports an instance.',
+        correct: 'Correct. ∃x (F(x) ∧ G(x)) says that at least one object is both F and G.',
       },
     },
     'lat-classify-triangle': {
@@ -397,48 +397,48 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'As a report that at least one triangle is present.',
       },
       choiceWrong:
-        'The geometric claim is a general rule for the kind, not an announcement that a triangle occupies the room.',
+        'The geometric claim states a general fact about triangles; it does not say that a triangle is present.',
       feedback: {
         correct:
-          'Correct. Here “a triangle” is generic: it constrains the kind, and does not by itself produce an instance.',
+          'Correct. Here “a triangle” is generic: the sentence states a general fact about triangles without asserting that any triangle is present.',
       },
     },
     'lat-classify-visitor': {
       prompt: 'How does “A visitor is at the door” typically function?',
       choices: {
-        universal: 'As a general rule about whatever would count as a visitor.',
+        universal: 'As a general rule about visitors in general.',
         existential: 'As a report that at least one visitor is present.',
       },
       choiceWrong:
-        'This is not a general rule about visitors. It locates a particular: someone is at the door.',
+        'This is not a general rule about visitors. It reports a particular situation: someone is at the door.',
       feedback: {
-        correct: 'Correct. Here the indefinite reports existence, not a mere hypothetical about visitors.',
+        correct: 'Correct. Here the indefinite says that a visitor exists; it is not merely a hypothetical about visitors.',
       },
     },
     'lat-formalize-readings': {
-      prompt: 'Which formula captures the universal-hypothetical reading of “A F is G”?',
+      prompt: 'Which formula expresses the universal-hypothetical reading of “A F is G”?',
       choices: {
         'universal-conditional': '∀x (F(x) → G(x))',
         'existential-conjunctive': '∃x (F(x) ∧ G(x))',
       },
       choiceWrong:
-        'The existential-conjunctive form already asserts an instance. The hypothetical reading uses implication under a universal quantifier.',
+        'The existential-conjunctive form already asserts that at least one F exists. The hypothetical reading uses implication under a universal quantifier.',
       feedback: {
         correct: 'Correct. The universal-hypothetical reading is the universal conditional, not the existential conjunction.',
       },
     },
     'lat-predict-descartes': {
-      prompt:
-        'Descartes needs the conclusion that a supremely perfect being exists. Which reading of “A supremely perfect being exists” would actually report existence?',
+      context: ['Descartes needs to conclude that a supremely perfect being exists.'],
+      prompt: 'Which reading of “A supremely perfect being exists” actually asserts existence?',
       choices: {
-        universal: 'The universal-hypothetical reading: anything that was supremely perfect would exist.',
+        universal: 'The universal-hypothetical reading: anything supremely perfect would exist.',
         existential: 'The existential reading: there is at least one supremely perfect being.',
       },
       choiceWrong:
         'A mere general claim about perfect beings would not yet say that the domain contains one. The conclusion Descartes wants is existential.',
       feedback: {
         correct:
-          'Correct. The intended conclusion is existential. A general constraint on the kind would not yet deliver it.',
+          'Correct. The intended conclusion is existential. A general statement about perfect beings would not by itself establish that one exists.',
       },
     },
     'lat-interrogate-premises': {
@@ -449,24 +449,24 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'universal-hypothetical': 'If anything is a perfect being, it exists.',
       },
       choiceWrong:
-        'Those premises constrain whatever would be perfect. They do not, without a further existence assumption, put such a being in the domain.',
+        'Those premises constrain whatever would be perfect. Without a further existence assumption, they do not show that any perfect being exists.',
       feedback: {
         correct:
           'Correct. The premises support a universal-hypothetical result. Existential import is not included.',
       },
     },
     'lat-transfer-kind': {
-      prompt:
-        'Suppose a hypergonal is defined as a figure that exists and has seventeen sides. Does that definition prove that a hypergonal exists?',
+      context: ['A hypergonal is defined as a figure that exists and has seventeen sides.'],
+      prompt: 'Does that definition prove that a hypergonal exists?',
       choices: {
-        'proves-instance': 'Yes — existence is written into the definition, so an instance follows.',
+        'proves-instance': 'Yes — existence is written into the definition, so at least one hypergonal must exist.',
         'no-instance': 'No — the definition still only says what would be true of any hypergonal.',
       },
       choiceWrong:
-        'Writing existence into a kind does not instantiate the kind. The definition remains a constraint on anything that would satisfy it.',
+        'Including existence in a definition does not make a corresponding object exist. The definition still only says what would be true of anything that satisfied it.',
       feedback: {
         correct:
-          'Correct. An invented kind that includes existence by stipulation still does not place an object in the domain.',
+          'Correct. Even if existence is included by stipulation, the definition still does not show that any such object exists.',
       },
     },
     'lat-mastery-empty-domain': {
@@ -525,7 +525,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'Il existe au moins un F, et il est G.',
       },
       choiceWrong:
-        'L’opérateur principal est une implication universelle, non une conjonction existentielle. ∀x (F(x) → G(x)) n’affirme pas d’instance.',
+        'L’opérateur principal est une implication universelle, non une conjonction existentielle. ∀x (F(x) → G(x)) n’affirme pas qu’un F existe.',
       feedback: {
         correct:
           'Exact. C’est la lecture universelle-hypothétique : tout F, s’il y en a un, est G.',
@@ -538,7 +538,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'Il y a au moins un objet à la fois F et G.',
       },
       choiceWrong:
-        'Le quantificateur existentiel pose un témoin. La conjonction exige ensuite que ce même objet soit à la fois F et G, contrairement à la lecture universelle-hypothétique.',
+        'Le quantificateur existentiel affirme qu’au moins un objet satisfait ce qui suit. La conjonction exige ensuite que ce même objet soit à la fois F et G, contrairement à la lecture universelle-hypothétique.',
       feedback: {
         correct: 'Exact. ∃x (F(x) ∧ G(x)) affirme qu’il existe un objet qui satisfait les deux propriétés.',
       },
@@ -550,20 +550,20 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         existential: 'Comme l’affirmation qu’au moins un triangle est présent.',
       },
       choiceWrong:
-        'L’assertion géométrique couvre le genre ; elle n’annonce pas qu’un triangle occupe la pièce.',
+        'L’énoncé géométrique exprime une règle générale sur les triangles ; il n’affirme pas qu’un triangle est présent.',
       feedback: {
         correct:
-          'Exact. Ici « un triangle » est générique : il contraint le type, sans produire à lui seul une instance.',
+          'Exact. Ici « un triangle » est générique : la phrase énonce une propriété générale des triangles sans affirmer qu’un triangle est présent.',
       },
     },
     'lat-classify-visitor': {
       prompt: 'Comment fonctionne typiquement « Un visiteur est à la porte » ?',
       choices: {
-        universal: 'Comme une règle générale sur ce qui compterait comme visiteur.',
+        universal: 'Comme une règle générale sur les visiteurs en général.',
         existential: 'Comme l’affirmation qu’au moins un visiteur est présent.',
       },
       choiceWrong:
-        'Ce n’est pas une règle générale sur les visiteurs. Cela localise un particulier : quelqu’un est à la porte.',
+        'Ce n’est pas une règle générale sur les visiteurs. La phrase décrit une situation particulière : quelqu’un est à la porte.',
       feedback: {
         correct:
           'Exact. Ici, l’indéfini affirme qu’un visiteur existe ; ce n’est pas une simple hypothèse sur les visiteurs.',
@@ -576,15 +576,15 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'existential-conjunctive': '∃x (F(x) ∧ G(x))',
       },
       choiceWrong:
-        'La forme existentielle-conjonctive affirme déjà une instance. La lecture hypothétique use de l’implication sous un quantificateur universel.',
+        'La forme existentielle-conjonctive affirme déjà qu’un objet existe. La lecture hypothétique utilise l’implication sous un quantificateur universel.',
       feedback: {
         correct:
           'Exact. La lecture universelle-hypothétique est l’implication universelle, non la conjonction existentielle.',
       },
     },
     'lat-predict-descartes': {
-      prompt:
-        'Descartes a besoin de conclure qu’un être souverainement parfait existe. Quelle lecture de « Un être souverainement parfait existe » affirme réellement l’existence d’un tel être ?',
+      context: ['Descartes doit conclure qu’un être souverainement parfait existe.'],
+      prompt: 'Quelle lecture de « Un être souverainement parfait existe » affirme réellement son existence ?',
       choices: {
         universal:
           'La lecture universelle-hypothétique : tout ce qui serait souverainement parfait existerait.',
@@ -606,26 +606,26 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'universal-hypothetical': 'Si quelque chose est un être parfait, alors il existe.',
       },
       choiceWrong:
-        'Ces prémisses contraignent ce qui serait parfait. Elles ne placent pas, sans hypothèse d’existence supplémentaire, un tel être dans le domaine.',
+        'Ces prémisses contraignent ce qui serait parfait. Sans hypothèse d’existence supplémentaire, elles ne montrent pas qu’un être parfait existe.',
       feedback: {
         correct:
           'Exact. Les prémisses étayent un résultat universel-hypothétique. L’import existentiel n’y figure pas.',
       },
     },
     'lat-transfer-kind': {
-      prompt:
-        'Soit un hypergone défini comme une figure qui existe et qui a dix-sept côtés. Cette définition prouve-t-elle qu’un hypergone existe ?',
+      context: ['Un hypergone est défini comme une figure qui existe et qui a dix-sept côtés.'],
+      prompt: 'Cette définition prouve-t-elle qu’un hypergone existe ?',
       choices: {
         'proves-instance':
-          'Oui — l’existence est inscrite dans la définition, donc une instance s’ensuit.',
+          'Oui — l’existence est inscrite dans la définition, donc il doit en exister au moins un.',
         'no-instance':
-          'Non — la définition dit seulement ce qui vaudrait de tout hypergone.',
+          'Non — la définition dit seulement ce qui serait vrai de tout hypergone.',
       },
       choiceWrong:
-        'Inscrire l’existence dans un genre n’instancie pas le genre. La définition reste une contrainte sur tout ce qui la satisferait.',
+        'Inclure l’existence dans une définition ne fait pas exister un objet correspondant. La définition dit seulement ce qui serait vrai de tout objet qui la satisferait.',
       feedback: {
         correct:
-          'Exact. Un genre inventé qui inclut l’existence par stipulation ne place toujours pas d’objet dans le domaine.',
+          'Exact. Même si l’existence est incluse par stipulation, la définition ne montre toujours pas qu’un tel objet existe.',
       },
     },
     'lat-mastery-empty-domain': {
@@ -640,7 +640,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'Sans rien de parfait dans le domaine, une conclusion existentielle est fausse. Les implications universelles peuvent encore valoir à vide.',
       feedback: {
         correct:
-          'Exact. Cette interprétation est un contre-modèle : les prémisses universelles-hypothétiques survivent, la conclusion existentielle non.',
+          'Exact. Cette interprétation est un contre-modèle : les prémisses universelles-hypothétiques restent vraies, tandis que la conclusion existentielle est fausse.',
       },
     },
   },

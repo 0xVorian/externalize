@@ -120,7 +120,7 @@ describe('reason-bearing learner feedback', () => {
     expect(en['wrong-atom']).toMatch(/recheck the P\/Q\/R key/i);
 
     const fr = getFeedbackTemplates('fr', 'translate-001');
-    expect(fr['wrong-operator']).toMatch(/Comparez chaque liaison logique/i);
+    expect(fr['wrong-operator']).toMatch(/Comparez chaque connecteur logique/i);
     expect(fr['wrong-atom']).toMatch(/Revérifiez la correspondance P\/Q\/R/i);
   });
 
