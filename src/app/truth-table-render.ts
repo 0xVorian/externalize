@@ -141,11 +141,19 @@ function renderBlankResultCell(
   locale: Locale,
   rowIndex: number,
   submitted: boolean | null,
-  answered: boolean,
 ): string {
   const copy = ui(locale);
-  const disabled = answered ? ' disabled' : '';
-  return `<td class="result-cell blank-cell"><div class="cell-segments" role="group" aria-label="${copy.cellFillAria(rowIndex + 1)}"><button type="button" class="cell-segment true${submitted === true ? ' selected' : ''}" data-action="submit-cell-value" data-value="true" aria-pressed="${submitted === true}"${disabled}>${copy.trueLabel}</button><button type="button" class="cell-segment false${submitted === false ? ' selected' : ''}" data-action="submit-cell-value" data-value="false" aria-pressed="${submitted === false}"${disabled}>${copy.falseLabel}</button></div></td>`;
+  const value = submitted === null ? '&nbsp;' : formatTruthValue(locale, submitted);
+  const stateClass = submitted === null ? 'empty' : 'filled';
+  return `<td class="result-cell blank-cell"><span class="truth-table-drop-slot ${stateClass}" aria-label="${copy.cellFillAria(rowIndex + 1)}">${value}</span></td>`;
+}
+
+function renderTruthTableAnswerTray(locale: Locale, rowIndex: number, answered: boolean): string {
+  if (answered) {
+    return '';
+  }
+  const copy = ui(locale);
+  return `<div class="truth-table-answer-tray" role="group" aria-label="${copy.cellFillAria(rowIndex + 1)}"><button type="button" class="cell-segment true" data-action="submit-cell-value" data-value="true">${copy.trueLabel}</button><button type="button" class="cell-segment false" data-action="submit-cell-value" data-value="false">${copy.falseLabel}</button></div>`;
 }
 
 export function renderPartialTruthTable(
@@ -162,13 +170,13 @@ export function renderPartialTruthTable(
         .join('');
       const resultCell =
         index === options.hiddenRowIndex
-          ? renderBlankResultCell(locale, index, options.submitted, options.answered)
+          ? renderBlankResultCell(locale, index, options.submitted)
           : `<td class="result-cell">${formatTruthValue(locale, row.result ?? false)}</td>`;
       return `<tr class="truth-table-row ${index === options.hiddenRowIndex ? 'active' : ''}">${atomCells}${resultCell}</tr>`;
     })
     .join('');
   const headerCells = table.atoms.map((atom) => `<th scope="col">${atom}</th>`).join('');
-  return `<div class="truth-table-wrap"><table class="truth-table" aria-label="${learn.truthTableAria(formula)}"><thead><tr>${headerCells}<th scope="col">${formula}</th></tr></thead><tbody>${body}</tbody></table></div>`;
+  return `<div class="truth-table-wrap"><table class="truth-table" aria-label="${learn.truthTableAria(formula)}"><thead><tr>${headerCells}<th scope="col">${formula}</th></tr></thead><tbody>${body}</tbody></table></div>${renderTruthTableAnswerTray(locale, options.hiddenRowIndex, options.answered)}`;
 }
 
 export function renderCompleteTruthTable(locale: Locale, formula: string): string {
@@ -177,7 +185,7 @@ export function renderCompleteTruthTable(locale: Locale, formula: string): strin
   const atoms = table.atoms;
   const body = table.rows.map((row) => {
     const atomCells = atoms.map((atom) => `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`).join('');
-    return `<tr class="truth-table-row">${atomCells}<td class="result-cell">${formatTruthValue(locale, row.result)}</td></tr>`;
+    return `<tr class="truth-table-row"><td>${atomCells}</td><td class="result-cell">${formatTruthValue(locale, row.result)}</td></tr>`;
   }).join('');
   const headerCells = atoms.map((atom) => `<th scope="col">${atom}</th>`).join('');
   return `<div class="truth-table-wrap truth-table-static"><table class="truth-table" aria-label="${learn.truthTableAria(formula)}"><thead><tr>${headerCells}<th scope="col">${formula}</th></tr></thead><tbody>${body}</tbody></table></div>`;
@@ -190,4 +198,3 @@ export function renderTautologyChoice(locale: Locale, submitted: boolean | null,
   }
   return `<div class="tautology-choice"><div class="tautology-segments" role="group" aria-label="${copy.tautologyChoiceAria}"><button type="button" class="tautology-segment" data-action="submit-tautology-answer" data-value="true">${copy.tautologyYes}</button><button type="button" class="tautology-segment" data-action="submit-tautology-answer" data-value="false">${copy.tautologyNo}</button></div></div>`;
 }
-
