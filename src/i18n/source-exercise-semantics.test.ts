@@ -32,12 +32,16 @@ describe('Sobel source exercise semantics', () => {
     expect(definition?.correctChoiceId).toBe('holds');
 
     const en = SOURCE_EXERCISES.en['lat-retrieve-conditional'];
-    expect(en.prompt).toMatch(/not a club member and did not sign/i);
+    expect(en.prompt).toBe('Is F(a) → G(a) true or false?');
+    expect(en.context?.join(' ')).toMatch(/not a club member.*did not sign the club register/i);
+    expect(en.context?.join(' ')).toMatch(/G\(x\).*signed the club register/i);
     expect(en.choices).toEqual({ holds: 'True', fails: 'False' });
     expect(`${en.choiceWrong} ${en.feedback?.correct}`).toMatch(/false only when the if-clause is true and the then-clause is false/i);
 
     const fr = SOURCE_EXERCISES.fr['lat-retrieve-conditional'];
-    expect(fr.prompt).toMatch(/n’est pas membre du club et n’a pas signé/i);
+    expect(fr.prompt).toBe('F(a) → G(a) est-elle vraie ou fausse ?');
+    expect(fr.context?.join(' ')).toMatch(/n’est pas membre du club.*n’a pas signé le registre du club/i);
+    expect(fr.context?.join(' ')).toMatch(/G\(x\).*a signé le registre du club/i);
     expect(fr.choices).toEqual({ holds: 'Vraie', fails: 'Fausse' });
     expect(`${fr.choiceWrong} ${fr.feedback?.correct}`).toMatch(/fausse seulement lorsque.*« si ».*vrai.*« alors ».*faux/i);
   });

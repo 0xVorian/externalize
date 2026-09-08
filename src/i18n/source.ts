@@ -8,13 +8,13 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'An empty club',
       subtitle: 'A general claim when nobody is there.',
       card: {
-        title: 'Every member signed',
+        title: 'Every member signed the register',
         body: [
           'Imagine a club that currently has no members.',
           'Someone claims: every member signed the register.',
           'Stay with the situation as it is: the club is empty.',
         ],
-        example: 'Club membership: (empty)\nClaim: every member signed.',
+        example: 'Club membership: (empty)\nClaim: every member signed the register.',
       },
     },
     'lat-empty-no-counterexample': {
@@ -23,7 +23,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Nobody failed to sign',
         body: [
-          'A counterexample would be a member who did not sign. That would show the general claim to be false.',
+          'A counterexample would be a member who did not sign the register. That would show the general claim to be false.',
           'This club has no members, so there is nobody who failed to sign. Nothing in the situation stands against the claim.',
           'That is why a general claim of this shape can still hold when there is nothing of the relevant kind around.',
         ],
@@ -35,20 +35,20 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Truth by vacuity',
         body: [
-          'Return to the empty club. “Every member signed” can still hold, because nobody failed to sign.',
+          'Return to the empty club. “Every member signed the register” can still hold, because nobody failed to sign the register.',
           'Logicians call this truth by vacuity: the general claim is true because there is no counterexample, not because an example was produced.',
           'The name labels an idea you already have. It does not add a new requirement.',
         ],
       },
     },
     'lat-conditional-meaning': {
-      title: 'If a member, then signed',
+      title: 'If a member, then signed the register',
       subtitle: 'The general claim in ordinary language.',
       card: {
-        title: 'What “every member signed” amounts to',
+        title: 'What “every member signed the register” amounts to',
         body: [
-          'Return to the empty club. “Every member signed” is a claim about members, if there are any.',
-          'In ordinary language: if someone is a member, then that person signed. With nobody in the club, the “if” is never met.',
+          'Return to the empty club. “Every member signed the register” is a claim about members, if there are any.',
+          'In ordinary language: if someone is a member, then that person signed the register. With nobody in the club, there is no member who makes the “if” part true.',
           'That is why the general claim can still hold: it does not require a member; it only constrains members, should there be any.',
         ],
       },
@@ -60,7 +60,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         title: 'The arrow →',
         body: [
           'We write “if … then …” with an arrow: →.',
-          'If x is F, then x is G becomes F(x) → G(x). For the club: if x is a member, then x signed.',
+          'If x is F, then x is G becomes F(x) → G(x). For the club: if x is a member, then x signed the register.',
           'The arrow records the if–then you already used. It does not yet say that an F exists.',
         ],
         example: 'F(x) → G(x)',
@@ -72,7 +72,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'The general claim covers each object',
         body: [
-          '“Every member signed” now has a precise reading: for each object, if it is a member, then it signed.',
+          '“Every member signed the register” now has a precise reading: for each object, if it is a member, then it signed the register.',
           'That is the if–then you already wrote, required of every object in the domain.',
           'It still does not say that a member exists. It only says the if–then holds throughout.',
         ],
@@ -95,13 +95,13 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'At least one',
       subtitle: 'A claim that needs an example.',
       card: {
-        title: 'At least one member signed',
+        title: 'At least one member signed the register',
         body: [
-          'Some claims are different. “At least one member signed” says there is an actual member who signed.',
+          'Some claims are different. “At least one member signed the register” says there is an actual member who signed the register.',
           'If the club is empty, that claim is false. There is no one to point to.',
           'Unlike the general claim, this one requires an example in the situation.',
         ],
-        example: 'Club membership: (empty)\nClaim: at least one member signed.',
+        example: 'Club membership: (empty)\nClaim: at least one member signed the register.',
       },
     },
     'lat-name-existential': {
@@ -172,23 +172,23 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Un club sans membres',
       subtitle: 'Une phrase générale quand personne n’est là.',
       card: {
-        title: 'Tout membre a signé',
+        title: 'Tout membre a signé le registre',
         body: [
           'Imaginez un club qui, pour l’heure, n’a aucun membre.',
           'On avance que tout membre a signé le registre.',
           'Tenez-vous-en à la situation telle qu’elle est : le club est vide.',
         ],
-        example: 'Membres du club : (aucun)\nPhrase : tout membre a signé.',
+        example: 'Membres du club : (aucun)\nPhrase : tout membre a signé le registre.',
       },
     },
     'lat-empty-no-counterexample': {
       title: 'Ce qui la ferait chuter',
-      subtitle: 'Chercher un membre qui n’aurait pas signé.',
+      subtitle: 'Chercher un membre qui n’aurait pas signé le registre.',
       card: {
-        title: 'Personne n’a manqué de signer',
+        title: 'Personne n’a manqué de signer le registre',
         body: [
-          'Un contre-exemple serait un membre qui n’a pas signé. Cela montrerait que la phrase générale est fausse.',
-          'Ce club n’a aucun membre : personne n’a donc manqué de signer. Rien dans la situation ne s’oppose à la phrase.',
+          'Un contre-exemple serait un membre qui n’a pas signé le registre. Cela montrerait que la phrase générale est fausse.',
+          'Ce club n’a aucun membre : personne n’a donc manqué de signer le registre. Rien dans la situation ne s’oppose à la phrase.',
           'Voilà pourquoi une phrase générale de cette forme peut encore valoir lorsqu’il n’y a rien du genre pertinent.',
         ],
       },
@@ -199,20 +199,20 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Vérité par vacuité',
         body: [
-          'Revenez au club vide. « Tout membre a signé » peut encore valoir, parce que personne n’a manqué de signer.',
+          'Revenez au club vide. « Tout membre a signé le registre » peut encore valoir, parce que personne n’a manqué de signer le registre.',
           'On appelle cela un cas de vérité par vacuité : la phrase générale est vraie faute de contre-exemple, non parce qu’un exemple a été produit.',
           'Le mot nomme une idée que vous avez déjà. Il n’ajoute pas une exigence nouvelle.',
         ],
       },
     },
     'lat-conditional-meaning': {
-      title: 'Si membre, alors a signé',
+      title: 'Si membre, alors a signé le registre',
       subtitle: 'La phrase générale en langue ordinaire.',
       card: {
-        title: 'Ce que dit « tout membre a signé »',
+        title: 'Ce que dit « tout membre a signé le registre »',
         body: [
-          'Revenez au club vide. « Tout membre a signé » porte sur les membres, s’il y en a.',
-          'En langue ordinaire : si quelqu’un est membre, alors cette personne a signé. Personne n’étant dans le club, le « si » n’est jamais rempli.',
+          'Revenez au club vide. « Tout membre a signé le registre » porte sur les membres, s’il y en a.',
+          'En langue ordinaire : si quelqu’un est membre, alors cette personne a signé le registre. Personne n’étant membre, aucune personne ne rend vraie la partie « si ».',
           'Voilà pourquoi la phrase générale peut encore valoir : elle n’exige pas un membre ; elle ne contraint que les membres, s’il y en a.',
         ],
       },
@@ -224,7 +224,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         title: 'La flèche →',
         body: [
           'On note « si … alors … » par une flèche : →.',
-          'Si x est F, alors x est G s’écrit F(x) → G(x). Pour le club : si x est membre, alors x a signé.',
+          'Si x est F, alors x est G s’écrit F(x) → G(x). Pour le club : si x est membre, alors x a signé le registre.',
           'La flèche consigne le si-alors déjà employé. Elle n’affirme pas encore qu’il existe un F.',
         ],
         example: 'F(x) → G(x)',
@@ -236,7 +236,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'La phrase générale porte sur chaque objet',
         body: [
-          '« Tout membre a signé » a maintenant une lecture précise : pour chaque objet, s’il est membre, alors il a signé.',
+          '« Tout membre a signé le registre » a maintenant une lecture précise : pour chaque objet, s’il est membre, alors il a signé le registre.',
           'C’est le si-alors déjà écrit, exigé de tout objet du domaine.',
           'Cela ne dit toujours pas qu’il existe un membre. Cela dit seulement que le si-alors vaut partout.',
         ],
@@ -259,13 +259,13 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Au moins un',
       subtitle: 'Une phrase qui a besoin d’un exemple.',
       card: {
-        title: 'Au moins un membre a signé',
+        title: 'Au moins un membre a signé le registre',
         body: [
-          'D’autres phrases sont d’un autre type. « Au moins un membre a signé » dit qu’il y a bel et bien un membre qui a signé.',
+          'D’autres phrases sont d’un autre type. « Au moins un membre a signé le registre » dit qu’il y a bel et bien un membre qui a signé le registre.',
           'Si le club est vide, cette phrase est fausse. On n’a personne à désigner.',
           'Contrairement à la phrase générale, celle-ci exige un exemple dans la situation.',
         ],
-        example: 'Membres du club : (aucun)\nPhrase : au moins un membre a signé.',
+        example: 'Membres du club : (aucun)\nPhrase : au moins un membre a signé le registre.',
       },
     },
     'lat-name-existential': {
@@ -274,7 +274,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       card: {
         title: 'Une assertion existentielle',
         body: [
-          'On parle alors d’une assertion existentielle : elle rapporte qu’il y a au moins une chose de ce genre.',
+          'On parle alors d’une assertion existentielle : elle affirme qu’il y a au moins une chose de ce genre.',
           'L’enjeu est l’exigence d’un exemple, non une énigme nouvelle. Vous l’avez déjà vue échouer dans le club vide.',
           'Gardez le contraste : une règle générale peut valoir sans personne ; une assertion existentielle, non.',
         ],
@@ -314,7 +314,7 @@ export const SOURCE_LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Cette préparation vise les §§2.6–2.8 du chapitre II (p. 35–40), où Sobel examine l’argument ontologique cartésien.',
           'La difficulté locale n’est pas de savoir si l’existence est une propriété. C’est de savoir si une règle générale sur les êtres parfaits dit déjà qu’il en existe un.',
-          'Vous avez les deux lectures : une règle portant sur tout ce qui serait F, contre le rapport qu’il y a au moins un F. Ces lectures se séparent.',
+          'Vous avez les deux lectures : une règle portant sur tout ce qui serait F, contre l’affirmation qu’il y a au moins un F. Ces lectures se séparent.',
         ],
       },
     },
@@ -343,15 +343,18 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'needs-instance': 'No — there must be at least one member.',
       },
       choiceWrong:
-        'Absence of members is not a counterexample. A counterexample would be a member who did not sign.',
+        'Absence of members is not a counterexample. A counterexample would be a member who did not sign the register.',
       feedback: {
         correct:
-          'Correct. With nobody there who failed to sign, the general claim stands.',
+          'Correct. With nobody there who failed to sign the register, the general claim stands.',
       },
     },
     'lat-retrieve-conditional': {
-      prompt:
-        'Alex is not a club member and did not sign. F stands for “is a member” and G for “signed”. Is F(a) → G(a) true or false, where a is Alex?',
+      context: [
+        'Alex is not a club member. Alex did not sign the club register.',
+        'F(x): x is a club member. G(x): x signed the club register. a refers to Alex.',
+      ],
+      prompt: 'Is F(a) → G(a) true or false?',
       choices: {
         holds: 'True',
         fails: 'False',
@@ -491,15 +494,18 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'needs-instance': 'Non — il faut au moins un membre.',
       },
       choiceWrong:
-        'L’absence de membres n’est pas un contre-exemple. Un contre-exemple serait un membre qui n’a pas signé.',
+        'L’absence de membres n’est pas un contre-exemple. Un contre-exemple serait un membre qui n’a pas signé le registre.',
       feedback: {
         correct:
-          'Exact. Personne n’a manqué de signer : la phrase générale tient.',
+          'Exact. Personne n’a manqué de signer le registre : la phrase générale tient.',
       },
     },
     'lat-retrieve-conditional': {
-      prompt:
-        'Alex n’est pas membre du club et n’a pas signé. F signifie « est membre » et G « a signé ». F(a) → G(a) est-elle vraie ou fausse, où a désigne Alex ?',
+      context: [
+        'Alex n’est pas membre du club. Alex n’a pas signé le registre du club.',
+        'F(x) : x est membre du club. G(x) : x a signé le registre du club. a désigne Alex.',
+      ],
+      prompt: 'F(a) → G(a) est-elle vraie ou fausse ?',
       choices: {
         holds: 'Vraie',
         fails: 'Fausse',
@@ -534,14 +540,14 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       choiceWrong:
         'Le quantificateur existentiel pose un témoin. La conjonction exige ensuite que ce même objet soit à la fois F et G, contrairement à la lecture universelle-hypothétique.',
       feedback: {
-        correct: 'Exact. ∃x (F(x) ∧ G(x)) rapporte une instance.',
+        correct: 'Exact. ∃x (F(x) ∧ G(x)) affirme qu’il existe un objet qui satisfait les deux propriétés.',
       },
     },
     'lat-classify-triangle': {
       prompt: 'Comment fonctionne typiquement « Un triangle a trois côtés » ?',
       choices: {
         universal: 'Comme une règle générale : tout ce qui est triangle a trois côtés.',
-        existential: 'Comme le rapport qu’il y a au moins un triangle présent.',
+        existential: 'Comme l’affirmation qu’au moins un triangle est présent.',
       },
       choiceWrong:
         'L’assertion géométrique couvre le genre ; elle n’annonce pas qu’un triangle occupe la pièce.',
@@ -554,17 +560,17 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt: 'Comment fonctionne typiquement « Un visiteur est à la porte » ?',
       choices: {
         universal: 'Comme une règle générale sur ce qui compterait comme visiteur.',
-        existential: 'Comme le rapport qu’il y a au moins un visiteur présent.',
+        existential: 'Comme l’affirmation qu’au moins un visiteur est présent.',
       },
       choiceWrong:
         'Ce n’est pas une règle générale sur les visiteurs. Cela localise un particulier : quelqu’un est à la porte.',
       feedback: {
         correct:
-          'Exact. Ici l’indéfini rapporte une existence, non une simple hypothèse sur les visiteurs.',
+          'Exact. Ici, l’indéfini affirme qu’un visiteur existe ; ce n’est pas une simple hypothèse sur les visiteurs.',
       },
     },
     'lat-formalize-readings': {
-      prompt: 'Quelle formule capture la lecture universelle-hypothétique de « Un F est G » ?',
+      prompt: 'Quelle formule formalise la lecture universelle-hypothétique de « Un F est G » ?',
       choices: {
         'universal-conditional': '∀x (F(x) → G(x))',
         'existential-conjunctive': '∃x (F(x) ∧ G(x))',
@@ -578,7 +584,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
     },
     'lat-predict-descartes': {
       prompt:
-        'Descartes a besoin de la conclusion qu’un être souverainement parfait existe. Quelle lecture de « Un être souverainement parfait existe » rapporterait réellement une existence ?',
+        'Descartes a besoin de conclure qu’un être souverainement parfait existe. Quelle lecture de « Un être souverainement parfait existe » affirme réellement l’existence d’un tel être ?',
       choices: {
         universal:
           'La lecture universelle-hypothétique : tout ce qui serait souverainement parfait existerait.',
@@ -589,7 +595,7 @@ export const SOURCE_EXERCISES: Record<Locale, Record<string, ExerciseCopy>> = {
         'Une simple contrainte générale sur les êtres parfaits ne dit pas encore que le domaine en contient un. La conclusion visée est existentielle.',
       feedback: {
         correct:
-          'Exact. La conclusion visée est existentielle. Une contrainte générale sur le genre ne la livre pas encore.',
+          'Exact. La conclusion visée est existentielle. Une contrainte générale sur ce type d’être ne suffit pas à l’établir.',
       },
     },
     'lat-interrogate-premises': {

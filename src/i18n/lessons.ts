@@ -85,6 +85,7 @@ export type LearnUiCopy = {
   routeFoundations: string;
   routeSobel: string;
   sourceLocator: string;
+  sourceCheckTitle: string;
   readingDepth: string;
   masteryDepth: string;
   depthGroupAria: string;
@@ -224,6 +225,7 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     routeFoundations: 'Logic foundations',
     routeSobel: 'Logic and Theism',
     sourceLocator: 'Source',
+    sourceCheckTitle: 'Quick check',
     readingDepth: 'Reading',
     masteryDepth: 'Mastery',
     depthGroupAria: 'Section depth',
@@ -287,6 +289,7 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     routeFoundations: 'Fondements de la logique',
     routeSobel: 'Logic and Theism',
     sourceLocator: 'Source',
+    sourceCheckTitle: 'Vérification rapide',
     readingDepth: 'Lecture',
     masteryDepth: 'Maîtrise',
     depthGroupAria: 'Profondeur de la section',
@@ -327,7 +330,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'In this course, each statement is either true (T) or false (F), not both.',
           'A truth assignment records, for each sentence letter, which of those two values it receives.',
-          'On exercises, tap T or F next to each letter; the table or tree updates immediately. Evaluating a formula means computing its value from that assignment.',
+          'An exercise can give you an assignment such as P ↦ T and Q ↦ F, then ask for the formula’s value. The table or tree keeps the relevant values visible while you work.',
         ],
         example: 'Assignment:  P ↦ T ,  Q ↦ F',
       },
@@ -372,7 +375,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     },
     'level0-05-guided': {
       title: 'Guided evaluation: P ∧ Q',
-      subtitle: 'Fix an assignment yourself.',
+      subtitle: 'Build an assignment step by step.',
       guidedSteps: [
         { kind: 'hint', mode: 'instruct', text: 'Set P to true.', atom: 'P', value: true },
         { kind: 'hint', mode: 'instruct', text: 'Now set Q to false.', atom: 'Q', value: false },
@@ -690,7 +693,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         body: [
           'Dans ce cours, chaque proposition est vraie (V) ou fausse (F), sans troisième cas.',
           'Une interprétation (ou valuation) attribue à chaque variable propositionnelle l’une de ces deux valeurs.',
-          'Aux exercices, toucher V ou F à côté de chaque variable ; le tableau ou l’arbre se met à jour. Évaluer une formule, c’est calculer sa valeur à partir de cette interprétation.',
+          'Un exercice peut donner une interprétation telle que P ↦ V et Q ↦ F, puis demander la valeur de la formule. Le tableau ou l’arbre garde les valeurs utiles visibles pendant le raisonnement.',
         ],
         example: 'Interprétation :  P ↦ V ,  Q ↦ F',
       },

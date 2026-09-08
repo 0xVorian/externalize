@@ -8,6 +8,9 @@ export function renderClassifyChoiceBody(state: AppState): string {
   const formula = state.exercise.formula
     ? `<p class="formula-display" aria-label="${uiCopy.formulaDisplayAria}">${state.exercise.formula}</p>`
     : '';
+  const context = copy.context?.length
+    ? `<div class="exercise-context">${copy.context.map((line) => `<p>${line}</p>`).join('')}</div>`
+    : '';
   const disabled = state.phase === 'answered' || state.attempt.status === 'finalized';
   const options = choiceIds
     .map((choiceId) => {
@@ -26,8 +29,10 @@ export function renderClassifyChoiceBody(state: AppState): string {
     })
     .join('');
   return `
+    ${context}
+    <p class="exercise-prompt">${state.prompt}</p>
     ${formula}
-    <div class="choice-list" role="group" aria-label="${copy.prompt}">
+    <div class="choice-list" role="group" aria-label="${state.prompt}">
       ${options}
     </div>
   `;
