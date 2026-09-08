@@ -37,7 +37,7 @@ export function renderModeNav(
   const learn = learnUi(locale);
   const progress = progressUi(locale);
   return `
-    <nav class="mode-nav mode-nav-four" aria-label="Mode">
+    <nav class="mode-nav mode-nav-four" aria-label="${ui(locale).modeNavAria}">
       <button
         type="button"
         class="mode-button ${mode === 'learn' ? 'active' : ''}"

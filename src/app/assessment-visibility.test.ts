@@ -5,6 +5,7 @@ import {
   checkCounterexample,
   checkEvaluation,
   createState,
+  practiceDraftSnapshot,
   selectEvaluationPrediction,
   setAtomValue,
   tryAgainPractice,
@@ -74,4 +75,16 @@ describe('assessment root visibility', () => {
     expect(state.phase).toBe('ready');
     expect(renderApp(state, 0, true)).toMatch(/class="result-cell">—<\/td>/);
   });
+  it('restores reason-bearing evaluation feedback after reload', () => {
+    const exercise = getExerciseDefinition('eval-001')!;
+    let state = createState('en', exercise);
+    state = selectEvaluationPrediction(state, state.tree.value!);
+    state = checkEvaluation(state);
+    expect(state.message).toMatch(/conjunction is true only when both conjuncts are true/i);
+
+    const restored = createState('en', exercise, practiceDraftSnapshot(state));
+    expect(restored.message).toBe(state.message);
+    expect(restored.message).toMatch(/whole formula is F/i);
+  });
+
 });

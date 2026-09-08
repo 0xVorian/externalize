@@ -57,11 +57,12 @@ describe('i18n', () => {
     expect(getCellFeedback('fr', 'scope-001', false)).not.toContain('Exact');
   });
 
-  it('formats evaluation assessment prompts from fixed assignments', () => {
-    expect(formatEvaluationAssessmentPrompt('en', { P: true, Q: false })).toContain('P = T');
-    expect(formatEvaluationAssessmentPrompt('en', { P: true, Q: false })).toContain('Q = F');
-    expect(formatEvaluationAssessmentPrompt('fr', { P: true, Q: false })).toContain('P = V');
-    expect(formatEvaluationAssessmentPrompt('fr', { P: true, Q: false })).toContain('Q = F');
+  it('keeps evaluation prompts focused on the task rather than duplicating the visible assignment', () => {
+    const en = formatEvaluationAssessmentPrompt('en', { P: true, Q: false });
+    const fr = formatEvaluationAssessmentPrompt('fr', { P: true, Q: false });
+    expect(en).toBe('Predict the truth value of the whole formula.');
+    expect(fr).toBe('Prédisez la valeur de vérité de la formule entière.');
+    expect(`${en} ${fr}`).not.toMatch(/P =|Q =/);
   });
 
   it('provides assessmentPrompt for every evaluate-formula exercise in both locales', () => {

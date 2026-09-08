@@ -28,7 +28,8 @@ test.describe('First-run onboarding', () => {
     await expect(page.locator('#onboarding-title')).toContainText('Choose, then check');
 
     await page.locator('[data-action="onboarding-next"]').click();
-    await expect(page.locator('#onboarding-title')).toContainText('Your progress stays here');
+    await expect(page.locator('#onboarding-title')).toContainText('Start with a short round');
+    await expect(page.locator('.onboarding-overlay')).toContainText('More');
 
     await page.locator('[data-action="onboarding-finish"]').click();
 

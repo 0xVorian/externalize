@@ -73,7 +73,7 @@ describe('reason-bearing learner feedback', () => {
     expect(fr).toMatch(/^Exact —/);
     expect(fr).toMatch(/P vaut V/);
     expect(fr).toMatch(/Q vaut F/);
-    expect(fr).toMatch(/conjonction n’est vraie que si les deux conjoints/i);
+    expect(fr).toMatch(/conjonction n’est vraie que si les deux parties/i);
     expect(fr).toMatch(/formule entière vaut donc F/);
     expect(fr).not.toMatch(/valeur prédite|votre prédiction/i);
   });

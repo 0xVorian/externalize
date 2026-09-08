@@ -7,6 +7,7 @@ export type ExerciseCopy = {
   prompt: string;
   context?: string[];
   assessmentPrompt?: string;
+  progressLabel?: string;
   hint?: string;
   atoms?: Record<string, string>;
   feedback?: FeedbackTemplate;
@@ -39,6 +40,7 @@ export type UiCopy = {
   tryAgain: string;
   nextExercise: string;
   checkScope: string;
+  checkAnswer: string;
   checkEvaluation: string;
   showHint: string;
   hintHeading: string;
@@ -52,6 +54,7 @@ export type UiCopy = {
   falseLabel: string;
   valueAria: (value: string) => string;
   languageGroupAria: string;
+  modeNavAria: string;
   languageToggle: (locale: Locale) => string;
   switchTo: (locale: Locale) => string;
   tautologyYes: string;
@@ -364,48 +367,53 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
     'tt-002': { prompt: 'Choose the missing value.', cellCorrect: 'Correct — a material conditional is false only in this case.', cellWrong: 'When the antecedent is true and the consequent is false, P → Q is false.' },
     'tt-003': { prompt: 'Choose the missing value.', cellCorrect: 'Correct — disjunction is false only when both disjuncts are false.', cellWrong: 'With neither disjunct true, P ∨ Q is false.' },
     'tt-004': { prompt: 'Choose the missing value.', cellCorrect: 'Correct — the implication is true, but the conjunction fails because R is false.', cellWrong: 'When P and Q are true, (P → Q) is true; with R false, the whole conjunction is false.' },
-    'val-001': { prompt: 'Inspect the full truth table for P ∨ ¬P. Is this formula a tautology?', cellCorrect: 'Correct — every row reads T, so the formula is true under every assignment.', cellWrong: 'A tautology is true on every row. Here the result column is uniformly T.' },
-    'val-002': { prompt: 'The table for P ∧ ¬P is displayed. Is this a tautology?', cellCorrect: 'Correct — the result column is never uniformly T; this is a contradiction, not a tautology.', cellWrong: 'A tautology must be true in every row. This formula is false throughout — a contradiction.' },
-    'val-003': { prompt: 'Is P → P a tautology? Read the result column before answering.', cellCorrect: 'Correct — material implication with identical antecedent and consequent is true on every assignment.', cellWrong: 'Compare antecedent and consequent row by row: P → P is true in every case.' },
-    'val-004': { prompt: 'Two sentence letters, four assignments. Is (P → Q) ∨ (Q → P) a tautology?', cellCorrect: 'Correct — at least one implication is true on each row, so the disjunction is a tautology.', cellWrong: 'Check each row: either P → Q or Q → P (often both) is true, so the disjunction never comes out false.' },
-    'val-005': { prompt: 'Look at the result column for P ∧ Q. Is this formula a tautology?', cellCorrect: 'Correct — conjunction is true only when both conjuncts are true, so this contingent formula is not a tautology.', cellWrong: 'A tautology is true on every row. P ∧ Q is false whenever at least one conjunct is false.' },
+    'val-001': { prompt: 'Is this formula a tautology?', cellCorrect: 'Correct — every row reads T, so the formula is true under every assignment.', cellWrong: 'A tautology is true on every row. Here the result column is uniformly T.' },
+    'val-002': { prompt: 'Is this formula a tautology?', cellCorrect: 'Correct — the result column is never uniformly T; this is a contradiction, not a tautology.', cellWrong: 'A tautology must be true in every row. This formula is false throughout — a contradiction.' },
+    'val-003': { prompt: 'Is this formula a tautology?', cellCorrect: 'Correct — material implication with identical antecedent and consequent is true on every assignment.', cellWrong: 'Compare antecedent and consequent row by row: P → P is true in every case.' },
+    'val-004': { prompt: 'Is this formula a tautology?', cellCorrect: 'Correct — at least one implication is true on each row, so the disjunction is a tautology.', cellWrong: 'Check each row: either P → Q or Q → P (often both) is true, so the disjunction never comes out false.' },
+    'val-005': { prompt: 'Is this formula a tautology?', cellCorrect: 'Correct — conjunction is true only when both conjuncts are true, so this contingent formula is not a tautology.', cellWrong: 'A tautology is true on every row. P ∧ Q is false whenever at least one conjunct is false.' },
     'tt-005': { prompt: 'Choose the missing value.', cellCorrect: 'Correct — a biconditional is true only when both sides match.', cellWrong: 'P and Q have different truth values here, so P ↔ Q is false.' },
     'tt-006': { prompt: 'Choose the missing value.', cellCorrect: 'Correct — with neither disjunct true, P ∨ Q is false and its negation is true.', cellWrong: 'When both P and Q are false, P ∨ Q is false, so ¬(P ∨ Q) is true.' },
-    'counter-001': { prompt: 'Find a truth assignment that makes P ∧ Q false. Toggle P and Q, then check.', counterCorrect: 'Correct — at least one conjunct is false.', counterWrong: 'Both conjuncts are still true.' },
+    'counter-001': { prompt: 'Find a truth assignment that makes P ∧ Q false, then check.', counterCorrect: 'Correct — at least one conjunct is false.', counterWrong: 'Both conjuncts are still true.' },
     'counter-002': { prompt: 'Find an assignment where P → Q is false.', counterCorrect: 'Correct — true antecedent, false consequent.', counterWrong: 'This assignment still makes P → Q true.' },
     'counter-003': { prompt: 'Find an assignment that makes P ∨ Q false.', counterCorrect: 'Correct — both disjuncts false.', counterWrong: 'At least one disjunct is still true.' },
     'counter-004': { prompt: 'Find an assignment where P ↔ Q is false.', counterCorrect: 'Correct — P and Q differ.', counterWrong: 'P and Q still match.' },
     'counter-005': { prompt: 'Find an assignment that makes ¬(P ∨ Q) true. Both disjuncts must be false.', counterCorrect: 'Correct — neither P nor Q is true, so the negated disjunction is true.', counterWrong: 'At least one disjunct is still true, so ¬(P ∨ Q) remains false.' },
-    'translate-001': { prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', atoms: { P: 'It rains.', Q: 'The game is cancelled.' }, feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
+    'translate-001': { progressLabel: 'Rain → cancellation', prompt: 'If it rains, then the game is cancelled. Build the matching formula with the palette.', atoms: { P: 'It rains.', Q: 'The game is cancelled.' }, feedback: { 'reversed-conditional': 'Rain is the antecedent (P).' } },
     'translate-002': {
+      progressLabel: 'Not both: gate open and alarm on',
       prompt: 'It is not the case that both the gate is open and the alarm is on. Build the formula.',
-      assessmentPrompt: 'Translate the sentence into a formula that preserves its connective structure (not merely any equivalent formula).',
+      hint: 'Preserve the sentence’s connective structure, not merely a logically equivalent formula.',
       atoms: { P: 'The gate is open.', Q: 'The alarm is on.' },
       feedback: { 'negation-scope': 'Negation must cover the whole conjunction: ¬(P ∧ Q), not ¬P ∧ Q.' },
     },
     'translate-003': {
+      progressLabel: 'Field closed + rain → cancellation',
       prompt: 'The field is closed, and if it rains, the game is cancelled. Build the formula.',
       atoms: { P: 'It rains.', Q: 'The game is cancelled.', R: 'The field is closed.' },
       feedback: { 'missing-parens': 'Group the conditional first: (P → Q) before conjoining with R.' },
     },
     'translate-004': {
+      progressLabel: 'Alarm → smoke',
       prompt: 'If the alarm sounds, then there is smoke. Build the matching formula.',
       atoms: { P: 'The alarm sounds.', Q: 'There is smoke.' },
       feedback: { 'reversed-conditional': 'The alarm sounding is P — it comes before the conditional arrow.' },
     },
     'translate-005': {
+      progressLabel: 'Door locked ↔ key missing',
       prompt: 'The door is locked if and only if the key is missing. Build the formula.',
       atoms: { P: 'The door is locked.', Q: 'The key is missing.' },
       feedback: { 'wrong-main-connective': '"If and only if" calls for ↔, not →.' },
     },
     'translate-006': {
+      progressLabel: 'Neither gate nor window open',
       prompt: 'It is not the case that the gate is open or the window is open. Build the formula.',
-      assessmentPrompt: 'Translate the sentence into a formula that preserves its connective structure (not merely any equivalent formula).',
+      hint: 'Preserve the sentence’s connective structure, not merely a logically equivalent formula.',
       atoms: { P: 'The gate is open.', Q: 'The window is open.' },
       feedback: { 'negation-scope': 'Negation applies to the whole disjunction: ¬(P ∨ Q), not ¬P ∨ Q.' },
     },
-    'nd-001': { prompt: 'Complete the proof: choose modus ponens and cite the lines that justify Q.', feedback: { correct: 'Correct — from P → Q and P you derive Q by → elimination (modus ponens).', incomplete: 'Select →E (modus ponens), then tap the premise lines to cite.', 'wrong-rule-for-premises': '→E needs a conditional and its antecedent among the cited lines.', 'wrong-citation': 'Cite the conditional and the matching antecedent (lines 1 and 2).', 'conclusion-does-not-follow': 'That combination does not yield Q on this line.' } },
-    'nd-002': { prompt: 'Complete the proof: choose conjunction elimination and cite the line that justifies P.', feedback: { correct: 'Correct — from P ∧ Q you derive the left conjunct P by ∧ elimination.', incomplete: 'Select ∧E, then tap the conjunction line to cite.', 'wrong-rule-for-premises': '∧E needs a conjunction on the cited line.', 'wrong-citation': 'Cite line 1, the conjunction P ∧ Q.', 'conclusion-does-not-follow': 'That step does not yield P on this line.' } },
+    'nd-001': { progressLabel: 'Derive Q', prompt: 'Complete the proof: choose modus ponens and cite the lines that justify Q.', feedback: { correct: 'Correct — from P → Q and P you derive Q by → elimination (modus ponens).', incomplete: 'Select →E (modus ponens), then tap the premise lines to cite.', 'wrong-rule-for-premises': '→E needs a conditional and its antecedent among the cited lines.', 'wrong-citation': 'Cite the conditional and the matching antecedent (lines 1 and 2).', 'conclusion-does-not-follow': 'That combination does not yield Q on this line.' } },
+    'nd-002': { progressLabel: 'Derive P', prompt: 'Complete the proof: choose conjunction elimination and cite the line that justifies P.', feedback: { correct: 'Correct — from P ∧ Q you derive the left conjunct P by ∧ elimination.', incomplete: 'Select ∧E, then tap the conjunction line to cite.', 'wrong-rule-for-premises': '∧E needs a conjunction on the cited line.', 'wrong-citation': 'Cite line 1, the conjunction P ∧ Q.', 'conclusion-does-not-follow': 'That step does not yield P on this line.' } },
   },
   fr: {
     'scope-001': {
@@ -478,7 +486,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
       prompt: 'Indiquez le connecteur principal de la formule.',
       feedback: {
         'selected-subconnective':
-          'L\'implication → gouverne (Q → R) à droite, mais l\'équivalence ↔ est le connecteur principal de la biconditionnelle entière.',
+          'L\'implication → gouverne (Q → R) à droite, mais la biconditionnelle ↔ est le connecteur principal de la formule entière.',
       },
     },
     'scope-012': {
@@ -505,7 +513,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
         'Fixez P et Q, puis lisez la colonne résultat : une disjonction est vraie dès qu\'au moins un disjonct est vrai.',
       assessmentPrompt:
         'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
-      hint: 'Une disjonction est vraie dès qu\'au moins un disjonct est vrai.',
+      hint: 'Une disjonction est vraie dès que l’une des deux parties est vraie.',
     },
     'eval-004': {
       prompt:
@@ -544,7 +552,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
         'Chaque conjoint est évalué séparément. La conjonction n\'est vraie que si (P → Q) et R le sont tous deux.',
       assessmentPrompt:
         'Fixez une interprétation, suivez le calcul des sous-formules visibles dans l\'arbre, puis prédisez la valeur au connecteur principal.',
-      hint: 'Une conjonction n\'est vraie que si ses deux conjoints le sont.',
+      hint: 'Une conjonction n\'est vraie que si ses deux parties le sont.',
     },
     'eval-010': {
       prompt:
@@ -558,14 +566,14 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
         'Les deux conjoints sont vrais ici. Vérifiez que P ∧ Q n\'est vrai que lorsque P et Q le sont tous deux.',
       assessmentPrompt:
         'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
-      hint: 'Une conjonction n\'est vraie que si ses deux conjoints le sont.',
+      hint: 'Une conjonction n\'est vraie que si ses deux parties le sont.',
     },
     'eval-012': {
       prompt:
         'Quand P et Q sont tous deux faux, la conjonction P ∧ Q est fausse. Fixez les variables et lisez la ligne résultat.',
       assessmentPrompt:
         'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
-      hint: 'Quand les deux conjoints sont faux, la conjonction est fausse.',
+      hint: 'Quand les deux parties sont fausses, la conjonction est fausse.',
     },
     'eval-013': {
       prompt:
@@ -579,7 +587,7 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
         'Avec P vrai et Q faux, au moins un disjonct est vrai — P ∨ Q doit donc être vrai.',
       assessmentPrompt:
         'Fixez P et Q, suivez les valeurs intermédiaires visibles, puis prédisez la valeur au connecteur principal.',
-      hint: 'Une disjonction est vraie dès qu\'au moins un disjonct est vrai.',
+      hint: 'Une disjonction est vraie dès que l’une des deux parties est vraie.',
     },
     'eval-015': {
       prompt:
@@ -648,52 +656,57 @@ const EXERCISE_COPY: Record<Locale, Record<string, ExerciseCopy>> = {
           "∨ est à l'intérieur des parenthèses, mais l'opérateur le plus externe est ¬ — sa portée couvre toute la disjonction.",
       },
     },
-    'tt-001': { prompt: 'Choisissez la valeur manquante.', cellCorrect: 'Exact — une conjonction exige que les deux conjoints soient vrais.', cellWrong: 'Sous cette interprétation, P est vrai et Q est faux, donc P ∧ Q est faux.' },
+    'tt-001': { prompt: 'Choisissez la valeur manquante.', cellCorrect: 'Exact — une conjonction exige que les deux parties soient vraies.', cellWrong: 'Sous cette interprétation, P est vrai et Q est faux, donc P ∧ Q est faux.' },
     'tt-002': { prompt: 'Choisissez la valeur manquante.', cellCorrect: 'Exact — l\'implication matérielle n\'est fausse que dans ce cas.', cellWrong: 'Quand l\'antécédent est vrai et le conséquent faux, P → Q est faux.' },
-    'tt-003': { prompt: 'Choisissez la valeur manquante.', cellCorrect: 'Exact — une disjonction n\'est fausse que si ses deux termes sont faux.', cellWrong: 'Aucun disjonct n\'étant vrai, P ∨ Q est faux.' },
+    'tt-003': { prompt: 'Choisissez la valeur manquante.', cellCorrect: 'Exact — une disjonction n\'est fausse que si ses deux termes sont faux.', cellWrong: 'Aucun des deux termes n\'étant vrai, P ∨ Q est faux.' },
     'tt-004': { prompt: 'Choisissez la valeur manquante.', cellCorrect: 'Exact — l\'implication est vraie, mais la conjonction échoue car R est faux.', cellWrong: 'Quand P et Q sont vrais, (P → Q) est vrai ; avec R faux, la conjonction entière est fausse.' },
-    'val-001': { prompt: 'Examinez le tableau complet de P ∨ ¬P. Cette formule est-elle une tautologie ?', cellCorrect: 'Exact — chaque ligne affiche V : la formule est vraie sous toute interprétation.', cellWrong: 'Une tautologie est vraie sur chaque ligne. Ici la colonne résultat est uniformément V.' },
-    'val-002': { prompt: "Le tableau de P ∧ ¬P est affiché. S'agit-il d'une tautologie ?", cellCorrect: "Exact — la colonne résultat n'est jamais uniformément V ; c'est une contradiction, pas une tautologie.", cellWrong: 'Une tautologie doit être vraie sur chaque ligne. Cette formule est fausse partout — une contradiction.' },
-    'val-003': { prompt: 'P → P est-elle une tautologie ? Lisez la colonne résultat avant de répondre.', cellCorrect: "Exact — une implication matérielle dont l'antécédent et le conséquent coïncident est vraie sur toute interprétation.", cellWrong: 'Comparez antécédent et conséquent ligne par ligne : P → P est vrai dans tous les cas.' },
-    'val-004': { prompt: 'Deux variables, quatre lignes. (P → Q) ∨ (Q → P) est-elle une tautologie ?', cellCorrect: 'Exact — au moins une implication est vraie sur chaque ligne, donc la disjonction est une tautologie.', cellWrong: 'Vérifiez chaque ligne : P → Q ou Q → P (souvent les deux) est vrai, donc la disjonction reste vraie sur toutes les lignes.' },
-    'val-005': { prompt: 'Observez la colonne résultat pour P ∧ Q. Cette formule est-elle une tautologie ?', cellCorrect: "Exact — une conjonction n'est vraie que si les deux conjoints le sont ; cette formule contingente n'est pas une tautologie.", cellWrong: "Une tautologie est vraie sur chaque ligne. P ∧ Q est faux dès qu'au moins un conjoint est faux." },
+    'val-001': { prompt: 'Cette formule est-elle une tautologie ?', cellCorrect: 'Exact — chaque ligne affiche V : la formule est vraie sous toute interprétation.', cellWrong: 'Une tautologie est vraie sur chaque ligne. Ici la colonne résultat est uniformément V.' },
+    'val-002': { prompt: 'Cette formule est-elle une tautologie ?', cellCorrect: "Exact — la colonne résultat n'est jamais uniformément V ; c'est une contradiction, pas une tautologie.", cellWrong: 'Une tautologie doit être vraie sur chaque ligne. Cette formule est fausse partout — une contradiction.' },
+    'val-003': { prompt: 'Cette formule est-elle une tautologie ?', cellCorrect: "Exact — une implication matérielle dont l'antécédent et le conséquent coïncident est vraie sur toute interprétation.", cellWrong: 'Comparez antécédent et conséquent ligne par ligne : P → P est vrai dans tous les cas.' },
+    'val-004': { prompt: 'Cette formule est-elle une tautologie ?', cellCorrect: 'Exact — au moins une implication est vraie sur chaque ligne, donc la disjonction est une tautologie.', cellWrong: 'Vérifiez chaque ligne : P → Q ou Q → P (souvent les deux) est vrai, donc la disjonction reste vraie sur toutes les lignes.' },
+    'val-005': { prompt: 'Cette formule est-elle une tautologie ?', cellCorrect: "Exact — une conjonction n'est vraie que si les deux parties le sont ; cette formule contingente n'est pas une tautologie.", cellWrong: "Une tautologie est vraie sur chaque ligne. P ∧ Q est faux dès qu'au moins une partie est fausse." },
     'tt-005': { prompt: 'Choisissez la valeur manquante.', cellCorrect: 'Exact — une biconditionnelle n\'est vraie que si les deux côtés coïncident.', cellWrong: 'P et Q ont ici des valeurs différentes, donc P ↔ Q est faux.' },
     'tt-006': { prompt: 'Choisissez la valeur manquante.', cellCorrect: 'Exact — aucun disjonct n\'est vrai, donc P ∨ Q est faux et sa négation est vraie.', cellWrong: 'Lorsque P et Q sont faux, P ∨ Q est faux, donc ¬(P ∨ Q) est vrai.' },
-    'counter-001': { prompt: 'Trouvez une interprétation qui rend P ∧ Q faux.', counterCorrect: 'Exact — au moins un conjoint est faux.', counterWrong: 'Les deux conjoints sont encore vrais.' },
+    'counter-001': { prompt: 'Trouvez une interprétation qui rend P ∧ Q faux.', counterCorrect: 'Exact — au moins une partie est fausse.', counterWrong: 'Les deux parties sont encore vraies.' },
     'counter-002': { prompt: 'Trouvez une interprétation où P → Q est faux.', counterCorrect: 'Exact — antécédent vrai, conséquent faux.', counterWrong: 'P → Q reste vrai.' },
-    'counter-003': { prompt: 'Trouvez une interprétation qui rend P ∨ Q faux.', counterCorrect: 'Exact — les deux termes de la disjonction sont faux.', counterWrong: 'Au moins un disjonct est encore vrai.' },
+    'counter-003': { prompt: 'Trouvez une interprétation qui rend P ∨ Q faux.', counterCorrect: 'Exact — les deux termes de la disjonction sont faux.', counterWrong: 'Au moins un des deux termes est encore vrai.' },
     'counter-004': { prompt: 'Trouvez une interprétation où P ↔ Q est faux.', counterCorrect: 'Exact — P et Q diffèrent.', counterWrong: 'P et Q ont encore la même valeur.' },
     'counter-005': { prompt: 'Trouvez une interprétation qui rend ¬(P ∨ Q) vrai. Les deux termes de la disjonction doivent être faux.', counterCorrect: 'Exact — ni P ni Q n\'est vrai, donc la disjonction niée est vraie.', counterWrong: 'Au moins un terme de la disjonction est encore vrai, donc ¬(P ∨ Q) reste faux.' },
-    'translate-001': { prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', atoms: { P: 'Il pleut.', Q: 'Le match est annulé.' }, feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
+    'translate-001': { progressLabel: 'Pluie → annulation', prompt: 'S\'il pleut, le match est annulé. Construisez la formule avec la palette.', atoms: { P: 'Il pleut.', Q: 'Le match est annulé.' }, feedback: { 'reversed-conditional': 'La pluie est P (antécédent).' } },
     'translate-002': {
+      progressLabel: 'Pas à la fois porte ouverte et alarme activée',
       prompt: 'Il n\'est pas le cas que la porte soit ouverte et l\'alarme activée. Construisez la formule.',
-      assessmentPrompt: 'Traduisez l\'énoncé en une formule qui respecte sa structure de connecteurs (pas seulement une formule équivalente).',
+      hint: 'Conservez la structure des connecteurs de la phrase, pas seulement une formule logiquement équivalente.',
       atoms: { P: 'La porte est ouverte.', Q: 'L\'alarme est activée.' },
       feedback: { 'negation-scope': 'La négation doit porter sur toute la conjonction : ¬(P ∧ Q), pas ¬P ∧ Q.' },
     },
     'translate-003': {
+      progressLabel: 'Terrain fermé + pluie → annulation',
       prompt: 'Le terrain est fermé. De plus, la pluie entraîne l\'annulation du match. Construisez une seule formule pour ces deux affirmations.',
       atoms: { P: 'Il pleut.', Q: 'Le match est annulé.', R: 'Le terrain est fermé.' },
       feedback: { 'missing-parens': 'Regroupez d\'abord la conditionnelle : (P → Q) avant de la conjonction avec R.' },
     },
     'translate-004': {
+      progressLabel: 'Alarme → fumée',
       prompt: 'Si l\'alarme sonne, alors il y a de la fumée. Construisez la formule.',
       atoms: { P: 'L\'alarme sonne.', Q: 'Il y a de la fumée.' },
       feedback: { 'reversed-conditional': 'L\'alarme correspond à P — elle précède la flèche de la conditionnelle.' },
     },
     'translate-005': {
+      progressLabel: 'Porte verrouillée ↔ clé manquante',
       prompt: 'La porte est verrouillée si et seulement si la clé manque. Construisez la formule.',
       atoms: { P: 'La porte est verrouillée.', Q: 'La clé manque.' },
       feedback: { 'wrong-main-connective': '« Si et seulement si » exige ↔, pas →.' },
     },
     'translate-006': {
+      progressLabel: 'Ni porte ni fenêtre ouverte',
       prompt: 'Il n\'est pas le cas que la porte soit ouverte ou que la fenêtre soit ouverte. Construisez la formule.',
-      assessmentPrompt: 'Traduisez l\'énoncé en une formule qui respecte sa structure de connecteurs (pas seulement une formule équivalente).',
+      hint: 'Conservez la structure des connecteurs de la phrase, pas seulement une formule logiquement équivalente.',
       atoms: { P: 'La porte est ouverte.', Q: 'La fenêtre est ouverte.' },
       feedback: { 'negation-scope': 'La négation s\'applique à toute la disjonction : ¬(P ∨ Q), pas ¬P ∨ Q.' },
     },
-    'nd-001': { prompt: 'Complétez la démonstration : choisissez le modus ponens et citez les lignes qui justifient Q.', feedback: { correct: 'Exact — de P → Q et P on obtient Q par élimination de → (modus ponens).', incomplete: 'Sélectionnez →E (modus ponens), puis touchez les lignes de prémisses à citer.', 'wrong-rule-for-premises': '→E exige une implication et son antécédent parmi les lignes citées.', 'wrong-citation': 'Citez l\'implication et l\'antécédent correspondant (lignes 1 et 2).', 'conclusion-does-not-follow': 'Ces lignes et cette règle ne permettent pas de conclure Q ici.' } },
-    'nd-002': { prompt: 'Complétez la démonstration : choisissez l\'élimination de la conjonction et citez la ligne qui justifie P.', feedback: { correct: 'Exact — de P ∧ Q on obtient le conjoint gauche P par élimination de ∧.', incomplete: 'Sélectionnez ∧E, puis touchez la ligne contenant la conjonction.', 'wrong-rule-for-premises': '∧E exige une conjonction sur la ligne citée.', 'wrong-citation': 'Citez la ligne 1, la conjonction P ∧ Q.', 'conclusion-does-not-follow': 'Cette étape ne permet pas de conclure P ici.' } },
+    'nd-001': { progressLabel: 'Dériver Q', prompt: 'Complétez la démonstration : choisissez le modus ponens et citez les lignes qui justifient Q.', feedback: { correct: 'Exact — de P → Q et P on obtient Q par élimination de → (modus ponens).', incomplete: 'Sélectionnez →E (modus ponens), puis touchez les lignes de prémisses à citer.', 'wrong-rule-for-premises': '→E exige une implication et son antécédent parmi les lignes citées.', 'wrong-citation': 'Citez l\'implication et l\'antécédent correspondant (lignes 1 et 2).', 'conclusion-does-not-follow': 'Ces lignes et cette règle ne permettent pas de conclure Q ici.' } },
+    'nd-002': { progressLabel: 'Dériver P', prompt: 'Complétez la démonstration : choisissez l\'élimination de la conjonction et citez la ligne qui justifie P.', feedback: { correct: 'Exact — de P ∧ Q on obtient le conjoint gauche P par élimination de ∧.', incomplete: 'Sélectionnez ∧E, puis touchez la ligne contenant la conjonction.', 'wrong-rule-for-premises': '∧E exige une conjonction sur la ligne citée.', 'wrong-citation': 'Citez la ligne 1, la conjonction P ∧ Q.', 'conclusion-does-not-follow': 'Cette étape ne permet pas de conclure P ici.' } },
   },
 };
 
@@ -705,7 +718,7 @@ const UI: Record<Locale, UiCopy> = {
       `${count} exercise${count === 1 ? '' : 's'} scheduled for review`,
     assignment: 'Truth assignment',
     assignmentAria: 'Truth assignment to sentence letters',
-    assignmentHint: 'Tap T or F for each letter to set its truth value.',
+    assignmentHint: 'Set each letter to T or F.',
     assignmentGivenHint: 'These truth values are fixed for this exercise.',
     atomGroupAria: (atom) => `Truth value for ${atom}`,
     atomSetTrueAria: (atom) => `Set ${atom} to true`,
@@ -721,6 +734,7 @@ const UI: Record<Locale, UiCopy> = {
     tryAgain: 'Try again',
     nextExercise: 'Next exercise',
     checkScope: 'Check selection',
+    checkAnswer: 'Check',
     checkEvaluation: 'Check prediction',
     showHint: 'Show hint',
     hintHeading: 'Hint',
@@ -734,6 +748,7 @@ const UI: Record<Locale, UiCopy> = {
     falseLabel: 'F',
     valueAria: (value) => `truth value ${value}`,
     languageGroupAria: 'Language',
+    modeNavAria: 'Activity mode',
     languageToggle: (locale) => (locale === 'en' ? 'English' : 'French'),
     switchTo: (locale) => (locale === 'en' ? 'Switch to English' : 'Switch to French'),
     tautologyYes: 'Yes — tautology',
@@ -747,7 +762,7 @@ const UI: Record<Locale, UiCopy> = {
       `${count} exercice${count === 1 ? '' : 's'} à revoir`,
     assignment: 'Interprétation',
     assignmentAria: 'Interprétation (valuation des variables propositionnelles)',
-    assignmentHint: 'Toucher V ou F pour fixer la valeur de chaque variable.',
+    assignmentHint: 'Fixez chaque variable à V ou F.',
     assignmentGivenHint: 'Ces valeurs de vérité sont fixées pour cet exercice.',
     atomGroupAria: (atom) => `Valeur de vérité de ${atom}`,
     atomSetTrueAria: (atom) => `Mettre ${atom} à vrai (V)`,
@@ -763,6 +778,7 @@ const UI: Record<Locale, UiCopy> = {
     tryAgain: 'Réessayer',
     nextExercise: 'Exercice suivant',
     checkScope: 'Vérifier la sélection',
+    checkAnswer: 'Vérifier',
     checkEvaluation: 'Vérifier la prédiction',
     showHint: 'Afficher un indice',
     hintHeading: 'Indice',
@@ -776,6 +792,7 @@ const UI: Record<Locale, UiCopy> = {
     falseLabel: 'F',
     valueAria: (value) => `valeur de vérité ${value}`,
     languageGroupAria: 'Langue',
+    modeNavAria: 'Mode d’activité',
     languageToggle: (locale) => (locale === 'en' ? 'Anglais' : 'Français'),
     switchTo: (locale) => (locale === 'en' ? 'Passer en anglais' : 'Passer en français'),
     tautologyYes: 'Oui — tautologie',
@@ -818,19 +835,11 @@ export function getExerciseCopy(locale: Locale, exerciseId: string): ExerciseCop
 
 export function formatEvaluationAssessmentPrompt(
   locale: Locale,
-  assignment: Record<string, boolean>,
+  _assignment: Record<string, boolean>,
 ): string {
-  const atoms = Object.keys(assignment).sort();
-  const parts = atoms.map(
-    (atom) =>
-      locale === 'fr'
-        ? `${atom} = ${formatTruthValue(locale, assignment[atom])}`
-        : `${atom} = ${formatTruthValue(locale, assignment[atom])}`,
-  );
-  if (locale === 'fr') {
-    return `Étant donné ${parts.join(' et ')}, suivez les sous-formules visibles, puis prédisez la valeur de vérité au connecteur principal.`;
-  }
-  return `Given ${parts.join(' and ')}, follow the visible intermediate values, then predict the truth value at the root.`;
+  return locale === 'fr'
+    ? 'Prédisez la valeur de vérité de la formule entière.'
+    : 'Predict the truth value of the whole formula.';
 }
 
 export function getAssessmentPrompt(
@@ -845,6 +854,9 @@ export function getAssessmentPrompt(
   const copy = getExerciseCopy(locale, exerciseId);
   if (exerciseType === 'evaluate-formula') {
     return copy.assessmentPrompt ?? ui(locale).evaluationPracticePrompt;
+  }
+  if (exerciseType === 'translate-en-to-formula') {
+    return copy.prompt;
   }
   return copy.assessmentPrompt ?? copy.prompt;
 }
@@ -1068,11 +1080,11 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     whatNextStartExercise: 'Start exercise',
   },
   fr: {
-    progress: 'Parcours',
+    progress: 'Suivi',
     continueTitle: 'Reprendre',
     continueLearn: 'Reprendre le cours',
     continuePractice: 'Reprendre les exercices',
-    continueProgress: 'Voir le parcours',
+    continueProgress: 'Voir le suivi',
     lastSeen: (when) => `Dernière activité : ${when}`,
     level0Heading: 'Unité d\'introduction',
     level0Status: (done, total) => `${done} section${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}`,
@@ -1083,8 +1095,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     reviewDue: (count) => `${count} à revoir`,
     strugglesHeading: 'À consolider',
     strugglesEmpty: 'Rien pour l\'instant — les erreurs aux exercices s\'afficheront ici.',
-    comfortableHeading: 'Acquis solides',
-    comfortableEmpty: 'Continuez — les points solides apparaissent après plusieurs réussites.',
+    comfortableHeading: 'En bonne voie',
+    comfortableEmpty: 'Continuez — les points qui se confirment apparaissent après plusieurs réussites.',
     errorsHeading: 'Erreurs fréquentes',
     errorsEmpty: 'Aucun motif d\'erreur récurrent pour l\'instant.',
     skillLabel: (id) =>
@@ -1129,13 +1141,13 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     level1ExercisesHeading: 'Exercices — unité 1',
     level2ExercisesHeading: 'Exercices — unité 2',
     syncHeading: 'Autre appareil',
-    syncHint: 'Exportez ici, puis importez le fichier sur l\'appareil où vous voulez reprendre.',
-    exportProgress: 'Exporter le parcours',
-    importProgress: 'Importer un parcours',
-    importSuccess: 'Parcours restauré. Vous pouvez reprendre.',
+    syncHint: 'Exportez ici, puis importez le fichier sur l’appareil où vous voulez reprendre.',
+    exportProgress: 'Exporter le suivi',
+    importProgress: 'Importer un suivi',
+    importSuccess: 'Suivi restauré. Vous pouvez reprendre.',
     importError: 'Fichier illisible. Choisissez une exportation Externalize.',
     progressItemAria: (label, status) => `${label}, ${status}`,
-    modeProgressAria: 'Parcours',
+    modeProgressAria: 'Suivi',
     whatNextTitle: 'Et ensuite ?',
     whatNextWeakestSkill: (skill, rate) => `Taux de réussite récent — ${skill} : ${rate} % ; quelques exercices ciblés devraient aider.`,
     whatNextNextExercise: (id) => `Prochain exercice : ${id}.`,
@@ -1200,7 +1212,7 @@ const VISIBILITY_UI: Record<Locale, VisibilityUiCopy> = {
     youCanNowEmpty:
       'Nothing is marked consistent yet. This status appears after repeated clean performance, not simply with time.',
     inProgressHeading: 'In progress',
-    inProgressEmpty: 'No capability is mid-practice yet.',
+    inProgressEmpty: 'Nothing is in progress yet.',
     upNextHeading: 'Up next',
     upNextEmpty: 'The next step appears as lessons and exercises become available.',
     momentConsistent: (capability) => `${capability} is consistent across recent attempts.`,
@@ -1229,9 +1241,9 @@ const VISIBILITY_UI: Record<Locale, VisibilityUiCopy> = {
     sessionFinish: 'Quitter la séance',
     youCanNowHeading: 'Résultats réguliers',
     youCanNowEmpty:
-      'Aucune capacité n’a encore accumulé assez de réussites nettes répétées pour apparaître ici. Le simple passage du temps ne suffit pas.',
+      'Rien n’est encore assez régulier pour apparaître ici. Le simple passage du temps ne suffit pas.',
     inProgressHeading: 'En cours',
-    inProgressEmpty: 'Aucune capacité n’est actuellement en consolidation.',
+    inProgressEmpty: 'Rien n’est en cours pour le moment.',
     upNextHeading: 'À venir',
     upNextEmpty: 'La prochaine étape s’affichera lorsque de nouvelles leçons ou de nouveaux exercices seront disponibles.',
     momentConsistent: (capability) => `Résultats réguliers pour ${capability} sur les essais récents.`,
@@ -1249,7 +1261,7 @@ export function visibilityUi(locale: Locale): VisibilityUiCopy {
 
 export type OnboardingScreenCopy={title:string;body:string;visual?:string};
 export type OnboardingUiCopy={stepLabel:(c:number,t:number)=>string;next:string;skip:string;getStarted:string;screens:OnboardingScreenCopy[]};
-const ONBOARDING_UI:Record<Locale,OnboardingUiCopy>={en:{stepLabel:(c,t)=>`${c} of ${t}`,next:'Next',skip:'Skip intro',getStarted:'Get started',screens:[{title:'See the structure',body:'Formulas are easier when structure is visible. Externalize shows how connectives bind sub-expressions and how truth values flow — so you do not have to hold it all in memory.',visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Choose, then check',body:'Exercises keep the relevant assignment and reasoning state visible. Choose the requested answer, then Check; correctness is revealed only after you commit.',visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment active">True</span><span class="onboarding-segment">False</span></div>'},{title:'Your progress stays here',body:'The Progress tab tracks lessons, exercises, and skills that need work. Everything is stored on this device — export anytime to move to another phone.',visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item">Course</span><span class="onboarding-nav-item">Exercises</span><span class="onboarding-nav-item active">Progress</span></div>'}]},fr:{stepLabel:(c,t)=>`${c} sur ${t}`,next:'Suivant',skip:"Passer l'intro",getStarted:'Commencer',screens:[{title:'Voir la structure',body:"Une formule est plus lisible quand sa structure est externalisée. Externalize montre comment les connecteurs lient les sous-formules et comment les valeurs de vérité se propagent — sans tout retenir en mémoire.",visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Choisissez, puis vérifiez',body:"Les exercices gardent visibles l’interprétation utile et l’état du raisonnement. Choisissez la réponse demandée, puis vérifiez ; la correction n’apparaît qu’après validation.",visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment active">Vrai</span><span class="onboarding-segment">Faux</span></div>'},{title:'Votre parcours ici',body:"L'onglet Parcours suit les sections, les exercices et les compétences à consolider. Tout reste sur cet appareil — exportez pour continuer ailleurs.",visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item">Cours</span><span class="onboarding-nav-item">Exercices</span><span class="onboarding-nav-item active">Parcours</span></div>'}]}};
+const ONBOARDING_UI:Record<Locale,OnboardingUiCopy>={en:{stepLabel:(c,t)=>`${c} of ${t}`,next:'Next',skip:'Skip intro',getStarted:'Get started',screens:[{title:'See the structure',body:'Formulas are easier when structure is visible. Externalize shows how connectives bind sub-expressions and how truth values flow — so you do not have to hold it all in memory.',visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Choose, then check',body:'Exercises keep the relevant assignment and reasoning state visible. Choose the requested answer, then Check; correctness is revealed only after you commit.',visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment active">True</span><span class="onboarding-segment">False</span></div>'},{title:'Start with a short round',body:'Externalize opens with one short round. Start there; Course, Explore, Exercises, and Progress remain under More. Everything stays on this device — export anytime to continue elsewhere.',visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item active">Start</span><span class="onboarding-nav-item">More</span></div>'}]},fr:{stepLabel:(c,t)=>`${c} sur ${t}`,next:'Suivant',skip:"Passer l'intro",getStarted:'Commencer',screens:[{title:'Voir la structure',body:"Une formule est plus lisible quand sa structure est externalisée. Externalize montre comment les connecteurs lient les sous-formules et comment les valeurs de vérité se propagent — sans tout retenir en mémoire.",visual:'<div class="onboarding-tree-demo"><span class="onboarding-tree-node root">∧</span><div class="onboarding-tree-row"><span class="onboarding-tree-node">P</span><span class="onboarding-tree-node">Q</span></div></div>'},{title:'Choisissez, puis vérifiez',body:"Les exercices gardent visibles l’interprétation utile et l’état du raisonnement. Choisissez la réponse demandée, puis vérifiez ; la correction n’apparaît qu’après validation.",visual:'<div class="onboarding-segment-demo"><span class="onboarding-segment active">Vrai</span><span class="onboarding-segment">Faux</span></div>'},{title:'Commencez par une courte séance',body:"Externalize s’ouvre sur une courte séance. Commencez là ; le cours, l’exploration, les exercices et le suivi restent accessibles dans Autres outils. Tout reste sur cet appareil — exportez pour continuer ailleurs.",visual:'<div class="onboarding-nav-demo"><span class="onboarding-nav-item active">Commencer</span><span class="onboarding-nav-item">Autres outils</span></div>'}]}};
 export function onboardingUi(locale: Locale): OnboardingUiCopy { return ONBOARDING_UI[locale]; }
 export function formatResumeTime(locale: Locale, iso: string): string {
   const date = new Date(iso);

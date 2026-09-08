@@ -165,7 +165,7 @@ const REFERENCE: Record<Locale, ReferenceEntry[]> = {
     },
     {
       symbol: '↔',
-      name: 'Équivalence',
+      name: 'Biconditionnelle',
       summary: 'Vraie ssi les deux composants ont la même valeur de vérité.',
     },
     {
@@ -210,12 +210,12 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
       'P runs down the side, Q across the top. Read the highlighted cell, then continue to the next case.',
     stepLabel: (current, total) => `Case ${current} of ${total}`,
     truthTableAria: (formula) => `Truth table for ${formula}`,
-    modeLearnAria: 'Learn',
+    modeLearnAria: 'Course',
     modePracticeAria: 'Exercises',
     exploreTitle: 'Explore formulas',
     exploreMeta: 'Free practice — no progress recorded',
     explorePrompt:
-      'Choose a formula and toggle sentence letters. The result updates live so you can build intuition before assessed exercises.',
+      'Choose a formula and set the sentence letters. The result updates live so you can build intuition before exercises.',
     exploreFormulaAria: 'Choose a formula to explore',
     exploreBackToLearn: 'Back to course',
     openExplore: 'Explore formulas',
@@ -262,7 +262,7 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     level0Complete:
       'Unité d\'introduction terminée. Les exercices sont disponibles — on commence par l\'évaluation de P ∧ Q sous une interprétation.',
     level1Complete:
-      'Unité 1 terminée. Vous avez vu la négation, la disjonction, l\'implication et l\'équivalence — poursuivez avec les exercices.',
+      'Unité 1 terminée. Vous avez vu la négation, la disjonction, l’implication et la biconditionnelle — poursuivez avec les exercices.',
     level2Complete:
       'Unité 2 terminée. Vous savez lire une structure imbriquée, simplifier une double négation, respecter la priorité des connecteurs et appliquer les lois de De Morgan.',
     unitPickerLabel: 'Unité du cours',
@@ -279,7 +279,7 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     exploreTitle: 'Explorer les formules',
     exploreMeta: 'Pratique libre — aucun progrès enregistré',
     explorePrompt:
-      'Choisissez une formule et modifiez les variables propositionnelles. Le résultat se met à jour en direct pour construire une intuition avant les exercices évalués.',
+      'Choisissez une formule et fixez les variables propositionnelles. Le résultat se met à jour en direct pour construire une intuition avant les exercices.',
     exploreFormulaAria: 'Choisir une formule à explorer',
     exploreBackToLearn: 'Retour au cours',
     openExplore: 'Explorer les formules',
@@ -920,14 +920,14 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       ],
     },
     'level1-10-iff': {
-      title: 'L\'équivalence',
+      title: 'La biconditionnelle',
       subtitle: 'Le connecteur ↔ (si et seulement si).',
       card: {
         title: 'P ↔ Q — mêmes valeurs de vérité',
         body: [
-          'Une équivalence est vraie lorsque P et Q ont la même valeur — tous deux vrais ou tous deux faux.',
+          'Une biconditionnelle est vraie lorsque P et Q ont la même valeur — tous deux vrais ou tous deux faux.',
           'Elle est fausse lorsque les composants diffèrent : l\'un vrai, l\'autre faux.',
-          'On lit souvent « P si et seulement si Q » ; c\'est une équivalence vérité-fonctionnelle mutuelle.',
+          'On lit « P si et seulement si Q » ; c’est la biconditionnelle vérité-fonctionnelle ↔.',
         ],
         example: 'V ↔ V  ⇒  V\nV ↔ F  ⇒  F\nF ↔ V  ⇒  F\nF ↔ F  ⇒  V',
       },
@@ -942,7 +942,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         },
         {
           assignment: { P: true, Q: false },
-          explanation: 'Valeurs différentes (V vs F) ; l\'équivalence est F.',
+          explanation: 'Valeurs différentes (V vs F) ; la biconditionnelle est F.',
         },
         {
           assignment: { P: false, Q: true },
@@ -950,7 +950,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         },
         {
           assignment: { P: false, Q: false },
-          explanation: 'Tous deux faux — même valeur — l\'équivalence vaut V.',
+          explanation: 'Tous deux faux — même valeur — la biconditionnelle vaut V.',
         },
       ],
     },
