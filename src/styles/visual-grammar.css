@@ -1,4 +1,4 @@
-/* PR #16 visual-grammar experiment: truth-table answer placement. */
+/* Session exercise visual grammar: preserve formal objects while separating the response workspace. */
 
 .session-active .blank-cell {
   padding: 0.35rem;
@@ -28,11 +28,14 @@
   color: var(--accent);
 }
 
+.session-active .truth-table-response-workspace {
+  margin-top: 1.25rem;
+}
+
 .session-active .truth-table-answer-tray {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
-  margin: 1.25rem 0 0;
   padding: 0.9rem;
   border: 1px solid var(--border);
   border-radius: 1rem;
@@ -44,4 +47,11 @@
   border-width: 1.5px;
   background: var(--bg);
   font-size: 1rem;
+}
+
+.session-active .truth-table-check {
+  width: 100%;
+  min-height: 3.1rem;
+  margin-top: 0.75rem;
+  font-weight: 700;
 }
