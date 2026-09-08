@@ -12,9 +12,24 @@ export type WatchStepCopy = {
   explanation: string;
 };
 
-export type GuidedStepCopy =
-  | { kind: 'hint'; text: string; atom: string; value: boolean }
-  | { kind: 'done'; text: string };
+export type GuidedHintStep =
+  | {
+      kind: 'hint';
+      mode: 'instruct';
+      text: string;
+      atom: string;
+      value: boolean;
+    }
+  | {
+      kind: 'hint';
+      mode: 'goal';
+      text: string;
+      atom: string;
+      value: boolean;
+      goalValue: boolean;
+    };
+
+export type GuidedStepCopy = GuidedHintStep | { kind: 'done'; text: string };
 
 export type LessonCopy = {
   title: string;
@@ -75,10 +90,11 @@ export type LearnUiCopy = {
   depthGroupAria: string;
   returnToBook: string;
   sourceRouteComplete: string;
-  chooseValueFor: (atom: string) => string;
   guidedValueWrong: (atom: string) => string;
   guidedTargetAria: (atom: string, filled: boolean) => string;
   guidedChoiceAria: (atom: string) => string;
+  unassignedAtomAria: (atom: string) => string;
+  undeterminedResultAria: string;
   check: string;
 };
 
@@ -214,12 +230,13 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     returnToBook: 'Done — return to the book',
     sourceRouteComplete:
       'This reading is complete. Continue in Sobel at Chapter II §§2.6–2.8. Switching to Mastery still opens any remaining formal check.',
-    chooseValueFor: (atom) => `Choose the value for ${atom}.`,
     guidedValueWrong: (atom) =>
       `That is not the value for ${atom}. Choose again, then check.`,
     guidedTargetAria: (atom, filled) =>
       filled ? `Current target ${atom}` : `Current target ${atom}, empty`,
     guidedChoiceAria: (atom) => `Value for ${atom}`,
+    unassignedAtomAria: (atom) => `${atom} not yet assigned`,
+    undeterminedResultAria: 'Result not yet determined',
     check: 'Check',
   },
   fr: {
@@ -276,12 +293,13 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     returnToBook: 'Terminé — retour au livre',
     sourceRouteComplete:
       'Cette lecture est achevée. Reprenez Sobel au chapitre II, §§2.6–2.8. Le mode Maîtrise reste disponible pour toute vérification formelle encore ouverte.',
-    chooseValueFor: (atom) => `Choisissez la valeur de ${atom}.`,
     guidedValueWrong: (atom) =>
       `Ce n'est pas la valeur de ${atom}. Choisissez de nouveau, puis vérifiez.`,
     guidedTargetAria: (atom, filled) =>
       filled ? `Valeur demandée : ${atom}` : `Valeur demandée : ${atom}, case vide`,
     guidedChoiceAria: (atom) => `Valeur de ${atom}`,
+    unassignedAtomAria: (atom) => `${atom} pas encore fixé`,
+    undeterminedResultAria: 'Résultat pas encore déterminé',
     check: 'Vérifier',
   },
 };
@@ -356,8 +374,8 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Guided evaluation: P ∧ Q',
       subtitle: 'Fix an assignment yourself.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choose the value for Q.', atom: 'Q', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Set P to true.', atom: 'P', value: true },
+        { kind: 'hint', mode: 'instruct', text: 'Now set Q to false.', atom: 'Q', value: false },
         {
           kind: 'done',
           text: 'Under P ↦ T and Q ↦ F, the conjunction P ∧ Q evaluates to F. Confirm the result column.',
@@ -396,7 +414,14 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Guided evaluation: ¬P',
       subtitle: 'Set P and read the negated result.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: true },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Choose P so that ¬P is false.',
+          atom: 'P',
+          value: true,
+          goalValue: false,
+        },
         {
           kind: 'done',
           text: 'Under P ↦ T, negation gives ¬P = F. The result column should show F.',
@@ -443,8 +468,22 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Guided evaluation: P ∨ Q',
       subtitle: 'Find the falsifying assignment.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: false },
-        { kind: 'hint', text: 'Choose the value for Q.', atom: 'Q', value: false },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Choose values that make P ∨ Q false.',
+          atom: 'P',
+          value: false,
+          goalValue: false,
+        },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Choose values that make P ∨ Q false.',
+          atom: 'Q',
+          value: false,
+          goalValue: false,
+        },
         {
           kind: 'done',
           text: 'Both disjuncts false: P ∨ Q evaluates to F. This is the sole falsifying row.',
@@ -492,8 +531,22 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Guided evaluation: P → Q',
       subtitle: 'Construct the falsifying assignment.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choose the value for Q.', atom: 'Q', value: false },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Make P → Q false.',
+          atom: 'P',
+          value: true,
+          goalValue: false,
+        },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Make P → Q false.',
+          atom: 'Q',
+          value: false,
+          goalValue: false,
+        },
         {
           kind: 'done',
           text: 'Antecedent true, consequent false — P → Q evaluates to F. Confirm the result column.',
@@ -539,8 +592,15 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Guided evaluation: P ↔ Q',
       subtitle: 'Build a mismatching assignment.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choose the value for Q.', atom: 'Q', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Set P to true.', atom: 'P', value: true },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Choose Q so that P ↔ Q is false.',
+          atom: 'Q',
+          value: false,
+          goalValue: false,
+        },
         {
           kind: 'done',
           text: 'P true, Q false — values differ, so P ↔ Q evaluates to F.',
@@ -564,9 +624,9 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'Guided evaluation: (P ∧ Q) ∨ R',
       subtitle: 'Follow values through a nested formula.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choose the value for Q.', atom: 'Q', value: false },
-        { kind: 'hint', text: 'Choose the value for R.', atom: 'R', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Set P to true.', atom: 'P', value: true },
+        { kind: 'hint', mode: 'instruct', text: 'Now set Q to false.', atom: 'Q', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Now set R to false.', atom: 'R', value: false },
         {
           kind: 'done',
           text: 'P ∧ Q is false, so the left disjunct is false; with R false, the whole disjunction is false.',
@@ -589,17 +649,17 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     'level2-01-nesting': { title: 'Nested structure', subtitle: 'Subformulas inside larger formulas.', card: { title: 'Building complex formulas', body: ['Connectives combine not only sentence letters but entire subformulas. Parentheses mark which subformula a connective governs.', 'In (P ∧ Q) → R, the antecedent is the whole conjunction — not P alone. The main connective of the full formula is →.', "Reading nested structure correctly is prerequisite for scope exercises and for applying equivalences such as de Morgan's laws."], example: '(P ∧ Q) → R\nP ∧ (Q ∨ R)' } },
     'level2-02-double-neg': { title: 'Double negation', subtitle: 'Two negations cancel.', card: { title: '¬¬P is equivalent to P', body: ['Negating twice returns the original truth value: if P is true, ¬P is false and ¬¬P is true again.', 'This is the double-negation equivalence — a standard rewrite when simplifying formulas or reading proofs.', 'Do not confuse ¬¬P with ¬(¬P ∧ Q): parentheses determine whether the second negation applies to P alone or to a larger subformula.'], example: 'P  ⇔  ¬¬P' } },
     'level2-03-double-neg-watch': { title: 'Worked cases: ¬¬P', subtitle: 'Double negation on each assignment for P.', watchSteps: [{ assignment: { P: true }, explanation: 'P is true, so ¬P is false and ¬¬P is true again. The outer negation restores the original value.' }, { assignment: { P: false }, explanation: 'P is false; negating twice yields false again. The highlighted row shows ¬¬P = F.' }] },
-    'level2-04-double-neg-guided': { title: 'Guided evaluation: ¬¬P', subtitle: 'Set P and read the doubly negated result.', guidedSteps: [{ kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: true }, { kind: 'done', text: 'Under P ↦ T, negation gives ¬P = F and a second negation gives ¬¬P = T.' }] },
+    'level2-04-double-neg-guided': { title: 'Guided evaluation: ¬¬P', subtitle: 'Set P and read the doubly negated result.', guidedSteps: [{ kind: 'hint', mode: 'instruct', text: 'Set P to true.', atom: 'P', value: true }, { kind: 'done', text: 'Under P ↦ T, negation gives ¬P = F and a second negation gives ¬¬P = T.' }] },
     'level2-05-precedence': { title: 'Connective precedence', subtitle: 'Which connective is the main one?', card: { title: 'Reading main connectives in nested formulas', body: ['When parentheses are omitted in informal notation, convention fixes the main connective: ¬ binds tightest, then ∧, then ∨, then →, then ↔.', 'In P ∨ Q → R, implication is main: the whole disjunction is the antecedent — (P ∨ Q) → R, not P ∨ (Q → R).', 'Parentheses override convention. Always identify the connective whose scope covers the entire formula (aside from an outermost negation).'], example: 'P ∨ Q → R  means  (P ∨ Q) → R' } },
     'level2-06-demorgan': { title: "De Morgan's laws", subtitle: 'Negating a compound formula.', card: { title: 'Distributing negation over ∧ and ∨', body: ['Negating a conjunction flips to a disjunction of negations: ¬(P ∧ Q) is equivalent to ¬P ∨ ¬Q.', 'Negating a disjunction flips to a conjunction of negations: ¬(P ∨ Q) is equivalent to ¬P ∧ ¬Q.', 'These rewrites preserve truth on every assignment and are central when translating natural-language denials or simplifying formulas.'], example: '¬(P ∧ Q)  ⇔  ¬P ∨ ¬Q\n¬(P ∨ Q)  ⇔  ¬P ∧ ¬Q' } },
     'level2-07-demorgan-watch': { title: 'Worked cases: ¬(P ∧ Q)', subtitle: 'Evaluate the negated conjunction row by row.', watchSteps: [{ assignment: { P: true, Q: true }, explanation: 'P ∧ Q is true, so its negation ¬(P ∧ Q) evaluates to F.' }, { assignment: { P: true, Q: false }, explanation: 'The conjunction is false (Q is false), so negating it yields T.' }, { assignment: { P: false, Q: true }, explanation: 'Again P ∧ Q is false, so ¬(P ∧ Q) is T.' }, { assignment: { P: false, Q: false }, explanation: 'Both conjuncts false — the conjunction is false — so the negation is T.' }] },
-    'level2-08-demorgan-guided': { title: 'Guided evaluation: ¬(P ∨ Q)', subtitle: 'Build an assignment and read the negated disjunction.', guidedSteps: [{ kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: true }, { kind: 'hint', text: 'Choose the value for Q.', atom: 'Q', value: false }, { kind: 'done', text: 'P ∨ Q is true (P is true), so ¬(P ∨ Q) evaluates to F.' }] },
+    'level2-08-demorgan-guided': { title: 'Guided evaluation: ¬(P ∨ Q)', subtitle: 'Build an assignment and read the negated disjunction.', guidedSteps: [{ kind: 'hint', mode: 'instruct', text: 'Set P to true.', atom: 'P', value: true }, { kind: 'hint', mode: 'instruct', text: 'Now set Q to false.', atom: 'Q', value: false }, { kind: 'done', text: 'P ∨ Q is true (P is true), so ¬(P ∨ Q) evaluates to F.' }] },
     'level2-09-de-morgan-guided': {
       title: 'Guided evaluation: ¬P ∧ ¬Q',
       subtitle: 'Evaluate the de Morgan equivalent and compare with ¬(P ∨ Q).',
       guidedSteps: [
-        { kind: 'hint', text: 'Choose the value for P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choose the value for Q.', atom: 'Q', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Set P to true.', atom: 'P', value: true },
+        { kind: 'hint', mode: 'instruct', text: 'Now set Q to false.', atom: 'Q', value: false },
         {
           kind: 'done',
           text: '¬P is F and ¬Q is T, so ¬P ∧ ¬Q is F — the same value as ¬(P ∨ Q) under this assignment (de Morgan\'s law).',
@@ -677,8 +737,8 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'À vous : évaluer P ∧ Q',
       subtitle: 'Construisez une interprétation pas à pas.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choisissez la valeur de Q.', atom: 'Q', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Fixez P à vrai.', atom: 'P', value: true },
+        { kind: 'hint', mode: 'instruct', text: 'Fixez maintenant Q à faux.', atom: 'Q', value: false },
         {
           kind: 'done',
           text: 'Sous P ↦ V et Q ↦ F, la conjonction P ∧ Q est F. Vérifiez la colonne résultat.',
@@ -717,7 +777,14 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'À vous : évaluer ¬P',
       subtitle: 'Fixez P et lisez le résultat nié.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: true },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Choisissez P de sorte que ¬P soit faux.',
+          atom: 'P',
+          value: true,
+          goalValue: false,
+        },
         {
           kind: 'done',
           text: 'Sous P ↦ V, la négation donne ¬P = F. La colonne résultat doit afficher F.',
@@ -764,8 +831,22 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'À vous : évaluer P ∨ Q',
       subtitle: 'Trouvez l\'interprétation falsifiante.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: false },
-        { kind: 'hint', text: 'Choisissez la valeur de Q.', atom: 'Q', value: false },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Choisissez des valeurs qui rendent P ∨ Q faux.',
+          atom: 'P',
+          value: false,
+          goalValue: false,
+        },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Choisissez des valeurs qui rendent P ∨ Q faux.',
+          atom: 'Q',
+          value: false,
+          goalValue: false,
+        },
         {
           kind: 'done',
           text: 'Les deux arguments faux : P ∨ Q est F. C\'est la seule ligne falsifiante.',
@@ -813,8 +894,22 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'À vous : évaluer P → Q',
       subtitle: 'Construisez l\'interprétation falsifiante.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choisissez la valeur de Q.', atom: 'Q', value: false },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Rendez P → Q faux.',
+          atom: 'P',
+          value: true,
+          goalValue: false,
+        },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Rendez P → Q faux.',
+          atom: 'Q',
+          value: false,
+          goalValue: false,
+        },
         {
           kind: 'done',
           text: 'Antécédent vrai, conséquent faux — P → Q est F. Vérifiez la colonne résultat.',
@@ -860,8 +955,15 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'À vous : évaluer P ↔ Q',
       subtitle: 'Construisez une interprétation discordante.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choisissez la valeur de Q.', atom: 'Q', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Fixez P à vrai.', atom: 'P', value: true },
+        {
+          kind: 'hint',
+          mode: 'goal',
+          text: 'Choisissez Q de sorte que P ↔ Q soit faux.',
+          atom: 'Q',
+          value: false,
+          goalValue: false,
+        },
         {
           kind: 'done',
           text: 'P vrai, Q faux — valeurs différentes, donc P ↔ Q est F.',
@@ -885,9 +987,9 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
       title: 'À vous : évaluer (P ∧ Q) ∨ R',
       subtitle: 'Suivre les valeurs dans une formule imbriquée.',
       guidedSteps: [
-        { kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choisissez la valeur de Q.', atom: 'Q', value: false },
-        { kind: 'hint', text: 'Choisissez la valeur de R.', atom: 'R', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Fixez P à vrai.', atom: 'P', value: true },
+        { kind: 'hint', mode: 'instruct', text: 'Fixez maintenant Q à faux.', atom: 'Q', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Fixez maintenant R à faux.', atom: 'R', value: false },
         {
           kind: 'done',
           text: 'P ∧ Q est faux, donc le disjonct gauche est faux ; avec R faux, la disjonction entière est fausse.',
@@ -910,17 +1012,17 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
     'level2-01-nesting': { title: 'Structure imbriquée', subtitle: "Sous-formules à l'intérieur de formules plus grandes.", card: { title: 'Composer des formules complexes', body: ['Les connecteurs combinent non seulement des variables, mais des sous-formules entières. Les parenthèses indiquent la portée.', "Dans (P ∧ Q) → R, l'antécédent est la conjonction tout entière — pas P seul. Le connecteur principal de la formule complète est →.", "Lire correctement l'imbrication est nécessaire pour les exercices de portée et pour appliquer des équivalences comme les lois de De Morgan."], example: '(P ∧ Q) → R\nP ∧ (Q ∨ R)' } },
     'level2-02-double-neg': { title: 'Double négation', subtitle: "Deux négations s'annulent.", card: { title: '¬¬P équivaut à P', body: ['Nier deux fois restitue la valeur de vérité initiale : si P est vrai, ¬P est faux et ¬¬P redevient vrai.', "C'est l'équivalence de double négation — une réécriture standard pour simplifier une formule ou lire une démonstration.", 'Ne confondez pas ¬¬P avec ¬(¬P ∧ Q) : les parenthèses fixent si la seconde négation porte sur P seul ou sur une sous-formule plus large.'], example: 'P  ⇔  ¬¬P' } },
     'level2-03-double-neg-watch': { title: 'Cas typiques : ¬¬P', subtitle: 'Double négation sur chaque interprétation de P.', watchSteps: [{ assignment: { P: true }, explanation: 'P est vrai : ¬P est faux et ¬¬P redevient vrai. La négation extérieure restitue la valeur initiale.' }, { assignment: { P: false }, explanation: 'P est faux ; deux négations redonnent faux. La ligne surlignée montre ¬¬P = F.' }] },
-    'level2-04-double-neg-guided': { title: 'À vous : évaluer ¬¬P', subtitle: 'Fixez P et lisez le résultat doublement nié.', guidedSteps: [{ kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: true }, { kind: 'done', text: 'Sous P ↦ V, la négation donne ¬P = F et une seconde négation donne ¬¬P = V.' }] },
+    'level2-04-double-neg-guided': { title: 'À vous : évaluer ¬¬P', subtitle: 'Fixez P et lisez le résultat doublement nié.', guidedSteps: [{ kind: 'hint', mode: 'instruct', text: 'Fixez P à vrai.', atom: 'P', value: true }, { kind: 'done', text: 'Sous P ↦ V, la négation donne ¬P = F et une seconde négation donne ¬¬P = V.' }] },
     'level2-05-precedence': { title: 'Priorité des connecteurs', subtitle: 'Quel connecteur est principal ?', card: { title: 'Lire le connecteur principal dans une formule imbriquée', body: ['Sans parenthèses explicites, la convention fixe le connecteur principal : ¬ lie le plus fort, puis ∧, puis ∨, puis →, puis ↔.', "Dans P ∨ Q → R, l'implication est principale : toute la disjonction est l'antécédent — (P ∨ Q) → R, et non P ∨ (Q → R).", "Les parenthèses l'emportent sur la convention. Repérez toujours le connecteur dont la portée couvre la formule entière (hors une négation extérieure)."], example: 'P ∨ Q → R  signifie  (P ∨ Q) → R' } },
     'level2-06-demorgan': { title: 'Lois de De Morgan', subtitle: 'Nier une formule composée.', card: { title: 'Distribuer la négation sur ∧ et ∨', body: ['Nier une conjonction donne une disjonction de négations : ¬(P ∧ Q) équivaut à ¬P ∨ ¬Q.', 'Nier une disjonction donne une conjonction de négations : ¬(P ∨ Q) équivaut à ¬P ∧ ¬Q.', 'Ces réécritures préservent la vérité sur toute interprétation et servent à traduire une négation en langue naturelle ou à simplifier une formule.'], example: '¬(P ∧ Q)  ⇔  ¬P ∨ ¬Q\n¬(P ∨ Q)  ⇔  ¬P ∧ ¬Q' } },
     'level2-07-demorgan-watch': { title: 'Cas typiques : ¬(P ∧ Q)', subtitle: 'Évaluer la conjonction niée ligne par ligne.', watchSteps: [{ assignment: { P: true, Q: true }, explanation: 'P ∧ Q est vrai, donc sa négation ¬(P ∧ Q) vaut F.' }, { assignment: { P: true, Q: false }, explanation: 'La conjonction est fausse (Q est faux), donc la nier donne V.' }, { assignment: { P: false, Q: true }, explanation: 'Encore P ∧ Q est faux, donc ¬(P ∧ Q) vaut V.' }, { assignment: { P: false, Q: false }, explanation: 'Les deux conjoints faux — la conjonction est fausse — donc la négation vaut V.' }] },
-    'level2-08-demorgan-guided': { title: 'À vous : évaluer ¬(P ∨ Q)', subtitle: 'Construisez une interprétation et lisez la disjonction niée.', guidedSteps: [{ kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: true }, { kind: 'hint', text: 'Choisissez la valeur de Q.', atom: 'Q', value: false }, { kind: 'done', text: 'P ∨ Q est vrai (P est vrai), donc ¬(P ∨ Q) vaut F.' }] },
+    'level2-08-demorgan-guided': { title: 'À vous : évaluer ¬(P ∨ Q)', subtitle: 'Construisez une interprétation et lisez la disjonction niée.', guidedSteps: [{ kind: 'hint', mode: 'instruct', text: 'Fixez P à vrai.', atom: 'P', value: true }, { kind: 'hint', mode: 'instruct', text: 'Fixez maintenant Q à faux.', atom: 'Q', value: false }, { kind: 'done', text: 'P ∨ Q est vrai (P est vrai), donc ¬(P ∨ Q) vaut F.' }] },
     'level2-09-de-morgan-guided': {
       title: 'À vous : évaluer ¬P ∧ ¬Q',
       subtitle: 'Évaluez la forme de De Morgan et comparez avec ¬(P ∨ Q).',
       guidedSteps: [
-        { kind: 'hint', text: 'Choisissez la valeur de P.', atom: 'P', value: true },
-        { kind: 'hint', text: 'Choisissez la valeur de Q.', atom: 'Q', value: false },
+        { kind: 'hint', mode: 'instruct', text: 'Fixez P à vrai.', atom: 'P', value: true },
+        { kind: 'hint', mode: 'instruct', text: 'Fixez maintenant Q à faux.', atom: 'Q', value: false },
         {
           kind: 'done',
           text: '¬P vaut F et ¬Q vaut V, donc ¬P ∧ ¬Q vaut F — comme ¬(P ∨ Q) sous cette interprétation (loi de De Morgan).',

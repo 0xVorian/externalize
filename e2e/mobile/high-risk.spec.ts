@@ -25,6 +25,9 @@ test('guided evaluation fits a narrow phone with a distinct response workspace',
   await expect(page.getByTestId('guided-response-workspace')).toBeVisible();
   await expect(page.locator('.atom-panel')).toHaveCount(0);
   await expect(page.getByTestId('guided-target-cell')).toHaveCount(1);
+  await expect(page.locator('.guided-prompt')).toContainText('Set P to true.');
+  await expect(page.locator('.unknown-cell')).toHaveText('—');
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
   const workspaceBox = await page.getByTestId('guided-response-workspace').boundingBox();
   const tableBox = await page.locator('.truth-table').boundingBox();
   expect(workspaceBox).toBeTruthy();
@@ -33,6 +36,22 @@ test('guided evaluation fits a narrow phone with a distinct response workspace',
   await page.locator('[data-action="select-guided-value"][data-value="true"]').click();
   await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('T');
   await page.locator('[data-action="check-guided-value"]').click();
+  await expect(page.locator('.guided-prompt')).toContainText('Now set Q to false.');
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
+  await expectNoPageOverflow(page);
+});
+
+test('guided ¬P on a narrow phone does not treat unset P as false', async ({ page }) => {
+  await gotoWithProgress(page, progressAtLesson('level1-03-neg-guided'));
+  await beginOfferedSession(page);
+  await expect(page.getByTestId('guided-response-workspace')).toBeVisible();
+  await expect(page.locator('.guided-prompt')).toContainText('Choose P so that ¬P is false.');
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
+  await page.locator('[data-action="select-guided-value"][data-value="false"]').click();
+  await expect(page.getByTestId('truth-result-cell')).toHaveText('T');
+  await page.locator('[data-action="check-guided-value"]').click();
+  await expect(page.locator('.feedback-wrong')).toBeVisible();
+  await expect(page.getByTestId('guided-response-workspace')).toBeVisible();
   await expectNoPageOverflow(page);
 });
 

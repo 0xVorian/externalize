@@ -55,23 +55,52 @@ describe('truth-table-render', () => {
       expect(html).toContain('truth-table-row active');
     });
 
-    it('blanks only the active guided target until a value is chosen', () => {
-      const html = renderLiveTruthRow('en', 'P ∧ Q', { P: false, Q: false }, {
+    it('blanks the active guided target and does not fill unset atoms with false', () => {
+      const html = renderLiveTruthRow('en', 'P ∧ Q', {}, {
         targetAtom: 'P',
         targetValue: null,
       });
       expect(html.match(/data-testid="guided-target-cell"/g)).toHaveLength(1);
       expect(html).toContain('truth-table-drop-slot empty');
-      expect(html).toMatch(/<td>F<\/td>/);
-      expect(html).not.toContain('atom-panel');
+      expect(html).toContain('unknown-cell');
+      expect(html).not.toMatch(/<td>F<\/td>/);
+      expect(html).toContain('data-testid="truth-result-cell"');
+      expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+    });
+
+    it('does not display a definite ¬P result while P is unset', () => {
+      const html = renderLiveTruthRow('en', '¬P', {}, {
+        targetAtom: 'P',
+        targetValue: null,
+      });
+      expect(html).toContain('truth-table-drop-slot empty');
+      expect(html).not.toMatch(/<td>T<\/td>/);
+      expect(html).not.toMatch(/<td>F<\/td>/);
+      expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+    });
+
+    it('shows a result only when the visible partial assignment determines it', () => {
+      const undetermined = renderLiveTruthRow('en', 'P ∧ Q', { P: true }, {
+        targetAtom: 'Q',
+        targetValue: null,
+      });
+      expect(undetermined).toContain('>T</td>');
+      expect(undetermined).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+
+      const determined = renderLiveTruthRow('en', 'P ∧ Q', { P: false }, {
+        targetAtom: 'Q',
+        targetValue: null,
+      });
+      expect(determined).toContain('>F</td>');
+      expect(determined).toMatch(/data-testid="truth-result-cell">F<\/td>/);
     });
 
     it('fills the guided target with compact notation after a provisional choice', () => {
-      const en = renderLiveTruthRow('en', 'P ∧ Q', { P: false, Q: false }, {
+      const en = renderLiveTruthRow('en', 'P ∧ Q', {}, {
         targetAtom: 'P',
         targetValue: true,
       });
-      const fr = renderLiveTruthRow('fr', 'P ∧ Q', { P: false, Q: false }, {
+      const fr = renderLiveTruthRow('fr', 'P ∧ Q', {}, {
         targetAtom: 'P',
         targetValue: true,
       });

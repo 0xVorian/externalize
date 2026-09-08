@@ -12,9 +12,10 @@ function renderGuidedValueWorkspace(state: LessonState, atom: string): string {
   const copy = ui(state.locale);
   const selected = state.guidedSelection;
   const checkDisabled = selected === null;
+  const prompt = currentGuidedHint(state);
   return `
     <section class="truth-table-response-workspace" data-testid="guided-response-workspace" aria-labelledby="guided-prompt">
-      <p class="guided-prompt" id="guided-prompt">${learn.chooseValueFor(atom)}</p>
+      <p class="guided-prompt" id="guided-prompt">${prompt}</p>
       <div class="truth-table-answer-tray" role="group" aria-label="${learn.guidedChoiceAria(atom)}">
         <button type="button" class="cell-segment true${selected === true ? ' selected' : ''}" data-action="select-guided-value" data-atom="${atom}" data-value="true" aria-pressed="${selected === true}">${copy.trueLabel}</button>
         <button type="button" class="cell-segment false${selected === false ? ' selected' : ''}" data-action="select-guided-value" data-atom="${atom}" data-value="false" aria-pressed="${selected === false}">${copy.falseLabel}</button>

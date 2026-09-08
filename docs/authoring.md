@@ -48,7 +48,7 @@ Add the same lesson key under **both** `en` and `fr` in the `LESSONS` object. Sh
 
 - **Card:** `title`, optional `subtitle`, `card: { title, body[], example? }`
 - **Watch:** `title`, optional `subtitle`, `watchSteps: [{ assignment, explanation }]`
-- **Guided:** `title`, optional `subtitle`, `guidedSteps: [{ kind: 'hint' | 'done', text }]`
+- **Guided:** `title`, optional `subtitle`, `guidedSteps: [{ kind: 'hint', mode: 'instruct' | 'goal', text, atom, value }, { kind: 'done', text }]`. Instruct steps name the requested value; goal steps state a visible logical aim that uniquely determines it.
 
 Write each locale from scratch — see [i18n rules](i18n.md).
 

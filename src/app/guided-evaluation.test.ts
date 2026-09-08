@@ -44,8 +44,10 @@ describe('single-target guided evaluation', () => {
     const { html } = renderGuided();
     expect(html.match(/data-testid="guided-target-cell"/g)).toHaveLength(1);
     expect(html).toContain('truth-table-drop-slot empty');
-    expect(html).toContain('Choose the value for P.');
-    expect(html.match(/Choose the value for P\./g)).toHaveLength(1);
+    expect(html).toContain('Set P to true.');
+    expect(html.match(/Set P to true\./g)).toHaveLength(1);
+    expect(html).toContain('unknown-cell');
+    expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
   });
 
   it('uses ordinary True / False and Vrai / Faux as answer choices', () => {
@@ -68,7 +70,7 @@ describe('single-target guided evaluation', () => {
     expect(html).toContain('truth-table-drop-slot filled');
     expect(html).toMatch(/guided-target-cell[\s\S]*?>T<\/span>/);
     expect(html).toContain('cell-segment true selected');
-    expect(selected.assignment.P).toBe(false);
+    expect(selected.assignment.P).toBeUndefined();
     expect(selected.complete).toBe(false);
     expect(selected.guidedStep).toBe(0);
     expect(html).not.toContain('feedback-correct');
@@ -95,7 +97,7 @@ describe('single-target guided evaluation', () => {
     const wrong = checkGuidedSelection(selectGuidedValue(initial, false));
     expect(wrong.complete).toBe(false);
     expect(wrong.guidedStep).toBe(0);
-    expect(wrong.assignment.P).toBe(false);
+    expect(wrong.assignment.P).toBeUndefined();
     expect(wrong.guidedCheckFailed).toBe(true);
     expect(wrong.guidedSelection).toBe(false);
 
@@ -124,6 +126,44 @@ describe('single-target guided evaluation', () => {
     const done = getLessonCopy('en', 'level0-05-guided').guidedSteps?.find((step) => step.kind === 'done');
     expect(html).toContain(done?.text ?? 'missing done copy');
   });
+
+  it('keeps unknown atoms distinct from false and hides undetermined results', () => {
+    const initial = createLessonState('en', getLessonDefinition('level0-05-guided')!);
+    expect(initial.assignment).toEqual({});
+    expect(initial.assignment.P).toBeUndefined();
+    expect(initial.assignment.Q).toBeUndefined();
+
+    const html = renderLessonView(initial, defaultLearnProgress);
+    expect(html).toContain('unknown-cell');
+    expect(html).not.toMatch(/<td>F<\/td>/);
+    expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+
+    const afterP = checkGuidedSelection(selectGuidedValue(initial, true));
+    expect(afterP.assignment).toEqual({ P: true });
+    expect(afterP.assignment.Q).toBeUndefined();
+    const afterPHtml = renderLessonView(afterP, defaultLearnProgress);
+    expect(afterPHtml).toContain('Now set Q to false.');
+    expect(afterPHtml).toContain('>T</td>');
+    expect(afterPHtml).toContain('data-testid="guided-target-cell"');
+    expect(afterPHtml).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+  });
+
+  it('does not show a definite ¬P result while P is unset', () => {
+    const state = createLessonState('en', getLessonDefinition('level1-03-neg-guided')!);
+    const html = renderLessonView(state, defaultLearnProgress);
+    expect(html).toContain('Choose P so that ¬P is false.');
+    expect(html).toContain('truth-table-drop-slot empty');
+    expect(html).not.toMatch(/<td>T<\/td>/);
+    expect(html).not.toMatch(/<td>F<\/td>/);
+    expect(html).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
+
+    const selected = selectGuidedValue(state, false);
+    const selectedHtml = renderLessonView(selected, defaultLearnProgress);
+    expect(selectedHtml).toMatch(/guided-target-cell[\s\S]*?>F<\/span>/);
+    expect(selectedHtml).toMatch(/data-testid="truth-result-cell">T<\/td>/);
+    expect(selected.complete).toBe(false);
+    expect(selected.guidedCheckFailed).toBe(false);
+  });
 });
 
 describe('full-assignment contexts stay on the assignment panel', () => {
@@ -132,6 +172,8 @@ describe('full-assignment contexts stay on the assignment panel', () => {
     expect(html).toContain('atom-panel');
     expect(html).toContain('data-action="set-explore-atom"');
     expect(html).not.toContain('data-testid="guided-response-workspace"');
+    expect(html).toContain('>F</td>');
+    expect(html).toMatch(/data-testid="truth-result-cell">F<\/td>/);
   });
 
   it('keeps find-counterexample on editable assignment controls', () => {

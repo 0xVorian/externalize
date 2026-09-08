@@ -1,6 +1,11 @@
 import { evaluate, parse, collectAtoms, generateTruthTable } from '../../engine';
 import type { Assignment, PartialTruthTable } from '../../engine';
 import { learnUi, ui, formatTruthValue, type Locale } from '../i18n';
+import {
+  determinedFormulaValue,
+  isAtomAssigned,
+  type PartialAssignment,
+} from './partial-assignment';
 
 /** Flat formulas that use a live single-row truth table in lessons and practice. */
 const LIVE_TRUTH_ROW_FORMULAS = new Set(['P ∧ Q', '¬P', 'P ∨ Q', 'P → Q', 'P ↔ Q']);
@@ -14,7 +19,7 @@ export function evaluateFormula(formula: string, assignment: Assignment): boolea
 }
 
 export type TruthTableRow = {
-  assignment: Assignment;
+  assignment: PartialAssignment;
   active: boolean;
   srLabel?: string;
   targetAtom?: string;
@@ -39,16 +44,22 @@ function assignmentsMatch(a: Assignment, b: Assignment, atoms: string[]): boolea
   return atoms.every((atom) => (a[atom] ?? false) === (b[atom] ?? false));
 }
 
-function rowAssignment(row: TruthTableRow, atoms: string[]): Assignment {
-  const assignment: Assignment = {};
+function visibleRowAssignment(row: TruthTableRow, atoms: string[]): PartialAssignment {
+  const assignment: PartialAssignment = {};
   for (const atom of atoms) {
-    if (atom === row.targetAtom && (row.targetValue === true || row.targetValue === false)) {
-      assignment[atom] = row.targetValue;
-    } else {
-      assignment[atom] = row.assignment[atom] ?? false;
+    if (atom === row.targetAtom) {
+      if (row.targetValue === true || row.targetValue === false) {
+        assignment[atom] = row.targetValue;
+      }
+    } else if (isAtomAssigned(row.assignment, atom)) {
+      assignment[atom] = row.assignment[atom];
     }
   }
   return assignment;
+}
+
+function renderUnknownCell(label: string, text: string): string {
+  return `<td class="unknown-cell"><span aria-label="${label}">${text}</span></td>`;
 }
 
 function renderTruthValueSlot(
@@ -71,8 +82,10 @@ export function renderTruthTable(
   const atoms = formulaAtoms(formula);
   const body = rows
     .map((row) => {
-      const displayAssignment = rowAssignment(row, atoms);
-      const result = evaluateFormula(formula, displayAssignment);
+      const displayAssignment = visibleRowAssignment(row, atoms);
+      const determined = options.hideResult
+        ? null
+        : determinedFormulaValue(formula, displayAssignment);
       const atomCells = atoms
         .map((atom) => {
           if (atom === row.targetAtom) {
@@ -82,14 +95,25 @@ export function renderTruthTable(
               : learn.guidedTargetAria(atom, false);
             return `<td class="blank-cell guided-target-cell" data-testid="guided-target-cell">${renderTruthValueSlot(locale, filled ? row.targetValue! : null, aria)}</td>`;
           }
-          return `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`;
+          if (!isAtomAssigned(row.assignment, atom)) {
+            return renderUnknownCell(
+              learn.unassignedAtomAria(atom),
+              formatTruthValue(locale, undefined),
+            );
+          }
+          return `<td>${formatTruthValue(locale, row.assignment[atom])}</td>`;
         })
         .join('');
+      const resultCell = options.hideResult
+        ? '<td class="result-cell">—</td>'
+        : determined === null
+          ? `<td class="result-cell" data-testid="truth-result-cell"><span aria-label="${learn.undeterminedResultAria}">${formatTruthValue(locale, undefined)}</span></td>`
+          : `<td class="result-cell" data-testid="truth-result-cell">${formatTruthValue(locale, determined)}</td>`;
       return `
         <tr class="truth-table-row ${row.active ? 'active' : ''}"${row.active ? ' aria-current="step"' : ''}>
           ${row.srLabel ? `<th scope="row" class="sr-only">${row.srLabel}</th>` : ''}
           ${atomCells}
-          <td class="result-cell">${options.hideResult ? '—' : formatTruthValue(locale, result)}</td>
+          ${resultCell}
         </tr>
       `;
     })
@@ -115,13 +139,14 @@ export function renderTruthTable(
 export function renderLiveTruthRow(
   locale: Locale,
   formula: string,
-  assignment: Record<string, boolean>,
+  assignment: PartialAssignment,
   options: LiveTruthRowOptions = {},
 ): string {
-  const atoms = formulaAtoms(formula);
-  const row: Assignment = {};
-  for (const atom of atoms) {
-    row[atom] = assignment[atom] ?? false;
+  const row: PartialAssignment = {};
+  for (const atom of formulaAtoms(formula)) {
+    if (isAtomAssigned(assignment, atom)) {
+      row[atom] = assignment[atom];
+    }
   }
   return renderTruthTable(
     locale,

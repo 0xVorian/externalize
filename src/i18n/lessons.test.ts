@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LEVEL_0_LESSONS, LEVEL_1_LESSONS, LEVEL_2_LESSONS, ALL_LEARN_LESSONS } from '../app/lessons';
+import { uniqueAtomValueForGoal } from '../app/partial-assignment';
 import { getLessonCopy, learnUi, getReference } from './lessons';
 
 const WATCH_STEP_COUNTS: Record<string, number> = {
@@ -121,7 +122,35 @@ describe('lesson i18n', () => {
         }
       }
     }
-    expect(learnUi('en').chooseValueFor('P')).toBe('Choose the value for P.');
-    expect(learnUi('fr').chooseValueFor('P')).toBe('Choisissez la valeur de P.');
+  });
+
+  it('never hides a required guided value behind a free-choice prompt', () => {
+    for (const lesson of ALL_LEARN_LESSONS) {
+      if (lesson.type !== 'guided' || !lesson.formula) continue;
+      for (const locale of ['en', 'fr'] as const) {
+        const steps = getLessonCopy(locale, lesson.id).guidedSteps ?? [];
+        const prior: Record<string, boolean> = {};
+        for (const step of steps) {
+          if (step.kind !== 'hint') continue;
+          expect(step.text).not.toMatch(/^Choose the value for [A-Z]\.$/);
+          expect(step.text).not.toMatch(/^Choisissez la valeur de [A-Z]\.$/);
+          expect(step.text).toContain(step.atom);
+          if (step.mode === 'instruct') {
+            if (locale === 'en') {
+              expect(step.text).toMatch(step.value ? /\btrue\b/i : /\bfalse\b/i);
+              expect(step.text).not.toMatch(step.value ? /\bfalse\b/i : /\btrue\b/i);
+            } else {
+              expect(step.text).toMatch(step.value ? /\bvrai\b/i : /\bfaux\b/i);
+              expect(step.text).not.toMatch(step.value ? /\bfaux\b/i : /\bvrai\b/i);
+            }
+          } else {
+            expect(uniqueAtomValueForGoal(lesson.formula, prior, step.atom, step.goalValue)).toBe(
+              step.value,
+            );
+          }
+          prior[step.atom] = step.value;
+        }
+      }
+    }
   });
 });

@@ -84,7 +84,7 @@ Copy shape in `src/i18n/lessons.ts`:
 | `title`, `subtitle` | All | Lesson header |
 | `card.title`, `card.body[]`, `card.example?` | `card` | Prose lesson |
 | `watchSteps[]` with `{ assignment, explanation }` | `watch` | Truth-table walkthrough |
-| `guidedSteps[]` with `{ kind: 'hint' \| 'done', text }` | `guided` | Step-by-step learner try |
+| `guidedSteps[]` with `{ kind: 'hint', mode: 'instruct' \| 'goal', text, atom, value }` or `{ kind: 'done', text }` | `guided` | Step-by-step learner try; instruct names the value, goal makes it derivable |
 
 Lessons live in `LEVEL_0_LESSONS`, `LEVEL_1_LESSONS`, and `LEVEL_2_LESSONS`. Combined navigation uses `ALL_LEARN_LESSONS`. Source-route cards live in `src/app/source-lessons.ts` and are **not** part of that sequence.
 

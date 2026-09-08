@@ -125,7 +125,9 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 When exactly one sentence letter is the current target:
 
 - Keep the formula visible.
-- Show that letter as a blank, highlighted cell in the live row. Already-set letters stay in compact T/F (V/F).
+- Show that letter as a blank, highlighted cell in the live row. Already-set letters stay in compact T/F (V/F). Letters not yet assigned render as unknown (`—`), not as a silent F.
+- The result column uses **partial determination**: it shows T/F only when the visible assignment (committed values plus the provisional target) fixes the formula; otherwise it stays blank (`—`). Example: `P ∧ Q` with P = F is already F; `¬P` with P unset stays unknown.
+- Each guided prompt either names the requested value (`Set P to true`) or states a goal from which the value follows (`Make P → Q false`). The app does not hide a required value behind a free choice.
 - Do **not** show the generic multi-row Truth assignment panel, and do not show inactive T/F controls for letters the learner is not being asked about.
 - Put True / False (Vrai / Faux) in a distinct response workspace below the row. Choosing a value fills the target with formal notation only; Check / Vérifier grades it. Wrong answers stay repairable in place. After the last correct check, the done explanation appears and Continue is the primary action.
 

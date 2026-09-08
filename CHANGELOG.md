@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Guided evaluation no longer treats unset sentence letters as false, and no longer hides a required truth value behind “Choose the value for P.” Each step either names the requested value or states a goal that determines it. Unassigned letters stay blank, and the result column appears only when the visible assignment logically fixes it.
 - Content JSON imports declare `type: json` so Playwright helpers can load progress modules under native Node ESM
 - Source-route classification items can be repaired in place: Try again is handled in Learn (it previously sat behind a Practice-only early return)
 - Source-route Reading completion is now durable: finishing the last item persists `completedAt`, shows Done / return to the book instead of endless Continue, and revisiting a completed route does not restart at item 1. Mastery work remains reachable after that terminal state

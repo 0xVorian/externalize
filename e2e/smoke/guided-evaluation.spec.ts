@@ -21,22 +21,28 @@ test.describe('guided evaluation visual grammar', () => {
     await expect(page.locator('[data-action="select-guided-value"][data-value="false"]')).toHaveText('False');
     await expect(page.locator('[data-action="check-guided-value"]')).toBeDisabled();
     await expect(page.locator('.guided-prompt')).toHaveCount(1);
+    await expect(page.locator('.guided-prompt')).toContainText('Set P to true.');
+    await expect(page.locator('.unknown-cell')).toHaveText('—');
+    await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
 
     await page.locator('[data-action="select-guided-value"][data-value="false"]').click();
     await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('F');
     await expect(page.locator('.feedback-wrong')).toHaveCount(0);
     await expect(page.locator('.feedback-correct')).toHaveCount(0);
     await expect(page.locator('[data-action="lesson-next"]')).toHaveCount(0);
+    await expect(page.getByTestId('truth-result-cell')).toHaveText('F');
 
     await page.locator('[data-action="check-guided-value"]').click();
     await expect(page.locator('.feedback-wrong')).toBeVisible();
     await expect(page.getByTestId('guided-response-workspace')).toBeVisible();
+    await expect(page.locator('.guided-prompt')).toContainText('Set P to true.');
 
     await page.locator('[data-action="select-guided-value"][data-value="true"]').click();
     await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('T');
     await page.locator('[data-action="check-guided-value"]').click();
     await expect(page.locator('.feedback-wrong')).toHaveCount(0);
-    await expect(page.locator('.guided-prompt')).toContainText('Choose the value for Q.');
+    await expect(page.locator('.guided-prompt')).toContainText('Now set Q to false.');
+    await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
 
     await completeGuidedStep(page, 'Q', false);
     await expect(page.locator('.feedback-correct')).toBeVisible();
@@ -52,7 +58,36 @@ test.describe('guided evaluation visual grammar', () => {
     await expect(page.locator('[data-action="select-guided-value"][data-value="true"]')).toHaveText('Vrai');
     await expect(page.locator('[data-action="select-guided-value"][data-value="false"]')).toHaveText('Faux');
     await expect(page.locator('[data-action="check-guided-value"]')).toHaveText('Vérifier');
+    await expect(page.locator('.guided-prompt')).toContainText('Fixez P à vrai.');
     await page.locator('[data-action="select-guided-value"][data-value="true"]').click();
     await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('V');
+    await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
+  });
+
+  test('¬P keeps the result unknown until P is assigned', async ({ page }) => {
+    await gotoWithProgress(page, progressAtLesson('level1-03-neg-guided'));
+    await beginOfferedSession(page);
+
+    await expect(page.locator('.formula-display')).toContainText('¬P');
+    await expect(page.locator('.guided-prompt')).toContainText('Choose P so that ¬P is false.');
+    await expect(page.getByTestId('guided-target-cell')).toHaveCount(1);
+    await expect(page.getByTestId('truth-result-cell')).toHaveText('—');
+    await expect(page.locator('.unknown-cell')).toHaveCount(0);
+
+    await page.locator('[data-action="select-guided-value"][data-value="false"]').click();
+    await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('F');
+    await expect(page.getByTestId('truth-result-cell')).toHaveText('T');
+    await expect(page.locator('.feedback-wrong')).toHaveCount(0);
+
+    await page.locator('[data-action="check-guided-value"]').click();
+    await expect(page.locator('.feedback-wrong')).toBeVisible();
+    await expect(page.getByTestId('guided-response-workspace')).toBeVisible();
+
+    await page.locator('[data-action="select-guided-value"][data-value="true"]').click();
+    await expect(page.locator('.truth-table-drop-slot.filled')).toContainText('T');
+    await expect(page.getByTestId('truth-result-cell')).toHaveText('F');
+    await page.locator('[data-action="check-guided-value"]').click();
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+    await expect(page.getByTestId('guided-response-workspace')).toHaveCount(0);
   });
 });
