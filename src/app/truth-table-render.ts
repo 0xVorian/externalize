@@ -185,7 +185,7 @@ export function renderCompleteTruthTable(locale: Locale, formula: string): strin
   const atoms = table.atoms;
   const body = table.rows.map((row) => {
     const atomCells = atoms.map((atom) => `<td>${formatTruthValue(locale, row.assignment[atom] ?? false)}</td>`).join('');
-    return `<tr class="truth-table-row"><td>${atomCells}</td><td class="result-cell">${formatTruthValue(locale, row.result)}</td></tr>`;
+    return `<tr class="truth-table-row">${atomCells}<td class="result-cell">${formatTruthValue(locale, row.result)}</td></tr>`;
   }).join('');
   const headerCells = atoms.map((atom) => `<th scope="col">${atom}</th>`).join('');
   return `<div class="truth-table-wrap truth-table-static"><table class="truth-table" aria-label="${learn.truthTableAria(formula)}"><thead><tr>${headerCells}<th scope="col">${formula}</th></tr></thead><tbody>${body}</tbody></table></div>`;
