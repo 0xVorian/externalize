@@ -56,6 +56,10 @@ export function ui(locale: Locale) {
   const copy = baseUi(locale);
   return {
     ...copy,
+    // Controls stay in ordinary language while formal displays keep T/F (or V/F).
+    // This lets learners use the meaning before fluency with the notation is assumed.
+    trueLabel: locale === 'fr' ? 'Vrai' : 'True',
+    falseLabel: locale === 'fr' ? 'Faux' : 'False',
     evaluationCorrect:
       locale === 'fr'
         ? 'Exact — les valeurs intermédiaires conduisent bien à ce résultat.'
