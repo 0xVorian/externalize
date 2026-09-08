@@ -334,3 +334,104 @@
     background: #171412;
   }
 }
+
+/*
+ * Session exercise visual-grammar experiment.
+ *
+ * The stimulus should read as the thing to reason about; the response area should read as the
+ * learner's workspace. Keep truth-table answers embedded because their location is part of the
+ * reasoning task, but make the target cell unmistakable.
+ */
+.session-active .exercise-card:has(.choice-list),
+.session-active .exercise-card:has(.prediction-panel),
+.session-active .exercise-card:has(.blank-cell) {
+  margin-top: 0.35rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.session-active .exercise-card:has(.choice-list) .exercise-prompt,
+.session-active .exercise-card:has(.prediction-panel) .exercise-prompt,
+.session-active .exercise-card:has(.blank-cell) .exercise-prompt {
+  margin-bottom: 1.25rem;
+  font-size: 1.08rem;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.session-active .exercise-card:has(.choice-list) .formula-display,
+.session-active .exercise-card:has(.prediction-panel) > .formula-display {
+  padding: 0.35rem 0;
+  background: transparent;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.session-active .choice-list,
+.session-active .prediction-panel {
+  margin: 1.5rem 0 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+}
+
+.session-active .prediction-panel {
+  border-top: 1px solid var(--border);
+}
+
+.session-active .prediction-label {
+  margin-bottom: 0.7rem;
+  font-size: 0.85rem;
+}
+
+.session-active .choice-option,
+.session-active .prediction-panel .cell-segment {
+  min-height: 3.25rem;
+  border-width: 1.5px;
+  background: var(--bg);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.session-active .choice-option {
+  padding: 0.8rem 0.9rem;
+}
+
+.session-active .choice-option.selected,
+.session-active .prediction-panel .cell-segment.selected {
+  border-width: 2px;
+}
+
+/* A truth-table answer is intentionally embedded in the object being evaluated. */
+.session-active .blank-cell {
+  position: relative;
+  padding: 0.45rem;
+  background: var(--surface) !important;
+  outline: 2px solid var(--border);
+  outline-offset: -3px;
+}
+
+.session-active .blank-cell .cell-segment {
+  min-height: 3rem;
+  background: var(--bg);
+}
+
+.session-active > .actions {
+  margin-top: 1.25rem;
+}
+
+.session-active > .actions .primary {
+  min-height: 3.1rem;
+  font-weight: 700;
+}
+
+.session-active .exercise-card:has(.choice-list) .feedback,
+.session-active .exercise-card:has(.prediction-panel) .feedback,
+.session-active .exercise-card:has(.blank-cell) .feedback {
+  margin-top: 1.25rem;
+  padding: 0.9rem;
+}
