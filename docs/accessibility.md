@@ -27,7 +27,8 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 
 - Table retains `aria-label` (formula-specific, localized).
 - Watch-mode highlighted row uses `aria-current="step"`.
-- Screen-reader row labels (`sr-only` `th scope="row"`) unchanged.
+- Watch-mode case labels are `.sr-only` spans inside the first visible cell, so they do not create an extra column.
+- The 2×2 watch grid keeps `scope="col"` / `scope="row"` on axis labels. The corner cell is visually empty and contains a localized `.sr-only` description of which letter labels rows vs columns.
 
 ### Truth-value controls
 

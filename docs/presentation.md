@@ -33,7 +33,7 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 ### Row table (single-atom and fallback)
 
 - All rows visible; **highlight the active row**; dim inactive rows slightly.
-- Columns: atom assignments + result column (formula header, e.g. `P ∧ Q`).
+- Columns: atom assignments + result column (formula header, e.g. `P ∧ Q`). Screen-reader case labels (`Case 1 of 2`) live as `.sr-only` text inside the first cell, not as an extra table column — an extra `th` would shift every value one column right.
 - Step counter (“Case 1 of 4”) plus row highlight — redundant on purpose (orientation + focus).
 - Locale-aware truth labels in cells (`T`/`F` EN, `V`/`F` FR) via `formatTruthValue()`.
 
@@ -45,8 +45,10 @@ When the lesson is “here are the four assignments for P ∧ Q”, a parse tree
 
 - **P on rows** (T then F, top to bottom), **Q on columns** (T then F, left to right); top-left cell is P=T, Q=T.
 - Each cell shows the formula result under that assignment; **highlight the active cell** matching the current watch step; dim inactive cells.
+- The corner cell is visually empty. Row labels (`P = T`) and column labels (`Q = T`) already name the axes; a cryptic `P ↓ / Q →` legend is not shown. A localized `.sr-only` label in the corner plus `scope="row"` / `scope="col"` keeps the table accessible.
+- The grid is a real `<table>`. Do not set `display: grid` or `display: flex` on the table, rows, or cells — that leftover CSS-grid styling breaks the 2×2 on narrow phones.
 - Same step counter and locale labels as the row table.
-- Set per lesson via `watchLayout: 'grid' | 'table'` in `src/app/lessons.ts`; binary formulas default to grid when eligible.
+- Binary flat formulas use the grid via `usesWatchGrid()`; single-atom and nested watches keep the row table.
 
 **Authoring:** `watchSteps` in `src/i18n/lessons.ts` — each step is `{ assignment, explanation }`. Result cells are computed by the engine; do not duplicate in copy.
 

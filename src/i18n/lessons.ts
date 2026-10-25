@@ -81,6 +81,7 @@ export type LearnUiCopy = {
   openExplore: string;
   modeExploreAria: string;
   watchGridAria: (formula: string) => string;
+  watchGridCornerAria: (rowAtom: string, colAtom: string) => string;
   routeLabel: string;
   routeFoundations: string;
   routeSobel: string;
@@ -221,6 +222,8 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     openExplore: 'Explore formulas',
     modeExploreAria: 'Explore',
     watchGridAria: (formula) => `Truth grid for ${formula}`,
+    watchGridCornerAria: (rowAtom, colAtom) =>
+      `${rowAtom} labels the rows; ${colAtom} labels the columns`,
     routeLabel: 'Learning route',
     routeFoundations: 'Logic foundations',
     routeSobel: 'Logic and Theism',
@@ -285,6 +288,8 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     openExplore: 'Explorer les formules',
     modeExploreAria: 'Explorer',
     watchGridAria: (formula) => `Grille de vérité de ${formula}`,
+    watchGridCornerAria: (rowAtom, colAtom) =>
+      `${rowAtom} désigne les lignes, ${colAtom} les colonnes`,
     routeLabel: 'Parcours',
     routeFoundations: 'Fondements de la logique',
     routeSobel: 'Logic and Theism',
@@ -405,7 +410,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         {
           assignment: { P: true },
           explanation:
-            'P is true, so negation reverses it: ¬P evaluates to F. Only the P column matters here.',
+            'P is true, so negation reverses it: ¬P evaluates to F. The highlighted row shows both P and the resulting ¬P.',
         },
         {
           assignment: { P: false },
@@ -768,7 +773,7 @@ const LESSONS: Record<Locale, Record<string, LessonCopy>> = {
         {
           assignment: { P: true },
           explanation:
-            'P est vrai : la négation l\'inverse, donc ¬P vaut F. Seule la colonne P compte ici.',
+            'P est vrai : la négation l\'inverse, donc ¬P vaut F. La ligne surlignée donne P et le ¬P qui en résulte.',
         },
         {
           assignment: { P: false },

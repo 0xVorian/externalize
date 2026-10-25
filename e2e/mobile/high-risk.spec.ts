@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
   gotoFresh,
   gotoWithProgress,
@@ -10,12 +10,7 @@ import { emptyProgress, progressAtLesson, progressReadyForExercise } from '../he
 import { beginOfferedSession, sessionOpening, sessionPosition, sessionPrimary } from '../helpers/session';
 import { setActiveRoute } from '../../src/app/source-route';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID } from '../../src/app/routes';
-
-async function expectNoPageOverflow(page: Page): Promise<void> {
-  expect(
-    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-  ).toBe(true);
-}
+import { expectAlignedTable, expectNoPageOverflow, readTableLayout } from '../helpers/tables';
 
 test('guided evaluation fits a narrow phone with a distinct response workspace', async ({
   page,
@@ -69,7 +64,24 @@ test('Level 0 watch grid fits a narrow phone', async ({ page }) => {
   await gotoWithProgress(page, progressAtLesson('level0-03-and'));
   await beginOfferedSession(page);
   await lessonNext(page).click();
-  await expect(page.locator('.watch-grid')).toBeVisible();
+  const grid = page.locator('.watch-grid');
+  await expect(grid).toBeVisible();
+  await expect(grid).not.toContainText('↓ /');
+  await expectAlignedTable(grid);
+  await expectNoPageOverflow(page);
+});
+
+test('¬P watch table keeps P values under the P header', async ({ page }) => {
+  await gotoWithProgress(page, progressAtLesson('level1-02-neg-watch'));
+  await enterLearn(page);
+  await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
+  const table = page.locator('.truth-table');
+  await expect(table).toBeVisible();
+  await expectAlignedTable(table);
+  const layout = await readTableLayout(table);
+  expect(layout.header.map((cell) => cell.text)).toEqual(['P', '¬P']);
+  expect(layout.body[0]?.map((cell) => cell.text)).toEqual(['V', 'F']);
+  await expect(page.locator('.feedback')).not.toContainText('Seule la colonne P');
   await expectNoPageOverflow(page);
 });
 
@@ -112,7 +124,9 @@ test('translation palette wraps without page overflow in French', async ({ page 
 test('truth table stays contained on a phone', async ({ page }) => {
   await gotoWithProgress(page, progressReadyForExercise('tt-001'));
   await clickMode(page, 'practice');
-  await expect(page.locator('.truth-table')).toBeVisible();
+  const table = page.locator('.truth-table');
+  await expect(table).toBeVisible();
+  await expectAlignedTable(table);
   await expectNoPageOverflow(page);
 });
 
