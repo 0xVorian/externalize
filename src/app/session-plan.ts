@@ -26,12 +26,18 @@ import {
 import { expandItemsToUnits, isTeachingItem } from './session-units';
 import {
   bodyItemIdsWithoutWarmupDuplicate,
+  fillWarmupBodyItemIds,
   repairStepsForWarmup,
   selectWarmup,
   warmupSteps,
 } from './session-warmup';
 
-export { applyWarmupMiss, mostRecentPractisedConcept, selectWarmup } from './session-warmup';
+export {
+  applyWarmupMiss,
+  applyWarmupMissAfterCheck,
+  mostRecentPractisedConcept,
+  selectWarmup,
+} from './session-warmup';
 
 export {
   SESSION_MAX,
@@ -159,7 +165,12 @@ export function composeSessionPlan(
   const now = options?.now ?? Date.now();
   const warmup = selectWarmup(store, now, itemIds);
   const remainingIds = warmup
-    ? bodyItemIdsWithoutWarmupDuplicate(itemIds, warmup)
+    ? fillWarmupBodyItemIds(
+        store,
+        bodyItemIdsWithoutWarmupDuplicate(itemIds, warmup),
+        warmup,
+        now,
+      )
     : itemIds;
   const expandedBody = expandItemsToUnits(remainingIds, store);
   // Envelope the rest first (max 6 when a warm-up will be prepended) so a
@@ -170,6 +181,8 @@ export function composeSessionPlan(
         target: Math.max(1, SESSION_TARGET - 1),
       })
     : takeSessionEnvelope(expandedBody);
+  // Exception to “every round opens with a warm-up”: omit it when the next
+  // cluster already needs all 7 slots, so that teach–practice group stays intact.
   const opening =
     warmup && warmupSteps(warmup).length + body.length <= SESSION_MAX
       ? warmupSteps(warmup)

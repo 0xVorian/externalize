@@ -9,10 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Rounds now open with one warm-up check on the most recently practised concept (the last concept that has an exercise, independent of route). A correct answer continues into the planned material; a miss turns the rest of the round into a short repair of that concept. A first-time learner still starts without a warm-up. The step counts toward the 5–7 envelope and the `n / m` counter.
+- Rounds now open with one warm-up check on the most recently practised concept (the last concept that has an exercise, independent of route). A correct answer continues into the planned material; a miss on that step’s Check turns the rest of the round into a short repair of that concept without growing `n / m`. Only the one due item chosen as the warm-up is consumed; other due items and other skills on the same concept stay in the round. A first-time learner still starts without a warm-up. **Exception:** a round whose next cluster already needs all 7 slots omits the warm-up so that cluster stays intact. The step counts toward the 5–7 envelope and the `n / m` counter.
 
 ### Fixed
 
+- A due-review warm-up now consumes only the one chosen item, so other due exercises (including a different skill on the same concept) stay in the round. A miss keeps advertised `n / m` and still attaches explanation plus practice; repair waits for that step’s Check rather than the first graded cell or node.
 - Session rounds no longer end on a teaching step whose related practice was deferred to the next round. The envelope still targets 6 steps and stays within 5–7 when a cluster fits; otherwise it ends before that teaching step so the `n / m` counter stays honest. Applies to Logic foundations lessons and the Sobel preparation sequence.
 - Restored the 2×2 watch grid as a real table on narrow screens (down to ~320px). A leftover `display: grid` rule had stacked the `Q = T` / `Q = F` headers and wrapped row labels off the grid. The cryptic `P ↓ / Q →` corner legend is gone; row and column labels already name the axes, and a visually hidden label keeps the table accessible.
 - Stopped screen-reader case labels from occupying a visual column in row-by-row truth tables, which had shifted ¬P (and other watch-table) values under the wrong headers. Negation watch copy now points at the highlighted row instead of saying that only the P column matters.

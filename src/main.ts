@@ -119,7 +119,7 @@ import {
 } from './app/practice-ui-state';
 import { currentScaffoldLevel } from './app/evaluation-scaffold';
 import {
-  applyWarmupMiss,
+  applyWarmupMissAfterCheck,
   offerOpening,
   startSession,
   resumeSession,
@@ -279,15 +279,15 @@ function usingSourcePractice(): boolean {
   return Boolean(sourcePracticeState) && (isSourceLearn() || isSourceSessionItem());
 }
 
-function maybeApplyWarmupRepair(): void {
+function maybeApplyWarmupRepair(isFinalCheck = false): void {
   if (!activeSession) {
     return;
   }
   const attempt = progress.practiceDraft?.attempt;
-  if (!attempt || attempt.firstCheckedCorrect !== false) {
-    return;
-  }
-  const next = applyWarmupMiss(activeSession);
+  const next = applyWarmupMissAfterCheck(activeSession, {
+    isFinalCheck,
+    firstCheckedCorrect: attempt?.firstCheckedCorrect ?? null,
+  });
   if (next === activeSession) {
     return;
   }
@@ -497,7 +497,10 @@ function persistPracticeState(): void {
   persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(practiceState)));
 }
 
-function commitCheckedPracticeState(nextState: AppState): void {
+function commitCheckedPracticeState(
+  nextState: AppState,
+  options?: { finalCheck?: boolean },
+): void {
   const before = snapshotProgressVisibility(progress);
   const wasFinalized = practiceState?.attempt.status === 'finalized';
   practiceState = nextState;
@@ -506,7 +509,7 @@ function commitCheckedPracticeState(nextState: AppState): void {
     practiceDraftSnapshot(nextState),
   );
   persistProgress(nextProgress);
-  maybeApplyWarmupRepair();
+  maybeApplyWarmupRepair(options?.finalCheck === true);
   if (progress.practiceDraft?.attempt.id === nextState.attempt.id) {
     practiceState = {
       ...nextState,
@@ -541,8 +544,11 @@ function updatePracticeState(update: (state: AppState) => AppState): void {
   render();
 }
 
-function checkPracticeState(check: (state: AppState) => AppState): void {
-  commitCheckedPracticeState(check(ensurePracticeState()));
+function checkPracticeState(
+  check: (state: AppState) => AppState,
+  options?: { finalCheck?: boolean },
+): void {
+  commitCheckedPracticeState(check(ensurePracticeState()), options);
   render();
 }
 
@@ -1009,14 +1015,14 @@ root.addEventListener('click', (event) => {
       const next = checkClassification(sourcePracticeState);
       sourcePracticeState = next;
       persistProgress(recordCheckedPracticeState(progress, practiceDraftSnapshot(next)));
-      maybeApplyWarmupRepair();
+      maybeApplyWarmupRepair(true);
       if (progress.practiceDraft) {
         sourcePracticeState = { ...next, attempt: progress.practiceDraft.attempt };
       }
       render();
       return;
     }
-    checkPracticeState(checkClassification);
+    checkPracticeState(checkClassification, { finalCheck: true });
     return;
   }
 
@@ -1136,13 +1142,13 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'check-scope') {
-    checkPracticeState(checkScope);
+    checkPracticeState(checkScope, { finalCheck: true });
     return;
   }
 
   if (action === 'submit-tautology-answer') {
     const value = button.dataset.value === 'true';
-    checkPracticeState((state) => submitTautologyAnswer(state, value));
+    checkPracticeState((state) => submitTautologyAnswer(state, value), { finalCheck: true });
     return;
   }
 
@@ -1177,7 +1183,7 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'check-evaluation') {
-    checkPracticeState(checkEvaluation);
+    checkPracticeState(checkEvaluation, { finalCheck: true });
     return;
   }
 
@@ -1217,16 +1223,16 @@ root.addEventListener('click', (event) => {
     return;
   }
   if (action === 'check-proof') {
-    checkPracticeState(checkProofStep);
+    checkPracticeState(checkProofStep, { finalCheck: true });
     return;
   }
   if (action === 'check-translation') {
-    checkPracticeState(checkTranslation);
+    checkPracticeState(checkTranslation, { finalCheck: true });
     return;
   }
 
   if (action === 'check-counterexample') {
-    checkPracticeState(checkCounterexample);
+    checkPracticeState(checkCounterexample, { finalCheck: true });
     return;
   }
 

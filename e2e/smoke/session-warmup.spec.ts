@@ -65,6 +65,15 @@ test.describe('session warm-up', () => {
     await expect(page.getByTestId('session-step-label')).toContainText(/look back/i);
     await expect(page.getByTestId('session-step-label')).toContainText(/Conjunction/i);
     await expect(page.locator('.lesson-card-title')).toContainText(/and|∧|conjunction/i);
-    await expect(sessionPosition(page)).not.toHaveText('2 / 5');
+    await expect(sessionPosition(page)).toHaveText('2 / 4');
+  });
+
+  test('labels the warm-up in French', async ({ page }) => {
+    await gotoWithProgress(page, progressWithConjunctionPractice());
+    await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
+    await beginOfferedSession(page);
+    await expect(page.getByTestId('session-step-label')).toContainText(/Rappel/);
+    await expect(page.getByTestId('session-step-label')).toContainText(/Conjonction/);
+    await expect(sessionPosition(page)).toHaveText('1 / 5');
   });
 });

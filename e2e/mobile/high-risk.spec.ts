@@ -6,7 +6,12 @@ import {
   clickMode,
   enterLearn,
 } from '../helpers/app';
-import { emptyProgress, progressAtLesson, progressReadyForExercise } from '../helpers/progress';
+import {
+  emptyProgress,
+  progressAtLesson,
+  progressReadyForExercise,
+  progressWithConjunctionPractice,
+} from '../helpers/progress';
 import { beginOfferedSession, sessionOpening, sessionPosition, sessionPrimary } from '../helpers/session';
 import { setActiveRoute } from '../../src/app/source-route';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID } from '../../src/app/routes';
@@ -164,6 +169,20 @@ test('practice and progress chrome stay inside a narrow phone', async ({ page })
 
   await clickMode(page, 'progress');
   await expect(page.locator('[data-testid="capability-summary"]')).toBeVisible();
+  await expectNoPageOverflow(page);
+});
+
+test('warm-up label fits a narrow phone without overflow', async ({ page }) => {
+  await gotoWithProgress(page, progressWithConjunctionPractice());
+  await beginOfferedSession(page);
+  const label = page.getByTestId('session-step-label');
+  await expect(label).toBeVisible();
+  await expect(label).toContainText(/Warm-up/i);
+  await expect(label).toContainText(/Conjunction/i);
+  await expect(sessionPosition(page)).toHaveText('1 / 5');
+  const box = await label.boundingBox();
+  expect(box).toBeTruthy();
+  expect((box?.width ?? 0) + (box?.x ?? 0)).toBeLessThanOrEqual((page.viewportSize()?.width ?? 0) + 1);
   await expectNoPageOverflow(page);
 });
 
