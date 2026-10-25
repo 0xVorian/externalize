@@ -122,6 +122,15 @@ describe('learner-facing copy quality', () => {
     expect(blob).not.toMatch(/No capability is mid-practice|Aucune capacité/i);
   });
 
+  it('does not tell learners that only the P column matters on a ¬P table', () => {
+    const en = getLessonCopy('en', 'level1-02-neg-watch').watchSteps?.[0]?.explanation ?? '';
+    const fr = getLessonCopy('fr', 'level1-02-neg-watch').watchSteps?.[0]?.explanation ?? '';
+    expect(en).not.toMatch(/only the P column/i);
+    expect(fr).not.toMatch(/seule la colonne P/i);
+    expect(en).toMatch(/highlighted row/i);
+    expect(fr).toMatch(/ligne surlignée/i);
+  });
+
   it('uses a complete subject in the ordinary-language conditional source title', () => {
     expect(getLessonCopy('en', 'lat-conditional-meaning').title).toBe('If someone is a member, they signed the register');
     expect(getLessonCopy('fr', 'lat-conditional-meaning').title).toBe('Si quelqu’un est membre, il a signé le registre');

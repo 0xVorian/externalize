@@ -1,8 +1,15 @@
 import { test, expect, type Page } from '@playwright/test';
 import { updateResume } from '../../src/app/storage';
-import { emptyProgress, progressAfterLevel0, progressReadyForExercise, STORAGE_KEY } from '../helpers/progress';
+import {
+  emptyProgress,
+  progressAfterLevel0,
+  progressAtLesson,
+  progressReadyForExercise,
+  STORAGE_KEY,
+} from '../helpers/progress';
 import { gotoWithProgress, clickMode, enterLearn, modeButton } from '../helpers/app';
 import { expandSessionMore } from '../helpers/session';
+import { expectAlignedTable, expectNoPageOverflow, readTableLayout } from '../helpers/tables';
 
 async function storedAttemptId(page: Page): Promise<string> {
   return page.evaluate(
@@ -17,12 +24,51 @@ test('watch uses a real two-dimensional table with one active case at 320px', as
   await gotoWithProgress(page, store);
   await enterLearn(page);
 
-  const grid = page.locator('.watch-grid');
-  await expect(grid).toBeVisible();
-  await expect(grid.locator('tbody tr')).toHaveCount(2);
-  await expect(grid.locator('tbody tr').first().locator('.watch-grid-cell')).toHaveCount(2);
-  await expect(grid.locator('.watch-grid-cell.active')).toHaveCount(1);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  for (const locale of ['en', 'fr'] as const) {
+    await page.locator(`[data-action="set-locale"][data-locale="${locale}"]`).click();
+    const grid = page.locator('.watch-grid');
+    await expect(grid).toBeVisible();
+    await expect(grid.locator('tbody tr')).toHaveCount(2);
+    await expect(grid.locator('tbody tr').first().locator('.watch-grid-cell')).toHaveCount(2);
+    await expect(grid.locator('.watch-grid-cell.active')).toHaveCount(1);
+    await expect(grid.locator('.watch-grid-corner .sr-only')).toHaveCount(1);
+    await expect(grid).not.toContainText('↓ /');
+    await expectAlignedTable(grid);
+    const layout = await readTableLayout(grid);
+    expect(layout.header[0]?.text ?? 'corner').toBe('');
+    expect(layout.header[1]?.text).toMatch(/Q = /);
+    expect(layout.body[0]?.[0]?.text).toMatch(/P = /);
+    await expectNoPageOverflow(page);
+  }
+});
+
+test('row-by-row watch tables keep values under the matching headers at 320px', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 760 });
+  const lessons = [
+    'level1-02-neg-watch',
+    'level2-03-double-neg-watch',
+    'level2-07-demorgan-watch',
+  ] as const;
+
+  for (const lessonId of lessons) {
+    await gotoWithProgress(page, progressAtLesson(lessonId));
+    await enterLearn(page);
+    for (const locale of ['en', 'fr'] as const) {
+      await page.locator(`[data-action="set-locale"][data-locale="${locale}"]`).click();
+      const table = page.locator('.truth-table');
+      await expect(table).toBeVisible();
+      await expectAlignedTable(table);
+      if (lessonId === 'level1-02-neg-watch') {
+        const layout = await readTableLayout(table);
+        expect(layout.header.map((cell) => cell.text)).toEqual(['P', '¬P']);
+        const trueMark = locale === 'fr' ? 'V' : 'T';
+        expect(layout.body[0]?.map((cell) => cell.text)).toEqual([trueMark, 'F']);
+      }
+      await expectNoPageOverflow(page);
+    }
+  }
 });
 
 test('scope selects before checking and repairs inside one attempt', async ({ page }) => {

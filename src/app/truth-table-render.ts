@@ -61,8 +61,12 @@ function committedRowAssignment(row: TruthTableRow, atoms: string[]): PartialAss
   return assignment;
 }
 
-function renderUnknownCell(label: string, text: string): string {
-  return `<td class="unknown-cell"><span aria-label="${label}">${text}</span></td>`;
+function renderUnknownCell(label: string, text: string, prefix = ''): string {
+  return `<td class="unknown-cell">${prefix}<span aria-label="${label}">${text}</span></td>`;
+}
+
+function caseLabelMarkup(label: string | undefined, isFirstCell: boolean): string {
+  return isFirstCell && label ? `<span class="sr-only">${label}</span>` : '';
 }
 
 function renderTruthValueSlot(
@@ -90,21 +94,23 @@ export function renderTruthTable(
         ? null
         : determinedFormulaValue(formula, displayAssignment);
       const atomCells = atoms
-        .map((atom) => {
+        .map((atom, atomIndex) => {
+          const prefix = caseLabelMarkup(row.srLabel, atomIndex === 0);
           if (atom === row.targetAtom) {
             const filled = row.targetValue === true || row.targetValue === false;
             const aria = filled
               ? `${learn.guidedTargetAria(atom, true)}: ${formatTruthValue(locale, row.targetValue!)}`
               : learn.guidedTargetAria(atom, false);
-            return `<td class="blank-cell guided-target-cell" data-testid="guided-target-cell">${renderTruthValueSlot(locale, filled ? row.targetValue! : null, aria)}</td>`;
+            return `<td class="blank-cell guided-target-cell" data-testid="guided-target-cell">${prefix}${renderTruthValueSlot(locale, filled ? row.targetValue! : null, aria)}</td>`;
           }
           if (!isAtomAssigned(row.assignment, atom)) {
             return renderUnknownCell(
               learn.unassignedAtomAria(atom),
               formatTruthValue(locale, undefined),
+              prefix,
             );
           }
-          return `<td>${formatTruthValue(locale, row.assignment[atom])}</td>`;
+          return `<td>${prefix}${formatTruthValue(locale, row.assignment[atom])}</td>`;
         })
         .join('');
       const resultCell = options.hideResult
@@ -114,7 +120,6 @@ export function renderTruthTable(
           : `<td class="result-cell" data-testid="truth-result-cell">${formatTruthValue(locale, determined)}</td>`;
       return `
         <tr class="truth-table-row ${row.active ? 'active' : ''}"${row.active ? ' aria-current="step"' : ''}>
-          ${row.srLabel ? `<th scope="row" class="sr-only">${row.srLabel}</th>` : ''}
           ${atomCells}
           ${resultCell}
         </tr>
@@ -207,7 +212,7 @@ export function renderWatchGrid(
       <table class="watch-grid" aria-label="${learn.watchGridAria(formula)}">
         <thead>
           <tr>
-            <th class="watch-grid-corner" scope="col">${rowAtom} ↓ / ${colAtom} →</th>
+            <th class="watch-grid-corner" scope="col"><span class="sr-only">${learn.watchGridCornerAria(rowAtom, colAtom)}</span></th>
             ${colValues.map((value) => `<th scope="col" class="watch-grid-col-label">${colAtom} = ${formatTruthValue(locale, value)}</th>`).join('')}
           </tr>
         </thead>

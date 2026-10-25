@@ -70,12 +70,12 @@ npm run test:e2e:ui
 | `e2e/smoke/practice-resume.spec.ts` | Translation and proof draft hydration after reload |
 | `e2e/smoke/biconditional-symmetry.spec.ts` | Swapped biconditional operands accepted through the UI |
 | `e2e/smoke/french-content.spec.ts` | French-authored prompt and atom gloss rendering |
-| `e2e/mobile/high-risk.spec.ts` | Watch, evaluation, scope, translation, truth table, and proof at 320px and 390px |
+| `e2e/mobile/high-risk.spec.ts` | Watch grid, ¬P watch table, evaluation, scope, translation, truth table, and proof at 320px and 390px |
 | `e2e/smoke/progress-visibility.spec.ts` | Learn meters, Unit 1 lesson count, practice session counting, consistency/scaffold moments, Unit 2 completion one-shot, session complete, Progress capability summary |
 | `e2e/smoke/session-first.spec.ts` | Opening offer, bounded-round start/resume/completion, effort contract, import invalidation, re-entry and telemetry boundaries |
 | `e2e/smoke/source-route.spec.ts` | Logic and Theism route planning, repair, terminal completion/revisit, and source-return behavior |
 | `e2e/smoke/guided-evaluation.spec.ts` | Guided unset/partial assignment semantics, True/False → formal notation bridge, provisional selection, explicit Check and repair |
-| `e2e/smoke/ui-remediation.spec.ts` | Exercise stimulus/response/action visual contract and feedback-facing regressions |
+| `e2e/smoke/ui-remediation.spec.ts` | Exercise stimulus/response/action visual contract, watch-grid / watch-table alignment, and feedback-facing regressions |
 | `e2e/smoke/pwa-offline.spec.ts` | Installed/offline navigation shell reload |
 | `e2e/smoke/repaired-review-priority.spec.ts` | Immediately due repaired reviews are not starved by frontier work |
 
