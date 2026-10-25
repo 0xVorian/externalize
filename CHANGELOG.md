@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Session rounds no longer end on a teaching step whose related practice was deferred to the next round. The envelope still targets 6 steps and stays within 5–7 when a cluster fits; otherwise it ends before that teaching step so the `n / m` counter stays honest. Applies to Logic foundations lessons and the Sobel preparation sequence.
+
 ## [0.5.1] - 2026-09-08
 
 ### Changed

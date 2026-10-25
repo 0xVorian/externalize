@@ -10,6 +10,7 @@ import {
   isEvidenceStale,
   plannedItemIds,
 } from './planner';
+import { conceptForItem } from './prerequisites';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID } from './routes';
 import { plannedSourceItems, sourcePlan } from './source-route';
 import { getUnlockedExerciseIds, isPracticeUnlocked, type ProgressStore } from './storage';
@@ -22,7 +23,7 @@ import {
   type SessionPlan,
   type SessionStep,
 } from './session-types';
-import { expandItemsToUnits } from './session-units';
+import { expandItemsToUnits, isTeachingItem } from './session-units';
 
 export {
   SESSION_MAX,
@@ -48,6 +49,67 @@ export function takeEnvelope<T>(items: T[]): T[] {
   return items.slice(0, SESSION_TARGET);
 }
 
+/**
+ * Cluster key for teach–practice cohesion. Planner teach sequences stay
+ * together even when an in-sequence check uses a different concept; otherwise
+ * consecutive items share a concept, or a single item id.
+ */
+export function sessionClusterKey(itemId: string): string {
+  for (const [requirement, bridge] of Object.entries(PREREQUISITE_BRIDGES)) {
+    if (bridge.teach.includes(itemId)) {
+      return `teach:${requirement}`;
+    }
+  }
+  return conceptForItem(itemId) ?? `item:${itemId}`;
+}
+
+export function groupSessionSteps(steps: SessionStep[]): SessionStep[][] {
+  const groups: SessionStep[][] = [];
+  for (const step of steps) {
+    const key = sessionClusterKey(step.itemId);
+    const current = groups[groups.length - 1];
+    if (current && sessionClusterKey(current[0]!.itemId) === key) {
+      current.push(step);
+    } else {
+      groups.push([step]);
+    }
+  }
+  return groups;
+}
+
+/**
+ * Cap a step list at 5–7, preferring 6, without ending on a teaching step
+ * whose practice in the same cluster was pushed to a later round.
+ */
+export function takeSessionEnvelope(steps: SessionStep[]): SessionStep[] {
+  if (steps.length === 0) {
+    return [];
+  }
+  if (steps.length <= SESSION_MAX) {
+    return steps;
+  }
+  if (!steps.some((step) => isTeachingItem(step.itemId))) {
+    return takeEnvelope(steps);
+  }
+
+  const groups = groupSessionSteps(steps);
+  const taken: SessionStep[] = [];
+  for (const group of groups) {
+    const nextCount = taken.length + group.length;
+    if (nextCount > SESSION_MAX) {
+      if (taken.length === 0) {
+        return takeEnvelope(group);
+      }
+      break;
+    }
+    taken.push(...group);
+    if (taken.length >= SESSION_TARGET) {
+      break;
+    }
+  }
+  return taken;
+}
+
 export function estimateMinutes(stepCount: number): number {
   if (stepCount <= 0) {
     return 0;
@@ -65,7 +127,7 @@ export function composeSessionPlan(
   itemIds: string[],
   options?: { preparation?: boolean },
 ): SessionPlan {
-  const steps = takeEnvelope(expandItemsToUnits(itemIds, store));
+  const steps = takeSessionEnvelope(expandItemsToUnits(itemIds, store));
   return {
     id: planId(kind, steps),
     kind,

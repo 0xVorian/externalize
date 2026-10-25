@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { evidenceKey } from './curriculum';
-import { LEVEL_0_LESSONS, LEVEL_1_LESSONS, ALL_LEARN_LESSONS } from './lessons';
+import {
+  ALL_LEARN_LESSONS,
+  LEVEL_0_LESSONS,
+  LEVEL_1_LESSONS,
+  LEVEL_2_LESSONS,
+} from './lessons';
 import {
   LOGIC_AND_THEISM_READING_ROUTE_ID,
   LOGIC_FOUNDATIONS_ROUTE_ID,
@@ -8,13 +13,18 @@ import {
 import {
   completeCurrentStep,
   composeSessionPlan,
+  groupSessionSteps,
   offerOpening,
   resumeSession,
+  SESSION_MAX,
+  SESSION_TARGET,
+  sessionClusterKey,
   sessionPosition,
   sessionSegmentMs,
   startSession,
   takeEnvelope,
 } from './session-plan';
+import { expandItemsToUnits, isPracticeItem, isTeachingItem } from './session-units';
 import { completeLesson, loadProgress, type ProgressStore } from './storage';
 import { plannedSourceItems, setActiveRoute } from './source-route';
 
@@ -53,14 +63,25 @@ describe('offerOpening', () => {
     expect(offer.plan?.steps.map((step) => step.id)).toEqual([
       'level0-01-letters',
       'level0-02-truth',
+    ]);
+    expect(offer.plan?.steps).toHaveLength(2);
+    expect(offer.plan?.estimatedMinutes).toBe(2);
+    expect(offer.plan?.steps.some((step) => step.itemId === 'level0-03-and')).toBe(false);
+  });
+
+  it('keeps the conjunction explanation with its watch and guided practice', () => {
+    const store = loadProgress();
+    const remaining = LEVEL_0_LESSONS.slice(2).map((lesson) => lesson.id);
+    const plan = composeSessionPlan(store, 'continue', remaining);
+    expect(plan.steps.map((step) => step.id)).toEqual([
       'level0-03-and',
       'level0-04-watch#0',
       'level0-04-watch#1',
       'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-05-guided',
     ]);
-    expect(offer.plan?.steps).toHaveLength(6);
-    expect(offer.plan?.estimatedMinutes).toBe(3);
-    expect(offer.plan?.steps.filter((step) => step.itemId === 'level0-04-watch')).toHaveLength(3);
+    expect(plan.steps).toHaveLength(6);
   });
 
   it('continues with unseen Unit 1 lessons after Unit 0', () => {
@@ -132,7 +153,16 @@ describe('offerOpening', () => {
     expect(offer.kind).toBe('start');
     expect(offer.plan?.preparation).toBe(true);
     expect(offer.plan?.steps[0]?.itemId).toBe(plannedSourceItems(store)[0]);
-    expect(offer.plan?.steps).toHaveLength(6);
+    expect(offer.plan?.steps.map((step) => step.itemId)).toEqual([
+      'lat-conditional-bridge',
+      'lat-predict-empty-club',
+      'lat-empty-no-counterexample',
+      'lat-name-vacuity',
+      'lat-conditional-meaning',
+      'lat-conditional-notation',
+      'lat-retrieve-conditional',
+    ]);
+    expect(offer.plan?.steps).toHaveLength(7);
   });
 
   it('skips the conditional bridge when evidence is already strong', () => {
@@ -151,9 +181,12 @@ describe('offerOpening', () => {
     };
     const offer = offerOpening(store, null);
     expect(offer.plan?.steps.some((step) => step.itemId === 'lat-conditional-bridge')).toBe(false);
-    expect(offer.plan?.steps.map((step) => step.itemId)).toEqual(
-      takeEnvelope(plannedSourceItems(store)),
-    );
+    expect(offer.plan?.steps.map((step) => step.itemId)).toEqual([
+      'lat-universal-meaning',
+      'lat-quantifier-universal',
+      'lat-check-universal',
+    ]);
+    expect(offer.plan?.steps.some((step) => step.itemId === 'lat-existential-meaning')).toBe(false);
   });
 
   it('idles when the learn path is done and nothing is due', () => {
@@ -277,6 +310,29 @@ describe('composeSessionPlan', () => {
     expect(store.activeRouteId).toBe(LOGIC_FOUNDATIONS_ROUTE_ID);
   });
 
+  it('still caps a long practice-only list at the target of 6', () => {
+    const store = loadProgress();
+    const plan = composeSessionPlan(store, 'quick-review', [
+      'eval-001',
+      'eval-011',
+      'tt-001',
+      'counter-001',
+      'eval-010',
+      'eval-019',
+      'eval-003',
+      'eval-013',
+    ]);
+    expect(plan.steps).toHaveLength(6);
+    expect(plan.steps.map((step) => step.itemId)).toEqual([
+      'eval-001',
+      'eval-011',
+      'tt-001',
+      'counter-001',
+      'eval-010',
+      'eval-019',
+    ]);
+  });
+
   it('expands a watch lesson into one unit per separately advanced case', () => {
     const store = loadProgress();
     const plan = composeSessionPlan(store, 'start', ['level0-04-watch', 'level0-05-guided']);
@@ -290,6 +346,136 @@ describe('composeSessionPlan', () => {
     expect(plan.steps.every((step) => step.itemId === 'level0-04-watch' ? step.unitIndex !== undefined : true)).toBe(
       true,
     );
+  });
+
+  it('does not start disjunction without its watch and guided practice', () => {
+    const store = loadProgress();
+    const remaining = LEVEL_1_LESSONS.map((lesson) => lesson.id);
+    const plan = composeSessionPlan(store, 'continue', remaining);
+    expect(plan.steps.map((step) => step.itemId)).toEqual([
+      'level1-01-neg',
+      'level1-02-neg-watch',
+      'level1-02-neg-watch',
+      'level1-03-neg-guided',
+    ]);
+    expect(plan.steps.some((step) => step.itemId === 'level1-04-or')).toBe(false);
+    const disjunction = composeSessionPlan(
+      store,
+      'continue',
+      remaining.filter((id) => !plan.steps.some((step) => step.itemId === id)),
+    );
+    expect(disjunction.steps.map((step) => step.itemId)).toEqual([
+      'level1-04-or',
+      'level1-05-or-watch',
+      'level1-05-or-watch',
+      'level1-05-or-watch',
+      'level1-05-or-watch',
+      'level1-06-or-guided',
+    ]);
+  });
+});
+
+function assertTeachPracticeCohesion(
+  remainingItemIds: string[],
+  store: ProgressStore,
+  kind: 'start' | 'continue' = 'continue',
+): void {
+  const expanded = expandItemsToUnits(remainingItemIds, store);
+  const plan = composeSessionPlan(store, kind, remainingItemIds);
+  expect(plan.steps.length).toBeGreaterThan(0);
+  expect(plan.steps.length).toBeLessThanOrEqual(SESSION_MAX);
+  expect(plan.steps.map((step) => step.id)).toEqual(
+    expanded.slice(0, plan.steps.length).map((step) => step.id),
+  );
+  if (expanded.length > SESSION_MAX) {
+    expect(plan.steps.length).toBeGreaterThanOrEqual(1);
+    expect(plan.steps.length).toBeLessThanOrEqual(SESSION_MAX);
+  } else {
+    expect(plan.steps).toHaveLength(expanded.length);
+  }
+
+  const last = plan.steps[plan.steps.length - 1]!;
+  if (isTeachingItem(last.itemId)) {
+    const key = sessionClusterKey(last.itemId);
+    const pushedPractice = expanded
+      .slice(plan.steps.length)
+      .filter((step) => sessionClusterKey(step.itemId) === key && isPracticeItem(step.itemId));
+    expect(pushedPractice, `${last.id} left ${key} practice for a later round`).toEqual([]);
+  }
+
+  const groups = groupSessionSteps(expanded);
+  let offset = 0;
+  for (const group of groups) {
+    if (offset >= plan.steps.length) {
+      break;
+    }
+    if (group.length > SESSION_MAX) {
+      expect(plan.steps.slice(offset).map((step) => step.id)).toEqual(
+        group.slice(0, plan.steps.length - offset).map((step) => step.id),
+      );
+      break;
+    }
+    expect(
+      plan.steps.slice(offset, offset + group.length).map((step) => step.id),
+      `split cluster ${sessionClusterKey(group[0]!.itemId)}`,
+    ).toEqual(group.map((step) => step.id));
+    offset += group.length;
+    if (offset >= SESSION_TARGET) {
+      break;
+    }
+  }
+}
+
+describe('teach-practice session boundaries', () => {
+  it.each([
+    ['Unit 0', LEVEL_0_LESSONS],
+    ['Unit 1', LEVEL_1_LESSONS],
+    ['Unit 2', LEVEL_2_LESSONS],
+  ] as const)('keeps explanation with practice from every %s lesson', (_label, lessons) => {
+    const store = loadProgress();
+    for (let index = 0; index < lessons.length; index += 1) {
+      const remaining = lessons.slice(index).map((lesson) => lesson.id);
+      assertTeachPracticeCohesion(remaining, store);
+    }
+  });
+
+  it('covers every foundations lesson id as a starting remainder', () => {
+    const seen = new Set<string>();
+    for (const lessons of [LEVEL_0_LESSONS, LEVEL_1_LESSONS, LEVEL_2_LESSONS]) {
+      for (let index = 0; index < lessons.length; index += 1) {
+        seen.add(lessons[index]!.id);
+      }
+    }
+    expect([...seen]).toEqual(ALL_LEARN_LESSONS.map((lesson) => lesson.id));
+  });
+
+  it('keeps Sobel teach sequences with their checks from every remaining prefix', () => {
+    const store = setActiveRoute(loadProgress(), LOGIC_AND_THEISM_READING_ROUTE_ID);
+    const items = plannedSourceItems(store);
+    expect(items.length).toBeGreaterThan(0);
+    for (let index = 0; index < items.length; index += 1) {
+      assertTeachPracticeCohesion(items.slice(index), store, index === 0 ? 'start' : 'continue');
+    }
+  });
+
+  it('keeps skipped-bridge Sobel prefixes intact', () => {
+    let store = setActiveRoute(loadProgress(), LOGIC_AND_THEISM_READING_ROUTE_ID);
+    store = {
+      ...store,
+      conceptEvidence: {
+        [evidenceKey('conditional', 'apply')]: {
+          attempts: 4,
+          cleanPasses: 4,
+          transferPasses: 0,
+          recentErrors: [],
+          lastSeenAt: new Date().toISOString(),
+        },
+      },
+    };
+    const items = plannedSourceItems(store);
+    for (let index = 0; index < items.length; index += 1) {
+      assertTeachPracticeCohesion(items.slice(index), store, 'continue');
+    }
   });
 });
 

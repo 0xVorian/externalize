@@ -14,6 +14,15 @@ export function conceptForLesson(lessonId: string): string | undefined {
   return PREREQUISITES_GRAPH.lessons.find((lesson) => lesson.id === lessonId)?.concept;
 }
 
+export function conceptForExercise(exerciseId: string): string | undefined {
+  return PREREQUISITES_GRAPH.exercises.find((entry) => entry.id === exerciseId)?.concept;
+}
+
+/** Lesson concept, else the exercise's primary concept. */
+export function conceptForItem(itemId: string): string | undefined {
+  return conceptForLesson(itemId) ?? conceptForExercise(itemId);
+}
+
 export function requiredLessonsForExercise(exerciseId: string): string[] {
   return PREREQUISITES_GRAPH.exercises.find((entry) => entry.id === exerciseId)?.requiresLessons ?? [];
 }
