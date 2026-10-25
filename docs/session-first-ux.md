@@ -118,7 +118,8 @@ Rules:
 - a session must not silently expand after it starts;
 - newly due work waits for the next round;
 - finishing the declared envelope is legitimate completion;
-- stopping after one completed session is never framed as failure or premature exit.
+- stopping after one completed session is never framed as failure or premature exit;
+- a round never ends on a teaching step whose related practice was pushed later. If the remaining cluster fits in the 7-step maximum, the round stretches to include it; otherwise the round ends before that teaching step. The advertised `n / m` count is the frozen step list.
 
 A session may contain a mixture of route items and due retrieval when that is pedagogically coherent, but composition must remain deterministic and inspectable.
 
@@ -289,6 +290,7 @@ Important invariants:
 
 - a plan is concrete and inspectable;
 - the step list is fixed for the lifetime of the active session;
+- teach–practice clusters (a card/watch and the guided or checked item it depends on; planner teach sequences on the source route) are not split across rounds;
 - session completion writes no mastery by itself;
 - only the underlying graded activities affect SRS/concept evidence;
 - lesson exposure remains exposure;

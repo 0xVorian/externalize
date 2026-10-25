@@ -61,9 +61,9 @@ test('guided ¬P on a narrow phone does not treat unset P as false', async ({ pa
 });
 
 test('Level 0 watch grid fits a narrow phone', async ({ page }) => {
-  await gotoFresh(page);
+  await gotoWithProgress(page, progressAtLesson('level0-03-and'));
   await beginOfferedSession(page);
-  for (let card = 0; card < 3; card += 1) await lessonNext(page).click();
+  await lessonNext(page).click();
   const grid = page.locator('.watch-grid');
   await expect(grid).toBeVisible();
   await expect(grid).not.toContainText('↓ /');
@@ -179,7 +179,7 @@ test('session opening and one-tap start fit a narrow phone', async ({ page }) =>
   await sessionPrimary(page).focus();
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('session-active')).toBeVisible();
-    await expect(sessionPosition(page)).toHaveText('1 / 6');
+    await expect(sessionPosition(page)).toHaveText('1 / 2');
   await expectNoPageOverflow(page);
   await expect(page.getByTestId('session-exit')).toBeVisible();
 });

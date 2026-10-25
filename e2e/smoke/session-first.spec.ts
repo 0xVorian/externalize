@@ -71,7 +71,7 @@ test.describe('session-first UX', () => {
     await expect(sessionOpening(page)).toBeVisible();
     await expect(page.locator('button.primary')).toHaveCount(1);
     await expect(sessionPrimary(page)).toBeVisible();
-    await expect(sessionOpening(page)).toContainText('6 steps');
+    await expect(sessionOpening(page)).toContainText('2 steps');
     await expect(sessionOpening(page)).toContainText('about');
     await expect(page.getByTestId('route-picker')).toHaveCount(0);
     await expect(page.locator('.depth-toggle')).toHaveCount(0);
@@ -83,25 +83,23 @@ test.describe('session-first UX', () => {
     await gotoFresh(page);
     await beginOfferedSession(page);
     await expect(page.getByTestId('session-active')).toBeVisible();
-    await expect(sessionPosition(page)).toHaveText('1 / 6');
+    await expect(sessionPosition(page)).toHaveText('1 / 2');
     await expect(page.getByTestId('route-picker')).toHaveCount(0);
     await expect(page.locator('.depth-toggle')).toHaveCount(0);
     await lessonNext(page).click();
-    await expect(sessionPosition(page)).toHaveText('2 / 6');
-    await lessonNext(page).click();
-    await expect(sessionPosition(page)).toHaveText('3 / 6');
+    await expect(sessionPosition(page)).toHaveText('2 / 2');
   });
 
   test('an interrupted round resumes the same steps', async ({ page }) => {
     await gotoFresh(page);
     await beginOfferedSession(page);
     await lessonNext(page).click();
-    await expect(sessionPosition(page)).toHaveText('2 / 6');
+    await expect(sessionPosition(page)).toHaveText('2 / 2');
     await sessionExit(page).click();
     await expect(sessionOpening(page)).toBeVisible();
     await expect(sessionPrimary(page)).toContainText('Resume');
     await beginOfferedSession(page);
-    await expect(sessionPosition(page)).toHaveText('2 / 6');
+    await expect(sessionPosition(page)).toHaveText('2 / 2');
     await expect(page.locator('.lesson-card-title')).toContainText('True or false');
   });
 
@@ -178,17 +176,15 @@ test.describe('session-first UX', () => {
   });
 
   test('a watch case is one advertised unit, not a hidden Next-case sequence', async ({ page }) => {
-    await gotoFresh(page);
+    await gotoWithProgress(page, progressAtLesson('level0-03-and'));
     await expect(sessionOpening(page)).toContainText('6 steps');
     await beginOfferedSession(page);
-    for (let card = 0; card < 3; card += 1) {
-      await lessonNext(page).click();
-    }
+    await lessonNext(page).click();
     await expect(page.getByTestId('session-watch-unit')).toBeVisible();
-    await expect(sessionPosition(page)).toHaveText('4 / 6');
+    await expect(sessionPosition(page)).toHaveText('2 / 6');
     await expect(page.getByTestId('session-active')).not.toContainText('Case 1 of 4');
     await lessonNext(page).click();
-    await expect(sessionPosition(page)).toHaveText('5 / 6');
+    await expect(sessionPosition(page)).toHaveText('3 / 6');
     await expect(page.getByTestId('session-watch-unit')).toBeVisible();
   });
 

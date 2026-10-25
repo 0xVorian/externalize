@@ -6,6 +6,18 @@ import { watchCaseCount } from '../i18n';
 
 export { watchCaseCount };
 
+export function isTeachingItem(itemId: string): boolean {
+  const lesson = getLessonDefinition(itemId);
+  return lesson?.type === 'card' || lesson?.type === 'watch';
+}
+
+export function isPracticeItem(itemId: string): boolean {
+  if (getExerciseDefinition(itemId)) {
+    return true;
+  }
+  return getLessonDefinition(itemId)?.type === 'guided';
+}
+
 export function isLastWatchUnit(itemId: string, unitIndex: number | undefined): boolean {
   if (unitIndex === undefined) {
     return true;
