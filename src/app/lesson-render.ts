@@ -170,7 +170,7 @@ export function renderLessonView(
     };
     unitCompleteNotice?: string | null;
     unitCompleteNoticeLive?: boolean;
-    session?: { current: number; total: number };
+    session?: { current: number; total: number; label?: string };
   },
 ): string {
   const learn = learnUi(state.locale);
@@ -230,6 +230,7 @@ export function renderLessonView(
       locale: state.locale,
       current: options.session.current,
       total: options.session.total,
+      label: options.session.label,
       body,
       actions: nextButton,
     });

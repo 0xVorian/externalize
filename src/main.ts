@@ -119,6 +119,7 @@ import {
 } from './app/practice-ui-state';
 import { currentScaffoldLevel } from './app/evaluation-scaffold';
 import {
+  applyWarmupMiss,
   offerOpening,
   startSession,
   resumeSession,
@@ -129,6 +130,7 @@ import {
   sessionSegmentMs,
   type PersistedSession,
 } from './app/session-plan';
+import { sessionStepLabel } from './app/session-chrome-render';
 import {
   loadActiveSession,
   saveActiveSession,
@@ -263,11 +265,34 @@ function currentOffer() {
   return offerOpening(progress, activeSession);
 }
 
-function sessionChrome(): { current: number; total: number } | undefined {
+function sessionChrome(): { current: number; total: number; label?: string } | undefined {
   if (surface !== 'session' || !activeSession) {
     return undefined;
   }
-  return sessionPosition(activeSession);
+  return {
+    ...sessionPosition(activeSession),
+    label: sessionStepLabel(locale, currentSessionStep(activeSession)),
+  };
+}
+
+function usingSourcePractice(): boolean {
+  return Boolean(sourcePracticeState) && (isSourceLearn() || isSourceSessionItem());
+}
+
+function maybeApplyWarmupRepair(): void {
+  if (!activeSession) {
+    return;
+  }
+  const attempt = progress.practiceDraft?.attempt;
+  if (!attempt || attempt.firstCheckedCorrect !== false) {
+    return;
+  }
+  const next = applyWarmupMiss(activeSession);
+  if (next === activeSession) {
+    return;
+  }
+  activeSession = next;
+  saveActiveSession(next);
 }
 
 function isSourceSessionItem(): boolean {
@@ -481,6 +506,7 @@ function commitCheckedPracticeState(nextState: AppState): void {
     practiceDraftSnapshot(nextState),
   );
   persistProgress(nextProgress);
+  maybeApplyWarmupRepair();
   if (progress.practiceDraft?.attempt.id === nextState.attempt.id) {
     practiceState = {
       ...nextState,
@@ -968,7 +994,7 @@ root.addEventListener('click', (event) => {
     if (!choiceId) {
       return;
     }
-    if (isSourceLearn() && sourcePracticeState) {
+    if (usingSourcePractice() && sourcePracticeState) {
       sourcePracticeState = selectClassificationChoice(sourcePracticeState, choiceId);
       persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(sourcePracticeState)));
       render();
@@ -979,10 +1005,11 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'check-classification') {
-    if (isSourceLearn() && sourcePracticeState) {
+    if (usingSourcePractice() && sourcePracticeState) {
       const next = checkClassification(sourcePracticeState);
       sourcePracticeState = next;
       persistProgress(recordCheckedPracticeState(progress, practiceDraftSnapshot(next)));
+      maybeApplyWarmupRepair();
       if (progress.practiceDraft) {
         sourcePracticeState = { ...next, attempt: progress.practiceDraft.attempt };
       }
@@ -1009,7 +1036,7 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'try-again') {
-    if (isSourceLearn()) {
+    if (isSourceLearn() || isSourceSessionItem()) {
       if (!sourcePracticeState) {
         sourcePracticeState = loadSourcePracticeState();
       }

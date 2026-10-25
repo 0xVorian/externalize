@@ -57,6 +57,19 @@ describe('session shell', () => {
     );
   });
 
+  it('labels a warm-up step in the session frame', () => {
+    const html = renderSessionFrame({
+      locale: 'en',
+      current: 1,
+      total: 5,
+      label: 'Warm-up: last time you worked on Conjunction (∧)',
+      body: '<article>reason</article>',
+      actions: '<button type="button">Check</button>',
+    });
+    expect(html).toContain('data-testid="session-step-label"');
+    expect(html).toContain('Warm-up: last time you worked on Conjunction (∧)');
+  });
+
   it('makes Done for now primary and another round secondary', () => {
     const html = renderRoundComplete({ locale: 'en' });
     expect(html).toContain('data-testid="session-done"');

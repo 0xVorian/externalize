@@ -73,7 +73,7 @@ export function renderSourceLearnView(options: {
   routeComplete: boolean;
   lessonState?: LessonState;
   practiceState?: AppState;
-  session?: { current: number; total: number };
+  session?: { current: number; total: number; label?: string };
 }): string {
   const learn = learnUi(options.locale);
   const anchor = LOGIC_AND_THEISM_SOURCE_PACK.anchors[0];
@@ -89,6 +89,7 @@ export function renderSourceLearnView(options: {
       locale: options.locale,
       current: options.session.current,
       total: options.session.total,
+      label: options.session.label,
       body: `${completeBanner}${body}`,
       actions,
     });

@@ -18,6 +18,7 @@ import {
 import { scaffoldMaxLevel } from '../../src/app/evaluation-scaffold';
 import type { SkillId } from '../../src/app/progress-tracker';
 import { LOGIC_FOUNDATIONS_ROUTE_ID } from '../../src/app/routes';
+import { evidenceKey } from '../../src/app/curriculum';
 
 export const STORAGE_KEY = 'externalize-progress-v1';
 
@@ -126,6 +127,30 @@ export function withSkillStats(
       ...store.skills,
       [skillId]: { attempts, successes, recentErrorTags: [] },
     },
+  };
+}
+
+export function progressWithConjunctionPractice(): ProgressStore {
+  let store = emptyProgress();
+  for (const lesson of LEVEL_0_LESSONS) {
+    store = completeLesson(store, lesson.id);
+  }
+  const lastSeenAt = new Date().toISOString();
+  const due = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+  return {
+    ...store,
+    passed: ['eval-001'],
+    attempted: ['eval-001'],
+    conceptEvidence: {
+      [evidenceKey('conjunction', 'apply')]: {
+        attempts: 1,
+        cleanPasses: 1,
+        transferPasses: 0,
+        recentErrors: [],
+        lastSeenAt,
+      },
+    },
+    queue: [{ exerciseId: 'eval-001', due, intervalDays: 1, ease: 2.5 }],
   };
 }
 

@@ -8,6 +8,8 @@ export type SessionKind = 'start' | 'continue' | 'quick-review' | 'lapse-recover
 
 export type SessionStepSource = 'route' | 'practice';
 
+export type SessionStepRole = 'warmup' | 'repair';
+
 export type SessionStep = {
   id: string;
   source: SessionStepSource;
@@ -17,6 +19,10 @@ export type SessionStep = {
    * watch lesson. Absent for cards, guided lessons, and practice items.
    */
   unitIndex?: number;
+  /** Warm-up recall or post-miss repair. Absent for ordinary planned steps. */
+  role?: SessionStepRole;
+  /** Concept the warm-up or repair is recalling. */
+  conceptId?: string;
 };
 
 export type SessionPlan = {
@@ -26,6 +32,12 @@ export type SessionPlan = {
   estimatedMinutes: number;
   /** True when the plan is a planner-composed prerequisite round. Never shown as planner copy. */
   preparation?: boolean;
+  /** Concept recalled by the opening warm-up step, when present. */
+  warmupConceptId?: string;
+  /** Precomputed repair tail; applied only after a warm-up miss. */
+  repairSteps?: SessionStep[];
+  /** True after a warm-up miss replaced the remaining planned steps. */
+  repairApplied?: boolean;
 };
 
 export type OpeningKind = SessionKind | 'resume' | 'idle';

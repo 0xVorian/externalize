@@ -119,7 +119,8 @@ Rules:
 - newly due work waits for the next round;
 - finishing the declared envelope is legitimate completion;
 - stopping after one completed session is never framed as failure or premature exit;
-- a round never ends on a teaching step whose related practice was pushed later. If the remaining cluster fits in the 7-step maximum, the round stretches to include it; otherwise the round ends before that teaching step. The advertised `n / m` count is the frozen step list.
+- a round never ends on a teaching step whose related practice was pushed later. If the remaining cluster fits in the 7-step maximum, the round stretches to include it; otherwise the round ends before that teaching step. The advertised `n / m` count is the frozen step list;
+- when the learner has already practised a concept with an exercise, the round opens with one warm-up check on that most recent concept. A correct answer continues into the planned material. A first-check miss turns the remaining steps into a short repair of that concept (explanation plus one or two practice steps) without increasing the advertised envelope. A brand-new learner has no warm-up. If that concept already has a due review (or another planned check) this round, that item *is* the warm-up; further same-concept exercises are left for a later round rather than duplicated. After a long gap the warm-up stays a single check — a miss already yields explanation plus practice, and the copy does not mention the absence. The rest of the round is enveloped at 6 steps, then the warm-up is prepended, so a 7-step teach cluster is not blocked by treating the warm-up as its own leading cluster.
 
 A session may contain a mixture of route items and due retrieval when that is pedagogically coherent, but composition must remain deterministic and inspectable.
 

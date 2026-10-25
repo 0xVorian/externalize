@@ -24,6 +24,14 @@ import {
   type SessionStep,
 } from './session-types';
 import { expandItemsToUnits, isTeachingItem } from './session-units';
+import {
+  bodyItemIdsWithoutWarmupDuplicate,
+  repairStepsForWarmup,
+  selectWarmup,
+  warmupSteps,
+} from './session-warmup';
+
+export { applyWarmupMiss, mostRecentPractisedConcept, selectWarmup } from './session-warmup';
 
 export {
   SESSION_MAX,
@@ -37,6 +45,7 @@ export type {
   SessionKind,
   SessionPlan,
   SessionStep,
+  SessionStepRole,
 } from './session-types';
 
 export function takeEnvelope<T>(items: T[]): T[] {
@@ -77,33 +86,53 @@ export function groupSessionSteps(steps: SessionStep[]): SessionStep[][] {
   return groups;
 }
 
+function capSteps(steps: SessionStep[], max: number, target: number): SessionStep[] {
+  if (steps.length === 0) {
+    return [];
+  }
+  if (steps.length <= max) {
+    return steps;
+  }
+  return steps.slice(0, Math.min(target, max));
+}
+
 /**
  * Cap a step list at 5–7, preferring 6, without ending on a teaching step
  * whose practice in the same cluster was pushed to a later round.
  */
-export function takeSessionEnvelope(steps: SessionStep[]): SessionStep[] {
-  if (steps.length === 0) {
+export function takeSessionEnvelope(
+  steps: SessionStep[],
+  limits?: { max?: number; target?: number },
+): SessionStep[] {
+  const max = limits?.max ?? SESSION_MAX;
+  const target = Math.min(limits?.target ?? SESSION_TARGET, max);
+  if (steps.length === 0 || max <= 0) {
     return [];
   }
-  if (steps.length <= SESSION_MAX) {
+  if (steps.length <= max) {
     return steps;
   }
   if (!steps.some((step) => isTeachingItem(step.itemId))) {
-    return takeEnvelope(steps);
+    return capSteps(steps, max, target);
   }
 
   const groups = groupSessionSteps(steps);
   const taken: SessionStep[] = [];
   for (const group of groups) {
     const nextCount = taken.length + group.length;
-    if (nextCount > SESSION_MAX) {
+    if (nextCount > max) {
       if (taken.length === 0) {
-        return takeEnvelope(group);
+        // A cluster that still fits the global 7-step max must stay intact even
+        // when the body budget is 6 to leave room for a later warm-up prepend.
+        if (group.some((step) => isTeachingItem(step.itemId)) && group.length <= SESSION_MAX) {
+          return group;
+        }
+        return capSteps(group, max, target);
       }
       break;
     }
     taken.push(...group);
-    if (taken.length >= SESSION_TARGET) {
+    if (taken.length >= target) {
       break;
     }
   }
@@ -125,15 +154,36 @@ export function composeSessionPlan(
   store: ProgressStore,
   kind: SessionKind,
   itemIds: string[],
-  options?: { preparation?: boolean },
+  options?: { preparation?: boolean; now?: number },
 ): SessionPlan {
-  const steps = takeSessionEnvelope(expandItemsToUnits(itemIds, store));
+  const now = options?.now ?? Date.now();
+  const warmup = selectWarmup(store, now, itemIds);
+  const remainingIds = warmup
+    ? bodyItemIdsWithoutWarmupDuplicate(itemIds, warmup)
+    : itemIds;
+  const expandedBody = expandItemsToUnits(remainingIds, store);
+  // Envelope the rest first (max 6 when a warm-up will be prepended) so a
+  // following 7-step cluster is the first group, not a blocked second cluster.
+  const body = warmup
+    ? takeSessionEnvelope(expandedBody, {
+        max: SESSION_MAX - 1,
+        target: Math.max(1, SESSION_TARGET - 1),
+      })
+    : takeSessionEnvelope(expandedBody);
+  const opening =
+    warmup && warmupSteps(warmup).length + body.length <= SESSION_MAX
+      ? warmupSteps(warmup)
+      : [];
+  const steps = [...opening, ...body];
+  const usedWarmup = opening.length > 0 ? warmup : undefined;
   return {
     id: planId(kind, steps),
     kind,
     steps,
     estimatedMinutes: estimateMinutes(steps.length),
     preparation: options?.preparation,
+    warmupConceptId: usedWarmup?.conceptId,
+    repairSteps: usedWarmup ? repairStepsForWarmup(store, usedWarmup, now) : undefined,
   };
 }
 
@@ -247,7 +297,7 @@ export function offerOpening(
       return withReview(
         {
           kind: 'quick-review',
-          plan: composeSessionPlan(store, 'quick-review', due),
+          plan: composeSessionPlan(store, 'quick-review', due, { now }),
         },
         store,
         now,
@@ -268,7 +318,7 @@ export function offerOpening(
       return withReview(
         {
           kind: 'lapse-recovery',
-          plan: composeSessionPlan(store, 'lapse-recovery', lapse),
+          plan: composeSessionPlan(store, 'lapse-recovery', lapse, { now }),
         },
         store,
         now,
@@ -284,6 +334,7 @@ export function offerOpening(
         kind,
         plan: composeSessionPlan(store, kind, remaining.items, {
           preparation: remaining.preparation,
+          now,
         }),
       },
       store,
