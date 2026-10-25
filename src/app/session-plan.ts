@@ -26,7 +26,6 @@ import {
 import { expandItemsToUnits, isTeachingItem } from './session-units';
 import {
   bodyItemIdsWithoutWarmupDuplicate,
-  fillWarmupBodyItemIds,
   repairStepsForWarmup,
   selectWarmup,
   warmupSteps,
@@ -165,12 +164,7 @@ export function composeSessionPlan(
   const now = options?.now ?? Date.now();
   const warmup = selectWarmup(store, now, itemIds);
   const remainingIds = warmup
-    ? fillWarmupBodyItemIds(
-        store,
-        bodyItemIdsWithoutWarmupDuplicate(itemIds, warmup),
-        warmup,
-        now,
-      )
+    ? bodyItemIdsWithoutWarmupDuplicate(itemIds, warmup)
     : itemIds;
   const expandedBody = expandItemsToUnits(remainingIds, store);
   // Envelope the rest first (max 6 when a warm-up will be prepended) so a

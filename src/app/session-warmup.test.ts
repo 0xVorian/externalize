@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { evidenceKey } from './curriculum';
-import { ALL_LEARN_LESSONS, LEVEL_0_LESSONS, LEVEL_1_LESSONS } from './lessons';
+import { LEVEL_0_LESSONS, LEVEL_1_LESSONS } from './lessons';
 import { PREREQUISITE_BRIDGES } from './planner';
 import { recordAttemptCheck } from './practice-attempt';
+import { conceptForItem } from './prerequisites';
 import {
   applyWarmupMiss,
   applyWarmupMissAfterCheck,
@@ -25,6 +26,7 @@ import { isPracticeItem } from './session-units';
 import {
   beginPracticeAttempt,
   completeLesson,
+  getUnlockedExerciseIds,
   loadProgress,
   recordCheckedPracticeState,
   type ProgressStore,
@@ -36,6 +38,30 @@ function withLevel0Complete(store: ProgressStore): ProgressStore {
     next = completeLesson(next, lesson.id);
   }
   return next;
+}
+
+function withLevel1Complete(store: ProgressStore): ProgressStore {
+  let next = withLevel0Complete(store);
+  for (const lesson of LEVEL_1_LESSONS) {
+    next = completeLesson(next, lesson.id);
+  }
+  return next;
+}
+
+function withOneDueConjunctionAndLaterConcepts(
+  store: ProgressStore,
+  seenAt = '2026-09-07T11:00:00.000Z',
+): ProgressStore {
+  const next = withLevel1Complete(withConjunctionPractice(store, seenAt));
+  return {
+    ...next,
+    passed: ['eval-001'],
+    queue: [
+      { exerciseId: 'eval-001', due: '2026-09-07T11:00:00.000Z', intervalDays: 1, ease: 2.5 },
+      { exerciseId: 'eval-010', due: '2026-09-10T12:00:00.000Z', intervalDays: 1, ease: 2.5 },
+      { exerciseId: 'tt-002', due: '2026-09-10T12:00:00.000Z', intervalDays: 1, ease: 2.5 },
+    ],
+  };
 }
 
 function withConjunctionPractice(store: ProgressStore, at = '2026-09-07T12:00:00.000Z'): ProgressStore {
@@ -287,32 +313,83 @@ describe('warm-up SRS writes', () => {
   });
 });
 
-describe('short warm-up miss envelopes', () => {
-  it('does not compose a 1-step due-review round, and a miss never grows the counter', () => {
-    const now = Date.parse('2026-09-07T12:00:00.000Z');
-    let store = withConjunctionPractice(loadProgress(), '2026-09-07T11:00:00.000Z');
-    for (const lesson of ALL_LEARN_LESSONS) {
-      store = completeLesson(store, lesson.id);
-    }
-    store.passed = ['eval-001', 'eval-011'];
-    store.queue = [
-      { exerciseId: 'eval-001', due: '2026-09-07T11:00:00.000Z', intervalDays: 1, ease: 2.5 },
-    ];
+describe('short due-review rounds', () => {
+  const now = Date.parse('2026-09-07T12:00:00.000Z');
+
+  it('a single due item is the whole pass-path round, with nothing from other concepts', () => {
+    const store = withOneDueConjunctionAndLaterConcepts(loadProgress());
+    const unlocked = getUnlockedExerciseIds(store);
+    expect(unlocked).toContain('eval-010');
+    expect(unlocked).toContain('tt-002');
     const offer = offerOpening(store, null, now);
     expect(offer.kind).toBe('quick-review');
-    expect(offer.plan?.steps[0]?.role).toBe('warmup');
-    expect(offer.plan?.steps.length).toBeGreaterThanOrEqual(3);
-    const originalTotal = offer.plan!.steps.length;
-    const session = applyWarmupMiss(startSession(offer.plan!, '2026-09-07T12:00:00.000Z'));
-    expect(session.plan.repairApplied).toBe(true);
-    expect(session.plan.steps.length).toBe(originalTotal);
-    expect(session.plan.steps.length).toBeLessThanOrEqual(SESSION_MAX);
-    expect(session.plan.steps.slice(1).some((step) => isPracticeItem(step.itemId))).toBe(true);
-    expect(session.plan.steps.slice(1).some((step) => step.itemId === 'level0-03-and')).toBe(true);
+    expect(offer.plan?.steps.map((step) => step.itemId)).toEqual(['eval-001']);
+    expect(offer.plan?.steps[0]).toMatchObject({
+      role: 'warmup',
+      conceptId: 'conjunction',
+    });
+    expect(offer.plan?.steps.some((step) => conceptForItem(step.itemId) !== 'conjunction')).toBe(
+      false,
+    );
   });
 
-  it('keeps both due conjunction items and still includes practice on a miss', () => {
-    const now = Date.parse('2026-09-07T12:00:00.000Z');
+  it('a 1-due pass writes SRS and evidence only for that item', () => {
+    const store = withOneDueConjunctionAndLaterConcepts(loadProgress());
+    expect(offerOpening(store, null, now).plan?.steps.map((step) => step.itemId)).toEqual([
+      'eval-001',
+    ]);
+    const beforeQueue = structuredClone(store.queue);
+    const beforeEvidence = structuredClone(store.conceptEvidence);
+    const started = beginPracticeAttempt(store, 'eval-001');
+    const draft = started.practiceDraft!;
+    const next = recordCheckedPracticeState(started, {
+      ...draft,
+      phase: 'answered',
+      feedbackTag: 'correct',
+      attempt: recordAttemptCheck(draft.attempt, true),
+    });
+    expect(next.queue.find((entry) => entry.exerciseId === 'eval-001')?.due).not.toBe(
+      beforeQueue.find((entry) => entry.exerciseId === 'eval-001')?.due,
+    );
+    expect(next.queue.find((entry) => entry.exerciseId === 'eval-010')).toEqual(
+      beforeQueue.find((entry) => entry.exerciseId === 'eval-010'),
+    );
+    expect(next.queue.find((entry) => entry.exerciseId === 'tt-002')).toEqual(
+      beforeQueue.find((entry) => entry.exerciseId === 'tt-002'),
+    );
+    expect(next.exerciseStats['eval-001']?.successes).toBe(1);
+    expect(next.exerciseStats['eval-010']).toBeUndefined();
+    expect(next.exerciseStats['tt-002']).toBeUndefined();
+    expect(next.conceptEvidence[evidenceKey('negation', 'apply')]).toEqual(
+      beforeEvidence[evidenceKey('negation', 'apply')],
+    );
+    expect(next.conceptEvidence[evidenceKey('conditional', 'apply')]).toEqual(
+      beforeEvidence[evidenceKey('conditional', 'apply')],
+    );
+  });
+
+  it('a 1-due miss grows into same-concept explanation plus practice only', () => {
+    const store = withOneDueConjunctionAndLaterConcepts(loadProgress());
+    const plan = offerOpening(store, null, now).plan!;
+    expect(plan.steps.map((step) => step.itemId)).toEqual(['eval-001']);
+    const session = applyWarmupMiss(startSession(plan, '2026-09-07T12:00:00.000Z'));
+    expect(session.plan.repairApplied).toBe(true);
+    expect(session.plan.steps.map((step) => step.itemId)).toEqual([
+      'eval-001',
+      'level0-03-and',
+      'level0-05-guided',
+      'eval-011',
+    ]);
+    expect(session.plan.steps.length).toBeGreaterThan(plan.steps.length);
+    expect(session.plan.steps.length).toBeLessThanOrEqual(SESSION_MAX);
+    expect(session.plan.steps.slice(1).every((step) => step.role === 'repair')).toBe(true);
+    expect(session.plan.steps.every((step) => conceptForItem(step.itemId) === 'conjunction')).toBe(
+      true,
+    );
+    expect(session.plan.steps.slice(1).some((step) => isPracticeItem(step.itemId))).toBe(true);
+  });
+
+  it('two due conjunction items stay exactly those items on the pass path', () => {
     const store = withLevel0Complete(loadProgress());
     store.passed = ['eval-001', 'eval-011'];
     store.queue = [
@@ -330,28 +407,19 @@ describe('short warm-up miss envelopes', () => {
     };
     const offer = offerOpening(store, null, now);
     expect(offer.kind).toBe('quick-review');
+    expect(offer.plan?.steps.map((step) => step.itemId)).toEqual(['eval-001', 'eval-011']);
     expect(offer.plan?.steps[0]).toMatchObject({ itemId: 'eval-001', role: 'warmup' });
-    expect(offer.plan?.steps.map((step) => step.itemId)).toContain('eval-011');
-    expect(offer.plan?.steps.length).toBeGreaterThanOrEqual(3);
-    const originalTotal = offer.plan!.steps.length;
     const session = applyWarmupMiss(startSession(offer.plan!, '2026-09-07T12:00:00.000Z'));
-    expect(session.plan.steps.length).toBe(originalTotal);
-    expect(session.plan.steps.slice(1).every((step) => step.role === 'repair')).toBe(true);
-    expect(session.plan.steps.slice(1).some((step) => isPracticeItem(step.itemId))).toBe(true);
-    expect(session.plan.steps.slice(1).some((step) => step.itemId === 'level0-03-and')).toBe(true);
-  });
-
-  it('does not grow advertised m if a 1-step plan is applied anyway', () => {
-    const store = withConjunctionPractice(loadProgress());
-    const plan = offerOpening(store, null, Date.parse('2026-09-07T12:00:00.000Z')).plan!;
-    const oneStep = {
-      ...plan,
-      steps: plan.steps.slice(0, 1),
-    };
-    expect(oneStep.steps).toHaveLength(1);
-    const session = applyWarmupMiss(startSession(oneStep, '2026-09-07T12:00:00.000Z'));
-    expect(session.plan.steps).toHaveLength(1);
-    expect(session.plan.repairApplied).toBeUndefined();
+    expect(session.plan.steps[0]?.itemId).toBe('eval-001');
+    expect(session.plan.steps.slice(1).map((step) => step.itemId)).toEqual([
+      'level0-03-and',
+      'level0-05-guided',
+      'eval-011',
+    ]);
+    expect(session.plan.steps.every((step) => conceptForItem(step.itemId) === 'conjunction')).toBe(
+      true,
+    );
+    expect(session.plan.steps.some((step) => isPracticeItem(step.itemId))).toBe(true);
   });
 });
 

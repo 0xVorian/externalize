@@ -254,83 +254,14 @@ export function repairStepsForWarmup(
 
 /**
  * Consume only the exercise chosen as the warm-up. Other due items — including
- * different skills on the same concept — stay in the body.
+ * different skills on the same concept — stay in the body. Short lists are not
+ * padded with unrelated exercises.
  */
 export function bodyItemIdsWithoutWarmupDuplicate(
   itemIds: string[],
   selection: WarmupSelection,
 ): string[] {
   return itemIds.filter((itemId) => itemId !== selection.exerciseId);
-}
-
-/** Body steps a miss can replace with explanation plus at least one practice. */
-const MIN_BODY_STEPS_FOR_REPAIR = 2;
-
-function isScheduledLater(store: ProgressStore, exerciseId: string, now: number): boolean {
-  const entry = store.queue.find((item) => item.exerciseId === exerciseId);
-  if (!entry) {
-    return false;
-  }
-  return Date.parse(entry.due) > now;
-}
-
-function warmupBodyFillCandidates(
-  store: ProgressStore,
-  warmup: WarmupSelection,
-  excluded: Set<string>,
-  now: number,
-): string[] {
-  const ids: string[] = [];
-  const push = (id: string | undefined) => {
-    if (!id || excluded.has(id) || ids.includes(id)) {
-      return;
-    }
-    ids.push(id);
-  };
-  for (const id of getUnlockedExerciseIds(store)) {
-    if (isScheduledLater(store, id, now)) {
-      continue;
-    }
-    push(id);
-  }
-  for (const id of [...store.passed].reverse()) {
-    if (isScheduledLater(store, id, now)) {
-      continue;
-    }
-    push(id);
-  }
-  for (const id of lessonsOfType(warmup.conceptId, 'guided')) {
-    push(id);
-  }
-  for (const lesson of [...ALL_LEARN_LESSONS, ...SOURCE_LESSONS]) {
-    if (lesson.type === 'guided') {
-      push(lesson.id);
-    }
-  }
-  return ids;
-}
-
-/**
- * A warm-up miss keeps advertised `m` and needs room for explanation plus
- * practice. Short due lists get a replaceable practice tail so the round is
- * never a 1-step warm-up with nothing to swap.
- */
-export function fillWarmupBodyItemIds(
-  store: ProgressStore,
-  remainingIds: string[],
-  warmup: WarmupSelection,
-  now = Date.now(),
-): string[] {
-  const filled = [...remainingIds];
-  const excluded = new Set<string>([warmup.exerciseId, ...filled]);
-  for (const id of warmupBodyFillCandidates(store, warmup, excluded, now)) {
-    if (expandItemsToUnits(filled, store).length >= MIN_BODY_STEPS_FOR_REPAIR) {
-      break;
-    }
-    filled.push(id);
-    excluded.add(id);
-  }
-  return filled;
 }
 
 function takeRepairTail(repairSteps: SessionStep[], room: number): SessionStep[] {
@@ -351,6 +282,11 @@ function takeRepairTail(repairSteps: SessionStep[], room: number): SessionStep[]
   return [...prefix.slice(0, room - 1), { ...practice }];
 }
 
+/**
+ * Replace the remaining tail with same-concept repair. Longer rounds keep
+ * advertised `m` (they may shrink). A short due-review may grow into
+ * explanation plus 1–2 practice on that concept, still within SESSION_MAX.
+ */
 export function applyWarmupMiss(session: PersistedSession): PersistedSession {
   const plan = session.plan;
   const current = plan.steps[session.currentIndex];
@@ -359,8 +295,13 @@ export function applyWarmupMiss(session: PersistedSession): PersistedSession {
   }
   const kept = plan.steps.slice(0, session.currentIndex + 1).map((step) => ({ ...step }));
   const originalTotal = plan.steps.length;
-  const room = Math.max(0, originalTotal - kept.length);
-  const tail = takeRepairTail(plan.repairSteps, room);
+  const frozenRoom = Math.max(0, originalTotal - kept.length);
+  const maxRepairRoom = Math.max(0, SESSION_MAX - kept.length);
+  const frozen = takeRepairTail(plan.repairSteps, frozenRoom);
+  const wanted = takeRepairTail(plan.repairSteps, maxRepairRoom);
+  const hasRepairShape =
+    frozen.length >= 2 && frozen.some((step) => isPracticeItem(step.itemId));
+  const tail = hasRepairShape ? frozen : wanted;
   if (tail.length === 0) {
     return session;
   }
