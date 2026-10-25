@@ -116,11 +116,30 @@
 }
 
 .watch-grid {
+  display: table;
   width: 100%;
   table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0.35rem;
   font-family: "Fira Code", "Cascadia Code", monospace;
+}
+
+.watch-grid thead {
+  display: table-header-group;
+}
+
+.watch-grid tbody {
+  display: table-row-group;
+}
+
+.watch-grid tr {
+  display: table-row;
+}
+
+.watch-grid th,
+.watch-grid td {
+  display: table-cell;
+  vertical-align: middle;
 }
 
 .watch-grid th,
@@ -133,7 +152,11 @@
   background: var(--surface);
 }
 
-.watch-grid-corner,
+.watch-grid th.watch-grid-corner {
+  border-color: transparent;
+  background: transparent;
+}
+
 .watch-grid-col-label,
 .watch-grid-row-label {
   color: var(--muted);

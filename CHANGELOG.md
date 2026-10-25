@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Restored the 2×2 watch grid as a real table on narrow screens (down to ~320px). A leftover `display: grid` rule had stacked the `Q = T` / `Q = F` headers and wrapped row labels off the grid. The cryptic `P ↓ / Q →` corner legend is gone; row and column labels already name the axes, and a visually hidden label keeps the table accessible.
+- Stopped screen-reader case labels from occupying a visual column in row-by-row truth tables, which had shifted ¬P (and other watch-table) values under the wrong headers. Negation watch copy now points at the highlighted row instead of saying that only the P column matters.
+
 ## [0.5.1] - 2026-09-08
 
 ### Changed

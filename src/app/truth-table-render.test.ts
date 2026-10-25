@@ -149,6 +149,25 @@ describe('truth-table-render', () => {
       ]);
       expect(html).toContain('truth-table-wrap');
     });
+
+    it('keeps screen-reader case labels inside cells so columns stay aligned', () => {
+      const html = renderTruthTable('en', '¬P', [
+        { assignment: { P: true }, active: true, srLabel: 'Case 1 of 2' },
+        { assignment: { P: false }, active: false, srLabel: 'Case 2 of 2' },
+      ]);
+      const header = html.match(/<thead>[\s\S]*?<tr>([\s\S]*?)<\/tr>/)?.[1] ?? '';
+      const bodyRows = [...html.matchAll(/<tbody>[\s\S]*?<\/tbody>/g)]
+        .flatMap((block) => [...block[0].matchAll(/<tr\b[\s\S]*?<\/tr>/g)].map((row) => row[0]));
+      const headerCells = header.match(/<(?:th|td)\b/g) ?? [];
+      expect(headerCells).toHaveLength(2);
+      expect(html).not.toMatch(/<tr[^>]*>\s*<th[^>]*class="[^"]*sr-only/);
+      expect(html).toContain('class="sr-only">Case 1 of 2</span>');
+      for (const row of bodyRows) {
+        expect(row.match(/<(?:th|td)\b/g)).toHaveLength(headerCells.length);
+      }
+      expect(html).toMatch(/<td><span class="sr-only">Case 1 of 2<\/span>T<\/td>/);
+      expect(html).toMatch(/data-testid="truth-result-cell">F<\/td>/);
+    });
   });
 
   describe('renderPartialTruthTable', () => {
@@ -204,6 +223,19 @@ describe('truth-table-render', () => {
       expect(html).toContain('watch-grid-cell active');
       expect(html).toContain('watch-grid-row-label">P = T</th>');
       expect(html).toContain('watch-grid-col-label">Q = T</th>');
+    });
+
+    it('leaves the corner visually empty and names the axes for assistive tech', () => {
+      const en = renderWatchGrid('en', 'P ∧ Q', { P: true, Q: true });
+      const fr = renderWatchGrid('fr', 'P ∨ Q', { P: false, Q: true });
+      expect(en).not.toContain('↓ /');
+      expect(fr).not.toContain('↓ /');
+      expect(en).toMatch(
+        /watch-grid-corner[^>]*>\s*<span class="sr-only">P labels the rows; Q labels the columns<\/span>/,
+      );
+      expect(fr).toContain('P désigne les lignes, Q les colonnes');
+      expect(en).toContain('scope="col"');
+      expect(en).toContain('scope="row"');
     });
 
     it('highlights the cell matching the active assignment', () => {

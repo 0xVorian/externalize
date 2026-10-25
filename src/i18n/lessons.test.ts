@@ -30,6 +30,8 @@ describe('lesson i18n', () => {
       expect(ui.lessonsCompletedLabel(1)).toBeTruthy();
       expect(ui.unitCompleteHeading).toBeTruthy();
       expect(ui.unitProgressAria(ui.level0Title, 1, 5, 0)).toBeTruthy();
+      expect(ui.watchGridCornerAria('P', 'Q')).toBeTruthy();
+      expect(ui.watchGridCornerAria('P', 'Q')).not.toMatch(/↓|→/);
     });
 
     it(`provides all level 0 lessons in ${locale}`, () => {
