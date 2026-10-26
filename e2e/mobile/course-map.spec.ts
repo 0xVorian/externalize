@@ -66,6 +66,8 @@ test('empty Progress shows all three unit headers on the first 390px screen', as
   expect(onFirstScreen(unit0, viewportHeight)).toBe(true);
   expect(onFirstScreen(unit1, viewportHeight)).toBe(true);
   expect(onFirstScreen(unit2, viewportHeight)).toBe(true);
+  const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+  console.log(`empty Progress height ${pageHeight}px at 390x${viewportHeight}`);
 });
 
 test('mid-Unit 1 Progress shows you-are-here on the first 390px screen', async ({
@@ -78,4 +80,6 @@ test('mid-Unit 1 Progress shows you-are-here on the first 390px screen', async (
   const viewportHeight = page.viewportSize()!.height;
   const hereBox = await page.getByTestId('course-outline-here').boundingBox();
   expect(onFirstScreen(hereBox, viewportHeight)).toBe(true);
+  const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+  console.log(`mid-Unit 1 Progress height ${pageHeight}px at 390x${viewportHeight}`);
 });

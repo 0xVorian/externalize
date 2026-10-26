@@ -142,8 +142,8 @@ function regroupLessons(lessons: CourseOutlineLesson[]): CourseOutlineConceptGro
 }
 
 /**
- * Current unit: done lessons above here, then here plus the next lesson,
- * then remaining upcoming lessons for a collapsed preview.
+ * Current unit: done lessons above here, the here lesson, then remaining
+ * upcoming lessons behind a count so unit headers fit a phone first screen.
  */
 export function splitCurrentUnitGroups(unit: CourseOutlineUnit): {
   doneGroups: CourseOutlineConceptGroup[];
@@ -155,7 +155,9 @@ export function splitCurrentUnitGroups(unit: CourseOutlineUnit): {
   const lessons = unit.concepts.flatMap((group) => group.lessons);
   const hereIndex = lessons.findIndex((lesson) => lesson.status === 'here');
   const start = hereIndex === -1 ? 0 : hereIndex;
-  const visibleEnd = hereIndex === -1 ? lessons.length : Math.min(lessons.length, hereIndex + 2);
+  const showFollowing = start > 0 ? 2 : 1;
+  const visibleEnd =
+    hereIndex === -1 ? lessons.length : Math.min(lessons.length, hereIndex + showFollowing);
   const doneLessons = lessons.slice(0, start);
   const visibleLessons = lessons.slice(start, visibleEnd);
   const remainingLessons = lessons.slice(visibleEnd);

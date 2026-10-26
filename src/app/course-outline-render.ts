@@ -110,10 +110,10 @@ function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: C
   const title = unitTitle(locale, unit.unit);
   const waitingTitle =
     unit.waitingOnUnit === undefined ? undefined : unitTitle(locale, unit.waitingOnUnit);
-  const waitingLine =
+  const countLine =
     unit.status === 'locked' && waitingTitle
-      ? `<p class="course-outline-waiting">${copy.waitingOn(waitingTitle)}</p>`
-      : '';
+      ? `${copy.lessonsStatus(unit.done, unit.total)} · ${copy.waitingOn(waitingTitle)}`
+      : copy.lessonsStatus(unit.done, unit.total);
   const currentAttr = unit.current ? ` aria-current="true"` : '';
   const currentLabel = unit.current
     ? ` <span class="sr-only">${copy.currentUnitAria}</span>`
@@ -159,9 +159,8 @@ function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: C
     >
       <header class="course-outline-unit-header">
         <h3 class="course-outline-unit-title" id="course-outline-unit-${unit.unit}-heading">${title}${currentLabel}</h3>
-        <p class="course-outline-unit-count">${copy.lessonsStatus(unit.done, unit.total)}</p>
+        <p class="course-outline-unit-count">${countLine}</p>
       </header>
-      ${waitingLine}
       ${body}
     </section>
   `;
