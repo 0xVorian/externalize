@@ -311,12 +311,17 @@ export function applyWarmupMiss(session: PersistedSession): PersistedSession {
       ...plan,
       steps: [...kept, ...tail],
       repairApplied: true,
+      repairPending: false,
     },
     status: 'active',
   };
 }
 
 /**
+ * A warm-up Check miss marks repair pending. The remaining steps (and the
+ * advertised `n / m`) stay unchanged until the learner leaves the Try again
+ * screen; `completeCurrentStep` then applies the tail.
+ *
  * Repair is the first submitted Check on the warm-up step, not the first
  * graded cell or scaffold node (`firstCheckedCorrect` can flip before Check).
  */
@@ -327,5 +332,21 @@ export function applyWarmupMissAfterCheck(
   if (!options.isFinalCheck || options.firstCheckedCorrect !== false) {
     return session;
   }
-  return applyWarmupMiss(session);
+  const plan = session.plan;
+  const current = plan.steps[session.currentIndex];
+  if (
+    plan.repairApplied ||
+    plan.repairPending ||
+    current?.role !== 'warmup' ||
+    !plan.repairSteps?.length
+  ) {
+    return session;
+  }
+  return {
+    ...session,
+    plan: {
+      ...plan,
+      repairPending: true,
+    },
+  };
 }

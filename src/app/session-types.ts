@@ -36,6 +36,12 @@ export type SessionPlan = {
   warmupConceptId?: string;
   /** Precomputed repair tail; applied only after a warm-up miss. */
   repairSteps?: SessionStep[];
+  /**
+   * True after a warm-up Check miss, before the repair tail replaces the
+   * remaining steps. Advertised `n / m` stays unchanged until the learner
+   * leaves the Try again screen and the first repair step begins.
+   */
+  repairPending?: boolean;
   /** True after a warm-up miss replaced the remaining planned steps. */
   repairApplied?: boolean;
 };

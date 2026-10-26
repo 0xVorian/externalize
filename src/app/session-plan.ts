@@ -2,6 +2,7 @@ import {
   LEVEL_0_LESSONS,
   LEVEL_1_LESSONS,
   LEVEL_2_LESSONS,
+  getLessonDefinition,
   isLevel1Complete,
   isLevel2Complete,
 } from './lessons';
@@ -16,6 +17,7 @@ import { plannedSourceItems, sourcePlan } from './source-route';
 import { getUnlockedExerciseIds, isPracticeUnlocked, type ProgressStore } from './storage';
 import {
   SESSION_MAX,
+  SESSION_MIN,
   SESSION_TARGET,
   type OpeningOffer,
   type PersistedSession,
@@ -23,8 +25,9 @@ import {
   type SessionPlan,
   type SessionStep,
 } from './session-types';
-import { expandItemsToUnits, isTeachingItem } from './session-units';
+import { expandItemsToUnits, isPracticeItem, isTeachingItem } from './session-units';
 import {
+  applyWarmupMiss,
   bodyItemIdsWithoutWarmupDuplicate,
   repairStepsForWarmup,
   selectWarmup,
@@ -101,6 +104,45 @@ function capSteps(steps: SessionStep[], max: number, target: number): SessionSte
   return steps.slice(0, Math.min(target, max));
 }
 
+function firstPracticeIndex(steps: SessionStep[]): number {
+  return steps.findIndex((step) => isPracticeItem(step.itemId));
+}
+
+function isCardStep(step: SessionStep | undefined): boolean {
+  return getLessonDefinition(step?.itemId ?? '')?.type === 'card';
+}
+
+/**
+ * Split a teach–practice cluster longer than SESSION_MAX. Prefer 6, stay in
+ * 5–7. Keep the first practice with the explanation it depends on when that
+ * still fits. Otherwise cut between watch cases so the leftover round still
+ * opens with teaching — never a stranded guided step, never a lone card.
+ */
+function splitOversizedCluster(group: SessionStep[]): SessionStep[] {
+  const firstPractice = firstPracticeIndex(group);
+  if (firstPractice < 0) {
+    return capSteps(group, SESSION_MAX, SESSION_TARGET);
+  }
+
+  const throughPractice = firstPractice + 1;
+  if (throughPractice <= SESSION_MAX) {
+    const end = Math.min(SESSION_MAX, Math.max(throughPractice, SESSION_TARGET));
+    return group.slice(0, end);
+  }
+
+  // Practice cannot fit this round. Leave at least one teaching unit with it
+  // so the next round does not open on a stranded guided step.
+  const maxTake = Math.max(1, Math.min(SESSION_MAX, firstPractice - 1));
+  let take = Math.min(SESSION_TARGET, maxTake);
+  if (take < SESSION_MIN && SESSION_MIN <= maxTake) {
+    take = SESSION_MIN;
+  }
+  if (take > 0 && isCardStep(group[take - 1]) && take < maxTake) {
+    take = Math.min(maxTake, Math.max(take, SESSION_MIN));
+  }
+  return group.slice(0, take);
+}
+
 /**
  * Cap a step list at 5–7, preferring 6, without ending on a teaching step
  * whose practice in the same cluster was pushed to a later round.
@@ -131,6 +173,12 @@ export function takeSessionEnvelope(
         // when the body budget is 6 to leave room for a later warm-up prepend.
         if (group.some((step) => isTeachingItem(step.itemId)) && group.length <= SESSION_MAX) {
           return group;
+        }
+        if (group.some((step) => isTeachingItem(step.itemId))) {
+          // Oversized clusters use the global 5–7 envelope, not the tighter
+          // warm-up body budget, so a 6-slot cap cannot reintroduce a cut
+          // immediately before guided practice.
+          return splitOversizedCluster(group);
         }
         return capSteps(group, max, target);
       }
@@ -401,10 +449,18 @@ export function completeCurrentStep(persisted: PersistedSession): PersistedSessi
       ? persisted
       : { ...persisted, status: 'completed' };
   }
-  const currentIndex = persisted.currentIndex + 1;
+  const withRepair =
+    persisted.plan.repairPending && !persisted.plan.repairApplied
+      ? applyWarmupMiss(persisted)
+      : persisted;
+  const plan = withRepair.plan.repairPending
+    ? { ...withRepair.plan, repairPending: false }
+    : withRepair.plan;
+  const currentIndex = withRepair.currentIndex + 1;
   return {
-    ...persisted,
+    ...withRepair,
+    plan,
     currentIndex,
-    status: currentIndex >= persisted.plan.steps.length ? 'completed' : 'active',
+    status: currentIndex >= plan.steps.length ? 'completed' : 'active',
   };
 }

@@ -16,7 +16,9 @@ Work merged after v0.5.1 still sits under `[Unreleased]` in `CHANGELOG.md`. It i
 
 - mobile truth-table and watch-grid layout: the 2×2 grid is a real table again, the cryptic `P ↓ / Q →` legend is gone, and screen-reader case labels no longer occupy a visual column ([#21](https://github.com/0xVorian/externalize/issues/21), [#24](https://github.com/0xVorian/externalize/issues/24), [PR #26](https://github.com/0xVorian/externalize/pull/26));
 - a concept’s teaching and practice stay in the same session round ([#25](https://github.com/0xVorian/externalize/issues/25), [PR #28](https://github.com/0xVorian/externalize/pull/28));
-- rounds open with one warm-up check on the most recently practised concept ([#27](https://github.com/0xVorian/externalize/issues/27), [PR #32](https://github.com/0xVorian/externalize/pull/32)).
+- rounds open with one warm-up check on the most recently practised concept ([#27](https://github.com/0xVorian/externalize/issues/27), [PR #32](https://github.com/0xVorian/externalize/pull/32));
+- oversized teach–practice clusters no longer fall back to a cut at 6: this round takes through the first practice when it still fits, otherwise it splits between watch cases ([#30](https://github.com/0xVorian/externalize/issues/30), [PR #35](https://github.com/0xVorian/externalize/pull/35));
+- a warm-up miss keeps the advertised `n / m` on Try again; the new total appears once the first repair step begins ([#33](https://github.com/0xVorian/externalize/issues/33), [PR #35](https://github.com/0xVorian/externalize/pull/35)).
 
 Implementation of the session-first and adaptive baseline is complete; the experiential/product-validation gates remain open.
 
@@ -86,10 +88,8 @@ Do not treat the adaptive authorization as general curriculum expansion. Chapter
 
 ### Open GitHub Issues
 
-As of 2026-10-26, remaining open issues (this pass closes #23, #29, and #31):
+As of 2026-10-26, remaining open issues (PR #34 closed #23, #29, and #31; this PR closes #30 and #33):
 
-- [#33](https://github.com/0xVorian/externalize/issues/33) — Warm-up follow-ups: the `n / m` counter jumps on Try again, `docs/session-first-ux.md` still says a miss grows because there is “no tail”, and the 1-due SRS unit test does not go through session orchestration.
-- [#30](https://github.com/0xVorian/externalize/issues/30) — Session envelope: a cluster longer than 7 steps still falls back to a cut at 6 (latent; no current content is that long).
 - [#22](https://github.com/0xVorian/externalize/issues/22) — Daily practice reminder. Explicitly gated on an out-of-app experiment (2026-10-26 to 2026-11-08). Push/email infrastructure stays in “not building yet” unless that experiment shows a measurable increase in practice. Copy must not use streak or guilt language.
 
 Do not treat this list as authorization to invent extra work. If an issue is not listed, check GitHub rather than assuming a new phase.

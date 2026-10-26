@@ -23,7 +23,9 @@ import {
   sessionSegmentMs,
   startSession,
   takeEnvelope,
+  takeSessionEnvelope,
 } from './session-plan';
+import type { SessionStep } from './session-types';
 import { expandItemsToUnits, isPracticeItem, isTeachingItem } from './session-units';
 import { completeLesson, loadProgress, type ProgressStore } from './storage';
 import { plannedSourceItems, setActiveRoute } from './source-route';
@@ -40,6 +42,21 @@ function withLevel0Complete(store: ProgressStore): ProgressStore {
   return next;
 }
 
+function conjunctionLikeCluster(watchCount: number, extras: SessionStep[] = []): SessionStep[] {
+  const watches: SessionStep[] = Array.from({ length: watchCount }, (_, index) => ({
+    id: `level0-04-watch#${index}`,
+    source: 'route',
+    itemId: 'level0-04-watch',
+    unitIndex: index,
+  }));
+  return [
+    { id: 'level0-03-and', source: 'route', itemId: 'level0-03-and' },
+    ...watches,
+    { id: 'level0-05-guided', source: 'route', itemId: 'level0-05-guided' },
+    ...extras,
+  ];
+}
+
 describe('session envelope', () => {
   it('keeps 1–7 items and caps longer lists at 6', () => {
     expect(takeEnvelope(['a', 'b', 'c', 'd', 'e'])).toHaveLength(5);
@@ -52,6 +69,82 @@ describe('session envelope', () => {
       'e',
       'f',
     ]);
+  });
+
+  it('keeps guided practice with its explanation when an 8-step cluster would cut at 6', () => {
+    const cluster = conjunctionLikeCluster(5, [
+      { id: 'eval-011', source: 'practice', itemId: 'eval-011' },
+    ]);
+    expect(cluster.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+      'level0-05-guided',
+      'eval-011',
+    ]);
+    const taken = takeSessionEnvelope(cluster);
+    expect(taken.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+      'level0-05-guided',
+    ]);
+    expect(taken).toHaveLength(7);
+    expect(taken.some((step) => step.itemId === 'level0-05-guided')).toBe(true);
+    expect(taken.some((step) => step.itemId === 'eval-011')).toBe(false);
+  });
+
+  it('still keeps that guided step when the warm-up body budget would have capped at 6', () => {
+    const cluster = conjunctionLikeCluster(5, [
+      { id: 'eval-011', source: 'practice', itemId: 'eval-011' },
+    ]);
+    const taken = takeSessionEnvelope(cluster, { max: SESSION_MAX - 1, target: SESSION_TARGET - 1 });
+    expect(taken.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+      'level0-05-guided',
+    ]);
+  });
+
+  it('splits an 8-step cluster between watch cases when guided cannot fit this round', () => {
+    const cluster = conjunctionLikeCluster(6);
+    expect(cluster.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+      'level0-04-watch#5',
+      'level0-05-guided',
+    ]);
+    const taken = takeSessionEnvelope(cluster);
+    expect(taken.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+    ]);
+    const leftover = cluster.slice(taken.length);
+    expect(leftover.map((step) => step.id)).toEqual([
+      'level0-04-watch#5',
+      'level0-05-guided',
+    ]);
+    expect(isTeachingItem(leftover[0]!.itemId)).toBe(true);
+    expect(isPracticeItem(leftover[1]!.itemId)).toBe(true);
+    expect(taken.some((step) => step.itemId === 'level0-05-guided')).toBe(false);
   });
 });
 
@@ -401,10 +494,16 @@ function assertTeachPracticeCohesion(
   const last = plan.steps[plan.steps.length - 1]!;
   if (isTeachingItem(last.itemId)) {
     const key = sessionClusterKey(last.itemId);
-    const pushedPractice = expanded
+    const rest = expanded
       .slice(plan.steps.length)
-      .filter((step) => sessionClusterKey(step.itemId) === key && isPracticeItem(step.itemId));
-    expect(pushedPractice, `${last.id} left ${key} practice for a later round`).toEqual([]);
+      .filter((step) => sessionClusterKey(step.itemId) === key);
+    const pushedPractice = rest.filter((step) => isPracticeItem(step.itemId));
+    if (pushedPractice.length > 0) {
+      expect(
+        rest[0] && isTeachingItem(rest[0].itemId),
+        `${last.id} stranded ${key} practice without explanation`,
+      ).toBe(true);
+    }
   }
 
   const groups = groupSessionSteps(expanded);
@@ -414,9 +513,14 @@ function assertTeachPracticeCohesion(
       break;
     }
     if (group.length > SESSION_MAX) {
-      expect(plan.steps.slice(offset).map((step) => step.id)).toEqual(
-        group.slice(0, plan.steps.length - offset).map((step) => step.id),
+      const takenFromGroup = plan.steps.slice(offset);
+      expect(takenFromGroup.map((step) => step.id)).toEqual(
+        group.slice(0, takenFromGroup.length).map((step) => step.id),
       );
+      const leftover = group.slice(takenFromGroup.length);
+      if (leftover.some((step) => isPracticeItem(step.itemId))) {
+        expect(isTeachingItem(leftover[0]!.itemId)).toBe(true);
+      }
       break;
     }
     expect(
