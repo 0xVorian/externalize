@@ -1,14 +1,22 @@
-# Git-connected Pages reads this file. Do **not** declare [[d1_databases]]
-# here: Cloudflare rejects a D1 binding whose database does not exist
-# (error 10021) and the preview deploy fails. Bind DB in the dashboard
-# after creating the database. Local `wrangler d1` uses wrangler.local.toml
-# (`-c`); `wrangler pages dev` cannot take `-c`, so local/e2e pass
-# `--d1 DB=<nil UUID matching wrangler.local.toml>`.
+# Git-connected Pages reads this file as the source of truth for bindings
+# (`pages_build_output_dir` is set, so dashboard binds are wiped on every git
+# build). D1 is production-only: [[env.production.d1_databases]] with the
+# real database_id. Preview inherits the top level, which has no D1, so
+# branch deploys stay unbound and GET /api/status returns { available: false }.
 #
-# Without a working D1 bind, Functions still deploy; GET /api/status
-# returns { available: false } and the account UI stays hidden.
-# Remote migrate: npm run d1:migrate:remote -- --database-id <uuid>
-# (temp config) or the D1 SQL console. Never put a database_id here.
+# Inheritable keys (name, pages_build_output_dir, compatibility_date,
+# compatibility_flags) stay at the top level. Vars and bindings do not
+# inherit: env.production must repeat [vars] alongside the D1 bind.
+# https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+#
+# Local `wrangler d1` uses wrangler.local.toml (`-c`); `wrangler pages dev`
+# cannot take `-c`, so local/e2e pass `--d1 DB=<nil UUID matching
+# wrangler.local.toml>`.
+#
+# Future remote migrations: D1 SQL console / query API, or a gitignored
+# wrangler.remote.toml (copy wrangler.local.toml, put the real database_id).
+# Do not write a temp config under /tmp — Wrangler resolves migrations_dir
+# relative to the config file.
 
 name = "externalize"
 compatibility_date = "2025-10-11"
@@ -22,3 +30,11 @@ WEBAUTHN_RP_NAME = "Externalize"
 # WEBAUTHN_RP_ID = "externalize.pages.dev"
 # WEBAUTHN_ORIGIN = "https://externalize.pages.dev"
 # WEBAUTHN_ALLOWED_ORIGINS = "https://logic.example.org"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "externalize-progress"
+database_id = "6d9806e2-46c4-41b1-a5fe-8c224ecbadf3"
+
+[env.production.vars]
+WEBAUTHN_RP_NAME = "Externalize"
