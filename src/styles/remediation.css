@@ -306,8 +306,21 @@
   margin-top: 0.75rem;
 }
 
-.progress-overview .progress-meta:last-child {
+.progress-overview .progress-meta:last-child,
+.course-outline-unit-header .course-outline-unit-count {
   margin-bottom: 0;
+}
+
+@media (max-width: 400px) {
+  .course-outline-unit-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .course-outline-lesson {
+    align-items: flex-start;
+  }
 }
 
 .unit-button:focus-visible,

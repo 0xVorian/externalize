@@ -18,7 +18,8 @@ Work merged after v0.5.1 still sits under `[Unreleased]` in `CHANGELOG.md`. It i
 - a concept’s teaching and practice stay in the same session round ([#25](https://github.com/0xVorian/externalize/issues/25), [PR #28](https://github.com/0xVorian/externalize/pull/28));
 - rounds open with one warm-up check on the most recently practised concept ([#27](https://github.com/0xVorian/externalize/issues/27), [PR #32](https://github.com/0xVorian/externalize/pull/32));
 - oversized teach–practice clusters no longer fall back to a cut at 6: this round takes through the first practice when it still fits, otherwise it splits between watch cases ([#30](https://github.com/0xVorian/externalize/issues/30), [PR #35](https://github.com/0xVorian/externalize/pull/35));
-- a warm-up miss keeps the advertised `n / m` on Try again; the new total appears once the first repair step begins ([#33](https://github.com/0xVorian/externalize/issues/33), [PR #35](https://github.com/0xVorian/externalize/pull/35)).
+- a warm-up miss keeps the advertised `n / m` on Try again; the new total appears once the first repair step begins ([#33](https://github.com/0xVorian/externalize/issues/33), [PR #35](https://github.com/0xVorian/externalize/pull/35));
+- Progress shows a course map: one next matching Home, an always-visible three-unit outline, and concept-map statuses that no longer depend on optional Logic and Theism lessons ([#43](https://github.com/0xVorian/externalize/issues/43)).
 
 Optional passkey accounts ([#37](https://github.com/0xVorian/externalize/issues/37)) are a separate bounded feature, not a session-first remediation: signed-out local use stays as it is; Cloudflare Pages Functions + D1 copy progress when a passkey is created. Production D1 is bound only under `env.production` in committed `wrangler.toml` ([accounts.md](accounts.md)); preview deploys stay unbound.
 
@@ -53,7 +54,7 @@ The implemented baseline does not authorize XP, hearts, reset streaks, currencie
 
 ### Progress visibility baseline
 
-The progress-visibility pass defined in [progress-visibility.md](progress-visibility.md) is implemented. Learn exposes unit/lesson position; Practice exposes capability state and finite five-exercise sessions; Progress leads with capability-oriented summaries; meaningful transitions are derived from graded evidence rather than time spent or arbitrary XP.
+The progress-visibility pass defined in [progress-visibility.md](progress-visibility.md) is implemented. Learn exposes unit/lesson position; Practice exposes capability state and finite five-exercise sessions; Progress leads with the same bounded next as Home and an always-visible three-unit outline, then capability summaries; meaningful transitions are derived from graded evidence rather than time spent or arbitrary XP.
 
 Implemented scope:
 
@@ -63,6 +64,7 @@ Implemented scope:
 - [x] Session-complete summary based on actual changes
 - [x] Visible transitions for capability consistency, new unlocks, and reduced scaffolding
 - [x] Capability-first summary in Progress (`You can now`, `In progress`, `Up next`)
+- [x] Course map v1 on Progress: one next matching Home, always-visible three-unit outline, translation on the concept map, main-route statuses independent of `lat-*` lessons
 - [x] EN/FR, accessibility, reduced-motion, and ~320px mobile coverage
 - [x] Unit and browser regression tests for progress derivation and transition behavior
 

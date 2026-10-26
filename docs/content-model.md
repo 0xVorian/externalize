@@ -183,13 +183,20 @@ Prerequisite relationships live in [`content/prerequisites.json`](../content/pre
 
 ```
 proposition          → (none)
-negation             → proposition
-conjunction          → proposition, negation
-disjunction          → proposition, negation
-conditional          → proposition, negation, conjunction, disjunction
+truth-values         → proposition
+conjunction          → proposition, truth-values
+negation             → proposition, truth-values
+disjunction          → negation
+conditional          → conjunction, disjunction
 biconditional        → conditional
-scope-and-parens     → all connectives
+translation          → biconditional
+scope                → conjunction, negation, disjunction, conditional, biconditional
+double-negation      → negation
+precedence           → scope
+demorgan             → negation, scope
 ```
+
+Main-route concept completion on the Progress map uses foundations (`level0-*` / `level1-*` / `level2-*`) lessons only. Optional *Logic and Theism* (`lat-*`) lessons must not keep a foundations concept incomplete.
 
 ## Progress record (local storage)
 

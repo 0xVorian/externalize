@@ -169,7 +169,7 @@ test('Progress is resume-first with detail closed but reachable', async ({ page 
 
   const cards = page.locator('main.app > .progress-card');
   await expect(cards.first()).toHaveClass(/what-next-card/);
-  await expect(page.locator('.progress-overview')).toBeVisible();
+  await expect(page.locator('[data-testid="course-outline"]')).toBeVisible();
   const detail = page.locator('.progress-disclosure');
   expect(await detail.count()).toBeGreaterThan(0);
   for (const disclosure of await detail.all()) {

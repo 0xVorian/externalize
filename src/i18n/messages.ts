@@ -954,10 +954,13 @@ export type ProgressUiCopy = {
   continuePractice: string;
   continueProgress: string;
   lastSeen: (when: string) => string;
-  level0Heading: string;
-  level0Status: (done: number, total: number) => string;
-  level1Heading: string;
-  level1Status: (done: number, total: number) => string;
+  outlineHeading: string;
+  lessonsStatus: (done: number, total: number) => string;
+  youAreHere: string;
+  lessonUpcoming: string;
+  waitingOn: (unitTitle: string) => string;
+  currentUnitAria: string;
+  exercisesLater: (count: number) => string;
   exercisesHeading: string;
   exercisesStatus: (done: number, unlocked: number) => string;
   reviewDue: (count: number) => string;
@@ -988,15 +991,6 @@ export type ProgressUiCopy = {
   importError: string;
   progressItemAria: (label: string, status: string) => string;
   modeProgressAria: string;
-  whatNextTitle: string;
-  whatNextWeakestSkill: (skill: string, rate: number) => string;
-  whatNextNextExercise: (exerciseId: string) => string;
-  whatNextReviewDue: (count: number) => string;
-  whatNextResumeLesson: (lesson: string) => string;
-  whatNextResumePractice: string;
-  whatNextResumeProgress: string;
-  whatNextPracticeSkill: string;
-  whatNextStartExercise: string;
 };
 
 const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
@@ -1007,10 +1001,14 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     continuePractice: 'Continue exercises',
     continueProgress: 'View progress',
     lastSeen: (when) => `Last activity: ${when}`,
-    level0Heading: 'Introductory unit',
-    level0Status: (done, total) => `${done} of ${total} sections complete`,
-    level1Heading: 'Connectives unit',
-    level1Status: (done, total) => `${done} of ${total} sections complete`,
+    outlineHeading: 'Course',
+    lessonsStatus: (done, total) => `${done} of ${total} lessons`,
+    youAreHere: 'you are here',
+    lessonUpcoming: 'upcoming',
+    waitingOn: (unitTitle) => `after ${unitTitle}`,
+    currentUnitAria: 'current unit',
+    exercisesLater: (count) =>
+      count === 1 ? '1 later exercise' : `${count} later exercises`,
     exercisesHeading: 'Exercises',
     exercisesStatus: (done, unlocked) => `${done} completed · ${unlocked} available`,
     reviewDue: (count) => `${count} scheduled for review`,
@@ -1070,15 +1068,6 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     importError: 'That file could not be read. Choose an Externalize progress export.',
     progressItemAria: (label, status) => `${label}, ${status}`,
     modeProgressAria: 'Progress',
-    whatNextTitle: 'What next?',
-    whatNextWeakestSkill: (skill, rate) => `Recent success rate for ${skill}: ${rate}% — a few targeted exercises should help.`,
-    whatNextNextExercise: (id) => `Next up: ${id}.`,
-    whatNextReviewDue: (count) => `${count} exercise${count === 1 ? '' : 's'} scheduled for review.`,
-    whatNextResumeLesson: (lesson) => `Continue the course at “${lesson}”.`,
-    whatNextResumePractice: 'Pick up your last exercise session.',
-    whatNextResumeProgress: 'Start or continue the introductory unit.',
-    whatNextPracticeSkill: 'Practice this skill',
-    whatNextStartExercise: 'Start exercise',
   },
   fr: {
     progress: 'Suivi',
@@ -1087,10 +1076,15 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     continuePractice: 'Reprendre les exercices',
     continueProgress: 'Voir le suivi',
     lastSeen: (when) => `Dernière activité : ${when}`,
-    level0Heading: 'Unité d\'introduction',
-    level0Status: (done, total) => `${done} section${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}`,
-    level1Heading: 'Unité sur les connecteurs',
-    level1Status: (done, total) => `${done} section${done > 1 ? 's' : ''} sur ${total} terminée${done > 1 ? 's' : ''}`,
+    outlineHeading: 'Le cours',
+    lessonsStatus: (done, total) =>
+      `${done} leçon${done > 1 ? 's' : ''} sur ${total}`,
+    youAreHere: 'vous êtes ici',
+    lessonUpcoming: 'à venir',
+    waitingOn: (unitTitle) => `après ${unitTitle}`,
+    currentUnitAria: 'unité en cours',
+    exercisesLater: (count) =>
+      count === 1 ? '1 exercice plus loin dans le cours' : `${count} exercices plus loin dans le cours`,
     exercisesHeading: 'Exercices',
     exercisesStatus: (done, unlocked) => `${done} terminé${done > 1 ? 's' : ''} · ${unlocked} disponible${unlocked > 1 ? 's' : ''}`,
     reviewDue: (count) => `${count} à revoir`,
@@ -1150,15 +1144,6 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     importError: 'Fichier illisible. Choisissez une exportation Externalize.',
     progressItemAria: (label, status) => `${label}, ${status}`,
     modeProgressAria: 'Suivi',
-    whatNextTitle: 'Et ensuite ?',
-    whatNextWeakestSkill: (skill, rate) => `Taux de réussite récent — ${skill} : ${rate} % ; quelques exercices ciblés devraient aider.`,
-    whatNextNextExercise: (id) => `Prochain exercice : ${id}.`,
-    whatNextReviewDue: (count) => `${count} exercice${count > 1 ? 's' : ''} à revoir.`,
-    whatNextResumeLesson: (lesson) => `Reprendre le cours à « ${lesson} ».`,
-    whatNextResumePractice: 'Reprendre votre dernière séance d’exercices.',
-    whatNextResumeProgress: "Commencer ou poursuivre l'unité d'introduction.",
-    whatNextPracticeSkill: 'Travailler cette compétence',
-    whatNextStartExercise: "Commencer l'exercice",
   },
 };
 

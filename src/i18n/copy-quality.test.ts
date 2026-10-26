@@ -60,6 +60,11 @@ describe('learner-facing copy quality', () => {
     expect(fr.explorePrompt).not.toMatch(/notés|évalués/i);
     expect(progressUi('en').exercisesStatus(2, 4)).toContain('available');
     expect(progressUi('fr').exercisesStatus(2, 4)).toContain('disponible');
+    expect(progressUi('en').lessonsStatus(2, 5)).toMatch(/lessons/);
+    expect(progressUi('fr').lessonsStatus(2, 5)).toMatch(/leçons/);
+    expect(progressUi('en').outlineHeading).toBe('Course');
+    expect(progressUi('fr').outlineHeading).toBe('Le cours');
+    expect(progressUi('en').youAreHere).not.toBe(progressUi('fr').youAreHere);
     expect(visibilityUi('en').momentExerciseUnlocked('eval-001')).not.toMatch(/unlocked/i);
     expect(visibilityUi('fr').upNextEmpty).not.toMatch(/s’ouvriront/i);
   });

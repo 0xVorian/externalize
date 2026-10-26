@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { computeWhatNext } from './what-next';
-import { buildSummaryFromStore } from './progress-render';
 import {
   beginPracticeAttempt,
   clearPracticeDraft,
@@ -72,11 +70,9 @@ describe('selectNextExerciseId', () => {
     expect(selectNextExerciseId(store)).toBe('eval-011');
   });
 
-  it('matches Progress What next? and never selects locked content', () => {
+  it('never selects locked content', () => {
     let store = completeLevel0(loadProgress());
     const continueId = selectNextExerciseId(store);
-    const whatNext = computeWhatNext('en', store, buildSummaryFromStore(store));
-    expect(whatNext.exerciseId).toBe(continueId);
     expect(getUnlockedExerciseIds(store)).toContain(continueId);
     expect(selectNextExerciseId(store)).toBe('eval-001');
   });

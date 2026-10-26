@@ -72,6 +72,16 @@
       ]
     },
     {
+      "id": "translation",
+      "label": {
+        "en": "Translation",
+        "fr": "Traduction"
+      },
+      "requires": [
+        "biconditional"
+      ]
+    },
+    {
       "id": "scope",
       "label": {
         "en": "Scope & main connective",

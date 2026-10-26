@@ -118,16 +118,16 @@ The exercise itself remains the visual priority. Progress chrome must stay compa
 
 ### Progress
 
-The Progress view should become more capability-oriented and less like a storage dump.
+The Progress view should answer where the learner is and what the next bounded round covers, without becoming a storage dump.
 
-Keep detailed lists/statistics available, but foreground:
+Foreground, in order:
 
-- **You can now** — consistent capabilities;
-- **In progress** — developing capabilities;
-- **Up next** — unlocked/ready capability or the next meaningful curriculum step;
-- current unit/session/review context.
+- **One next** — the same `offerOpening` round as Home, named by the concept or lesson it covers;
+- **Course outline** — all three units, with the current unit expanded by concept and lesson, a you-are-here marker, done items marked, and later units visible as upcoming or locked with what they wait on;
+- **Concept map** — prerequisite graph whose main-route statuses do not depend on optional `lat-*` lessons;
+- **You can now / In progress / Up next** — capability summary, not a second “what’s next” action.
 
-The concept map remains useful as the richer structural view.
+Detailed exercise lists and statistics stay collapsed after the outline.
 
 ### Concept context outside Progress
 

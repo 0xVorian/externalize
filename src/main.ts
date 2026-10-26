@@ -802,6 +802,7 @@ function render(): void {
     root.innerHTML = renderProgressView(locale, progress, practiceUnlocked, {
       importNotice: importNotice ?? undefined,
       account,
+      offer: currentOffer(),
     });
     return;
   }

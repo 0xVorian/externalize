@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISE_DEFINITIONS } from './exercises';
-import { ALL_LEARN_LESSONS, PRACTICE_UNLOCK_ORDER } from './lessons';
+import {
+  ALL_LEARN_LESSONS,
+  LEVEL_0_LESSONS,
+  LEVEL_1_LESSONS,
+  PRACTICE_UNLOCK_ORDER,
+} from './lessons';
 import {
   PREREQUISITES_GRAPH,
   conceptForExercise,
@@ -14,7 +19,21 @@ import {
   renderConceptMap,
 } from './concept-map-render';
 import { SOURCE_LESSONS } from './source-lessons';
-import { loadProgress } from './storage';
+import { completeLesson, loadProgress } from './storage';
+
+function completeIds(ids: readonly string[]) {
+  let store = loadProgress();
+  for (const id of ids) {
+    store = completeLesson(store, id);
+  }
+  return store;
+}
+
+function conceptStatuses(store: ReturnType<typeof loadProgress>) {
+  return Object.fromEntries(
+    PREREQUISITES_GRAPH.concepts.map((concept) => [concept.id, conceptStatus(store, concept.id)]),
+  );
+}
 
 describe('prerequisites graph', () => {
   it('maps every card, watch, and guided unit to a concept', () => {
@@ -77,5 +96,67 @@ describe('concept map render', () => {
     const html = renderConceptMap('fr', loadProgress());
     expect(html).toContain('Carte des concepts');
     expect(html).toContain('Conjonction');
+  });
+
+  it('includes the translation concept on the map', () => {
+    const html = renderConceptMap('en', loadProgress());
+    expect(PREREQUISITES_GRAPH.concepts.some((concept) => concept.id === 'translation')).toBe(
+      true,
+    );
+    expect(html).toContain('data-concept-id="translation"');
+    expect(html).toContain('Translation');
+  });
+
+  it('does not let optional lat-* lessons block main-route concept completion', () => {
+    const latConditional = PREREQUISITES_GRAPH.lessons.filter(
+      (lesson) => lesson.concept === 'conditional' && lesson.id.startsWith('lat-'),
+    );
+    expect(latConditional.length).toBe(5);
+    const store = completeIds([
+      ...LEVEL_0_LESSONS.map((lesson) => lesson.id),
+      ...LEVEL_1_LESSONS.map((lesson) => lesson.id),
+    ]);
+    expect(store.lessonsCompleted.some((id) => id.startsWith('lat-'))).toBe(false);
+    expect(isConceptCompleted(store, 'conditional')).toBe(true);
+    expect(conceptStatus(store, 'conditional')).toBe('completed');
+  });
+
+  it('locks in concept-map statuses after Unit 0', () => {
+    const store = completeIds(LEVEL_0_LESSONS.map((lesson) => lesson.id));
+    expect(conceptStatuses(store)).toEqual({
+      proposition: 'completed',
+      'truth-values': 'completed',
+      conjunction: 'completed',
+      negation: 'available',
+      disjunction: 'locked',
+      conditional: 'locked',
+      biconditional: 'locked',
+      translation: 'locked',
+      scope: 'locked',
+      'double-negation': 'locked',
+      precedence: 'locked',
+      demorgan: 'locked',
+    });
+  });
+
+  it('locks in concept-map statuses after Unit 1', () => {
+    const store = completeIds([
+      ...LEVEL_0_LESSONS.map((lesson) => lesson.id),
+      ...LEVEL_1_LESSONS.map((lesson) => lesson.id),
+    ]);
+    expect(conceptStatuses(store)).toEqual({
+      proposition: 'completed',
+      'truth-values': 'completed',
+      conjunction: 'completed',
+      negation: 'completed',
+      disjunction: 'completed',
+      conditional: 'completed',
+      biconditional: 'completed',
+      translation: 'completed',
+      scope: 'available',
+      'double-negation': 'available',
+      precedence: 'locked',
+      demorgan: 'locked',
+    });
   });
 });
