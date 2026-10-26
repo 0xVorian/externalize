@@ -1,7 +1,10 @@
 export const PRODUCTION_RP_ID = 'externalize.pages.dev';
-export const CHALLENGE_RATE_WINDOW_MS = 10 * 60 * 1000;
-export const CHALLENGE_RATE_MAX = 30;
-export const CHALLENGE_GLOBAL_CAP = 200;
+export const CHALLENGE_TTL_MS = 5 * 60 * 1000;
+export const CHALLENGE_RATE_WINDOW_MS = 60 * 60 * 1000;
+export const CHALLENGE_RATE_MAX = 10;
+export const CHALLENGE_GLOBAL_CAP = 40;
+export const CHALLENGE_WRITES_PER_SLOT = 3;
+export const D1_FREE_DAILY_WRITES = 100_000;
 export const PURGE_INTERVAL_MS = 10 * 60 * 1000;
 export const CSRF_ERROR = 'csrf';
 export const RATE_LIMIT_ERROR = 'rate-limited';
@@ -34,16 +37,16 @@ export function resetAccountPolicyForTests(now = 0): void {
 
 export function extraAllowedOrigins(env: RelyingPartyConfig): string[] {
   const extras: string[] = [];
-  if (env.WEBAUTHN_ORIGIN) {
-    extras.push(env.WEBAUTHN_ORIGIN);
-  }
-  if (env.WEBAUTHN_ALLOWED_ORIGINS) {
-    for (const part of env.WEBAUTHN_ALLOWED_ORIGINS.split(',')) {
-      const origin = part.trim();
-      if (origin) {
-        extras.push(origin);
-      }
+  for (const origin of [env.WEBAUTHN_ORIGIN, ...(env.WEBAUTHN_ALLOWED_ORIGINS ?? '').split(',')]) {
+    const trimmed = origin?.trim();
+    if (!trimmed) {
+      continue;
     }
+    const url = parseOrigin(trimmed);
+    if (!url || url.protocol !== 'https:') {
+      continue;
+    }
+    extras.push(trimmed);
   }
   return extras;
 }
@@ -53,14 +56,14 @@ export function isAllowedMutationOrigin(origin: string, extra: readonly string[]
   if (!url) {
     return false;
   }
-  if (extra.includes(origin)) {
-    return true;
-  }
   if (url.protocol === 'http:' && (url.hostname === 'localhost' || url.hostname === '127.0.0.1')) {
     return true;
   }
   if (url.protocol !== 'https:') {
     return false;
+  }
+  if (extra.includes(origin)) {
+    return true;
   }
   return isPagesDevHost(url.hostname);
 }
@@ -144,6 +147,34 @@ export function allowChallengeCreation(clientKey: string, now = Date.now()): boo
   return true;
 }
 
+export function planChallengeRate(input: {
+  nowMs: number;
+  windowStartMs: number | null;
+  count: number;
+}): { allowed: boolean; windowStartMs: number; count: number } {
+  if (input.windowStartMs === null || input.nowMs - input.windowStartMs >= CHALLENGE_RATE_WINDOW_MS) {
+    return { allowed: true, windowStartMs: input.nowMs, count: 1 };
+  }
+  if (input.count >= CHALLENGE_RATE_MAX) {
+    return { allowed: false, windowStartMs: input.windowStartMs, count: input.count };
+  }
+  return { allowed: true, windowStartMs: input.windowStartMs, count: input.count + 1 };
+}
+
+/**
+ * Worst-case D1 writes/day if an attacker keeps the live-challenge table full.
+ * Admission checks the 40-row cap with a SELECT first, so a full table does
+ * not write. Each admitted slot is one INSERT, one rate UPSERT, and one
+ * DELETE (consume or TTL purge) per five-minute window:
+ * 288 windows × 40 × 3 = 34_560, under the free-tier 100k/day cap.
+ * The in-memory limiter is only a same-isolate first filter.
+ */
+export function dailyChallengeWriteCeiling(): number {
+  const dayMs = 24 * 60 * 60 * 1000;
+  const cycles = Math.ceil(dayMs / CHALLENGE_TTL_MS);
+  return cycles * CHALLENGE_GLOBAL_CAP * CHALLENGE_WRITES_PER_SLOT;
+}
+
 export function shouldPurgeExpired(now = Date.now()): boolean {
   if (lastPurgeAt !== 0 && now - lastPurgeAt < PURGE_INTERVAL_MS) {
     return false;
@@ -152,11 +183,6 @@ export function shouldPurgeExpired(now = Date.now()): boolean {
   return true;
 }
 
-/**
- * Synced passkeys often report signature counter 0 forever. Treat 0 as
- * "counter not supported" rather than a clone. A positive reported counter
- * that did not advance is a clone.
- */
 export function availabilityFromProbe(
   row: { ok?: unknown } | null | undefined,
   failed: boolean,
@@ -164,12 +190,17 @@ export function availabilityFromProbe(
   return !failed && row?.ok === 1;
 }
 
+/**
+ * Synced passkeys often report signature counter 0 forever. Treat 0 as
+ * "counter not supported" and keep the stored high-water mark. A positive
+ * reported counter that did not advance is a clone.
+ */
 export function nextStoredCounter(stored: number, reported: number): number | null {
   if (!Number.isFinite(stored) || !Number.isFinite(reported) || stored < 0 || reported < 0) {
     return null;
   }
   if (reported === 0) {
-    return 0;
+    return stored;
   }
   if (reported > stored) {
     return reported;

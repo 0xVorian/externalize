@@ -61,18 +61,6 @@ export async function fetchAccountAvailability(): Promise<boolean> {
   return status.available;
 }
 
-export async function fetchAccountSession(): Promise<AccountSession> {
-  const response = await api('/api/session');
-  if (!response.ok) {
-    return { signedIn: false, passkeyCount: 0 };
-  }
-  const body = (await response.json()) as AccountSession;
-  return {
-    signedIn: body.signedIn === true,
-    passkeyCount: typeof body.passkeyCount === 'number' ? body.passkeyCount : 0,
-  };
-}
-
 export async function registerPasskey(): Promise<AccountSession> {
   const { challengeId, options } = await postJson<{
     challengeId: string;

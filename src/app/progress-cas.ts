@@ -4,7 +4,8 @@ import type { ProgressStore } from './storage';
 export const CAS_MAX_ATTEMPTS = 5;
 
 export type StoredProgressRow = {
-  snapshot: ProgressStore;
+  /** Null means the stored JSON is unreadable and should be replaced. */
+  snapshot: ProgressStore | null;
   revision: number;
 };
 
@@ -31,7 +32,8 @@ export async function mergeWithCasRetry(input: {
   const maxAttempts = input.maxAttempts ?? CAS_MAX_ATTEMPTS;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const stored = await input.read();
-    const merged = stored ? mergeProgress(input.incoming, stored.snapshot) : input.incoming;
+    const merged =
+      stored?.snapshot ? mergeProgress(input.incoming, stored.snapshot) : input.incoming;
     const expected = stored ? stored.revision : null;
     const written = await input.write(merged, expected);
     if (written) {

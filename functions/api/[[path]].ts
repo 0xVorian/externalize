@@ -33,6 +33,7 @@ import { base64UrlToBytes, randomId } from '../lib/crypto';
 import {
   casInsertProgress,
   casUpdateProgress,
+  consumeChallengeQuota,
   countChallenges,
   createUserWithCredential,
   deleteAccount,
@@ -67,9 +68,6 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
     if (error instanceof CasConflictError) {
       return errorJson('cas-conflict', 409);
-    }
-    if (error instanceof CorruptSnapshotError) {
-      return errorJson('corrupt-snapshot', 500);
     }
     console.error('accounts api', error);
     return errorJson('server-error', 500);
@@ -161,17 +159,18 @@ async function handleStatus(env: Env, request: Request): Promise<Response> {
 }
 
 async function rejectAbusiveChallenge(db: D1Database, request: Request): Promise<Response | null> {
+  // Live-row cap first (read-only). A full table 429s with no D1 write, so
+  // rotating IPs cannot burn the free write budget on challenge_rate upserts.
+  const outstanding = await countChallenges(db);
+  if (outstanding >= CHALLENGE_GLOBAL_CAP) {
+    return errorJson('rate-limited', 429);
+  }
   const key = clientKeyFromHeaders(request.headers);
   if (!allowChallengeCreation(key)) {
     return errorJson('rate-limited', 429);
   }
-  let outstanding = await countChallenges(db);
-  if (outstanding >= CHALLENGE_GLOBAL_CAP) {
-    await purgeExpired(db);
-    outstanding = await countChallenges(db);
-    if (outstanding >= CHALLENGE_GLOBAL_CAP) {
-      return errorJson('rate-limited', 429);
-    }
+  if (!(await consumeChallengeQuota(db, key))) {
+    return errorJson('rate-limited', 429);
   }
   return null;
 }
@@ -440,10 +439,11 @@ async function handleSyncGet(db: D1Database, request: Request): Promise<Response
     return json({ progress: null, updatedAt: null, revision: null });
   }
   const snapshot = parseStoredSnapshot(row.snapshot);
-  if (!snapshot) {
-    return errorJson('corrupt-snapshot', 500);
-  }
-  return json({ progress: snapshot, updatedAt: row.updated_at, revision: row.revision });
+  return json({
+    progress: snapshot,
+    updatedAt: row.updated_at,
+    revision: row.revision,
+  });
 }
 
 async function handleSyncPost(db: D1Database, request: Request): Promise<Response> {
@@ -463,11 +463,10 @@ async function handleSyncPost(db: D1Database, request: Request): Promise<Respons
       if (!row) {
         return null;
       }
-      const snapshot = parseStoredSnapshot(row.snapshot);
-      if (!snapshot) {
-        throw new CorruptSnapshotError();
-      }
-      return { snapshot, revision: Number(row.revision) || 1 };
+      return {
+        snapshot: parseStoredSnapshot(row.snapshot),
+        revision: Number(row.revision) || 1,
+      };
     },
     write: async (snapshot, expectedRevision) => {
       const encoded = JSON.stringify(snapshot);
@@ -494,12 +493,5 @@ function parseStoredSnapshot(raw: string): ProgressStore | null {
     return parseProgressStore(JSON.parse(raw) as unknown);
   } catch {
     return null;
-  }
-}
-
-class CorruptSnapshotError extends Error {
-  constructor() {
-    super('corrupt-snapshot');
-    this.name = 'CorruptSnapshotError';
   }
 }

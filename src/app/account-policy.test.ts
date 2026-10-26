@@ -1,15 +1,22 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  CHALLENGE_GLOBAL_CAP,
   CHALLENGE_RATE_MAX,
+  CHALLENGE_RATE_WINDOW_MS,
+  CHALLENGE_TTL_MS,
+  CHALLENGE_WRITES_PER_SLOT,
+  D1_FREE_DAILY_WRITES,
   PRODUCTION_RP_ID,
   PURGE_INTERVAL_MS,
   allowChallengeCreation,
   assertSameOriginMutation,
   availabilityFromProbe,
   clientKeyFromHeaders,
+  dailyChallengeWriteCeiling,
   extraAllowedOrigins,
   isAllowedWebAuthnOrigin,
   nextStoredCounter,
+  planChallengeRate,
   resetAccountPolicyForTests,
   resolveRelyingParty,
   shouldPurgeExpired,
@@ -59,6 +66,12 @@ describe('resolveRelyingParty', () => {
       'https://logic.example.org',
       'https://preview.logic.example.org',
     ]);
+    expect(extraAllowedOrigins({ WEBAUTHN_ALLOWED_ORIGINS: 'http://evil.example' })).toEqual([]);
+    expect(
+      assertSameOriginMutation('POST', 'http://evil.example', {
+        WEBAUTHN_ALLOWED_ORIGINS: 'http://evil.example',
+      }),
+    ).toEqual({ ok: false, error: 'csrf' });
     expect(resolveRelyingParty('https://logic.example.org', env)).toEqual({
       rpName: 'Externalize',
       rpID: 'logic.example.org',
@@ -101,12 +114,47 @@ describe('shouldPurgeExpired', () => {
 });
 
 describe('nextStoredCounter', () => {
-  it('accepts a reported 0 from synced passkeys and rejects a non-incrementing positive counter', () => {
+  it('keeps a stored high-water mark when the authenticator reports 0', () => {
     expect(nextStoredCounter(0, 0)).toBe(0);
-    expect(nextStoredCounter(5, 0)).toBe(0);
+    expect(nextStoredCounter(5, 0)).toBe(5);
     expect(nextStoredCounter(3, 4)).toBe(4);
     expect(nextStoredCounter(5, 5)).toBeNull();
     expect(nextStoredCounter(5, 3)).toBeNull();
+  });
+});
+
+describe('planChallengeRate / write ceiling', () => {
+  it('allows a fresh window and rejects after the per-client cap', () => {
+    expect(planChallengeRate({ nowMs: 1_000, windowStartMs: null, count: 0 })).toEqual({
+      allowed: true,
+      windowStartMs: 1_000,
+      count: 1,
+    });
+    expect(
+      planChallengeRate({ nowMs: 2_000, windowStartMs: 1_000, count: CHALLENGE_RATE_MAX }),
+    ).toEqual({
+      allowed: false,
+      windowStartMs: 1_000,
+      count: CHALLENGE_RATE_MAX,
+    });
+    expect(
+      planChallengeRate({
+        nowMs: 1_000 + CHALLENGE_RATE_WINDOW_MS,
+        windowStartMs: 1_000,
+        count: CHALLENGE_RATE_MAX,
+      }),
+    ).toEqual({
+      allowed: true,
+      windowStartMs: 1_000 + CHALLENGE_RATE_WINDOW_MS,
+      count: 1,
+    });
+  });
+
+  it('keeps the worst-case challenge write rate under the free D1 daily cap', () => {
+    const windows = Math.ceil((24 * 60 * 60 * 1000) / CHALLENGE_TTL_MS);
+    expect(dailyChallengeWriteCeiling()).toBe(windows * CHALLENGE_GLOBAL_CAP * CHALLENGE_WRITES_PER_SLOT);
+    expect(dailyChallengeWriteCeiling()).toBe(34_560);
+    expect(dailyChallengeWriteCeiling()).toBeLessThan(D1_FREE_DAILY_WRITES);
   });
 });
 

@@ -1,6 +1,10 @@
-import { availabilityFromProbe } from '../../src/app/account-policy';
+import {
+  availabilityFromProbe,
+  CHALLENGE_RATE_WINDOW_MS,
+  planChallengeRate,
+} from '../../src/app/account-policy';
 import { CHALLENGE_TTL_MS, laterIso, nowIso } from './http';
-import { randomId } from './crypto';
+import { randomId, sha256Base64Url } from './crypto';
 
 export async function requireDb(env: Env): Promise<D1Database | null> {
   return env.DB ?? null;
@@ -20,10 +24,38 @@ export async function probeDatabase(db: D1Database | undefined | null): Promise<
 
 export async function purgeExpired(db: D1Database): Promise<void> {
   const now = nowIso();
+  const staleRate = new Date(Date.now() - CHALLENGE_RATE_WINDOW_MS * 2).toISOString();
   await db.batch([
     db.prepare('DELETE FROM challenges WHERE expires_at < ?').bind(now),
     db.prepare('DELETE FROM sessions WHERE expires_at < ?').bind(now),
+    db.prepare('DELETE FROM challenge_rate WHERE window_start < ?').bind(staleRate),
   ]);
+}
+
+export async function consumeChallengeQuota(db: D1Database, clientKey: string): Promise<boolean> {
+  const hashed = await sha256Base64Url(clientKey);
+  const nowMs = Date.now();
+  const row = await db
+    .prepare('SELECT window_start, count FROM challenge_rate WHERE client_key = ?')
+    .bind(hashed)
+    .first<{ window_start: string; count: number }>();
+  const windowStartMs = row ? Date.parse(row.window_start) : Number.NaN;
+  const plan = planChallengeRate({
+    nowMs,
+    windowStartMs: Number.isFinite(windowStartMs) ? windowStartMs : null,
+    count: typeof row?.count === 'number' ? row.count : 0,
+  });
+  if (!plan.allowed) {
+    return false;
+  }
+  await db
+    .prepare(
+      `INSERT INTO challenge_rate (client_key, window_start, count) VALUES (?, ?, ?)
+       ON CONFLICT(client_key) DO UPDATE SET window_start = excluded.window_start, count = excluded.count`,
+    )
+    .bind(hashed, new Date(plan.windowStartMs).toISOString(), plan.count)
+    .run();
+  return true;
 }
 
 export async function countChallenges(db: D1Database): Promise<number> {

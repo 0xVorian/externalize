@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:pages": "npm run build && npm run d1:migrate:local && wrangler pages dev dist --ip 0.0.0.0 --port 8788",
-    "d1:migrate:local": "wrangler d1 migrations apply externalize-progress --local",
+    "dev:pages": "npm run build && npm run d1:migrate:local && wrangler pages dev dist --d1 DB=00000000-0000-0000-0000-000000000000 --ip 0.0.0.0 --port 8788",
+    "d1:migrate:local": "wrangler -c wrangler.local.toml d1 migrations apply externalize-progress --local",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",

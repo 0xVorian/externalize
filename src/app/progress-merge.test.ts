@@ -707,6 +707,80 @@ describe('isProgressStore', () => {
     expect(parsed).toEqual(store());
     expect(parsed && 'extraGarbage' in parsed).toBe(false);
   });
+
+  it('rejects prototype-polluting map keys', () => {
+    expect(
+      isProgressStore({
+        ...store(),
+        skills: { ['__proto__']: { attempts: 1, successes: 0, recentErrorTags: [] } },
+      }),
+    ).toBe(false);
+    expect(
+      isProgressStore({
+        ...store(),
+        exerciseStats: { constructor: { attempts: 1, successes: 0, repairedPasses: 0 } },
+      }),
+    ).toBe(false);
+    expect(
+      isProgressStore({
+        ...store(),
+        errorCounts: { prototype: 1 },
+      }),
+    ).toBe(false);
+  });
+
+  it('deep-validates translation builder tokens', () => {
+    const attempt = {
+      id: 'attempt-a',
+      exerciseId: 'translate-001',
+      status: 'active' as const,
+      checkedAnswers: 0,
+      firstCheckedCorrect: null,
+      lastCheckCorrect: null,
+      repairOccurred: false,
+      errorTags: [],
+      startedAt: T0,
+    };
+    expect(
+      parseProgressStore({
+        ...store(),
+        practiceDrafts: {
+          'translate-001': {
+            phase: 'ready',
+            attempt,
+            builderTokens: [{ kind: 'pred', name: 'P', args: [] }, { kind: 'connective', connective: 'imp' }],
+          },
+        },
+      })?.practiceDrafts['translate-001']?.builderTokens,
+    ).toEqual([
+      { kind: 'pred', name: 'P', args: [] },
+      { kind: 'connective', connective: 'imp' },
+    ]);
+    expect(
+      isProgressStore({
+        ...store(),
+        practiceDrafts: {
+          'translate-001': {
+            phase: 'ready',
+            attempt,
+            builderTokens: [{ kind: 'garbage', extra: true }],
+          },
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isProgressStore({
+        ...store(),
+        practiceDrafts: {
+          'translate-001': {
+            phase: 'ready',
+            attempt,
+            builderTokens: [{ kind: 'pred', name: 'P', args: [{ kind: 'nope' }] }],
+          },
+        },
+      }),
+    ).toBe(false);
+  });
 });
 
 describe('progressSnapshotsEqual', () => {

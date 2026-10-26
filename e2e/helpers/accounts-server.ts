@@ -23,6 +23,8 @@ export async function startAccountsServer(): Promise<string> {
   }
   await run('npx', [
     'wrangler',
+    '-c',
+    'wrangler.local.toml',
     'd1',
     'migrations',
     'apply',
@@ -30,6 +32,8 @@ export async function startAccountsServer(): Promise<string> {
     '--local',
   ]);
 
+  // pages dev does not accept -c/--config. --d1 uses the same local
+  // database_id as wrangler.local.toml so migrations apply to this bind.
   child = spawn(
     'npx',
     [
@@ -37,6 +41,8 @@ export async function startAccountsServer(): Promise<string> {
       'pages',
       'dev',
       'dist',
+      '--d1',
+      'DB=00000000-0000-0000-0000-000000000000',
       '--ip',
       '0.0.0.0',
       '--port',

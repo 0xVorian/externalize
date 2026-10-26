@@ -1,7 +1,9 @@
+import { CHALLENGE_TTL_MS as POLICY_CHALLENGE_TTL_MS } from '../../src/app/account-policy';
+
 export const SESSION_COOKIE = 'ex_session';
 export const HOST_SESSION_COOKIE = '__Host-ex_session';
 export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 30;
-export const CHALLENGE_TTL_MS = 5 * 60 * 1000;
+export const CHALLENGE_TTL_MS = POLICY_CHALLENGE_TTL_MS;
 export const MAX_BODY_BYTES = 512 * 1024;
 
 export function json(data: unknown, status = 200, extraHeaders?: Record<string, string>): Response {

@@ -87,6 +87,29 @@ describe('mergeWithCasRetry', () => {
     expect(box.row).toEqual({ snapshot: incoming, revision: 1 });
   });
 
+  it('replaces an unreadable stored snapshot with the incoming one', async () => {
+    const box: { snapshot: ProgressStore | null; revision: number } = {
+      snapshot: null,
+      revision: 4,
+    };
+    const incoming = store({ lessonsCompleted: ['level0-01-letters'] });
+    const merged = await mergeWithCasRetry({
+      incoming,
+      read: async () => ({ snapshot: box.snapshot, revision: box.revision }),
+      write: async (next, expected) => {
+        if (expected !== 4) {
+          return false;
+        }
+        box.snapshot = next;
+        box.revision += 1;
+        return true;
+      },
+    });
+    expect(merged).toEqual(incoming);
+    expect(box.snapshot).toEqual(incoming);
+    expect(box.revision).toBe(5);
+  });
+
   it('throws after repeated conflicts', async () => {
     await expect(
       mergeWithCasRetry({

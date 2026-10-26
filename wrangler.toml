@@ -1,10 +1,12 @@
-# Local Pages + D1 development. Production D1 is bound in the Cloudflare
-# dashboard — replace the placeholder database_id after creating the database.
-# See docs/accounts.md.
+# Git-connected Pages reads this file. Do **not** declare [[d1_databases]]
+# here: Cloudflare rejects a D1 binding whose database does not exist
+# (error 10021) and the preview deploy fails. Bind DB in the dashboard
+# after creating the database. Local `wrangler d1` uses wrangler.local.toml
+# (`-c`); `wrangler pages dev` cannot take `-c`, so local/e2e pass
+# `--d1 DB=<nil UUID matching wrangler.local.toml>`.
 #
-# The nil UUID does not make accounts available on its own. GET /api/status
-# runs SELECT 1 against the binding; a stub or unprovisioned D1 reports
-# { available: false } and the UI stays on file export/import.
+# Without a working D1 bind, Functions still deploy; GET /api/status
+# returns { available: false } and the account UI stays hidden.
 
 name = "externalize"
 compatibility_date = "2025-10-11"
@@ -18,10 +20,3 @@ WEBAUTHN_RP_NAME = "Externalize"
 # WEBAUTHN_RP_ID = "externalize.pages.dev"
 # WEBAUTHN_ORIGIN = "https://externalize.pages.dev"
 # WEBAUTHN_ALLOWED_ORIGINS = "https://logic.example.org"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "externalize-progress"
-database_id = "00000000-0000-0000-0000-000000000000"
-preview_database_id = "00000000-0000-0000-0000-000000000000"
-migrations_dir = "migrations"

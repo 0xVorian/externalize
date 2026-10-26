@@ -1,8 +1,10 @@
+import type { ConnectiveKind, Term } from '../../engine';
 import type { ConceptCapabilityStat, RouteDepth, RouteProgress } from './curriculum';
 import type { PracticeDraft, PracticeAttempt, PracticeErrorTag } from './practice-attempt';
 import type { ExerciseStat, ResumePoint, SkillStat } from './progress-tracker';
 import type { SrsEntry } from './srs';
 import type { ProgressStore } from './storage';
+import type { BuilderToken } from './translation/types';
 
 const MAX_ID_LIST = 4_000;
 const MAX_QUEUE = 2_000;
@@ -220,7 +222,7 @@ function parseAssignment(value: unknown): Record<string, boolean> | null {
   }
   const out: Record<string, boolean> = {};
   for (const [key, item] of Object.entries(value)) {
-    if (!idString(key, 32) || typeof item !== 'boolean') {
+    if (!isSafeMapKey(key, 32) || typeof item !== 'boolean') {
       return null;
     }
     out[key] = item;
@@ -234,7 +236,7 @@ function parseSkills(value: unknown): Record<string, SkillStat> | null {
   }
   const out: Record<string, SkillStat> = {};
   for (const [key, item] of Object.entries(value)) {
-    if (!idString(key) || !isPlainObject(item)) {
+    if (!isSafeMapKey(key) || !isPlainObject(item)) {
       return null;
     }
     const tags = parseStringList(item.recentErrorTags, MAX_TAG_LIST);
@@ -262,7 +264,7 @@ function parseExerciseStats(value: unknown): Record<string, ExerciseStat> | null
   }
   const out: Record<string, ExerciseStat> = {};
   for (const [key, item] of Object.entries(value)) {
-    if (!idString(key) || !isPlainObject(item)) {
+    if (!isSafeMapKey(key) || !isPlainObject(item)) {
       return null;
     }
     if (
@@ -310,7 +312,7 @@ function parseErrorCounts(value: unknown): ProgressStore['errorCounts'] | null {
   }
   const out: ProgressStore['errorCounts'] = {};
   for (const [key, item] of Object.entries(value)) {
-    if (!idString(key) || !isFiniteNumber(item) || item < 0) {
+    if (!isSafeMapKey(key) || !isFiniteNumber(item) || item < 0) {
       return null;
     }
     out[key as PracticeErrorTag] = item;
@@ -324,7 +326,7 @@ function parseRoutes(value: unknown): Record<string, RouteProgress> | null {
   }
   const out: Record<string, RouteProgress> = {};
   for (const [key, item] of Object.entries(value)) {
-    if (!idString(key) || !isPlainObject(item)) {
+    if (!isSafeMapKey(key) || !isPlainObject(item)) {
       return null;
     }
     const next: RouteProgress = {};
@@ -365,7 +367,7 @@ function parseDepth(value: unknown): Record<string, RouteDepth> | null {
   }
   const out: Record<string, RouteDepth> = {};
   for (const [key, item] of Object.entries(value)) {
-    if (!idString(key) || (item !== 'reading' && item !== 'mastery')) {
+    if (!isSafeMapKey(key) || (item !== 'reading' && item !== 'mastery')) {
       return null;
     }
     out[key] = item;
@@ -379,7 +381,7 @@ function parseConceptEvidence(value: unknown): Record<string, ConceptCapabilityS
   }
   const out: Record<string, ConceptCapabilityStat> = {};
   for (const [key, item] of Object.entries(value)) {
-    if (!idString(key) || !isPlainObject(item)) {
+    if (!isSafeMapKey(key) || !isPlainObject(item)) {
       return null;
     }
     const recentErrors = parseStringList(item.recentErrors, MAX_TAG_LIST);
@@ -417,7 +419,7 @@ function parseDraftMap(value: unknown): Record<string, PracticeDraft> | null {
   }
   const out: Record<string, PracticeDraft> = {};
   for (const [key, item] of Object.entries(value)) {
-    if (!idString(key)) {
+    if (!isSafeMapKey(key)) {
       return null;
     }
     const draft = parseDraft(item);
@@ -479,10 +481,11 @@ function parseDraft(value: unknown): PracticeDraft | null {
     draft.submittedCell = value.submittedCell;
   }
   if (value.builderTokens !== undefined) {
-    if (!Array.isArray(value.builderTokens) || value.builderTokens.length > 200) {
+    const tokens = parseBuilderTokens(value.builderTokens);
+    if (!tokens) {
       return null;
     }
-    draft.builderTokens = value.builderTokens as PracticeDraft['builderTokens'];
+    draft.builderTokens = tokens;
   }
   if (value.proofRule !== undefined) {
     if (value.proofRule !== null && (typeof value.proofRule !== 'string' || !idString(value.proofRule))) {
@@ -592,8 +595,85 @@ function parseStringList(value: unknown, cap: number): string[] | null {
   return out;
 }
 
+function parseBuilderTokens(value: unknown): BuilderToken[] | null {
+  if (!Array.isArray(value) || value.length > 200) {
+    return null;
+  }
+  const out: BuilderToken[] = [];
+  for (const item of value) {
+    const token = parseBuilderToken(item);
+    if (!token) {
+      return null;
+    }
+    out.push(token);
+  }
+  return out;
+}
+
+function parseBuilderToken(value: unknown): BuilderToken | null {
+  if (!isPlainObject(value)) {
+    return null;
+  }
+  if (value.kind === 'paren') {
+    if (value.side !== 'open' && value.side !== 'close') {
+      return null;
+    }
+    return { kind: 'paren', side: value.side };
+  }
+  if (value.kind === 'connective') {
+    if (!isConnectiveKind(value.connective)) {
+      return null;
+    }
+    return { kind: 'connective', connective: value.connective };
+  }
+  if (value.kind === 'pred') {
+    if (typeof value.name !== 'string' || !idString(value.name, 32)) {
+      return null;
+    }
+    if (!Array.isArray(value.args) || value.args.length > 8) {
+      return null;
+    }
+    const args: Term[] = [];
+    for (const arg of value.args) {
+      const term = parseTerm(arg);
+      if (!term) {
+        return null;
+      }
+      args.push(term);
+    }
+    return { kind: 'pred', name: value.name, args };
+  }
+  return null;
+}
+
+function parseTerm(value: unknown): Term | null {
+  if (!isPlainObject(value)) {
+    return null;
+  }
+  if ((value.kind === 'const' || value.kind === 'var') && typeof value.name === 'string' && idString(value.name, 32)) {
+    return { kind: value.kind, name: value.name };
+  }
+  return null;
+}
+
+function isConnectiveKind(value: unknown): value is ConnectiveKind {
+  return (
+    value === 'not' ||
+    value === 'and' ||
+    value === 'or' ||
+    value === 'imp' ||
+    value === 'iff' ||
+    value === 'forall' ||
+    value === 'exists'
+  );
+}
+
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isSafeMapKey(value: string, max = MAX_ID_LEN): boolean {
+  return value !== '__proto__' && value !== 'constructor' && value !== 'prototype' && idString(value, max);
 }
 
 function objectKeyCount(value: Record<string, unknown>): number {
