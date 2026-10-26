@@ -60,6 +60,10 @@ test('row-by-row watch tables keep values under the matching headers at 320px', 
       const table = page.locator('.truth-table');
       await expect(table).toBeVisible();
       await expectAlignedTable(table);
+      await expect(table.locator('tbody tr th[scope="row"]')).toHaveCount(
+        await table.locator('tbody tr').count(),
+      );
+      await expect(table.getByRole('rowheader')).toHaveCount(await table.locator('tbody tr').count());
       if (lessonId === 'level1-02-neg-watch') {
         const layout = await readTableLayout(table);
         expect(layout.header.map((cell) => cell.text)).toEqual(['P', '¬P']);

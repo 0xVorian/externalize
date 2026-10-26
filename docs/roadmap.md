@@ -1,12 +1,26 @@
 # Roadmap
 
-This document tracks the shipped application and the remaining validation gates. It is intentionally conservative: implemented prototypes are not promoted to “done” merely because code exists.
+This document tracks the shipped application and the remaining validation gates. It is intentionally conservative: implemented prototypes are not promoted to “done” merely because code exists. Day-to-day follow-ups live in [GitHub Issues](https://github.com/0xVorian/externalize/issues); this file should not invent a parallel plan.
 
-## Current status — v0.4.0 + unreleased adaptive/session UX baseline
+## Current status — v0.5.1, plus bounded remediations on `master`
 
 Externalize now has three propositional-logic learning units, graded practice across multiple skills, local progress/SRS, EN/FR course material, Explore mode, export/import, a concept map, PWA support, browser regression coverage, evidence-backed progress visibility, explicit learning routes, portable concept × capability evidence, a narrow *Logic and Theism* Chapter II source-driven pilot with deterministic prerequisite planning, and the session-first low-intimidation UX on `master`.
 
-v0.4.0 established the released baseline for progress visibility, persistence/PWA hardening, and simplified Practice orchestration. The adaptive-curriculum pilot, bounded-session shell, reason-bearing feedback, and exercise visual-grammar work are merged on top of that baseline under `[Unreleased]`. Their implementation is complete; the experiential/product-validation gates remain open.
+Release history for the current baseline:
+
+- **v0.4.0** — progress visibility, persistence/PWA hardening, and simplified Practice orchestration.
+- **v0.5.0** — adaptive-curriculum Phases A–C, the bounded-session shell, reason-bearing feedback, and the exercise visual-grammar work (stimulus → response workspace → Check). These are no longer `[Unreleased]`.
+- **v0.5.1** — learner-facing copy, accessibility, and source-route interaction reconciliation on that v0.5 baseline.
+
+Work merged after v0.5.1 still sits under `[Unreleased]` in `CHANGELOG.md`. It is bounded remediation of observed friction, not a new product phase:
+
+- mobile truth-table and watch-grid layout: the 2×2 grid is a real table again, the cryptic `P ↓ / Q →` legend is gone, and screen-reader case labels no longer occupy a visual column ([#21](https://github.com/0xVorian/externalize/issues/21), [#24](https://github.com/0xVorian/externalize/issues/24), [PR #26](https://github.com/0xVorian/externalize/pull/26));
+- a concept’s teaching and practice stay in the same session round ([#25](https://github.com/0xVorian/externalize/issues/25), [PR #28](https://github.com/0xVorian/externalize/pull/28));
+- rounds open with one warm-up check on the most recently practised concept ([#27](https://github.com/0xVorian/externalize/issues/27), [PR #32](https://github.com/0xVorian/externalize/pull/32));
+- oversized teach–practice clusters no longer fall back to a cut at 6: this round takes through the first practice when it still fits, otherwise it splits between watch cases ([#30](https://github.com/0xVorian/externalize/issues/30), [PR #35](https://github.com/0xVorian/externalize/pull/35));
+- a warm-up miss keeps the advertised `n / m` on Try again; the new total appears once the first repair step begins ([#33](https://github.com/0xVorian/externalize/issues/33), [PR #35](https://github.com/0xVorian/externalize/pull/35)).
+
+Implementation of the session-first and adaptive baseline is complete; the experiential/product-validation gates remain open.
 
 The main unresolved question is no longer whether the core interactions can be built. It is whether Externalize can make difficult formal material **easy to start, finite to engage with, understandable without product-taxonomy overhead, and useful enough to return to** while preserving rigorous mastery evidence and transfer.
 
@@ -26,7 +40,7 @@ The canonical pre-refactor anti-example was the Sobel Chapter II screen exposing
 
 Implemented sequence:
 
-1. **UX-A — session shell and finite contract:** one-action entry, fixed 5–7 step envelope where content permits, visible effort, no silent expansion, interruption/resume, explicit completion. **Implemented.**
+1. **UX-A — session shell and finite contract:** one-action entry, 5–7 step envelope where content permits (target 6), visible effort, interruption/resume, explicit completion. A short due-review may grow after a warm-up miss into same-concept repair, still within 7; other rounds do not silently expand. **Implemented.**
 2. **UX-B — low-intimidation beginner surface:** planner internals removed from learner copy; progressive disclosure of route/depth/reference/source controls; Sobel opening rebuilt around meaning → use → name → notation → independent use; earliest foundations audited for the same failure mode. **Implemented.**
 3. **UX-C — learning-aligned re-entry:** due review / continue / lapse-recovery / nothing-useful-due opening states, plus next-useful-review indication where existing SRS state supports it. **Implemented.**
 4. **UX-D — minimal local validation telemetry:** small separate `localStorage` event log; not part of progress v7. **Implemented.**
@@ -71,6 +85,14 @@ The authorized adaptive sequence is now implemented through Phase C:
 The shipped session-first UX is now part of that test: the route/planner substrate is intentionally quieter and should be judged by whether it gets the learner into useful reasoning and back to the source with less friction.
 
 Do not treat the adaptive authorization as general curriculum expansion. Chapter III+ renderers, PDF ingestion, runtime AI route generation, backend/cloud accounts, and universal activity/engine abstractions remain out of scope until the pilot is used and evaluated.
+
+### Open GitHub Issues
+
+As of 2026-10-26, remaining open issues (PR #34 closed #23, #29, and #31; this PR closes #30 and #33):
+
+- [#22](https://github.com/0xVorian/externalize/issues/22) — Daily practice reminder. Explicitly gated on an out-of-app experiment (2026-10-26 to 2026-11-08). Push/email infrastructure stays in “not building yet” unless that experiment shows a measurable increase in practice. Copy must not use streak or guilt language.
+
+Do not treat this list as authorization to invent extra work. If an issue is not listed, check GitHub rather than assuming a new phase.
 
 ## Phase 0 — Documentation
 

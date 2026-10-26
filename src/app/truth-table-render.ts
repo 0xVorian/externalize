@@ -61,8 +61,24 @@ function committedRowAssignment(row: TruthTableRow, atoms: string[]): PartialAss
   return assignment;
 }
 
-function renderUnknownCell(label: string, text: string, prefix = ''): string {
-  return `<td class="unknown-cell">${prefix}<span aria-label="${label}">${text}</span></td>`;
+function wrapAtomCell(inner: string, isRowHeader: boolean, attrs = ''): string {
+  if (isRowHeader) {
+    return `<th scope="row"${attrs}>${inner}</th>`;
+  }
+  return `<td${attrs}>${inner}</td>`;
+}
+
+function renderUnknownCell(
+  label: string,
+  text: string,
+  prefix = '',
+  isRowHeader = false,
+): string {
+  return wrapAtomCell(
+    `${prefix}<span aria-label="${label}">${text}</span>`,
+    isRowHeader,
+    ' class="unknown-cell"',
+  );
 }
 
 function caseLabelMarkup(label: string | undefined, isFirstCell: boolean): string {
@@ -95,22 +111,31 @@ export function renderTruthTable(
         : determinedFormulaValue(formula, displayAssignment);
       const atomCells = atoms
         .map((atom, atomIndex) => {
-          const prefix = caseLabelMarkup(row.srLabel, atomIndex === 0);
+          const isRowHeader = atomIndex === 0;
+          const prefix = caseLabelMarkup(row.srLabel, isRowHeader);
           if (atom === row.targetAtom) {
             const filled = row.targetValue === true || row.targetValue === false;
             const aria = filled
               ? `${learn.guidedTargetAria(atom, true)}: ${formatTruthValue(locale, row.targetValue!)}`
               : learn.guidedTargetAria(atom, false);
-            return `<td class="blank-cell guided-target-cell" data-testid="guided-target-cell">${prefix}${renderTruthValueSlot(locale, filled ? row.targetValue! : null, aria)}</td>`;
+            return wrapAtomCell(
+              `${prefix}${renderTruthValueSlot(locale, filled ? row.targetValue! : null, aria)}`,
+              isRowHeader,
+              ' class="blank-cell guided-target-cell" data-testid="guided-target-cell"',
+            );
           }
           if (!isAtomAssigned(row.assignment, atom)) {
             return renderUnknownCell(
               learn.unassignedAtomAria(atom),
               formatTruthValue(locale, undefined),
               prefix,
+              isRowHeader,
             );
           }
-          return `<td>${prefix}${formatTruthValue(locale, row.assignment[atom])}</td>`;
+          return wrapAtomCell(
+            `${prefix}${formatTruthValue(locale, row.assignment[atom])}`,
+            isRowHeader,
+          );
         })
         .join('');
       const resultCell = options.hideResult

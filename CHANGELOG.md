@@ -14,9 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Session-first docs now say a short due-review grows on a miss when the leftover tail cannot hold explanation plus practice, not merely because there was “no tail”. A one-item or two-item due list both grow.
+- `docs/roadmap.md` now describes the v0.5.0 / v0.5.1 shipped baseline, the post-0.5.1 remediations already on `master` (mobile truth tables, session envelope, warm-up), and the remaining GitHub Issues rather than “v0.4.0 + unreleased”.
 
 ### Fixed
 
+- Mapped Unit 1 nesting lessons `level1-13-nesting` and `level1-14-nesting-guided` onto the `scope` concept so the session envelope keeps the explanation with its guided practice. Also mapped the translation intro card `level1-15-translate`. A content check now fails if any card, watch, or guided unit, or any exercise, lacks a prerequisites entry.
+- Watch-table body rows use `<th scope="row">` for the hidden case label, so assistive tech announces it as a row header. Column alignment at 320px and 390px is unchanged.
 - A due-review warm-up now consumes only the one chosen item, so other due exercises (including a different skill on the same concept) stay in the round. Short due lists are not padded with unrelated exercises: a pass ends the honest small round; a miss grows into same-concept explanation plus practice. Repair waits for that step’s Check rather than the first graded cell or node.
 - A warm-up miss no longer changes the advertised `n / m` total on the Try again screen. The new total appears once the first repair step begins.
 - Session rounds no longer end on a teaching step whose related practice was deferred to the next round. The envelope still targets 6 steps and stays within 5–7 when a cluster fits; otherwise it ends before that teaching step so the `n / m` counter stays honest. Applies to Logic foundations lessons and the Sobel preparation sequence.

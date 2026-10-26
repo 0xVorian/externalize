@@ -28,7 +28,7 @@ describe('assessment root visibility', () => {
     });
     const readyHtml = renderApp(state, 0, true);
     expect(countEmDashResultCells(readyHtml)).toBe(1);
-    expect(readyHtml).toContain('<td>T</td><td>F</td>');
+    expect(readyHtml).toContain('<th scope="row">T</th><td>F</td>');
     expect(readyHtml).toContain('atom-panel-readonly');
 
     state = selectEvaluationPrediction(state, false);

@@ -632,6 +632,7 @@ button {
 .truth-table tbody td,
 .truth-table tbody th {
   background: var(--table-surface);
+  font-weight: 400;
 }
 
 .truth-table-row.active td,

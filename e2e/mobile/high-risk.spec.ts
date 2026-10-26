@@ -83,6 +83,8 @@ test('¬P watch table keeps P values under the P header', async ({ page }) => {
   const table = page.locator('.truth-table');
   await expect(table).toBeVisible();
   await expectAlignedTable(table);
+  await expect(table.locator('tbody tr th[scope="row"]')).toHaveCount(2);
+  await expect(table.getByRole('rowheader')).toHaveCount(2);
   const layout = await readTableLayout(table);
   expect(layout.header.map((cell) => cell.text)).toEqual(['P', '¬P']);
   expect(layout.body[0]?.map((cell) => cell.text)).toEqual(['V', 'F']);
