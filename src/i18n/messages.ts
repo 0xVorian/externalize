@@ -1062,7 +1062,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     level1ExercisesHeading: 'Unit 1 exercises',
     level2ExercisesHeading: 'Unit 2 exercises',
     syncHeading: 'Another device',
-    syncHint: 'Export on this device, then import the file where you want to continue.',
+    syncHint:
+      'A passkey, when this device offers one, copies progress elsewhere. You can also export a file here and import it on the other device.',
     exportProgress: 'Export progress',
     importProgress: 'Import progress',
     importSuccess: 'Progress restored. You can pick up where you left off.',
@@ -1141,7 +1142,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     level1ExercisesHeading: 'Exercices — unité 1',
     level2ExercisesHeading: 'Exercices — unité 2',
     syncHeading: 'Autre appareil',
-    syncHint: 'Exportez ici, puis importez le fichier sur l’appareil où vous voulez reprendre.',
+    syncHint:
+      'Une clé d’accès, si elle est proposée, reprend le suivi sur un autre appareil ; un fichier d’export reste utilisable.',
     exportProgress: 'Exporter le suivi',
     importProgress: 'Importer un suivi',
     importSuccess: 'Suivi restauré. Vous pouvez reprendre.',

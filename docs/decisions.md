@@ -63,9 +63,9 @@ Do not treat arbitrary algebraic equivalence as globally accepted on day one.
 
 ### Progress storage
 
-**Decision:** Local only for v1. Export/import JSON for backup and migration.
+**Decision:** Local `localStorage` (progress v7) remains the source of truth on each device. File export/import stays. Optional passkey accounts (issue #37) may copy that snapshot through Cloudflare Pages Functions + D1, with a deterministic per-item merge. Signed-out use is unchanged.
 
-No authentication, no server sync, until there is a concrete need.
+See [accounts.md](accounts.md).
 
 ### Input modalities
 
@@ -150,7 +150,7 @@ Pair each exercise with a structural check (main connective, scope boundary) and
 | Defer | Reason |
 |-------|--------|
 | Mobile native app | Web-first covers the use case |
-| User accounts / cloud sync | Local storage sufficient for v1 |
+| Email/password accounts or non-Cloudflare sync | Optional passkeys on the Pages free tier cover the cross-device case |
 | Multi-textbook notation modes | One notation keeps feedback precise |
 | Predicate logic UI, identity | After propositional interaction model works; AST design in [predicate-logic.md](predicate-logic.md) |
 | Full exercise generation engine | Hand-author first |

@@ -29,6 +29,7 @@ Start here:
 | [Versioning & changelog](docs/versioning.md) | Semver policy and release workflow |
 | [Internationalization](docs/i18n.md) | Independent EN/FR academic copy (not translation) |
 | [Testing](docs/testing.md) | Vitest unit tests and Playwright smoke suite |
+| [Optional passkey accounts](docs/accounts.md) | WebAuthn sign-in, D1 sync, merge rules, and Cloudflare provisioning |
 | [Generated inventory](docs/generated-inventory.md) | Source-derived lesson/exercise/practice-chain inventory; refreshed with `npm run inventory:update` |
 | [Presentation](docs/presentation.md) | When to use truth tables vs parse trees, layout rules |
 | [Predicate logic (Phase 6 prep)](docs/predicate-logic.md) | AST extension, notation, engine impact — design/engine groundwork only |
@@ -38,7 +39,7 @@ For current work, treat `AGENTS.md`, `docs/roadmap.md`, `docs/session-first-ux.m
 
 ## Status
 
-**Implemented:** Three propositional-logic learning units; sequential graded practice for evaluation, scope, truth tables, counterexamples, tautologies, translation, and introductory proof steps; local progress, SRS, export/import, Explore mode, PWA support, evidence-backed progress visibility, explicit learning routes, portable concept × capability evidence, and the narrow *Logic and Theism* Chapter II source-driven pilot with deterministic prerequisite planning.
+**Implemented:** Three propositional-logic learning units; sequential graded practice for evaluation, scope, truth tables, counterexamples, tautologies, translation, and introductory proof steps; local progress, SRS, export/import, optional passkey accounts with cross-device merge on Cloudflare Pages/D1, Explore mode, PWA support, evidence-backed progress visibility, explicit learning routes, portable concept × capability evidence, and the narrow *Logic and Theism* Chapter II source-driven pilot with deterministic prerequisite planning.
 
 **Experimental:** The small natural-deduction exercise set and predicate-logic AST/parser spike. Predicate-logic curriculum remains design-only beyond the narrow Chapter II teaching slice.
 
@@ -51,7 +52,8 @@ npm install
 npm run inventory:check  # verify checked-in lesson/exercise inventory
 npm test          # Vitest unit tests
 npm run test:e2e  # Playwright smoke tests (build + preview)
-npm run dev       # dev server (mobile-friendly viewport)
+npm run dev       # dev server (mobile-friendly viewport; no account API)
+npm run dev:pages # wrangler Pages + local D1 (passkeys)
 npm run build     # typecheck + production build
 ```
 
@@ -77,13 +79,13 @@ Connect the GitHub repository in Cloudflare Pages with:
 | Build output directory | `dist` |
 | Node.js version | `22` (or set `NODE_VERSION=22`) |
 
-No environment variables required. Progress is stored in the browser (`localStorage`).
+No environment variables are required for signed-out use. Progress is stored in the browser (`localStorage`). Optional passkey sync needs a D1 binding named `DB` added in the Cloudflare dashboard — not a `database_id` in the committed `wrangler.toml` (a missing or fake UUID there fails the git-connected Pages deploy). Until that bind exists, `/api/status` reports `{ available: false }`, account controls stay hidden, and the static app still deploys. Setup steps: [docs/accounts.md](docs/accounts.md).
 
 After deploy, open the Pages URL on your phone to run the real-use validation.
 
 ## Install as PWA (home screen)
 
-Externalize ships a web app manifest and a service worker that pre-caches the built app shell, refreshes navigation from the network when available, and falls back to the cached shell offline. Progress still lives in `localStorage` on each device — use Progress → Export/Import to move between installs.
+Externalize ships a web app manifest and a service worker that pre-caches the built app shell, refreshes navigation from the network when available, and falls back to the cached shell offline. Progress still lives in `localStorage` on each device. Use Progress → Another device to export/import a file, or create a passkey when the Cloudflare D1 binding is configured.
 
 **Android (Chrome):** open the site → menu (⋮) → **Install app** or **Add to Home screen**.
 

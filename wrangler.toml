@@ -1,0 +1,22 @@
+# Git-connected Pages reads this file. Do **not** declare [[d1_databases]]
+# here: Cloudflare rejects a D1 binding whose database does not exist
+# (error 10021) and the preview deploy fails. Bind DB in the dashboard
+# after creating the database. Local `wrangler d1` uses wrangler.local.toml
+# (`-c`); `wrangler pages dev` cannot take `-c`, so local/e2e pass
+# `--d1 DB=<nil UUID matching wrangler.local.toml>`.
+#
+# Without a working D1 bind, Functions still deploy; GET /api/status
+# returns { available: false } and the account UI stays hidden.
+
+name = "externalize"
+compatibility_date = "2025-10-11"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+[vars]
+WEBAUTHN_RP_NAME = "Externalize"
+
+# Optional overrides (also settable as Pages environment variables):
+# WEBAUTHN_RP_ID = "externalize.pages.dev"
+# WEBAUTHN_ORIGIN = "https://externalize.pages.dev"
+# WEBAUTHN_ALLOWED_ORIGINS = "https://logic.example.org"

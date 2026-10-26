@@ -59,7 +59,8 @@ npm run test:e2e:ui
 | `e2e/smoke/level0-lesson.spec.ts` | Complete all five Level 0 lessons; practice unlocks |
 | `e2e/smoke/tt-001.spec.ts` | Fill-truth-table cell submission |
 | `e2e/smoke/translate-001.spec.ts` | Symbol-palette translation exercise |
-| `e2e/smoke/progress-sync.spec.ts` | Progress export → clear → import |
+| `e2e/smoke/progress-sync.spec.ts` | Progress export → clear → import; passkey UI hidden on the static preview |
+| `e2e/accounts/passkeys.spec.ts` | Passkey sign-up / sign-in / add-passkey / merge / delete against local wrangler + D1 at 320px and 390px; same-device session resume; challenge replay; CSRF logout; malformed progress; concurrent sync |
 | `e2e/smoke/unit-picker.spec.ts` | Unit 0 / Unit 1 tab navigation |
 | `e2e/smoke/onboarding.spec.ts` | First-run intro skip and finish |
 | `e2e/smoke/counter-001.spec.ts` | Find-counterexample toggle and check |
@@ -81,7 +82,7 @@ npm run test:e2e:ui
 
 Helpers under `e2e/helpers/` seed `localStorage` with the same progress shapes the app uses in production.
 
-Desktop Chromium runs the complete smoke directory. The mobile projects run only `e2e/mobile/` at 320×640 and an emulated 390px phone, so the full suite is not multiplied across devices.
+Desktop Chromium runs the complete smoke directory plus `e2e/accounts/`. Account tests start `wrangler pages dev` with a local D1 (see [accounts.md](accounts.md)). The mobile projects run only `e2e/mobile/` at 320×640 and an emulated 390px phone, so the full suite is not multiplied across devices; passkey layout is checked at both widths inside the accounts spec.
 
 ### Selectors
 
@@ -96,7 +97,7 @@ GitHub Actions runs on every push and pull request to `master` (see [`.github/wo
 | `test-and-build` | `npm ci` → `npm test` → `npm run build` |
 | `e2e` | `npm ci` → Playwright Chromium install → `npm run test:e2e` with `CI=true` |
 
-The e2e job runs after unit tests and build succeed. Playwright config enables retries and a single worker when `CI` is set.
+The e2e job runs after unit tests and build succeed. Playwright config enables retries and a single worker when `CI` is set. Account tests start a local `wrangler pages dev` with D1; no Cloudflare account is required for that.
 
 To reproduce locally:
 

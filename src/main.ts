@@ -94,7 +94,28 @@ import { renderLessonView } from './app/lesson-render';
 import { renderProgressView } from './app/progress-render';
 import { renderOnboarding } from './app/onboarding-render';
 import type { AppMode } from './app/shell-render';
-import { loadLocale, saveLocale, progressUi, learnUi, type Locale } from './i18n';
+import { loadLocale, saveLocale, progressUi, learnUi, accountUi, type Locale } from './i18n';
+import {
+  AccountApiError,
+  addPasskey,
+  authenticatePasskey,
+  deleteAccount as deleteRemoteAccount,
+  fetchAccountStatus,
+  isPasskeyCancellation,
+  passkeysSupported,
+  pullRemoteProgress,
+  pushLocalProgress,
+  registerPasskey,
+  signOutAccount,
+} from './app/account-client';
+import { mergeProgress } from './app/progress-merge';
+import {
+  flagAfterSyncFailure,
+  learningStateEqual,
+  resolvePushOutcome,
+  shouldInvalidateSession,
+} from './app/account-sync';
+import { defaultAccountView, type AccountView } from './app/account-render';
 import { getProofExerciseConfig } from './app/proof/exercise-config';
 import type { RuleId } from '../engine';
 import { skillForExercise } from './app/progress-tracker';
@@ -158,6 +179,15 @@ let sourcePracticeState: AppState | null = null;
 let exploreState: ExploreState = createExploreState(locale);
 let onboardingStep = 0;
 let importNotice: { kind: 'success' | 'error'; message: string } | null = null;
+const ACCOUNT_FLAG_KEY = 'externalize-account-flag-v1';
+let account: AccountView = {
+  ...defaultAccountView(),
+  supported: passkeysSupported(),
+  online: navigator.onLine,
+};
+let accountSyncTimer: number | undefined;
+let applyingRemoteProgress = false;
+let accountPushInFlight = false;
 let practiceUi = createPracticeUiState();
 type ShellSurface = 'opening' | 'session' | 'complete' | 'browse';
 let surface: ShellSurface = 'opening';
@@ -259,6 +289,178 @@ function practiceViewContext(): PracticeViewContext {
 
 function persistProgress(next: ProgressStore): void {
   progress = saveProgress(next);
+  if (!applyingRemoteProgress && account.signedIn) {
+    scheduleAccountPush();
+  }
+}
+
+function readAccountFlag(): { signedIn: boolean; pendingSync: boolean } {
+  try {
+    const raw = localStorage.getItem(ACCOUNT_FLAG_KEY);
+    if (!raw) {
+      return { signedIn: false, pendingSync: false };
+    }
+    const parsed = JSON.parse(raw) as { signedIn?: boolean; pendingSync?: boolean };
+    return {
+      signedIn: parsed.signedIn === true,
+      pendingSync: parsed.pendingSync === true,
+    };
+  } catch {
+    return { signedIn: false, pendingSync: false };
+  }
+}
+
+function writeAccountFlag(next: { signedIn: boolean; pendingSync: boolean }): void {
+  try {
+    if (!next.signedIn && !next.pendingSync) {
+      localStorage.removeItem(ACCOUNT_FLAG_KEY);
+      return;
+    }
+    localStorage.setItem(ACCOUNT_FLAG_KEY, JSON.stringify(next));
+  } catch {
+    // Best-effort UI flag; the HttpOnly cookie is the real session.
+  }
+}
+
+function scheduleAccountPush(): void {
+  account.pendingSync = true;
+  writeAccountFlag({ signedIn: true, pendingSync: true });
+  if (accountSyncTimer !== undefined) {
+    window.clearTimeout(accountSyncTimer);
+  }
+  accountSyncTimer = window.setTimeout(() => {
+    void pushAccountProgress();
+  }, 800);
+}
+
+async function pushAccountProgress(): Promise<void> {
+  if (!account.signedIn || !account.online || accountPushInFlight) {
+    return;
+  }
+  accountPushInFlight = true;
+  applyingRemoteProgress = true;
+  const sent = progress;
+  try {
+    const server = await pushLocalProgress(sent);
+    const outcome = resolvePushOutcome({ sent, current: progress, server });
+    applyRemoteLearning(outcome.merged);
+    account.pendingSync = outcome.pendingPush;
+    writeAccountFlag({ signedIn: true, pendingSync: outcome.pendingPush });
+  } catch (error) {
+    if (error instanceof AccountApiError && error.status === 401) {
+      const flag = flagAfterSyncFailure(401);
+      account.signedIn = flag.signedIn;
+      account.passkeyCount = 0;
+      account.pendingSync = flag.pendingSync;
+      writeAccountFlag(flag);
+    } else {
+      const flag = flagAfterSyncFailure(error instanceof AccountApiError ? error.status : 0);
+      account.pendingSync = flag.pendingSync;
+      writeAccountFlag({ signedIn: true, pendingSync: flag.pendingSync });
+    }
+  } finally {
+    applyingRemoteProgress = false;
+    accountPushInFlight = false;
+    if (account.signedIn && account.pendingSync && account.online) {
+      scheduleAccountPush();
+    }
+    if (mode === 'progress') {
+      render();
+    }
+  }
+}
+
+function applyRemoteLearning(merged: ProgressStore): void {
+  if (learningStateEqual(merged, progress)) {
+    return;
+  }
+  if (shouldInvalidateSession(progress, merged)) {
+    invalidateEphemeralSession();
+    lessonState = loadLessonFromProgress(merged);
+    practiceState = null;
+    sourcePracticeState = null;
+    practiceUi = resetPracticeUiState();
+  }
+  progress = saveProgress(merged);
+}
+
+async function syncAfterSignIn(): Promise<void> {
+  try {
+    const remote = await pullRemoteProgress();
+    if (remote) {
+      applyRemoteLearning(mergeProgress(progress, remote));
+    }
+    const needPush =
+      account.pendingSync || !remote || !learningStateEqual(progress, remote);
+    if (needPush) {
+      await pushAccountProgress();
+    } else {
+      account.pendingSync = false;
+      writeAccountFlag({ signedIn: true, pendingSync: false });
+    }
+  } catch (error) {
+    if (error instanceof AccountApiError && error.status === 401) {
+      const flag = flagAfterSyncFailure(401);
+      account.signedIn = flag.signedIn;
+      account.passkeyCount = 0;
+      account.pendingSync = flag.pendingSync;
+      writeAccountFlag(flag);
+      return;
+    }
+    const flag = flagAfterSyncFailure(0);
+    account.pendingSync = flag.pendingSync;
+    writeAccountFlag({ signedIn: true, pendingSync: flag.pendingSync });
+  }
+}
+
+async function probeAccount(): Promise<void> {
+  const status = await fetchAccountStatus();
+  account.available = status.available;
+  account.supported = passkeysSupported();
+  account.online = navigator.onLine;
+  if (!status.available) {
+    if (mode === 'progress') {
+      render();
+    }
+    return;
+  }
+  const flag = readAccountFlag();
+  account.signedIn = status.signedIn;
+  account.passkeyCount = status.passkeyCount;
+  account.pendingSync = flag.pendingSync;
+  writeAccountFlag({ signedIn: status.signedIn, pendingSync: flag.pendingSync });
+  if (status.signedIn) {
+    await syncAfterSignIn();
+  }
+  if (mode === 'progress') {
+    render();
+  }
+}
+
+function accountNoticeFromError(error: unknown): { kind: 'error'; message: string } {
+  const copy = accountUi(locale);
+  if (isPasskeyCancellation(error)) {
+    return { kind: 'error', message: copy.errorCancelled };
+  }
+  return { kind: 'error', message: copy.errorGeneric };
+}
+
+async function runAccountAction(work: () => Promise<void>): Promise<void> {
+  if (account.busy) {
+    return;
+  }
+  account.busy = true;
+  account.notice = null;
+  render();
+  try {
+    await work();
+  } catch (error) {
+    console.error('account action failed', error);
+    account.notice = accountNoticeFromError(error);
+  } finally {
+    account.busy = false;
+    render();
+  }
 }
 
 function currentOffer() {
@@ -584,6 +786,7 @@ function render(): void {
   if (mode === 'progress') {
     root.innerHTML = renderProgressView(locale, progress, practiceUnlocked, {
       importNotice: importNotice ?? undefined,
+      account,
     });
     return;
   }
@@ -883,6 +1086,9 @@ function applyImportedProgress(imported: ProgressStore, importedLocale?: Locale)
     saveLocale(locale);
     lessonState = applyLessonLocale(lessonState, locale);
   }
+  if (account.signedIn) {
+    scheduleAccountPush();
+  }
 }
 
 function handleImportRaw(raw: string): void {
@@ -957,6 +1163,77 @@ root.addEventListener('click', (event) => {
 
   if (action === 'import-progress') {
     importInput.click();
+    return;
+  }
+
+  if (action === 'create-passkey') {
+    void runAccountAction(async () => {
+      const session = await registerPasskey();
+      account.signedIn = true;
+      account.passkeyCount = session.passkeyCount;
+      account.notice = { kind: 'success', message: accountUi(locale).createSuccess };
+      writeAccountFlag({ signedIn: true, pendingSync: true });
+      await syncAfterSignIn();
+    });
+    return;
+  }
+
+  if (action === 'use-passkey') {
+    void runAccountAction(async () => {
+      const session = await authenticatePasskey();
+      account.signedIn = true;
+      account.passkeyCount = session.passkeyCount;
+      account.notice = { kind: 'success', message: accountUi(locale).useSuccess };
+      writeAccountFlag({ signedIn: true, pendingSync: true });
+      await syncAfterSignIn();
+    });
+    return;
+  }
+
+  if (action === 'add-passkey') {
+    void runAccountAction(async () => {
+      const session = await addPasskey();
+      account.passkeyCount = session.passkeyCount;
+      account.notice = { kind: 'success', message: accountUi(locale).addSuccess };
+    });
+    return;
+  }
+
+  if (action === 'sign-out-account') {
+    void runAccountAction(async () => {
+      await signOutAccount();
+      account.signedIn = false;
+      account.passkeyCount = 0;
+      account.pendingSync = false;
+      account.confirmDelete = false;
+      account.notice = { kind: 'success', message: accountUi(locale).signOutSuccess };
+      writeAccountFlag({ signedIn: false, pendingSync: false });
+    });
+    return;
+  }
+
+  if (action === 'delete-account') {
+    account.confirmDelete = true;
+    render();
+    return;
+  }
+
+  if (action === 'cancel-delete-account') {
+    account.confirmDelete = false;
+    render();
+    return;
+  }
+
+  if (action === 'confirm-delete-account') {
+    void runAccountAction(async () => {
+      await deleteRemoteAccount();
+      account.signedIn = false;
+      account.passkeyCount = 0;
+      account.pendingSync = false;
+      account.confirmDelete = false;
+      account.notice = { kind: 'success', message: accountUi(locale).deleteSuccess };
+      writeAccountFlag({ signedIn: false, pendingSync: false });
+    });
     return;
   }
 
@@ -1257,7 +1534,25 @@ root.addEventListener('keydown', (event) => {
   }
 });
 
+const flag = readAccountFlag();
+account.signedIn = flag.signedIn;
+account.pendingSync = flag.pendingSync;
+
+window.addEventListener('online', () => {
+  account.online = true;
+  if (account.signedIn) {
+    void (account.pendingSync ? pushAccountProgress() : probeAccount());
+  }
+});
+window.addEventListener('offline', () => {
+  account.online = false;
+  if (mode === 'progress') {
+    render();
+  }
+});
+
 render();
+void probeAccount();
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
