@@ -1,7 +1,10 @@
-import { mergeProgress } from './progress-merge';
+import { mergeProgress, parseProgressStore } from './progress-merge';
 import type { ProgressStore } from './storage';
 import type { ResumePoint } from './progress-tracker';
 import type { SrsEntry } from './srs';
+
+export const SYNC_RETRY_BASE_MS = 800;
+export const SYNC_RETRY_MAX_MS = 5 * 60 * 1000;
 
 export type PushOutcome = {
   merged: ProgressStore;
@@ -41,6 +44,51 @@ export function flagAfterSyncFailure(status: number): { signedIn: boolean; pendi
     return { signedIn: false, pendingSync: true };
   }
   return { signedIn: true, pendingSync: true };
+}
+
+/**
+ * Delay before the next `/api/sync` POST. `failures === 0` is the local-save
+ * debounce (fixed 800 ms). After a failed push the wait doubles each time,
+ * with 50–100% jitter, and never exceeds five minutes. A 401 does not use
+ * this helper: the queue is kept until the next sign-in.
+ */
+export function nextSyncRetryDelay(failures: number, random = Math.random()): number {
+  if (!Number.isFinite(failures) || failures <= 0) {
+    return SYNC_RETRY_BASE_MS;
+  }
+  const exp = Math.min(Math.floor(failures) - 1, 16);
+  const unclamped = SYNC_RETRY_BASE_MS * 2 ** exp;
+  const capped = Math.min(unclamped, SYNC_RETRY_MAX_MS);
+  return Math.round(capped * (0.5 + random * 0.5));
+}
+
+export function nextSyncFailureCount(previous: number): number {
+  if (!Number.isFinite(previous) || previous < 0) {
+    return 1;
+  }
+  return previous + 1;
+}
+
+/**
+ * Parse a `/api/sync` JSON body. `progress: null` is a valid empty snapshot.
+ * Anything else that fails `parseProgressStore` is invalid — callers must not
+ * write it over local progress.
+ */
+export function readSyncProgress(
+  body: unknown,
+): { ok: true; progress: ProgressStore | null } | { ok: false } {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) {
+    return { ok: false };
+  }
+  const progress = (body as { progress?: unknown }).progress;
+  if (progress === null || progress === undefined) {
+    return { ok: true, progress: null };
+  }
+  const parsed = parseProgressStore(progress);
+  if (!parsed) {
+    return { ok: false };
+  }
+  return { ok: true, progress: parsed };
 }
 
 function learningView(store: ProgressStore): unknown {

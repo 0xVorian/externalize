@@ -2,8 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   flagAfterSyncFailure,
   learningStateEqual,
+  nextSyncFailureCount,
+  nextSyncRetryDelay,
+  readSyncProgress,
   resolvePushOutcome,
   shouldInvalidateSession,
+  SYNC_RETRY_BASE_MS,
+  SYNC_RETRY_MAX_MS,
 } from './account-sync';
 import { mergeProgress } from './progress-merge';
 import type { ProgressStore } from './storage';
@@ -153,5 +158,29 @@ describe('flagAfterSyncFailure', () => {
   it('keeps a queued push after a transport or server error', () => {
     expect(flagAfterSyncFailure(500)).toEqual({ signedIn: true, pendingSync: true });
     expect(flagAfterSyncFailure(0)).toEqual({ signedIn: true, pendingSync: true });
+  });
+});
+
+describe('nextSyncRetryDelay', () => {
+  it('uses the 800 ms debounce on a fresh local save and backs off after failures', () => {
+    expect(nextSyncRetryDelay(0, 1)).toBe(SYNC_RETRY_BASE_MS);
+    expect(nextSyncRetryDelay(1, 1)).toBe(SYNC_RETRY_BASE_MS);
+    expect(nextSyncRetryDelay(2, 1)).toBe(SYNC_RETRY_BASE_MS * 2);
+    expect(nextSyncRetryDelay(3, 1)).toBe(SYNC_RETRY_BASE_MS * 4);
+    expect(nextSyncRetryDelay(20, 1)).toBe(SYNC_RETRY_MAX_MS);
+    expect(nextSyncRetryDelay(2, 0)).toBe(SYNC_RETRY_BASE_MS);
+    expect(nextSyncFailureCount(0)).toBe(1);
+    expect(nextSyncFailureCount(3)).toBe(4);
+  });
+});
+
+describe('readSyncProgress', () => {
+  it('accepts a missing snapshot and rejects a payload that does not parse', () => {
+    expect(readSyncProgress({ progress: null })).toEqual({ ok: true, progress: null });
+    expect(readSyncProgress({ progress: store() })).toEqual({ ok: true, progress: store() });
+    expect(readSyncProgress({ progress: { ...store(), version: 6 } })).toEqual({ ok: false });
+    expect(readSyncProgress({ progress: { ...store(), extra: true } }).ok).toBe(true);
+    expect(readSyncProgress('nope')).toEqual({ ok: false });
+    expect(readSyncProgress({ progress: { version: 7 } })).toEqual({ ok: false });
   });
 });

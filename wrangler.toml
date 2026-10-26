@@ -7,6 +7,8 @@
 #
 # Without a working D1 bind, Functions still deploy; GET /api/status
 # returns { available: false } and the account UI stays hidden.
+# Remote migrate: npm run d1:migrate:remote -- --database-id <uuid>
+# (temp config) or the D1 SQL console. Never put a database_id here.
 
 name = "externalize"
 compatibility_date = "2025-10-11"

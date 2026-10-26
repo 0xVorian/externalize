@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Optional passkey accounts can copy progress v7 across devices on the Cloudflare free tier (Pages Functions + D1). Signed-out use is unchanged. Merge is per-item and never drops completions or evidence from either device; in-flight bounded sessions stay local and are invalidated only when learning state actually changes. Passkey controls hide unless `/api/status` can `SELECT 1` against D1. Git-connected `wrangler.toml` does not declare a D1 binding, so a Pages preview with no dashboard database still deploys as a static site. Provisioning: `docs/accounts.md`.
+- Optional passkey accounts can copy progress v7 across devices on the Cloudflare free tier (Pages Functions + D1). Signed-out use is unchanged. Merge is per-item and never drops completions or evidence from either device; in-flight bounded sessions stay local and are invalidated only when learning state actually changes. Passkey controls hide unless `/api/status` can probe the migrated D1 schema. Git-connected `wrangler.toml` does not declare a D1 binding, so a Pages preview with no dashboard database still deploys as a static site. Provisioning: `docs/accounts.md`.
 - Rounds now open with one warm-up check on the most recently practised concept (the last concept that has an exercise, independent of route). A correct answer continues into the planned material, or ends a short due-review early (`1 / 1` is honest). A miss on that step’s Check turns the rest of the round into a short repair of that concept. Only the one due item chosen as the warm-up is consumed; other due items and other skills on the same concept stay in the round. Short due lists are not padded with unlocked work from other concepts. A first-time learner still starts without a warm-up. **Exception:** a round whose next cluster already needs all 7 slots omits the warm-up so that cluster stays intact. The step counts toward the 5–7 envelope and the `n / m` counter.
 
 ### Changed
@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Passkey/D1 hardening before production bind (#39): `/api/status` probes the migrated schema rather than `SELECT 1`; challenge admission is a single conditional INSERT plus an atomic per-IP UPSERT; failed sync retries with exponential backoff and jitter (401 still keeps the queue); `/api/sync` responses are `parseProgressStore`d and merges cannot grow past the parser cap. Remote migrate is documented as D1 console SQL or `npm run d1:migrate:remote -- --database-id <uuid>` so committed `wrangler.toml` still has no D1 id.
 - A successful `/api/sync` is merged into the current local snapshot rather than overwriting it, so a save made while the request is in flight is kept and re-queued. A 401 no longer drops that queued push.
 - Same-device sync no longer aborts an in-flight bounded round: SRS queue order and visit timestamps are not treated as a remote change.
 - WebAuthn RP ID/origin come from a configured allowlist (never the request Host), user verification is required, challenges are single-use (`DELETE … RETURNING`) and origin-bound, and synced passkeys that report counter 0 are accepted.

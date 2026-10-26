@@ -22,4 +22,14 @@ describe('Pages git-connected config', () => {
     expect(helper).toContain(`DB=${id}`);
     expect(helper).not.toMatch(/-c',\s*'wrangler\.local\.toml',\s*'pages'/);
   });
+
+  it('ships a remote-migrate script that never writes a database_id into committed wrangler.toml', () => {
+    const script = readFileSync('scripts/d1-migrate-remote.ts', 'utf8');
+    expect(script).toMatch(/--database-id/);
+    expect(script).toMatch(/mkdtempSync/);
+    expect(script).toMatch(/'migrations',\s*'apply'/);
+    expect(script).toMatch(/committed wrangler\.toml must not declare a D1 database_id/);
+    const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as { scripts: Record<string, string> };
+    expect(pkg.scripts['d1:migrate:remote']).toBe('tsx scripts/d1-migrate-remote.ts');
+  });
 });

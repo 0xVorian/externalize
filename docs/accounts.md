@@ -7,7 +7,7 @@ This feature runs on the **Cloudflare free tier**: Pages Functions for the API a
 ## Learner-facing behaviour
 
 - Signing in is offered quietly on Progress → **Another device**, next to export/import.
-- If D1 is not actually usable, Functions are down, or `GET /api/status` returns `{ available: false }`, the passkey controls stay hidden. The static app still loads.
+- If D1 is not actually usable (missing bind, or bound but unmigrated), Functions are down, or `GET /api/status` returns `{ available: false }`, the passkey controls stay hidden. The static app still loads.
 - Offline, the app keeps working from `localStorage`. A signed-in device queues a push and copies when it is online again. An expired session (HTTP 401) **keeps** that queued push until the learner signs in with a passkey.
 - Sign-out clears the HttpOnly session cookie. Local progress stays.
 - **Remove server copy** deletes the user, passkeys, sessions, and stored snapshot on the server. It is authorized by the session cookie and Origin check only; it does not re-prompt for a passkey. Session theft can remove the server copy; local progress on the device stays unless the learner also clears it.
@@ -61,7 +61,7 @@ Server `POST /api/sync` is read–merge–write with a compare-and-swap on `prog
 
 Passkeys are discoverable (`residentKey: 'required'`). Authenticator attachment is not restricted, so a platform passkey, a synced iCloud/Google passkey, or a cross-device / hybrid QR passkey can all be used. **Add another passkey** while signed in registers an extra credential on the same account.
 
-Unauthenticated `*/options` routes are limited per client in D1 (10 / hour, keyed on a hash of `CF-Connecting-IP`) and by a 40-row live-challenge cap. The cap is a read-only `COUNT` **before** any insert or rate upsert, so a full table 429s with no D1 write. Expired challenge/session/rate rows are purged at most every ten minutes, not on every request. Worst-case writes if an attacker keeps the table full: 40 slots × 3 writes (insert, delete, rate upsert) × 288 five-minute windows/day ≈ **34.6k**, under the free D1 100k writes/day cap. The in-memory limiter is only a same-isolate first filter.
+All `*/options` routes (register, login, and authenticated add-passkey) share a per-client D1 quota (10 / hour, keyed on a hash of `CF-Connecting-IP`) and a 40-row live-challenge cap. Admission is a **single conditional INSERT** (`WHERE COUNT(*) < 40`) plus an atomic rate UPSERT; a full table therefore 429s with no D1 row written. Expired challenge/session/rate rows are purged at most every ten minutes, not on every request. Worst-case writes if an attacker keeps the table full: 40 slots × 3 writes (insert, delete, rate upsert) × 288 five-minute windows/day ≈ **34.6k**, under the free D1 100k writes/day cap. The in-memory limiter is only a same-isolate first filter.
 
 ## API
 
@@ -69,7 +69,7 @@ All routes sit under `/api/` (Pages Function `functions/api/[[path]].ts`). Bindi
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/api/status` | Probes D1 with `SELECT 1`. `{ available: false }` when the binding is missing or the query fails. When available: `{ available: true, signedIn, passkeyCount }` so the client does not need a second session fetch. |
+| GET | `/api/status` | Probes D1 for the migrated schema (`challenge_rate` in `sqlite_master`). `{ available: false }` when the binding is missing, the query fails, or migrations have not been applied. When available: `{ available: true, signedIn, passkeyCount }` so the client does not need a second session fetch. |
 | GET | `/api/session` | Cookie session: `{ signedIn, passkeyCount }` |
 | POST | `/api/auth/register/options` + `/verify` | Create a passkey and account |
 | POST | `/api/auth/login/options` + `/verify` | Sign in with an existing passkey |
@@ -82,7 +82,9 @@ Without a working D1, `/api/status` returns `{ available: false }` and every oth
 
 Committed [`wrangler.toml`](../wrangler.toml) does **not** declare `[[d1_databases]]`. Git-connected Pages rejects a D1 binding whose database does not exist (error 10021), which would fail the preview deploy. A git-connected preview with no dashboard D1 bind is a static site: Functions still ship, `/api/status` reports `{ available: false }`, and account UI stays hidden. Bind `DB` in the Pages dashboard after creating the database — do not put a nil UUID in the committed config.
 
-A stored snapshot that no longer parses is treated as missing: `GET /api/sync` returns `progress: null`, and `POST` CAS-replaces the row with the incoming snapshot instead of returning `500 corrupt-snapshot`.
+A stored snapshot that no longer parses is treated as missing: `GET /api/sync` returns `progress: null`, and `POST` CAS-replaces the row with the incoming snapshot instead of returning `500 corrupt-snapshot`. The client runs `parseProgressStore` on every `/api/sync` body; an invalid snapshot is a failed sync and does not overwrite local progress. `mergeProgress` caps unions and maps at the parser limits so a merge cannot grow past what the next GET would accept.
+
+D1 `batch()` is sequential, not a rollback transaction. User+credential creation inserts the user then the credential and deletes the user if the credential write fails. Account deletion deletes child rows first and continues through remaining statements if one fails.
 
 ## Local development
 
@@ -109,11 +111,20 @@ This repository does **not** create the production D1 database. After the Pages 
 
 1. **Create a D1 database** in the Cloudflare dashboard (Workers & Pages → D1). Name it `externalize-progress` (or any name you prefer).
 2. **Bind it on the Pages project only** (do not add `[[d1_databases]]` to the committed `wrangler.toml`): Pages → project → Settings → Bindings → Add → D1. Variable name: **`DB`**. Select `externalize-progress`. Save and **redeploy** so Functions receive the binding. Putting a nil UUID in git-connected `wrangler.toml` makes the deploy fail.
-3. **Apply migrations to the remote database:**
+3. **Apply migrations to the remote database.** Committed `wrangler.toml` has no `[[d1_databases]]`, so `npx wrangler d1 migrations apply externalize-progress --remote` cannot see the database. Use one of these, in order of simplicity:
+
+   **A. D1 SQL console (no Wrangler config).** Open Workers & Pages → D1 → `externalize-progress` → Console. Paste and run each file in `migrations/` **in order**: `0001_init.sql`, `0002_challenge_origin_and_revision.sql`, `0003_challenge_rate.sql`. This creates the tables the status probe looks for. Wrangler’s `d1_migrations` bookkeeping table is not required for the app; if you later switch to the CLI, either start from a fresh database or insert matching `d1_migrations` rows so Wrangler does not replay `CREATE TABLE`.
+
+   **B. Script that takes the real database id** (writes a temp config, never the committed file):
    ```bash
-   npx wrangler d1 migrations apply externalize-progress --remote
+   npm run d1:migrate:remote -- --database-id <uuid-from-dashboard>
    ```
-   Use the dashboard database name from `npx wrangler d1 list`. Do not pass `-c wrangler.local.toml` for `--remote` (that file is local-only and uses a nil UUID).
+   Optional `--database-name` if you did not name it `externalize-progress`. Do not pass the local nil UUID (`00000000-0000-0000-0000-000000000000`). Do not pass `-c wrangler.local.toml` for `--remote`.
+
+   **C. Uncommitted config.** Copy `wrangler.local.toml` to a gitignored file, replace `database_id` with the dashboard UUID, then:
+   ```bash
+   npx wrangler -c wrangler.remote.toml d1 migrations apply externalize-progress --remote
+   ```
 4. **Environment variables** (Pages → Settings → Environment variables), production and preview:
    | Variable | When to set | Example |
    |---|---|---|
@@ -124,13 +135,13 @@ This repository does **not** create the production D1 database. After the Pages 
 
    On `*.externalize.pages.dev` these may be omitted: Functions use the built-in allowlist and pin RP ID to `externalize.pages.dev`. They do **not** fall back to the request Host.
 
-5. Confirm `https://<pages-host>/api/status` returns `{ "available": true, ... }`. Open Progress → Another device; **Create a passkey** should appear. If the binding is missing or D1 queries fail, the JSON is `{ "available": false }` and the UI stays on file export/import only.
+5. Confirm `https://<pages-host>/api/status` returns `{ "available": true, ... }`. Open Progress → Another device; **Create a passkey** should appear. If the binding is missing, migrations have not been applied, or D1 queries fail, the JSON is `{ "available": false }` and the UI stays on file export/import only. Bind-without-migrate must not show the account chrome.
 
 The static build (`npm run build`) does not talk to Cloudflare. Git-connected previews without a dashboard D1 bind still deploy: the app serves, Functions answer `/api/status` with `{ available: false }`, and passkey controls stay hidden.
 
 ## Free-tier budget
 
-Every app open hits `GET /api/status` (one D1 `SELECT 1`, plus a session read when the cookie is present). A signed-in open also `GET /api/sync` and POSTs only when local learning state differs from remote or a push is already queued. Challenge/session expiry is not rewritten on every call.
+Every app open hits `GET /api/status` (one schema-probe `SELECT`, plus a session read when the cookie is present). A signed-in open also `GET /api/sync` and POSTs only when local learning state differs from remote or a push is already queued. A failed authenticated push retries with exponential backoff and jitter (800 ms doubling to a 5-minute cap) and resets on success; HTTP 401 keeps the queued push until the next passkey sign-in. Challenge/session expiry is not rewritten on every call.
 
 For a handful of learners that still fits the free daily Function and D1 allotments. Unauthenticated challenge creation is bounded globally (D1 quota + 40 live rows), not only in one isolate’s memory. Free D1 is 100k rows written/day; exhausting it would disable sync until 00:00 UTC (the static app still loads). The documented worst-case challenge write ceiling is under that cap (`dailyChallengeWriteCeiling` in `src/app/account-policy.ts`).
 
@@ -138,4 +149,4 @@ For a handful of learners that still fits the free daily Function and D1 allotme
 
 - Credential nicknames / a device list beyond “add another passkey”
 - Compressing snapshots if progress documents grow substantially
-- Typechecking `functions/` under the root `tsc` config (Wrangler still bundles them; DOM vs Workers lib conflict)
+- Two-browser e2e for two-device merge (current coverage is one profile plus concurrent `page.request`)

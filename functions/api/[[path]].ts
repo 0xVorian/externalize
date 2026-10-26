@@ -22,7 +22,7 @@ import { parseProgressStore } from '../../src/app/progress-merge';
 import type { ProgressStore } from '../../src/app/storage';
 import {
   BodyTooLargeError,
-  clearCookieHeader,
+  clearCookieHeaders,
   cookieHeader,
   errorJson,
   json,
@@ -31,18 +31,18 @@ import {
 } from '../lib/http';
 import { base64UrlToBytes, randomId } from '../lib/crypto';
 import {
+  admitChallenge,
   casInsertProgress,
   casUpdateProgress,
-  consumeChallengeQuota,
   countChallenges,
   createUserWithCredential,
   deleteAccount,
   getCredential,
   getProgress,
-  insertChallenge,
   insertCredential,
   listCredentials,
   parseTransports,
+  peekChallengeQuota,
   probeDatabase,
   purgeExpired,
   takeChallenge,
@@ -159,8 +159,8 @@ async function handleStatus(env: Env, request: Request): Promise<Response> {
 }
 
 async function rejectAbusiveChallenge(db: D1Database, request: Request): Promise<Response | null> {
-  // Live-row cap first (read-only). A full table 429s with no D1 write, so
-  // rotating IPs cannot burn the free write budget on challenge_rate upserts.
+  // Read-only filters before generating WebAuthn options. The hard cap is the
+  // conditional INSERT in admitChallenge; a full table still writes no row.
   const outstanding = await countChallenges(db);
   if (outstanding >= CHALLENGE_GLOBAL_CAP) {
     return errorJson('rate-limited', 429);
@@ -169,7 +169,7 @@ async function rejectAbusiveChallenge(db: D1Database, request: Request): Promise
   if (!allowChallengeCreation(key)) {
     return errorJson('rate-limited', 429);
   }
-  if (!(await consumeChallengeQuota(db, key))) {
+  if (!(await peekChallengeQuota(db, key))) {
     return errorJson('rate-limited', 429);
   }
   return null;
@@ -223,13 +223,20 @@ async function handleRegisterOptions(
     },
     supportedAlgorithmIDs: [-7, -257],
   });
-  const challengeId = await insertChallenge(db, {
-    challenge: options.challenge,
-    type: 'register',
-    userId,
-    origin: rp.origin,
-    rpId: rp.rpID,
-  });
+  const challengeId = await admitChallenge(
+    db,
+    {
+      challenge: options.challenge,
+      type: 'register',
+      userId,
+      origin: rp.origin,
+      rpId: rp.rpID,
+    },
+    clientKeyFromHeaders(request.headers),
+  );
+  if (!challengeId) {
+    return errorJson('rate-limited', 429);
+  }
   return json({ challengeId, options });
 }
 
@@ -285,12 +292,19 @@ async function handleLoginOptions(
     rpID: rp.rpID,
     userVerification: 'required',
   });
-  const challengeId = await insertChallenge(db, {
-    challenge: options.challenge,
-    type: 'login',
-    origin: rp.origin,
-    rpId: rp.rpID,
-  });
+  const challengeId = await admitChallenge(
+    db,
+    {
+      challenge: options.challenge,
+      type: 'login',
+      origin: rp.origin,
+      rpId: rp.rpID,
+    },
+    clientKeyFromHeaders(request.headers),
+  );
+  if (!challengeId) {
+    return errorJson('rate-limited', 429);
+  }
   return json({ challengeId, options });
 }
 
@@ -319,7 +333,7 @@ async function handleLoginVerify(db: D1Database, request: Request): Promise<Resp
     requireUserVerification: true,
     credential: {
       id: stored.id,
-      publicKey: base64UrlToBytes(stored.public_key),
+      publicKey: Uint8Array.from(base64UrlToBytes(stored.public_key)),
       // Counter clone-detection is applied after verify so a reported 0
       // (synced passkeys) is not rejected by SimpleWebAuthn.
       counter: 0,
@@ -345,7 +359,7 @@ async function handleLoginVerify(db: D1Database, request: Request): Promise<Resp
 
 async function handleLogout(db: D1Database, request: Request): Promise<Response> {
   await clearSession(db, request);
-  return json({ ok: true }, 200, { 'set-cookie': clearCookieHeader(request.url) });
+  return json({ ok: true }, 200, { 'set-cookie': clearCookieHeaders(request.url) });
 }
 
 async function handleAddPasskeyOptions(
@@ -379,13 +393,20 @@ async function handleAddPasskeyOptions(
     },
     supportedAlgorithmIDs: [-7, -257],
   });
-  const challengeId = await insertChallenge(db, {
-    challenge: options.challenge,
-    type: 'add-passkey',
-    userId,
-    origin: rp.origin,
-    rpId: rp.rpID,
-  });
+  const challengeId = await admitChallenge(
+    db,
+    {
+      challenge: options.challenge,
+      type: 'add-passkey',
+      userId,
+      origin: rp.origin,
+      rpId: rp.rpID,
+    },
+    clientKeyFromHeaders(request.headers),
+  );
+  if (!challengeId) {
+    return errorJson('rate-limited', 429);
+  }
   return json({ challengeId, options });
 }
 
@@ -401,7 +422,7 @@ async function handleAddPasskeyVerify(db: D1Database, request: Request): Promise
   if (typeof body.challengeId !== 'string' || !body.response || typeof body.response !== 'object') {
     return errorJson('invalid-body', 400);
   }
-  const challenge = await takeChallenge(db, body.challengeId, 'add-passkey');
+  const challenge = await takeChallenge(db, body.challengeId, 'add-passkey', userId);
   if (!challenge || challenge.user_id !== userId || !challenge.origin || !challenge.rp_id) {
     return errorJson('challenge-expired', 400);
   }
@@ -485,7 +506,7 @@ async function handleDeleteAccount(db: D1Database, request: Request): Promise<Re
     return errorJson('not-signed-in', 401);
   }
   await deleteAccount(db, userId);
-  return json({ ok: true }, 200, { 'set-cookie': clearCookieHeader(request.url) });
+  return json({ ok: true }, 200, { 'set-cookie': clearCookieHeaders(request.url) });
 }
 
 function parseStoredSnapshot(raw: string): ProgressStore | null {

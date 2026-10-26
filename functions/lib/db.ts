@@ -3,6 +3,17 @@ import {
   CHALLENGE_RATE_WINDOW_MS,
   planChallengeRate,
 } from '../../src/app/account-policy';
+import {
+  challengeRateCutoffIso,
+  DELETE_CHALLENGE_SQL,
+  INSERT_CHALLENGE_IF_ROOM_SQL,
+  insertChallengeBindings,
+  SCHEMA_PROBE_SQL,
+  TAKE_CHALLENGE_SQL,
+  takeChallengeBindings,
+  UPSERT_CHALLENGE_RATE_SQL,
+  upsertChallengeRateBindings,
+} from '../../src/app/account-challenge-sql';
 import { CHALLENGE_TTL_MS, laterIso, nowIso } from './http';
 import { randomId, sha256Base64Url } from './crypto';
 
@@ -15,7 +26,7 @@ export async function probeDatabase(db: D1Database | undefined | null): Promise<
     return false;
   }
   try {
-    const row = await db.prepare('SELECT 1 AS ok').first<{ ok: number }>();
+    const row = await db.prepare(SCHEMA_PROBE_SQL).first<{ ok: number }>();
     return availabilityFromProbe(row, false);
   } catch {
     return availabilityFromProbe(null, true);
@@ -32,7 +43,7 @@ export async function purgeExpired(db: D1Database): Promise<void> {
   ]);
 }
 
-export async function consumeChallengeQuota(db: D1Database, clientKey: string): Promise<boolean> {
+export async function peekChallengeQuota(db: D1Database, clientKey: string): Promise<boolean> {
   const hashed = await sha256Base64Url(clientKey);
   const nowMs = Date.now();
   const row = await db
@@ -40,22 +51,26 @@ export async function consumeChallengeQuota(db: D1Database, clientKey: string): 
     .bind(hashed)
     .first<{ window_start: string; count: number }>();
   const windowStartMs = row ? Date.parse(row.window_start) : Number.NaN;
-  const plan = planChallengeRate({
+  return planChallengeRate({
     nowMs,
     windowStartMs: Number.isFinite(windowStartMs) ? windowStartMs : null,
     count: typeof row?.count === 'number' ? row.count : 0,
-  });
-  if (!plan.allowed) {
-    return false;
-  }
-  await db
-    .prepare(
-      `INSERT INTO challenge_rate (client_key, window_start, count) VALUES (?, ?, ?)
-       ON CONFLICT(client_key) DO UPDATE SET window_start = excluded.window_start, count = excluded.count`,
-    )
-    .bind(hashed, new Date(plan.windowStartMs).toISOString(), plan.count)
+  }).allowed;
+}
+
+export async function consumeChallengeQuota(db: D1Database, clientKey: string): Promise<boolean> {
+  const hashed = await sha256Base64Url(clientKey);
+  const nowMs = Date.now();
+  const now = new Date(nowMs).toISOString();
+  const result = await db
+    .prepare(UPSERT_CHALLENGE_RATE_SQL)
+    .bind(...upsertChallengeRateBindings({
+      clientKey: hashed,
+      nowIso: now,
+      cutoffIso: challengeRateCutoffIso(nowMs),
+    }))
     .run();
-  return true;
+  return (result.meta.changes ?? 0) > 0;
 }
 
 export async function countChallenges(db: D1Database): Promise<number> {
@@ -75,22 +90,53 @@ export async function insertChallenge(
     origin: string;
     rpId: string;
   },
-): Promise<string> {
+): Promise<string | null> {
   const id = randomId();
-  await db
-    .prepare(
-      'INSERT INTO challenges (id, challenge, type, user_id, expires_at, origin, rp_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    )
+  const now = nowIso();
+  const result = await db
+    .prepare(INSERT_CHALLENGE_IF_ROOM_SQL)
     .bind(
-      id,
-      input.challenge,
-      input.type,
-      input.userId ?? null,
-      laterIso(CHALLENGE_TTL_MS),
-      input.origin,
-      input.rpId,
+      ...insertChallengeBindings({
+        id,
+        challenge: input.challenge,
+        type: input.type,
+        userId: input.userId ?? null,
+        expiresAt: laterIso(CHALLENGE_TTL_MS),
+        origin: input.origin,
+        rpId: input.rpId,
+        nowIso: now,
+      }),
     )
     .run();
+  if ((result.meta.changes ?? 0) < 1) {
+    return null;
+  }
+  return id;
+}
+
+export async function deleteChallenge(db: D1Database, id: string): Promise<void> {
+  await db.prepare(DELETE_CHALLENGE_SQL).bind(id).run();
+}
+
+export async function admitChallenge(
+  db: D1Database,
+  input: {
+    challenge: string;
+    type: string;
+    userId?: string | null;
+    origin: string;
+    rpId: string;
+  },
+  clientKey: string,
+): Promise<string | null> {
+  const id = await insertChallenge(db, input);
+  if (!id) {
+    return null;
+  }
+  if (!(await consumeChallengeQuota(db, clientKey))) {
+    await deleteChallenge(db, id);
+    return null;
+  }
   return id;
 }
 
@@ -98,14 +144,11 @@ export async function takeChallenge(
   db: D1Database,
   id: string,
   type: string,
+  userId?: string | null,
 ): Promise<ChallengeRow | null> {
   const row = await db
-    .prepare(
-      `DELETE FROM challenges
-       WHERE id = ? AND type = ? AND expires_at >= ?
-       RETURNING id, challenge, type, user_id, expires_at, origin, rp_id`,
-    )
-    .bind(id, type, nowIso())
+    .prepare(TAKE_CHALLENGE_SQL)
+    .bind(...takeChallengeBindings({ id, type, nowIso: nowIso(), userId }))
     .first<ChallengeRow>();
   return row ?? null;
 }
@@ -161,10 +204,15 @@ export async function createUserWithCredential(
     transports?: string[];
   },
 ): Promise<void> {
+  // D1 batch() is sequential, not a rollback transaction. Insert the user,
+  // then the credential; delete the user if the credential write fails.
   const at = nowIso();
-  await db.batch([
-    db.prepare('INSERT INTO users (id, created_at, updated_at) VALUES (?, ?, ?)').bind(userId, at, at),
-    db
+  await db
+    .prepare('INSERT INTO users (id, created_at, updated_at) VALUES (?, ?, ?)')
+    .bind(userId, at, at)
+    .run();
+  try {
+    await db
       .prepare(
         `INSERT INTO credentials
           (id, user_id, public_key, counter, device_type, backed_up, transports, created_at)
@@ -179,8 +227,12 @@ export async function createUserWithCredential(
         input.backedUp ? 1 : 0,
         input.transports ? JSON.stringify(input.transports) : null,
         at,
-      ),
-  ]);
+      )
+      .run();
+  } catch (error) {
+    await db.prepare('DELETE FROM users WHERE id = ?').bind(userId).run();
+    throw error;
+  }
 }
 
 export async function listCredentials(db: D1Database, userId: string): Promise<CredentialRow[]> {
@@ -284,13 +336,27 @@ export async function casUpdateProgress(
 }
 
 export async function deleteAccount(db: D1Database, userId: string): Promise<void> {
-  await db.batch([
+  // D1 batch() does not roll back earlier statements. Delete children first
+  // and keep going if one statement fails so a half-deleted account can still
+  // be cleaned up on retry.
+  const statements = [
     db.prepare('DELETE FROM sessions WHERE user_id = ?').bind(userId),
     db.prepare('DELETE FROM credentials WHERE user_id = ?').bind(userId),
     db.prepare('DELETE FROM challenges WHERE user_id = ?').bind(userId),
     db.prepare('DELETE FROM progress WHERE user_id = ?').bind(userId),
     db.prepare('DELETE FROM users WHERE id = ?').bind(userId),
-  ]);
+  ];
+  let firstError: unknown;
+  for (const statement of statements) {
+    try {
+      await statement.run();
+    } catch (error) {
+      firstError ??= error;
+    }
+  }
+  if (firstError) {
+    throw firstError;
+  }
 }
 
 export function parseTransports(raw: string | null): string[] | undefined {

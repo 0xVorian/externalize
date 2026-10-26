@@ -90,10 +90,11 @@ Do not treat the adaptive authorization as general curriculum expansion. Chapter
 
 ### Open GitHub Issues
 
-As of 2026-10-26, remaining open issues (PR #34 closed #23, #29, and #31; this PR closes #30 and #33):
+As of 2026-10-26, remaining open issues (PR #34 closed #23, #29, and #31; PR #35 closed #30 and #33; PR #38 implemented #37):
 
 - [#22](https://github.com/0xVorian/externalize/issues/22) — Daily practice reminder. Explicitly gated on an out-of-app experiment (2026-10-26 to 2026-11-08). Push/email infrastructure stays in “not building yet” unless that experiment shows a measurable increase in practice. Copy must not use streak or guilt language.
-- [#37](https://github.com/0xVorian/externalize/issues/37) — Optional passkey accounts and cross-device progress merge on the Cloudflare free tier. Implementation is in this change; production D1 still has to be created and bound by the owner ([docs/accounts.md](accounts.md)).
+- [#37](https://github.com/0xVorian/externalize/issues/37) — Optional passkey accounts and cross-device progress merge on the Cloudflare free tier. Implementation is on `master`; do not bind production D1 until the #39 hardening (working remote migrate, schema probe, atomic challenge admit, sync backoff, client parse of `/api/sync`) is merged. Provisioning: [docs/accounts.md](accounts.md).
+- [#39](https://github.com/0xVorian/externalize/issues/39) — Accounts hardening required before provisioning D1.
 
 Do not treat this list as authorization to invent extra work. If an issue is not listed, check GitHub rather than assuming a new phase.
 

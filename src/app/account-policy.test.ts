@@ -159,7 +159,7 @@ describe('planChallengeRate / write ceiling', () => {
 });
 
 describe('availabilityFromProbe / client key', () => {
-  it('hides accounts unless SELECT 1 actually succeeded', () => {
+  it('hides accounts unless the schema probe actually succeeded', () => {
     expect(availabilityFromProbe({ ok: 1 }, false)).toBe(true);
     expect(availabilityFromProbe({ ok: 1 }, true)).toBe(false);
     expect(availabilityFromProbe(null, false)).toBe(false);

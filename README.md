@@ -79,7 +79,7 @@ Connect the GitHub repository in Cloudflare Pages with:
 | Build output directory | `dist` |
 | Node.js version | `22` (or set `NODE_VERSION=22`) |
 
-No environment variables are required for signed-out use. Progress is stored in the browser (`localStorage`). Optional passkey sync needs a D1 binding named `DB` added in the Cloudflare dashboard — not a `database_id` in the committed `wrangler.toml` (a missing or fake UUID there fails the git-connected Pages deploy). Until that bind exists, `/api/status` reports `{ available: false }`, account controls stay hidden, and the static app still deploys. Setup steps: [docs/accounts.md](docs/accounts.md).
+No environment variables are required for signed-out use. Progress is stored in the browser (`localStorage`). Optional passkey sync needs a D1 binding named `DB` added in the Cloudflare dashboard — not a `database_id` in the committed `wrangler.toml` (a missing or fake UUID there fails the git-connected Pages deploy). Apply migrations with the D1 SQL console or `npm run d1:migrate:remote -- --database-id <uuid>` before (or immediately after) binding; `/api/status` stays `{ available: false }` until the schema exists. Setup steps: [docs/accounts.md](docs/accounts.md).
 
 After deploy, open the Pages URL on your phone to run the real-use validation.
 

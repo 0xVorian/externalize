@@ -112,6 +112,8 @@ import { mergeProgress } from './app/progress-merge';
 import {
   flagAfterSyncFailure,
   learningStateEqual,
+  nextSyncFailureCount,
+  nextSyncRetryDelay,
   resolvePushOutcome,
   shouldInvalidateSession,
 } from './app/account-sync';
@@ -188,6 +190,7 @@ let account: AccountView = {
 let accountSyncTimer: number | undefined;
 let applyingRemoteProgress = false;
 let accountPushInFlight = false;
+let accountSyncFailures = 0;
 let practiceUi = createPracticeUiState();
 type ShellSurface = 'opening' | 'session' | 'complete' | 'browse';
 let surface: ShellSurface = 'opening';
@@ -322,15 +325,18 @@ function writeAccountFlag(next: { signedIn: boolean; pendingSync: boolean }): vo
   }
 }
 
-function scheduleAccountPush(): void {
+function scheduleAccountPush(reason: 'local' | 'retry' = 'local'): void {
   account.pendingSync = true;
   writeAccountFlag({ signedIn: true, pendingSync: true });
+  if (reason === 'local') {
+    accountSyncFailures = 0;
+  }
   if (accountSyncTimer !== undefined) {
     window.clearTimeout(accountSyncTimer);
   }
   accountSyncTimer = window.setTimeout(() => {
     void pushAccountProgress();
-  }, 800);
+  }, nextSyncRetryDelay(accountSyncFailures));
 }
 
 async function pushAccountProgress(): Promise<void> {
@@ -345,6 +351,7 @@ async function pushAccountProgress(): Promise<void> {
     const outcome = resolvePushOutcome({ sent, current: progress, server });
     applyRemoteLearning(outcome.merged);
     account.pendingSync = outcome.pendingPush;
+    accountSyncFailures = 0;
     writeAccountFlag({ signedIn: true, pendingSync: outcome.pendingPush });
   } catch (error) {
     if (error instanceof AccountApiError && error.status === 401) {
@@ -352,17 +359,19 @@ async function pushAccountProgress(): Promise<void> {
       account.signedIn = flag.signedIn;
       account.passkeyCount = 0;
       account.pendingSync = flag.pendingSync;
+      accountSyncFailures = 0;
       writeAccountFlag(flag);
     } else {
       const flag = flagAfterSyncFailure(error instanceof AccountApiError ? error.status : 0);
       account.pendingSync = flag.pendingSync;
+      accountSyncFailures = nextSyncFailureCount(accountSyncFailures);
       writeAccountFlag({ signedIn: true, pendingSync: flag.pendingSync });
     }
   } finally {
     applyingRemoteProgress = false;
     accountPushInFlight = false;
     if (account.signedIn && account.pendingSync && account.online) {
-      scheduleAccountPush();
+      scheduleAccountPush('retry');
     }
     if (mode === 'progress') {
       render();
@@ -396,6 +405,7 @@ async function syncAfterSignIn(): Promise<void> {
       await pushAccountProgress();
     } else {
       account.pendingSync = false;
+      accountSyncFailures = 0;
       writeAccountFlag({ signedIn: true, pendingSync: false });
     }
   } catch (error) {
@@ -404,12 +414,17 @@ async function syncAfterSignIn(): Promise<void> {
       account.signedIn = flag.signedIn;
       account.passkeyCount = 0;
       account.pendingSync = flag.pendingSync;
+      accountSyncFailures = 0;
       writeAccountFlag(flag);
       return;
     }
     const flag = flagAfterSyncFailure(0);
     account.pendingSync = flag.pendingSync;
+    accountSyncFailures = nextSyncFailureCount(accountSyncFailures);
     writeAccountFlag({ signedIn: true, pendingSync: flag.pendingSync });
+    if (account.online) {
+      scheduleAccountPush('retry');
+    }
   }
 }
 

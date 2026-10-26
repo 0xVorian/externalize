@@ -6,9 +6,9 @@ import type { SrsEntry } from './srs';
 import type { ProgressStore } from './storage';
 import type { BuilderToken } from './translation/types';
 
-const MAX_ID_LIST = 4_000;
-const MAX_QUEUE = 2_000;
-const MAX_OBJECT_KEYS = 2_000;
+export const MAX_ID_LIST = 4_000;
+export const MAX_QUEUE = 2_000;
+export const MAX_OBJECT_KEYS = 2_000;
 const MAX_ID_LEN = 256;
 const MAX_TAG_LIST = 32;
 const MAX_ISO_LEN = 40;

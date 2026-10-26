@@ -26,7 +26,7 @@ npm test
 npm run test:watch   # watch mode
 ```
 
-Vitest config: [`vitest.config.ts`](../vitest.config.ts).
+Vitest config: [`vitest.config.ts`](../vitest.config.ts). Unit tests cover `src/`, `engine/`, `tools/`, and `functions/` (Pages Function helpers). Challenge-admission SQL is executed against in-process SQLite (`node:sqlite`).
 
 ## End-to-end smoke tests (Playwright)
 
