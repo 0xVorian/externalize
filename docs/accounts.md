@@ -80,7 +80,7 @@ All routes sit under `/api/` (Pages Function `functions/api/[[path]].ts`). Bindi
 
 Without a working D1, `/api/status` returns `{ available: false }` and every other route returns `503`. Functions never throw past that guard.
 
-Committed [`wrangler.toml`](../wrangler.toml) does **not** declare `[[d1_databases]]`. Git-connected Pages rejects a D1 binding whose database does not exist (error 10021), which would fail the preview deploy. A git-connected preview with no dashboard D1 bind is a static site: Functions still ship, `/api/status` reports `{ available: false }`, and account UI stays hidden. Bind `DB` in the Pages dashboard after creating the database — do not put a nil UUID in the committed config.
+Committed [`wrangler.toml`](../wrangler.toml) binds D1 **only** under `[[env.production.d1_databases]]` (`DB` → `externalize-progress`, id `6d9806e2-46c4-41b1-a5fe-8c224ecbadf3`). `pages_build_output_dir` makes that file the source of truth: every git-connected build overwrites dashboard bindings, so a dashboard D1 bind cannot stick. Preview inherits the top level, which has no `[[d1_databases]]`: Functions still ship, `/api/status` reports `{ available: false }`, and account UI stays hidden. Do not add a top-level or `env.preview` D1 bind — that would point branch deploys at the production database.
 
 A stored snapshot that no longer parses is treated as missing: `GET /api/sync` returns `progress: null`, and `POST` CAS-replaces the row with the incoming snapshot instead of returning `500 corrupt-snapshot`. The client runs `parseProgressStore` on every `/api/sync` body; an invalid snapshot is a failed sync and does not overwrite local progress. `mergeProgress` caps unions and maps at the parser limits so a merge cannot grow past what the next GET would accept.
 
@@ -103,41 +103,46 @@ npx wrangler -c wrangler.local.toml d1 migrations apply externalize-progress --l
 npx wrangler pages dev dist --d1 DB=00000000-0000-0000-0000-000000000000 --ip 0.0.0.0 --port 8788
 ```
 
-Git-connected Pages reads [`wrangler.toml`](../wrangler.toml) (no D1). `wrangler pages dev` does **not** accept `-c` / `--config`. Local `wrangler d1` uses [`wrangler.local.toml`](../wrangler.local.toml); pages/e2e bind the same sqlite with `--d1 DB=<that file's database_id>`. Schema: [`migrations/0001_init.sql`](../migrations/0001_init.sql), [`migrations/0002_challenge_origin_and_revision.sql`](../migrations/0002_challenge_origin_and_revision.sql), [`migrations/0003_challenge_rate.sql`](../migrations/0003_challenge_rate.sql). Wrangler 4.152 accepted a nil UUID in the *local* file for `d1 migrations apply --local`. Cloudflare’s current Pages+D1 snippet sometimes shows `preview_database_id = "DB"` (the binding name) rather than a UUID; that field is only in the local config, never in the git-connected file.
+Git-connected Pages reads [`wrangler.toml`](../wrangler.toml) (`env.production` D1 only). `wrangler pages dev` does **not** accept `-c` / `--config`. Local `wrangler d1` uses [`wrangler.local.toml`](../wrangler.local.toml); pages/e2e bind the same sqlite with `--d1 DB=<that file's database_id>`. Schema: [`migrations/0001_init.sql`](../migrations/0001_init.sql), [`migrations/0002_challenge_origin_and_revision.sql`](../migrations/0002_challenge_origin_and_revision.sql), [`migrations/0003_challenge_rate.sql`](../migrations/0003_challenge_rate.sql). Wrangler 4.152 accepted a nil UUID in the *local* file for `d1 migrations apply --local`. Cloudflare’s current Pages+D1 snippet sometimes shows `preview_database_id = "DB"` (the binding name) rather than a UUID; that field is only in the local config.
 
-## Production provisioning (Cloudflare dashboard)
+## Production provisioning
 
-This repository does **not** create the production D1 database. After the Pages git integration is already deploying `master` to `externalize.pages.dev`, the owner should:
+The production D1 database **already exists** and is fully migrated (`0001`–`0003` applied, `d1_migrations` rows recorded):
 
-1. **Create a D1 database** in the Cloudflare dashboard (Workers & Pages → D1). Name it `externalize-progress` (or any name you prefer).
-2. **Bind it on the Pages project only** (do not add `[[d1_databases]]` to the committed `wrangler.toml`): Pages → project → Settings → Bindings → Add → D1. Variable name: **`DB`**. Select `externalize-progress`. Save and **redeploy** so Functions receive the binding. Putting a nil UUID in git-connected `wrangler.toml` makes the deploy fail.
-3. **Apply migrations to the remote database.** Committed `wrangler.toml` has no `[[d1_databases]]`, so `npx wrangler d1 migrations apply externalize-progress --remote` cannot see the database. Use one of these, in order of simplicity:
+| Field | Value |
+|---|---|
+| Name | `externalize-progress` |
+| Id | `6d9806e2-46c4-41b1-a5fe-8c224ecbadf3` |
+| Binding | `DB`, production only via committed [`wrangler.toml`](../wrangler.toml) |
 
-   **A. D1 SQL console (no Wrangler config).** Open Workers & Pages → D1 → `externalize-progress` → Console. Paste and run each file in `migrations/` **in order**: `0001_init.sql`, `0002_challenge_origin_and_revision.sql`, `0003_challenge_rate.sql`. This creates the tables the status probe looks for. Wrangler’s `d1_migrations` bookkeeping table is not required for the app; if you later switch to the CLI, either start from a fresh database or insert matching `d1_migrations` rows so Wrangler does not replay `CREATE TABLE`.
+`pages_build_output_dir` makes `wrangler.toml` the source of truth. A dashboard D1 bind is overwritten on the next git build and cannot stick. Preview must stay unbound so branch deploys never touch this database.
 
-   **B. Script that takes the real database id** (writes a temp config, never the committed file):
-   ```bash
-   npm run d1:migrate:remote -- --database-id <uuid-from-dashboard>
-   ```
-   Optional `--database-name` if you did not name it `externalize-progress`. Do not pass the local nil UUID (`00000000-0000-0000-0000-000000000000`). Do not pass `-c wrangler.local.toml` for `--remote`.
+`name`, `pages_build_output_dir`, `compatibility_date`, and `compatibility_flags` inherit from the top level. `vars` and bindings do not: `[env.production.vars]` repeats `WEBAUTHN_RP_NAME` next to `[[env.production.d1_databases]]`. See [Pages wrangler configuration](https://developers.cloudflare.com/pages/functions/wrangler-configuration/).
 
-   **C. Uncommitted config.** Copy `wrangler.local.toml` to a gitignored file, replace `database_id` with the dashboard UUID, then:
-   ```bash
-   npx wrangler -c wrangler.remote.toml d1 migrations apply externalize-progress --remote
-   ```
-4. **Environment variables** (Pages → Settings → Environment variables), production and preview:
-   | Variable | When to set | Example |
-   |---|---|---|
-   | `WEBAUTHN_RP_NAME` | Display name on the passkey prompt | `Externalize` |
-   | `WEBAUTHN_RP_ID` | Custom domain (registrable domain, no scheme) | `logic.example.org` |
-   | `WEBAUTHN_ORIGIN` | Full origin, no trailing slash | `https://logic.example.org` |
-   | `WEBAUTHN_ALLOWED_ORIGINS` | Extra exact origins, comma-separated | `https://preview.logic.example.org` |
+**Future migrations** (do not use a temp wrangler.toml under `/tmp`; Wrangler resolves `migrations_dir` relative to the config file):
 
-   On `*.externalize.pages.dev` these may be omitted: Functions use the built-in allowlist and pin RP ID to `externalize.pages.dev`. They do **not** fall back to the request Host.
+**A. D1 SQL console / query API.** Open Workers & Pages → D1 → `externalize-progress` → Console, or use the D1 query API. Paste and run each new file in `migrations/` **in order**. Wrangler’s `d1_migrations` bookkeeping table is already populated for `0001`–`0003`; if you apply SQL by hand, insert a matching `d1_migrations` row so a later CLI apply does not replay `CREATE TABLE`.
 
-5. Confirm `https://<pages-host>/api/status` returns `{ "available": true, ... }`. Open Progress → Another device; **Create a passkey** should appear. If the binding is missing, migrations have not been applied, or D1 queries fail, the JSON is `{ "available": false }` and the UI stays on file export/import only. Bind-without-migrate must not show the account chrome.
+**B. Gitignored root config.** Copy `wrangler.local.toml` to `wrangler.remote.toml` (already gitignored), set `database_id` to `6d9806e2-46c4-41b1-a5fe-8c224ecbadf3`, then:
+```bash
+npx wrangler -c wrangler.remote.toml d1 migrations apply externalize-progress --remote
+```
+Do not pass `-c wrangler.local.toml` for `--remote` (that file uses the local nil UUID). Do not pass the nil UUID (`00000000-0000-0000-0000-000000000000`).
 
-The static build (`npm run build`) does not talk to Cloudflare. Git-connected previews without a dashboard D1 bind still deploy: the app serves, Functions answer `/api/status` with `{ available: false }`, and passkey controls stay hidden.
+**Environment variables** (Pages → Settings → Environment variables), production and preview:
+
+| Variable | When to set | Example |
+|---|---|---|
+| `WEBAUTHN_RP_NAME` | Display name on the passkey prompt | `Externalize` |
+| `WEBAUTHN_RP_ID` | Custom domain (registrable domain, no scheme) | `logic.example.org` |
+| `WEBAUTHN_ORIGIN` | Full origin, no trailing slash | `https://logic.example.org` |
+| `WEBAUTHN_ALLOWED_ORIGINS` | Extra exact origins, comma-separated | `https://preview.logic.example.org` |
+
+On `*.externalize.pages.dev` these may be omitted: Functions use the built-in allowlist and pin RP ID to `externalize.pages.dev`. They do **not** fall back to the request Host.
+
+After `master` deploys with this config, confirm `https://externalize.pages.dev/api/status` returns `{ "available": true, ... }`. Open Progress → Another device; **Create a passkey** should appear. Git-connected **preview** URLs must stay `{ "available": false }` (no D1). If production is unbound, unmigrated, or D1 queries fail, the JSON is `{ "available": false }` and the UI stays on file export/import only.
+
+The static build (`npm run build`) does not talk to Cloudflare. Preview deploys still serve the app; Functions answer `/api/status` with `{ available: false }`, and passkey controls stay hidden.
 
 ## Free-tier budget
 

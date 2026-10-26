@@ -1,9 +1,10 @@
 -- Externalize optional accounts (issue #37).
 -- Binding name: DB. Local:
 --   npx wrangler -c wrangler.local.toml d1 migrations apply externalize-progress --local
--- Remote (committed wrangler.toml has no [[d1_databases]]):
---   npm run d1:migrate:remote -- --database-id <uuid>
---   or paste this file, then 0002 and 0003, in the D1 SQL console.
+-- Remote (production bind is env.production in wrangler.toml; do not use a
+-- /tmp wrangler.toml — migrations_dir is resolved next to the config file):
+--   paste this file, then 0002 and 0003, in the D1 SQL console / query API
+--   or: npx wrangler -c wrangler.remote.toml d1 migrations apply externalize-progress --remote
 -- See docs/accounts.md.
 
 CREATE TABLE users (

@@ -1,12 +1,47 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
+const PRODUCTION_D1_ID = '6d9806e2-46c4-41b1-a5fe-8c224ecbadf3';
+
+function uncommented(toml: string): string {
+  return toml
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('#'))
+    .join('\n');
+}
+
+function section(toml: string, header: string): string {
+  const lines = uncommented(toml).split('\n');
+  const start = lines.findIndex((line) => line.trim() === header);
+  if (start === -1) {
+    return '';
+  }
+  const rest = lines.slice(start + 1);
+  const end = rest.findIndex((line) => line.startsWith('['));
+  return (end === -1 ? rest : rest.slice(0, end)).join('\n');
+}
+
 describe('Pages git-connected config', () => {
-  it('does not declare a D1 binding in the committed wrangler.toml', () => {
+  it('binds D1 only under env.production, with the real database id', () => {
     const toml = readFileSync('wrangler.toml', 'utf8');
-    expect(toml).not.toMatch(/^\[\[d1_databases\]\]/m);
-    expect(toml).not.toMatch(/^database_id\s*=/m);
+    const body = uncommented(toml);
+    expect(body).not.toMatch(/^\[\[d1_databases\]\]/m);
+    expect(body).not.toMatch(/^\[\[env\.preview\.d1_databases\]\]/m);
+    expect(body).not.toMatch(/^\[env\.preview[.\]]/m);
+
+    const production = section(toml, '[[env.production.d1_databases]]');
+    expect(production).toMatch(/binding = "DB"/);
+    expect(production).toMatch(/database_name = "externalize-progress"/);
+    expect(production).toMatch(`database_id = "${PRODUCTION_D1_ID}"`);
+
+    const ids = [...body.matchAll(/^database_id\s*=\s*"([^"]+)"/gm)].map((match) => match[1]);
+    expect(ids).toEqual([PRODUCTION_D1_ID]);
+
+    const productionVars = section(toml, '[env.production.vars]');
+    expect(productionVars).toMatch(/WEBAUTHN_RP_NAME = "Externalize"/);
+    expect(section(toml, '[vars]')).toMatch(/WEBAUTHN_RP_NAME = "Externalize"/);
     expect(toml).toMatch(/wrangler\.local\.toml/);
+    expect(toml).toMatch(/pages_build_output_dir/);
   });
 
   it('keeps the local D1 bind in wrangler.local.toml for wrangler d1, not pages --config', () => {
@@ -15,6 +50,7 @@ describe('Pages git-connected config', () => {
     expect(local).toMatch(/binding = "DB"/);
     const id = /database_id = "([^"]+)"/.exec(local)?.[1];
     expect(id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(id).not.toBe(PRODUCTION_D1_ID);
     const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as { scripts: Record<string, string> };
     expect(pkg.scripts['dev:pages']).toContain(`--d1 DB=${id}`);
     expect(pkg.scripts['dev:pages']).not.toMatch(/-c wrangler\.local\.toml pages dev/);
@@ -23,13 +59,10 @@ describe('Pages git-connected config', () => {
     expect(helper).not.toMatch(/-c',\s*'wrangler\.local\.toml',\s*'pages'/);
   });
 
-  it('ships a remote-migrate script that never writes a database_id into committed wrangler.toml', () => {
-    const script = readFileSync('scripts/d1-migrate-remote.ts', 'utf8');
-    expect(script).toMatch(/--database-id/);
-    expect(script).toMatch(/mkdtempSync/);
-    expect(script).toMatch(/'migrations',\s*'apply'/);
-    expect(script).toMatch(/committed wrangler\.toml must not declare a D1 database_id/);
+  it('does not ship a temp-config remote-migrate script', () => {
+    expect(existsSync('scripts/d1-migrate-remote.ts')).toBe(false);
     const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as { scripts: Record<string, string> };
-    expect(pkg.scripts['d1:migrate:remote']).toBe('tsx scripts/d1-migrate-remote.ts');
+    expect(pkg.scripts['d1:migrate:remote']).toBeUndefined();
+    expect(pkg.scripts['d1:migrate:local']).toContain('wrangler.local.toml');
   });
 });

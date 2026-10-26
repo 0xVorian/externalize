@@ -20,7 +20,7 @@ Work merged after v0.5.1 still sits under `[Unreleased]` in `CHANGELOG.md`. It i
 - oversized teach–practice clusters no longer fall back to a cut at 6: this round takes through the first practice when it still fits, otherwise it splits between watch cases ([#30](https://github.com/0xVorian/externalize/issues/30), [PR #35](https://github.com/0xVorian/externalize/pull/35));
 - a warm-up miss keeps the advertised `n / m` on Try again; the new total appears once the first repair step begins ([#33](https://github.com/0xVorian/externalize/issues/33), [PR #35](https://github.com/0xVorian/externalize/pull/35)).
 
-Optional passkey accounts ([#37](https://github.com/0xVorian/externalize/issues/37)) are a separate bounded feature, not a session-first remediation: signed-out local use stays as it is; Cloudflare Pages Functions + D1 copy progress when a passkey is created. The production D1 database is provisioned by the owner ([accounts.md](accounts.md)).
+Optional passkey accounts ([#37](https://github.com/0xVorian/externalize/issues/37)) are a separate bounded feature, not a session-first remediation: signed-out local use stays as it is; Cloudflare Pages Functions + D1 copy progress when a passkey is created. Production D1 is bound only under `env.production` in committed `wrangler.toml` ([accounts.md](accounts.md)); preview deploys stay unbound.
 
 Implementation of the session-first and adaptive baseline is complete; the experiential/product-validation gates remain open.
 
@@ -90,11 +90,12 @@ Do not treat the adaptive authorization as general curriculum expansion. Chapter
 
 ### Open GitHub Issues
 
-As of 2026-10-26, remaining open issues (PR #34 closed #23, #29, and #31; PR #35 closed #30 and #33; PR #38 implemented #37):
+As of 2026-10-26, remaining open issues (PR #34 closed #23, #29, and #31; PR #35 closed #30 and #33; PR #38 implemented #37; PR #40 closed #39):
 
 - [#22](https://github.com/0xVorian/externalize/issues/22) — Daily practice reminder. Explicitly gated on an out-of-app experiment (2026-10-26 to 2026-11-08). Push/email infrastructure stays in “not building yet” unless that experiment shows a measurable increase in practice. Copy must not use streak or guilt language.
-- [#37](https://github.com/0xVorian/externalize/issues/37) — Optional passkey accounts and cross-device progress merge on the Cloudflare free tier. Implementation is on `master`; do not bind production D1 until the #39 hardening (working remote migrate, schema probe, atomic challenge admit, sync backoff, client parse of `/api/sync`) is merged. Provisioning: [docs/accounts.md](accounts.md).
-- [#39](https://github.com/0xVorian/externalize/issues/39) — Accounts hardening required before provisioning D1.
+- [#36](https://github.com/0xVorian/externalize/issues/36) — Follow-ups from reviews of #34 and #35 (latest-card recap, split-round tests, dead branch).
+
+#37 is implemented on `master`; #39 hardening landed in #40. Production D1 (`externalize-progress`) is bound only via committed `wrangler.toml` `env.production`; git-connected previews stay unbound. Provisioning: [docs/accounts.md](accounts.md).
 
 Do not treat this list as authorization to invent extra work. If an issue is not listed, check GitHub rather than assuming a new phase.
 
