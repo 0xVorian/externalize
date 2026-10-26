@@ -69,7 +69,8 @@ describe('course outline', () => {
     expect(outline[2]?.total).toBe(LEVEL_2_LESSONS.length);
     const split = splitCurrentUnitGroups(outline[1]!);
     expect(split.doneCount).toBe(2);
-    expect(split.restGroups[0]?.lessons[0]?.status).toBe('here');
+    expect(split.visibleGroups[0]?.lessons[0]?.status).toBe('here');
+    expect(split.remainingCount).toBeGreaterThan(0);
   });
 
   it('treats concept labels with a symbol suffix as matching the lesson title', () => {

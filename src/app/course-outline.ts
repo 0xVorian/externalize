@@ -128,37 +128,42 @@ export function buildCourseOutline(store: ProgressStore): CourseOutlineUnit[] {
   });
 }
 
-/** Done lessons that sit above the here marker in the current unit. */
+function regroupLessons(lessons: CourseOutlineLesson[]): CourseOutlineConceptGroup[] {
+  const groups: CourseOutlineConceptGroup[] = [];
+  for (const lesson of lessons) {
+    const last = groups[groups.length - 1];
+    if (last && last.conceptId === lesson.conceptId) {
+      last.lessons.push(lesson);
+    } else {
+      groups.push({ conceptId: lesson.conceptId, lessons: [lesson] });
+    }
+  }
+  return groups;
+}
+
+/**
+ * Current unit: done lessons above here, then here plus the next lesson,
+ * then remaining upcoming lessons for a collapsed preview.
+ */
 export function splitCurrentUnitGroups(unit: CourseOutlineUnit): {
   doneGroups: CourseOutlineConceptGroup[];
-  restGroups: CourseOutlineConceptGroup[];
+  visibleGroups: CourseOutlineConceptGroup[];
+  remainingGroups: CourseOutlineConceptGroup[];
   doneCount: number;
+  remainingCount: number;
 } {
-  const doneGroups: CourseOutlineConceptGroup[] = [];
-  const restGroups: CourseOutlineConceptGroup[] = [];
-  let pastDonePrefix = false;
-
-  for (const group of unit.concepts) {
-    if (pastDonePrefix) {
-      restGroups.push(group);
-      continue;
-    }
-    const doneLessons = group.lessons.filter((lesson) => lesson.status === 'done');
-    const restLessons = group.lessons.filter((lesson) => lesson.status !== 'done');
-    if (restLessons.length === 0) {
-      doneGroups.push(group);
-      continue;
-    }
-    if (doneLessons.length > 0) {
-      doneGroups.push({ conceptId: group.conceptId, lessons: doneLessons });
-    }
-    restGroups.push({ conceptId: group.conceptId, lessons: restLessons });
-    pastDonePrefix = true;
-  }
-
+  const lessons = unit.concepts.flatMap((group) => group.lessons);
+  const hereIndex = lessons.findIndex((lesson) => lesson.status === 'here');
+  const start = hereIndex === -1 ? 0 : hereIndex;
+  const visibleEnd = hereIndex === -1 ? lessons.length : Math.min(lessons.length, hereIndex + 2);
+  const doneLessons = lessons.slice(0, start);
+  const visibleLessons = lessons.slice(start, visibleEnd);
+  const remainingLessons = lessons.slice(visibleEnd);
   return {
-    doneGroups,
-    restGroups,
-    doneCount: doneGroups.reduce((count, group) => count + group.lessons.length, 0),
+    doneGroups: regroupLessons(doneLessons),
+    visibleGroups: regroupLessons(visibleLessons),
+    remainingGroups: regroupLessons(remainingLessons),
+    doneCount: doneLessons.length,
+    remainingCount: remainingLessons.length,
   };
 }

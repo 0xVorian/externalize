@@ -65,6 +65,7 @@ describe('progress view course map', () => {
     const html = renderProgressView('en', loadProgress(), false);
     expect(html).toContain('data-testid="course-outline-unit-1-lessons"');
     expect(html).toContain('data-testid="course-outline-unit-2-lessons"');
+    expect(html).toContain('data-testid="course-outline-remaining-lessons"');
     expect(html).not.toMatch(
       /data-testid="course-outline-unit-1-lessons"[^>]*open/,
     );

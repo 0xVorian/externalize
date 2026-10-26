@@ -74,33 +74,17 @@ function renderConceptGroup(
   const concept = conceptLabel(locale, group.conceptId);
   const first = group.lessons[0];
   const firstTitle = first ? getLessonCopy(locale, first.id).title : '';
-  const dropFirst = Boolean(first && lessonTitleMatchesConcept(concept, firstTitle));
-  const rest = dropFirst ? group.lessons.slice(1) : group.lessons;
-
-  if (dropFirst && rest.length === 0 && first) {
-    return `
-      <li class="course-outline-concept" data-concept-id="${group.conceptId}">
-        <ul class="progress-list course-outline-lessons">${renderLesson(locale, copy, first, waitingOn)}</ul>
-      </li>
-    `;
-  }
-
-  const hereOnHeading = Boolean(dropFirst && first?.status === 'here' && rest.length > 0);
-  const headingHereClass = hereOnHeading ? ' is-here' : '';
-  const headingTestId = hereOnHeading ? ' data-testid="course-outline-here"' : '';
-  const headingAria = hereOnHeading
-    ? ` aria-label="${copy.progressItemAria(concept, copy.youAreHere)}"`
-    : '';
-  const headingMarker = hereOnHeading
-    ? `<span class="course-outline-here-marker" aria-hidden="true">${copy.youAreHere}</span>`
-    : '';
-  const lessons = rest
+  const skipHeading = Boolean(first && lessonTitleMatchesConcept(concept, firstTitle));
+  const lessons = group.lessons
     .map((lesson) => renderLesson(locale, copy, lesson, waitingOn))
     .join('');
+  const heading = skipHeading
+    ? ''
+    : `<h4 class="course-outline-concept-title">${concept}</h4>`;
 
   return `
     <li class="course-outline-concept" data-concept-id="${group.conceptId}">
-      <h4 class="course-outline-concept-title${headingHereClass}"${headingTestId}${headingAria}>${concept}${headingMarker}</h4>
+      ${heading}
       <ul class="progress-list course-outline-lessons">${lessons}</ul>
     </li>
   `;
@@ -146,7 +130,15 @@ function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: C
             'course-outline-done-lessons',
           )
         : '';
-    body = `${doneBlock}${renderConceptList(locale, copy, split.restGroups, waitingTitle)}`;
+    const remainingBlock =
+      split.remainingCount > 0
+        ? renderCollapsedLessons(
+            copy.remainingLessonsSummary(split.remainingCount),
+            renderConceptList(locale, copy, split.remainingGroups, waitingTitle),
+            'course-outline-remaining-lessons',
+          )
+        : '';
+    body = `${doneBlock}${renderConceptList(locale, copy, split.visibleGroups, waitingTitle)}${remainingBlock}`;
   } else {
     const conceptsList = renderConceptList(locale, copy, unit.concepts, waitingTitle);
     body = renderCollapsedLessons(
