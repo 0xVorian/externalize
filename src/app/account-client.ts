@@ -3,6 +3,7 @@ import {
   startAuthentication,
   startRegistration,
 } from '@simplewebauthn/browser';
+import { readSyncProgress } from './account-sync';
 import type { ProgressStore } from './storage';
 
 export type AccountSession = {
@@ -114,13 +115,19 @@ export async function pullRemoteProgress(): Promise<ProgressStore | null> {
   if (response.status === 401) {
     throw new AccountApiError('not-signed-in', 401);
   }
-  const body = (await readOk(response)) as { progress?: ProgressStore | null };
-  return body.progress ?? null;
+  const parsed = readSyncProgress(await readOk(response));
+  if (!parsed.ok) {
+    throw new AccountApiError('invalid-progress', 502);
+  }
+  return parsed.progress;
 }
 
 export async function pushLocalProgress(progress: ProgressStore): Promise<ProgressStore> {
-  const body = await postJson<{ progress: ProgressStore }>('/api/sync', { progress });
-  return body.progress;
+  const parsed = readSyncProgress(await postJson('/api/sync', { progress }));
+  if (!parsed.ok || !parsed.progress) {
+    throw new AccountApiError('invalid-progress', 502);
+  }
+  return parsed.progress;
 }
 
 export function isPasskeyCancellation(error: unknown): boolean {

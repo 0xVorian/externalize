@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { evidenceKey } from './curriculum';
 import { isProgressStore, mergeProgress, parseProgressStore, progressSnapshotsEqual } from './progress-merge';
+import { MAX_ID_LIST, MAX_OBJECT_KEYS, MAX_QUEUE } from './progress-parse';
 import type { PracticeDraft } from './practice-attempt';
 import type { ProgressStore } from './storage';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID, LOGIC_FOUNDATIONS_ROUTE_ID } from './routes';
@@ -780,6 +781,63 @@ describe('isProgressStore', () => {
         },
       }),
     ).toBe(false);
+  });
+});
+
+describe('mergeProgress size cap', () => {
+  it('keeps unions and maps within parseProgressStore limits', () => {
+    const leftIds = Array.from({ length: MAX_ID_LIST }, (_, i) => `left-${i}`);
+    const rightIds = Array.from({ length: MAX_ID_LIST }, (_, i) => `right-${i}`);
+    const leftQueue = Array.from({ length: MAX_QUEUE }, (_, i) => ({
+      exerciseId: `lq-${i}`,
+      due: T0,
+      intervalDays: 1,
+      ease: 2.5,
+    }));
+    const rightQueue = Array.from({ length: MAX_QUEUE }, (_, i) => ({
+      exerciseId: `rq-${i}`,
+      due: T1,
+      intervalDays: 1,
+      ease: 2.5,
+    }));
+    const leftSkills = Object.fromEntries(
+      Array.from({ length: MAX_OBJECT_KEYS }, (_, i) => [
+        `skill-l-${i}`,
+        { attempts: 1, successes: 0, recentErrorTags: [] },
+      ]),
+    );
+    const rightSkills = Object.fromEntries(
+      Array.from({ length: MAX_OBJECT_KEYS }, (_, i) => [
+        `skill-r-${i}`,
+        { attempts: 2, successes: 1, recentErrorTags: [] },
+      ]),
+    );
+
+    const merged = mergeProgress(
+      store({
+        lessonsCompleted: leftIds,
+        attempted: leftIds,
+        passed: leftIds,
+        queue: leftQueue,
+        skills: leftSkills,
+      }),
+      store({
+        lessonsCompleted: rightIds,
+        attempted: rightIds,
+        passed: rightIds,
+        queue: rightQueue,
+        skills: rightSkills,
+      }),
+    );
+
+    expect(merged.lessonsCompleted).toHaveLength(MAX_ID_LIST);
+    expect(merged.lessonsCompleted[0]).toBe('left-0');
+    expect(merged.queue).toHaveLength(MAX_QUEUE);
+    expect(merged.queue[0]?.exerciseId).toBe('lq-0');
+    expect(Object.keys(merged.skills)).toHaveLength(MAX_OBJECT_KEYS);
+    expect(merged.skills['skill-l-0']?.attempts).toBe(1);
+    expect(parseProgressStore(merged)).toEqual(merged);
+    expect(parseProgressStore({ ...merged, lessonsCompleted: [...leftIds, 'overflow'] })).toBeNull();
   });
 });
 

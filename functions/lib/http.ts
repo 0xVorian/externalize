@@ -6,15 +6,27 @@ export const SESSION_MAX_AGE_SEC = 60 * 60 * 24 * 30;
 export const CHALLENGE_TTL_MS = POLICY_CHALLENGE_TTL_MS;
 export const MAX_BODY_BYTES = 512 * 1024;
 
-export function json(data: unknown, status = 200, extraHeaders?: Record<string, string>): Response {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store',
-      ...extraHeaders,
-    },
+export function json(
+  data: unknown,
+  status = 200,
+  extraHeaders?: Record<string, string | string[]>,
+): Response {
+  const headers = new Headers({
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store',
   });
+  if (extraHeaders) {
+    for (const [key, value] of Object.entries(extraHeaders)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          headers.append(key, item);
+        }
+      } else {
+        headers.set(key, value);
+      }
+    }
+  }
+  return new Response(JSON.stringify(data), { status, headers });
 }
 
 export function errorJson(message: string, status: number): Response {
@@ -49,16 +61,20 @@ export function cookieHeader(token: string, requestUrl: string): string {
   return parts.join('; ');
 }
 
-export function clearCookieHeader(requestUrl: string): string {
-  const secure = new URL(requestUrl).protocol === 'https:';
-  const name = sessionCookieName(requestUrl);
-  const parts = [
-    `${name}=`,
-    'Path=/',
-    'HttpOnly',
-    'SameSite=Lax',
-    'Max-Age=0',
+/**
+ * Expire every session cookie name this API might have set. `readSessionUser`
+ * accepts either `ex_session` or `__Host-ex_session`; logout must clear both.
+ */
+export function clearCookieHeaders(requestUrl: string): string[] {
+  const https = new URL(requestUrl).protocol === 'https:';
+  return [
+    clearNamedCookie(SESSION_COOKIE, https),
+    clearNamedCookie(HOST_SESSION_COOKIE, true),
   ];
+}
+
+function clearNamedCookie(name: string, secure: boolean): string {
+  const parts = [`${name}=`, 'Path=/', 'HttpOnly', 'SameSite=Lax', 'Max-Age=0'];
   if (secure) {
     parts.push('Secure');
   }

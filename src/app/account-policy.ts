@@ -163,9 +163,9 @@ export function planChallengeRate(input: {
 
 /**
  * Worst-case D1 writes/day if an attacker keeps the live-challenge table full.
- * Admission checks the 40-row cap with a SELECT first, so a full table does
- * not write. Each admitted slot is one INSERT, one rate UPSERT, and one
- * DELETE (consume or TTL purge) per five-minute window:
+ * Admission is a single conditional INSERT (`WHERE COUNT(*) < 40`), so a full
+ * table does not write a row. Each admitted slot is one INSERT, one atomic
+ * rate UPSERT, and one DELETE (consume or TTL purge) per five-minute window:
  * 288 windows × 40 × 3 = 34_560, under the free-tier 100k/day cap.
  * The in-memory limiter is only a same-isolate first filter.
  */
@@ -183,6 +183,11 @@ export function shouldPurgeExpired(now = Date.now()): boolean {
   return true;
 }
 
+/**
+ * `/api/status` is available only when the probe row reports `ok === 1`.
+ * The probe itself is a schema check (`challenge_rate` exists), not `SELECT 1`,
+ * so a bound but unmigrated D1 keeps the account UI hidden.
+ */
 export function availabilityFromProbe(
   row: { ok?: unknown } | null | undefined,
   failed: boolean,

@@ -5,7 +5,7 @@ import { deleteSession, getSession, insertSession } from './db';
 export async function createSessionCookie(
   db: D1Database,
   userId: string,
-  requestUrl: string,
+  _requestUrl: string,
 ): Promise<{ token: string; userId: string }> {
   const token = randomToken();
   const tokenHash = await sha256Base64Url(token);

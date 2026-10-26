@@ -1,6 +1,12 @@
 import type { ConceptCapabilityStat, RouteDepth, RouteProgress } from './curriculum';
 import type { PracticeDraft } from './practice-attempt';
 import type { ExerciseStat, ResumePoint, SkillStat } from './progress-tracker';
+import {
+  MAX_ID_LIST,
+  MAX_OBJECT_KEYS,
+  MAX_QUEUE,
+  parseProgressStore,
+} from './progress-parse';
 import type { SrsEntry } from './srs';
 import type { ProgressStore } from './storage';
 
@@ -70,19 +76,22 @@ export function mergeProgress(left: ProgressStore, right: ProgressStore): Progre
   if (practiceDraft) {
     merged.practiceDraft = practiceDraft;
   }
-  return merged;
+  return parseProgressStore(merged) ?? left;
 }
 
 export function progressSnapshotsEqual(left: ProgressStore, right: ProgressStore): boolean {
   return stableStringify(left) === stableStringify(right);
 }
 
-function unionIds(left: string[], right: string[]): string[] {
+function unionIds(left: string[], right: string[], cap = MAX_ID_LIST): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
   for (const id of [...left, ...right]) {
     if (seen.has(id)) {
       continue;
+    }
+    if (out.length >= cap) {
+      break;
     }
     seen.add(id);
     out.push(id);
@@ -135,6 +144,9 @@ function mergeQueue(left: SrsEntry[], right: SrsEntry[]): SrsEntry[] {
   const out: SrsEntry[] = [];
   const seen = new Set<string>();
   for (const entry of left) {
+    if (out.length >= MAX_QUEUE) {
+      break;
+    }
     if (seen.has(entry.exerciseId)) {
       continue;
     }
@@ -142,9 +154,12 @@ function mergeQueue(left: SrsEntry[], right: SrsEntry[]): SrsEntry[] {
     out.push(byId.get(entry.exerciseId)!);
   }
   for (const entry of extras) {
+    if (out.length >= MAX_QUEUE) {
+      break;
+    }
     out.push(byId.get(entry.exerciseId)!);
   }
-  return out;
+  return out.length > MAX_QUEUE ? out.slice(0, MAX_QUEUE) : out;
 }
 
 function pickSrs(left: SrsEntry, right: SrsEntry): SrsEntry {
@@ -168,49 +183,24 @@ function mergeSkills(
   left: Record<string, SkillStat>,
   right: Record<string, SkillStat>,
 ): Record<string, SkillStat> {
-  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
-  const out: Record<string, SkillStat> = {};
-  for (const key of keys) {
-    const a = left[key];
-    const b = right[key];
-    if (!a) {
-      out[key] = b!;
-      continue;
-    }
-    if (!b) {
-      out[key] = a;
-      continue;
-    }
+  return mergeKeyed(left, right, (a, b) => {
     const attempts = Math.max(a.attempts, b.attempts);
     const successes = Math.min(attempts, Math.max(a.successes, b.successes));
     const preferred = a.attempts >= b.attempts ? a.recentErrorTags : b.recentErrorTags;
     const other = a.attempts >= b.attempts ? b.recentErrorTags : a.recentErrorTags;
-    out[key] = {
+    return {
       attempts,
       successes,
       recentErrorTags: mergeRecent(preferred, other, 5),
     };
-  }
-  return out;
+  });
 }
 
 function mergeExerciseStats(
   left: Record<string, ExerciseStat>,
   right: Record<string, ExerciseStat>,
 ): Record<string, ExerciseStat> {
-  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
-  const out: Record<string, ExerciseStat> = {};
-  for (const key of keys) {
-    const a = left[key];
-    const b = right[key];
-    if (!a) {
-      out[key] = b!;
-      continue;
-    }
-    if (!b) {
-      out[key] = a;
-      continue;
-    }
+  return mergeKeyed(left, right, (a, b) => {
     const successes = Math.max(a.successes, b.successes);
     const repairedPasses = Math.max(a.repairedPasses, b.repairedPasses);
     const attempts = Math.max(a.attempts, b.attempts, successes + repairedPasses);
@@ -231,41 +221,22 @@ function mergeExerciseStats(
     if (preferred.lastErrorTag) {
       next.lastErrorTag = preferred.lastErrorTag;
     }
-    out[key] = next;
-  }
-  return out;
+    return next;
+  });
 }
 
 function mergeErrorCounts(
   left: ProgressStore['errorCounts'],
   right: ProgressStore['errorCounts'],
 ): ProgressStore['errorCounts'] {
-  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
-  const out: ProgressStore['errorCounts'] = {};
-  for (const key of keys) {
-    const tag = key as keyof ProgressStore['errorCounts'];
-    out[tag] = Math.max(left[tag] ?? 0, right[tag] ?? 0);
-  }
-  return out;
+  return mergeKeyed(left, right, (a, b) => Math.max(a, b));
 }
 
 function mergeConceptEvidence(
   left: Record<string, ConceptCapabilityStat>,
   right: Record<string, ConceptCapabilityStat>,
 ): Record<string, ConceptCapabilityStat> {
-  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
-  const out: Record<string, ConceptCapabilityStat> = {};
-  for (const key of keys) {
-    const a = left[key];
-    const b = right[key];
-    if (!a) {
-      out[key] = b!;
-      continue;
-    }
-    if (!b) {
-      out[key] = a;
-      continue;
-    }
+  return mergeKeyed(left, right, (a, b) => {
     const attempts = Math.max(a.attempts, b.attempts);
     const cleanPasses = Math.min(attempts, Math.max(a.cleanPasses, b.cleanPasses));
     const transferPasses = Math.min(attempts, Math.max(a.transferPasses, b.transferPasses));
@@ -284,9 +255,8 @@ function mergeConceptEvidence(
     if (lastSeenAt) {
       next.lastSeenAt = lastSeenAt;
     }
-    out[key] = next;
-  }
-  return out;
+    return next;
+  });
 }
 
 function mergeRoutes(
@@ -294,19 +264,7 @@ function mergeRoutes(
   right: Record<string, RouteProgress>,
   preferLeftCurrent: boolean,
 ): Record<string, RouteProgress> {
-  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
-  const out: Record<string, RouteProgress> = {};
-  for (const key of keys) {
-    const a = left[key];
-    const b = right[key];
-    if (!a) {
-      out[key] = b!;
-      continue;
-    }
-    if (!b) {
-      out[key] = a;
-      continue;
-    }
+  return mergeKeyed(left, right, (a, b) => {
     const seenItems = unionIds(a.seenItems ?? [], b.seenItems ?? []);
     const currentStepId = preferLeftCurrent
       ? (a.currentStepId ?? b.currentStepId)
@@ -327,47 +285,55 @@ function mergeRoutes(
     if (Object.keys(depthByStep).length > 0) {
       next.depthByStep = depthByStep;
     }
-    out[key] = next;
-  }
-  return out;
+    return next;
+  });
 }
 
 function mergeDepth(
   left: Record<string, RouteDepth> | undefined,
   right: Record<string, RouteDepth> | undefined,
 ): Record<string, RouteDepth> {
-  const keys = new Set([...Object.keys(left ?? {}), ...Object.keys(right ?? {})]);
-  const out: Record<string, RouteDepth> = {};
-  for (const key of keys) {
-    const a = left?.[key];
-    const b = right?.[key];
+  return mergeKeyed(left ?? {}, right ?? {}, (a, b) => {
     if (a === 'mastery' || b === 'mastery') {
-      out[key] = 'mastery';
-    } else {
-      out[key] = a ?? b ?? 'reading';
+      return 'mastery';
     }
-  }
-  return out;
+    return a ?? b ?? 'reading';
+  });
 }
 
 function mergePracticeDrafts(
   left: Record<string, PracticeDraft>,
   right: Record<string, PracticeDraft>,
 ): Record<string, PracticeDraft> {
-  const keys = new Set([...Object.keys(left), ...Object.keys(right)]);
-  const out: Record<string, PracticeDraft> = {};
-  for (const key of keys) {
-    const a = left[key];
+  return mergeKeyed(left, right, pickDraft);
+}
+
+function mergeKeyed<T>(
+  left: Record<string, T>,
+  right: Record<string, T>,
+  mergeOne: (left: T, right: T) => T,
+  cap = MAX_OBJECT_KEYS,
+): Record<string, T> {
+  const out: Record<string, T> = {};
+  let count = 0;
+  for (const key of Object.keys(left)) {
+    if (count >= cap) {
+      break;
+    }
+    const a = left[key]!;
     const b = right[key];
-    if (!a) {
-      out[key] = b!;
+    out[key] = b === undefined ? a : mergeOne(a, b);
+    count += 1;
+  }
+  for (const key of Object.keys(right)) {
+    if (key in out) {
       continue;
     }
-    if (!b) {
-      out[key] = a;
-      continue;
+    if (count >= cap) {
+      break;
     }
-    out[key] = pickDraft(a, b);
+    out[key] = right[key]!;
+    count += 1;
   }
   return out;
 }

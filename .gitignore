@@ -5,6 +5,7 @@ node_modules/
 *.local
 .DS_Store
 .wrangler/
+wrangler.remote.toml
 
 # Playwright
 test-results/
