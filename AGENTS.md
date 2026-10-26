@@ -120,7 +120,7 @@ Preserve these unless the current UX plan explicitly changes their presentation:
 - **No universal engine/workflow abstraction.** Add narrow representation-specific machinery only when real content demands it.
 - **Keep the four functional modes.** Learn / Explore / Practice / Progress remain available, but the default initiation surface may de-emphasize them in favor of one session action.
 - **Session is orchestration, not mastery.** Session state may organize concrete work but does not itself strengthen concept evidence or SRS.
-- **Bounded means bounded.** Once started, the declared session step list must not silently grow.
+- **Bounded means bounded.** Once started, the declared session step list must not silently grow. **Exception (intended):** a short due-review may grow after a warm-up miss into same-concept explanation plus 1–2 practice steps (still within 7). Do not pad the pass path with unrelated items to prevent that growth.
 - **Planner internals stay internal.** Learners should not see missing-prerequisite/bridge/debug terminology.
 - **Meaning before terminology for novices.** Teach the real academic words, but attach them to understood ideas before making them the primary surface where possible.
 - **One intellectual demand per screen where practicable.** Quiet product chrome; explicit problem state.

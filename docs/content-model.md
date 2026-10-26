@@ -34,7 +34,7 @@ src/app/
   source-route.ts      — Sobel route sequencing, completion, and revisit
   session-types.ts     — SessionPlan / OpeningOffer contracts
   session-plan.ts      — deterministic 5–7 step envelope over route/SRS items; cuts respect teach–practice clusters; optional opening warm-up from the most recently practised concept
-  session-warmup.ts    — select the warm-up exercise, build the miss-repair tail, apply it without expanding the envelope
+  session-warmup.ts    — select the warm-up exercise, build the miss-repair tail; longer rounds keep advertised `m`, but a short due-review miss may grow into same-concept explanation plus practice (still ≤ 7)
   session-persistence.ts — interrupted-round resume (separate from progress v7)
   session-telemetry.ts — local UX-D events, not mastery
   session-opening-render.ts / session-chrome-render.ts / session-complete-render.ts
