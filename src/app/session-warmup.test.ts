@@ -7,9 +7,12 @@ import { conceptForItem } from './prerequisites';
 import {
   applyWarmupMiss,
   applyWarmupMissAfterCheck,
+  completeCurrentStep,
   composeSessionPlan,
+  currentSessionStep,
   offerOpening,
   SESSION_MAX,
+  sessionPosition,
   startSession,
 } from './session-plan';
 import {
@@ -257,7 +260,37 @@ describe('warm-up pass and miss paths', () => {
       isFinalCheck: true,
       firstCheckedCorrect: false,
     });
-    expect(afterCheck.plan.repairApplied).toBe(true);
+    expect(afterCheck.plan.repairPending).toBe(true);
+    expect(afterCheck.plan.repairApplied).toBeUndefined();
+    expect(afterCheck.plan.steps.map((step) => step.id)).toEqual(frozen);
+    expect(sessionPosition(afterCheck)).toEqual(sessionPosition(session));
+  });
+
+  it('does not change n / m on the Try again screen; the new total appears on the first repair step', () => {
+    const now = Date.parse('2026-09-07T12:00:00.000Z');
+    const store = withOneDueConjunctionAndLaterConcepts(loadProgress());
+    const plan = offerOpening(store, null, now).plan!;
+    expect(plan.steps.map((step) => step.itemId)).toEqual(['eval-001']);
+    let session = startSession(plan, '2026-09-07T12:00:00.000Z');
+    expect(sessionPosition(session)).toEqual({ current: 1, total: 1 });
+    session = applyWarmupMissAfterCheck(session, {
+      isFinalCheck: true,
+      firstCheckedCorrect: false,
+    });
+    expect(session.plan.repairPending).toBe(true);
+    expect(session.plan.repairApplied).toBeUndefined();
+    expect(session.plan.steps.map((step) => step.itemId)).toEqual(['eval-001']);
+    expect(sessionPosition(session)).toEqual({ current: 1, total: 1 });
+    session = completeCurrentStep(session);
+    expect(session.plan.repairApplied).toBe(true);
+    expect(session.plan.repairPending).toBe(false);
+    expect(session.plan.steps.map((step) => step.itemId)).toEqual([
+      'eval-001',
+      'level0-03-and',
+      'level0-05-guided',
+      'eval-011',
+    ]);
+    expect(sessionPosition(session)).toEqual({ current: 2, total: 4 });
   });
 });
 
@@ -368,6 +401,56 @@ describe('short due-review rounds', () => {
     );
   });
 
+  it('a 1-due pass through session orchestration writes SRS and evidence only for that item', () => {
+    const store = withOneDueConjunctionAndLaterConcepts(loadProgress());
+    const offer = offerOpening(store, null, now);
+    expect(offer.kind).toBe('quick-review');
+    expect(offer.plan?.steps.map((step) => step.itemId)).toEqual(['eval-001']);
+    expect(offer.plan?.steps[0]).toMatchObject({
+      role: 'warmup',
+      conceptId: 'conjunction',
+    });
+    let session = startSession(offer.plan!, '2026-09-07T12:00:00.000Z');
+    const step = currentSessionStep(session);
+    expect(step?.itemId).toBe('eval-001');
+    expect(sessionPosition(session)).toEqual({ current: 1, total: 1 });
+    const beforeQueue = structuredClone(store.queue);
+    const beforeEvidence = structuredClone(store.conceptEvidence);
+    const started = beginPracticeAttempt(store, step!.itemId);
+    const draft = started.practiceDraft!;
+    const next = recordCheckedPracticeState(started, {
+      ...draft,
+      phase: 'answered',
+      feedbackTag: 'correct',
+      attempt: recordAttemptCheck(draft.attempt, true),
+    });
+    session = completeCurrentStep(session);
+    expect(session.status).toBe('completed');
+    expect(session.plan.repairApplied).toBeUndefined();
+    expect(session.plan.steps.map((step) => step.itemId)).toEqual(['eval-001']);
+    expect(next.queue.find((entry) => entry.exerciseId === 'eval-001')?.due).not.toBe(
+      beforeQueue.find((entry) => entry.exerciseId === 'eval-001')?.due,
+    );
+    expect(next.queue.find((entry) => entry.exerciseId === 'eval-010')).toEqual(
+      beforeQueue.find((entry) => entry.exerciseId === 'eval-010'),
+    );
+    expect(next.queue.find((entry) => entry.exerciseId === 'tt-002')).toEqual(
+      beforeQueue.find((entry) => entry.exerciseId === 'tt-002'),
+    );
+    expect(next.exerciseStats['eval-001']?.successes).toBe(1);
+    expect(next.exerciseStats['eval-010']).toBeUndefined();
+    expect(next.exerciseStats['tt-002']).toBeUndefined();
+    expect(next.conceptEvidence[evidenceKey('conjunction', 'apply')]?.attempts).toBe(
+      (beforeEvidence[evidenceKey('conjunction', 'apply')]?.attempts ?? 0) + 1,
+    );
+    expect(next.conceptEvidence[evidenceKey('negation', 'apply')]).toEqual(
+      beforeEvidence[evidenceKey('negation', 'apply')],
+    );
+    expect(next.conceptEvidence[evidenceKey('conditional', 'apply')]).toEqual(
+      beforeEvidence[evidenceKey('conditional', 'apply')],
+    );
+  });
+
   it('a 1-due miss grows into same-concept explanation plus practice only', () => {
     const store = withOneDueConjunctionAndLaterConcepts(loadProgress());
     const plan = offerOpening(store, null, now).plan!;
@@ -450,6 +533,37 @@ describe('warm-up repair resume', () => {
     expect(offer.plan?.steps.map((step) => step.id)).toEqual(
       session.plan.steps.map((step) => step.id),
     );
+  });
+
+  it('resumes a pending repair with the original n / m until the next step', () => {
+    const storage = memoryStorage();
+    globalThis.localStorage = storage;
+    const store = withOneDueConjunctionAndLaterConcepts(loadProgress());
+    const plan = offerOpening(store, null, Date.parse('2026-09-07T12:00:00.000Z')).plan!;
+    const originalIds = plan.steps.map((step) => step.itemId);
+    let session = startSession(plan, '2026-09-07T12:00:00.000Z');
+    session = applyWarmupMissAfterCheck(session, {
+      isFinalCheck: true,
+      firstCheckedCorrect: false,
+    });
+    expect(session.plan.repairPending).toBe(true);
+    expect(sessionPosition(session)).toEqual({ current: 1, total: 1 });
+    saveActiveSession(session);
+    const loaded = loadActiveSession();
+    expect(loaded?.plan.repairPending).toBe(true);
+    expect(loaded?.plan.repairApplied).toBeUndefined();
+    expect(loaded?.plan.steps.map((step) => step.itemId)).toEqual(originalIds);
+    expect(offerOpening(store, loaded).kind).toBe('resume');
+    expect(sessionPosition(loaded!)).toEqual({ current: 1, total: 1 });
+    const advanced = completeCurrentStep(loaded!);
+    expect(advanced.plan.repairApplied).toBe(true);
+    expect(advanced.plan.steps.map((step) => step.itemId)).toEqual([
+      'eval-001',
+      'level0-03-and',
+      'level0-05-guided',
+      'eval-011',
+    ]);
+    expect(sessionPosition(advanced)).toEqual({ current: 2, total: 4 });
   });
 });
 

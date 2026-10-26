@@ -11,10 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Rounds now open with one warm-up check on the most recently practised concept (the last concept that has an exercise, independent of route). A correct answer continues into the planned material, or ends a short due-review early (`1 / 1` is honest). A miss on that step’s Check turns the rest of the round into a short repair of that concept. Only the one due item chosen as the warm-up is consumed; other due items and other skills on the same concept stay in the round. Short due lists are not padded with unlocked work from other concepts. A first-time learner still starts without a warm-up. **Exception:** a round whose next cluster already needs all 7 slots omits the warm-up so that cluster stays intact. The step counts toward the 5–7 envelope and the `n / m` counter.
 
+### Changed
+
+- Session-first docs now say a short due-review grows on a miss when the leftover tail cannot hold explanation plus practice, not merely because there was “no tail”. A one-item or two-item due list both grow.
+
 ### Fixed
 
 - A due-review warm-up now consumes only the one chosen item, so other due exercises (including a different skill on the same concept) stay in the round. Short due lists are not padded with unrelated exercises: a pass ends the honest small round; a miss grows into same-concept explanation plus practice. Repair waits for that step’s Check rather than the first graded cell or node.
+- A warm-up miss no longer changes the advertised `n / m` total on the Try again screen. The new total appears once the first repair step begins.
 - Session rounds no longer end on a teaching step whose related practice was deferred to the next round. The envelope still targets 6 steps and stays within 5–7 when a cluster fits; otherwise it ends before that teaching step so the `n / m` counter stays honest. Applies to Logic foundations lessons and the Sobel preparation sequence.
+- Teach–practice clusters longer than 7 micro-units no longer fall back to a blind cut at 6. If the first practice still fits in 7, this round takes through it; otherwise the cut falls between watch cases so the next round still opens with explanation, never a stranded guided step.
 - Restored the 2×2 watch grid as a real table on narrow screens (down to ~320px). A leftover `display: grid` rule had stacked the `Q = T` / `Q = F` headers and wrapped row labels off the grid. The cryptic `P ↓ / Q →` corner legend is gone; row and column labels already name the axes, and a visually hidden label keeps the table accessible.
 - Stopped screen-reader case labels from occupying a visual column in row-by-row truth tables, which had shifted ¬P (and other watch-table) values under the wrong headers. Negation watch copy now points at the highlighted row instead of saying that only the P column matters.
 

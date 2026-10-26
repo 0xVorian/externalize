@@ -80,6 +80,7 @@ Do not create work simply to finish an old phase label. If real use does not jus
 ### Implemented baseline
 
 - one obvious bounded opening action with a frozen session envelope;
+- teach–practice clusters longer than 7 micro-units split through the first practice or between watch cases, never immediately before guided;
 - interruption/resume and explicit completion;
 - planner/debug language hidden from the learner;
 - meaning → use → name → notation → independent use for novice material where practicable;

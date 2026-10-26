@@ -57,12 +57,15 @@ test.describe('session warm-up', () => {
       .click();
     await page.locator('[data-action="check-evaluation"]').click();
     await expect(page.locator('.feedback-wrong')).toBeVisible();
+    await expect(sessionPosition(page)).toHaveText('1 / 5');
     await page.locator('[data-action="try-again"]').click();
+    await expect(sessionPosition(page)).toHaveText('1 / 5');
     await page
       .locator(`[data-action="select-evaluation-prediction"][data-value="${value ? 'true' : 'false'}"]`)
       .click();
     await page.locator('[data-action="check-evaluation"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();
+    await expect(sessionPosition(page)).toHaveText('1 / 5');
     await page.locator('[data-action="next"]').click();
 
     await expect(page.getByTestId('session-step-label')).toContainText(/look back/i);
@@ -98,12 +101,15 @@ test.describe('session warm-up', () => {
       .click();
     await page.locator('[data-action="check-evaluation"]').click();
     await expect(page.locator('.feedback-wrong')).toBeVisible();
+    await expect(sessionPosition(page)).toHaveText('1 / 1');
     await page.locator('[data-action="try-again"]').click();
+    await expect(sessionPosition(page)).toHaveText('1 / 1');
     await page
       .locator(`[data-action="select-evaluation-prediction"][data-value="${value ? 'true' : 'false'}"]`)
       .click();
     await page.locator('[data-action="check-evaluation"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();
+    await expect(sessionPosition(page)).toHaveText('1 / 1');
     await page.locator('[data-action="next"]').click();
 
     await expect(page.getByTestId('session-step-label')).toContainText(/look back/i);
