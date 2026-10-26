@@ -308,7 +308,7 @@ test.describe('progress visibility', () => {
     await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
   });
 
-  test('Leave session then Progress Start exercise opens a fresh 0 / 5 session', async ({
+  test('Leave session then Progress next starts the same bounded round as Home', async ({
     page,
   }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
@@ -326,19 +326,15 @@ test.describe('progress visibility', () => {
     await expect(page.locator('[data-testid="practice-session"]')).toHaveText('5 / 5');
 
     await page.locator('[data-action="session-finish"]').click();
-    await expect(page.locator('[data-testid="capability-summary"]')).toBeVisible();
+    await expect(page.locator('[data-testid="course-outline"]')).toBeVisible();
 
-    const startExercise = page.locator('.what-next-card [data-action="practice-exercise"]');
-    await expect(startExercise).toBeVisible();
-    await startExercise.click();
+    const progressBegin = page.locator('[data-testid="progress-session-begin"]');
+    await expect(progressBegin).toBeVisible();
+    await expect(page.locator('.what-next-card [data-action="practice-exercise"]')).toHaveCount(0);
+    await progressBegin.click();
 
-    await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
-    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('0 / 5');
-    await expect(page.locator('.exercise-card button.primary')).toBeVisible();
-
-    await finalizeCurrentPractice(page);
-    await expect(page.locator('[data-testid="practice-session"]')).toHaveText('1 / 5');
-    await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
+    await expect(page.getByTestId('session-active')).toBeVisible();
+    await expect(page.getByTestId('session-position')).toBeVisible();
   });
 
   test('final Unit 2 completion opens Practice with a fresh session after 5 / 5', async ({
@@ -375,14 +371,16 @@ test.describe('progress visibility', () => {
     await expect(page.locator('[data-testid="session-complete"]')).toHaveCount(0);
   });
 
-  test('Progress view renders the capability-first summary', async ({ page }) => {
+  test('Progress view renders the capability-first summary after the outline', async ({ page }) => {
     await gotoWithProgress(page, progressReadyForExercise('eval-001'));
     await clickMode(page, 'progress');
+    await expect(page.getByTestId('course-outline')).toBeVisible();
     const summary = page.locator('[data-testid="capability-summary"]');
     await expect(summary).toBeVisible();
     await expect(summary).toContainText('Consistent so far');
     await expect(summary).toContainText('In progress');
     await expect(summary).toContainText('Up next');
-    await expect(summary).toContainText('Evaluating formulas');
+    const topic = (await page.getByTestId('opening-topic').innerText()).trim();
+    await expect(page.getByTestId('capability-up-next')).toHaveText(topic);
   });
 });

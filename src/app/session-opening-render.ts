@@ -1,9 +1,10 @@
 import { formatResumeTime, sessionUi } from '../i18n';
 import type { Locale } from '../i18n';
+import { openingTopic } from './opening-topic';
 import type { OpeningOffer } from './session-types';
 import { renderLanguageToggle } from './shell-render';
 
-function primaryLabel(
+export function sessionPrimaryLabel(
   locale: Locale,
   kind: OpeningOffer['kind'],
 ): string {
@@ -58,6 +59,10 @@ export function renderSessionOpening(options: {
   }
 
   const detail = offer.plan.preparation ? copy.preparationDetail : copy.detail(offer.kind);
+  const topic = openingTopic(options.locale, offer);
+  const topicLine = topic
+    ? `<p class="session-topic" data-testid="opening-topic">${topic}</p>`
+    : '';
   return `
     <main class="app session-opening" lang="${options.locale}" data-testid="session-opening">
       <div class="header-row">
@@ -65,8 +70,9 @@ export function renderSessionOpening(options: {
         ${renderLanguageToggle(options.locale)}
       </div>
       <h1>${copy.heading(offer.kind)}</h1>
+      ${topicLine}
       <p class="session-detail">${detail}</p>
-      <p class="session-effort">${copy.effort(offer.plan.steps.length, offer.plan.estimatedMinutes)}</p>
+      <p class="session-effort" data-testid="opening-effort">${copy.effort(offer.plan.steps.length, offer.plan.estimatedMinutes)}</p>
       <div class="actions">
         <button
           type="button"
@@ -74,7 +80,7 @@ export function renderSessionOpening(options: {
           data-action="session-begin"
           data-testid="session-primary-action"
           aria-label="${copy.primaryAria(offer.kind)}"
-        >${primaryLabel(options.locale, offer.kind)}</button>
+        >${sessionPrimaryLabel(options.locale, offer.kind)}</button>
       </div>
       ${renderMoreNav(options.locale, options.practiceUnlocked)}
     </main>

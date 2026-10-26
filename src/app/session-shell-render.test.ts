@@ -30,6 +30,7 @@ describe('session shell', () => {
     const html = renderSessionOpening({ locale: 'en', offer: startOffer, practiceUnlocked: false });
     expect(html.match(/data-testid="session-primary-action"/g)).toHaveLength(1);
     expect(html).toContain('A short logic session');
+    expect(html).toContain('Sentence letters');
     expect(html).toContain('5 steps');
     expect(html).not.toContain('data-testid="route-picker"');
     expect(html).not.toContain('depth-toggle');

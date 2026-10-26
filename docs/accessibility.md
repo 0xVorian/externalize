@@ -51,7 +51,7 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 
 ### Progress cards
 
-- Key sections use `aria-labelledby` tied to heading `id`s (continue, level checklists, exercises).
+- Key sections use `aria-labelledby` tied to heading `id`s (next card, course outline, exercises). The current unit and you-are-here lesson are named in text, not by colour alone.
 - Checklist rows expose combined label + status via `aria-label`; visible status text is `aria-hidden` to avoid duplication.
 
 ### Progress visibility

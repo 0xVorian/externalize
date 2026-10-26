@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Progress shows an always-visible outline of all three units: current unit expanded by concept and lesson, a you-are-here marker, done/upcoming/locked status with what later items wait on, and a per-unit lesson count. ([#43](https://github.com/0xVorian/externalize/issues/43))
+- The concept map includes Translation. ([#43](https://github.com/0xVorian/externalize/issues/43))
 - Optional passkey accounts can copy progress v7 across devices on the Cloudflare free tier (Pages Functions + D1). Signed-out use is unchanged. Merge is per-item and never drops completions or evidence from either device; in-flight bounded sessions stay local and are invalidated only when learning state actually changes. Passkey controls hide unless `/api/status` can probe the migrated D1 schema. Production Pages binds D1 only under `env.production` in committed `wrangler.toml`; git-connected previews stay unbound (`/api/status` → `{ available: false }`). Provisioning: `docs/accounts.md`.
 - Rounds now open with one warm-up check on the most recently practised concept (the last concept that has an exercise, independent of route). A correct answer continues into the planned material, or ends a short due-review early (`1 / 1` is honest). A miss on that step’s Check turns the rest of the round into a short repair of that concept. Only the one due item chosen as the warm-up is consumed; other due items and other skills on the same concept stay in the round. Short due lists are not padded with unlocked work from other concepts. A first-time learner still starts without a warm-up. **Exception:** a round whose next cluster already needs all 7 slots omits the warm-up so that cluster stays intact. The step counts toward the 5–7 envelope and the `n / m` counter.
 
 ### Changed
 
+- Home and Progress now share one next: the Progress card starts the same `offerOpening` round as Home, and both name the concept or lesson the round covers. Unit names and “lessons” wording are consistent; the exercise list stays collapsed after the outline. Locked units and finished lessons in the current unit stay collapsed so all three unit headers, and the you-are-here marker mid-unit, fit a 390×844 first screen. Capability “Up next” names that same round. ([#43](https://github.com/0xVorian/externalize/issues/43))
 - Session-first docs now say a short due-review grows on a miss when the leftover tail cannot hold explanation plus practice, not merely because there was “no tail”. A one-item or two-item due list both grow.
 - `docs/roadmap.md` now describes the v0.5.0 / v0.5.1 shipped baseline, the post-0.5.1 remediations already on `master` (mobile truth tables, session envelope, warm-up), optional passkey sync (#37), and the remaining GitHub Issues rather than “v0.4.0 + unreleased”.
 - Production D1 (`externalize-progress`, id `6d9806e2-46c4-41b1-a5fe-8c224ecbadf3`) is bound only under `[[env.production.d1_databases]]` in committed `wrangler.toml`, with `[env.production.vars]` repeating `WEBAUTHN_RP_NAME` (vars and bindings do not inherit). `pages_build_output_dir` makes that file the source of truth, so a dashboard bind cannot stick. Preview stays unbound. Future remote migrations use the D1 console / query API or a gitignored `wrangler.remote.toml`.
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Main-route concept-map completion no longer waits on optional Logic and Theism (`lat-*`) lessons, so after Unit 1 Conditional is completed and Scope is available rather than locked. ([#43](https://github.com/0xVorian/externalize/issues/43))
 - Passkey/D1 hardening before production bind (#39): `/api/status` probes the migrated schema rather than `SELECT 1`; challenge admission is a single conditional INSERT plus an atomic per-IP UPSERT; failed sync retries with exponential backoff and jitter (401 still keeps the queue); `/api/sync` responses are `parseProgressStore`d and merges cannot grow past the parser cap.
 - A successful `/api/sync` is merged into the current local snapshot rather than overwriting it, so a save made while the request is in flight is kept and re-queued. A 401 no longer drops that queued push.
 - Same-device sync no longer aborts an in-flight bounded round: SRS queue order and visit timestamps are not treated as a remote change.

@@ -181,13 +181,13 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
   en: {
     learn: 'Course',
     practice: 'Exercises',
-    practiceLocked: 'Complete the introductory unit before exercises become available.',
+    practiceLocked: 'Finish Unit 0 before exercises become available.',
     level0Title: 'Unit 0 — Propositional syntax',
     level1Title: 'Unit 1 — Connectives',
     level2Title: 'Unit 2 — Nested formulas',
     continueUnit1: 'Continue to Unit 1',
     continueUnit2: 'Continue to Unit 2',
-    lessonProgress: (current, total) => `Section ${current} of ${total}`,
+    lessonProgress: (current, total) => `Lesson ${current} of ${total}`,
     lessonOfUnit: (current, total) => `Lesson ${current} of ${total}`,
     lessonsCompletedLabel: (done) =>
       done === 1 ? '1 completed' : `${done} completed`,
@@ -197,7 +197,7 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     nextStep: 'Continue',
     startPractice: 'Begin exercises',
     level0Complete:
-      'Introductory unit complete. Exercises are now available — first up: evaluating P ∧ Q under an assignment.',
+      'Unit 0 complete. Exercises are now available — first up: evaluating P ∧ Q under an assignment.',
     level1Complete:
       'Unit 1 complete. You have covered negation, disjunction, implication, and biconditional — continue to exercises for more practice.',
     level2Complete:
@@ -247,13 +247,13 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
   fr: {
     learn: 'Cours',
     practice: 'Exercices',
-    practiceLocked: 'Terminez l\'unité d\'introduction pour accéder aux exercices.',
+    practiceLocked: 'Achevez l’unité 0 pour accéder aux exercices.',
     level0Title: 'Unité 0 — Syntaxe propositionnelle',
     level1Title: 'Unité 1 — Connecteurs',
     level2Title: 'Unité 2 — Formules imbriquées',
     continueUnit1: 'Passer à l\'unité 1',
     continueUnit2: 'Passer à l\'unité 2',
-    lessonProgress: (current, total) => `Section ${current} sur ${total}`,
+    lessonProgress: (current, total) => `Leçon ${current} sur ${total}`,
     lessonOfUnit: (current, total) => `Leçon ${current} sur ${total}`,
     lessonsCompletedLabel: (done) =>
       done === 1 ? '1 terminée' : `${done} terminées`,
@@ -263,7 +263,7 @@ const LEARN_UI: Record<Locale, LearnUiCopy> = {
     nextStep: 'Continuer',
     startPractice: 'Passer aux exercices',
     level0Complete:
-      'Unité d\'introduction terminée. Les exercices sont disponibles — on commence par l\'évaluation de P ∧ Q sous une interprétation.',
+      'Unité 0 terminée. Les exercices sont disponibles — on commence par l’évaluation de P ∧ Q sous une interprétation.',
     level1Complete:
       'Unité 1 terminée. Vous avez vu la négation, la disjonction, l’implication et la biconditionnelle — poursuivez avec les exercices.',
     level2Complete:

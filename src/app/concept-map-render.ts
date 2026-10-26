@@ -5,6 +5,7 @@ import {
   conceptPrerequisites,
   PREREQUISITES_GRAPH,
 } from './prerequisites';
+import { isSourceLessonId } from './source-lessons';
 
 type ConceptMapUiCopy = {
   heading: string;
@@ -78,7 +79,9 @@ const GRAPH_PAD = 16;
 const CHAR_WIDTH = 6.2;
 
 function lessonsForConcept(conceptId: string): string[] {
-  return PREREQUISITES_GRAPH.lessons.filter((lesson) => lesson.concept === conceptId).map((l) => l.id);
+  return PREREQUISITES_GRAPH.lessons
+    .filter((lesson) => lesson.concept === conceptId && !isSourceLessonId(lesson.id))
+    .map((l) => l.id);
 }
 
 function exercisesForConcept(conceptId: string): string[] {
