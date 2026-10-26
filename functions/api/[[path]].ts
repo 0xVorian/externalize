@@ -7,7 +7,18 @@ import {
   type RegistrationResponseJSON,
 } from '@simplewebauthn/server';
 import { isoBase64URL } from '@simplewebauthn/server/helpers';
-import { isProgressStore, mergeProgress } from '../../src/app/progress-merge';
+import {
+  allowChallengeCreation,
+  assertSameOriginMutation,
+  CHALLENGE_GLOBAL_CAP,
+  clientKeyFromHeaders,
+  nextStoredCounter,
+  resolveRelyingParty,
+  shouldPurgeExpired,
+  type RelyingParty,
+} from '../../src/app/account-policy';
+import { CasConflictError, mergeWithCasRetry } from '../../src/app/progress-cas';
+import { parseProgressStore } from '../../src/app/progress-merge';
 import type { ProgressStore } from '../../src/app/storage';
 import {
   BodyTooLargeError,
@@ -16,12 +27,14 @@ import {
   errorJson,
   json,
   readJsonBody,
-  relyingParty,
   routeKey,
 } from '../lib/http';
 import { base64UrlToBytes, randomId } from '../lib/crypto';
 import {
-  createUser,
+  casInsertProgress,
+  casUpdateProgress,
+  countChallenges,
+  createUserWithCredential,
   deleteAccount,
   getCredential,
   getProgress,
@@ -29,12 +42,18 @@ import {
   insertCredential,
   listCredentials,
   parseTransports,
+  probeDatabase,
   purgeExpired,
   takeChallenge,
   updateCredentialCounter,
-  upsertProgress,
 } from '../lib/db';
 import { clearSession, createSessionCookie, readSessionUser } from '../lib/session';
+
+const CHALLENGE_OPTION_ROUTES = new Set([
+  'auth/register/options',
+  'auth/login/options',
+  'auth/passkeys/options',
+]);
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   try {
@@ -45,6 +64,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     }
     if (error instanceof SyntaxError) {
       return errorJson('invalid-json', 400);
+    }
+    if (error instanceof CasConflictError) {
+      return errorJson('cas-conflict', 409);
+    }
+    if (error instanceof CorruptSnapshotError) {
+      return errorJson('corrupt-snapshot', 500);
     }
     console.error('accounts api', error);
     return errorJson('server-error', 500);
@@ -57,15 +82,29 @@ async function handle(context: EventContext<Env, 'path', unknown>): Promise<Resp
   const method = request.method.toUpperCase();
 
   if (method === 'GET' && route === 'status') {
-    return json({ available: Boolean(env.DB) });
+    return handleStatus(env, request);
   }
 
-  if (!env.DB) {
+  const csrf = assertSameOriginMutation(method, request.headers.get('Origin'), env);
+  if (!csrf.ok) {
+    return errorJson(csrf.error, 403);
+  }
+
+  if (!(await probeDatabase(env.DB))) {
     return errorJson('accounts-unavailable', 503);
   }
+  const db = env.DB!;
 
-  const db = env.DB;
-  await purgeExpired(db);
+  if (shouldPurgeExpired()) {
+    await purgeExpired(db);
+  }
+
+  if (method === 'POST' && CHALLENGE_OPTION_ROUTES.has(route)) {
+    const limited = await rejectAbusiveChallenge(db, request);
+    if (limited) {
+      return limited;
+    }
+  }
 
   if (method === 'GET' && route === 'session') {
     return handleSession(db, request);
@@ -74,13 +113,13 @@ async function handle(context: EventContext<Env, 'path', unknown>): Promise<Resp
     return handleRegisterOptions(db, env, request);
   }
   if (method === 'POST' && route === 'auth/register/verify') {
-    return handleRegisterVerify(db, env, request);
+    return handleRegisterVerify(db, request);
   }
   if (method === 'POST' && route === 'auth/login/options') {
     return handleLoginOptions(db, env, request);
   }
   if (method === 'POST' && route === 'auth/login/verify') {
-    return handleLoginVerify(db, env, request);
+    return handleLoginVerify(db, request);
   }
   if (method === 'POST' && route === 'auth/logout') {
     return handleLogout(db, request);
@@ -89,7 +128,7 @@ async function handle(context: EventContext<Env, 'path', unknown>): Promise<Resp
     return handleAddPasskeyOptions(db, env, request);
   }
   if (method === 'POST' && route === 'auth/passkeys/verify') {
-    return handleAddPasskeyVerify(db, env, request);
+    return handleAddPasskeyVerify(db, request);
   }
   if (method === 'GET' && route === 'sync') {
     return handleSyncGet(db, request);
@@ -104,6 +143,39 @@ async function handle(context: EventContext<Env, 'path', unknown>): Promise<Resp
   return errorJson('not-found', 404);
 }
 
+async function handleStatus(env: Env, request: Request): Promise<Response> {
+  if (!(await probeDatabase(env.DB))) {
+    return json({ available: false });
+  }
+  const db = env.DB!;
+  const userId = await readSessionUser(db, request);
+  if (!userId) {
+    return json({ available: true, signedIn: false, passkeyCount: 0 });
+  }
+  const credentials = await listCredentials(db, userId);
+  return json({
+    available: true,
+    signedIn: true,
+    passkeyCount: credentials.length,
+  });
+}
+
+async function rejectAbusiveChallenge(db: D1Database, request: Request): Promise<Response | null> {
+  const key = clientKeyFromHeaders(request.headers);
+  if (!allowChallengeCreation(key)) {
+    return errorJson('rate-limited', 429);
+  }
+  let outstanding = await countChallenges(db);
+  if (outstanding >= CHALLENGE_GLOBAL_CAP) {
+    await purgeExpired(db);
+    outstanding = await countChallenges(db);
+    if (outstanding >= CHALLENGE_GLOBAL_CAP) {
+      return errorJson('rate-limited', 429);
+    }
+  }
+  return null;
+}
+
 async function handleSession(db: D1Database, request: Request): Promise<Response> {
   const userId = await readSessionUser(db, request);
   if (!userId) {
@@ -111,6 +183,18 @@ async function handleSession(db: D1Database, request: Request): Promise<Response
   }
   const credentials = await listCredentials(db, userId);
   return json({ signedIn: true, passkeyCount: credentials.length });
+}
+
+async function readRelyingParty(env: Env, request: Request): Promise<RelyingParty | Response> {
+  const rp = resolveRelyingParty(request.headers.get('Origin'), env);
+  if ('error' in rp) {
+    return errorJson(rp.error, 403);
+  }
+  return rp;
+}
+
+function randomLearnerHandle(): string {
+  return `learner-${randomId().replace(/-/g, '').slice(0, 10)}`;
 }
 
 async function handleRegisterOptions(
@@ -122,18 +206,21 @@ async function handleRegisterOptions(
   if (existingUser) {
     return errorJson('already-signed-in', 409);
   }
-  const { rpName, rpID } = relyingParty(env, request);
+  const rp = await readRelyingParty(env, request);
+  if (rp instanceof Response) {
+    return rp;
+  }
   const userId = randomId();
   const options = await generateRegistrationOptions({
-    rpName,
-    rpID,
-    userName: `learner-${userId.slice(0, 8)}`,
+    rpName: rp.rpName,
+    rpID: rp.rpID,
+    userName: randomLearnerHandle(),
     userID: new TextEncoder().encode(userId),
     userDisplayName: 'Externalize',
     attestationType: 'none',
     authenticatorSelection: {
       residentKey: 'required',
-      userVerification: 'preferred',
+      userVerification: 'required',
     },
     supportedAlgorithmIDs: [-7, -257],
   });
@@ -141,15 +228,13 @@ async function handleRegisterOptions(
     challenge: options.challenge,
     type: 'register',
     userId,
+    origin: rp.origin,
+    rpId: rp.rpID,
   });
   return json({ challengeId, options });
 }
 
-async function handleRegisterVerify(
-  db: D1Database,
-  env: Env,
-  request: Request,
-): Promise<Response> {
+async function handleRegisterVerify(db: D1Database, request: Request): Promise<Response> {
   const body = (await readJsonBody(request)) as {
     challengeId?: unknown;
     response?: unknown;
@@ -158,25 +243,22 @@ async function handleRegisterVerify(
     return errorJson('invalid-body', 400);
   }
   const challenge = await takeChallenge(db, body.challengeId, 'register');
-  if (!challenge?.user_id) {
+  if (!challenge?.user_id || !challenge.origin || !challenge.rp_id) {
     return errorJson('challenge-expired', 400);
   }
-  const { rpID, origin } = relyingParty(env, request);
   const verification = await verifyRegistrationResponse({
     response: body.response as RegistrationResponseJSON,
     expectedChallenge: challenge.challenge,
-    expectedOrigin: origin,
-    expectedRPID: rpID,
-    requireUserVerification: false,
+    expectedOrigin: challenge.origin,
+    expectedRPID: challenge.rp_id,
+    requireUserVerification: true,
   });
   if (!verification.verified || !verification.registrationInfo) {
     return errorJson('verification-failed', 400);
   }
   const { credential, credentialDeviceType, credentialBackedUp } = verification.registrationInfo;
-  await createUser(db, challenge.user_id);
-  await insertCredential(db, {
+  await createUserWithCredential(db, challenge.user_id, {
     id: credential.id,
-    userId: challenge.user_id,
     publicKey: isoBase64URL.fromBuffer(credential.publicKey),
     counter: credential.counter,
     deviceType: credentialDeviceType,
@@ -196,23 +278,24 @@ async function handleLoginOptions(
   env: Env,
   request: Request,
 ): Promise<Response> {
-  const { rpID } = relyingParty(env, request);
+  const rp = await readRelyingParty(env, request);
+  if (rp instanceof Response) {
+    return rp;
+  }
   const options = await generateAuthenticationOptions({
-    rpID,
-    userVerification: 'preferred',
+    rpID: rp.rpID,
+    userVerification: 'required',
   });
   const challengeId = await insertChallenge(db, {
     challenge: options.challenge,
     type: 'login',
+    origin: rp.origin,
+    rpId: rp.rpID,
   });
   return json({ challengeId, options });
 }
 
-async function handleLoginVerify(
-  db: D1Database,
-  env: Env,
-  request: Request,
-): Promise<Response> {
+async function handleLoginVerify(db: D1Database, request: Request): Promise<Response> {
   const body = (await readJsonBody(request)) as {
     challengeId?: unknown;
     response?: unknown;
@@ -222,31 +305,36 @@ async function handleLoginVerify(
   }
   const assertion = body.response as AuthenticationResponseJSON;
   const challenge = await takeChallenge(db, body.challengeId, 'login');
-  if (!challenge) {
+  if (!challenge?.origin || !challenge.rp_id) {
     return errorJson('challenge-expired', 400);
   }
   const stored = await getCredential(db, assertion.id);
   if (!stored) {
     return errorJson('unknown-passkey', 400);
   }
-  const { rpID, origin } = relyingParty(env, request);
   const verification = await verifyAuthenticationResponse({
     response: assertion,
     expectedChallenge: challenge.challenge,
-    expectedOrigin: origin,
-    expectedRPID: rpID,
-    requireUserVerification: false,
+    expectedOrigin: challenge.origin,
+    expectedRPID: challenge.rp_id,
+    requireUserVerification: true,
     credential: {
       id: stored.id,
       publicKey: base64UrlToBytes(stored.public_key),
-      counter: stored.counter,
+      // Counter clone-detection is applied after verify so a reported 0
+      // (synced passkeys) is not rejected by SimpleWebAuthn.
+      counter: 0,
       transports: parseTransports(stored.transports),
     },
   });
   if (!verification.verified) {
     return errorJson('verification-failed', 400);
   }
-  await updateCredentialCounter(db, stored.id, verification.authenticationInfo.newCounter);
+  const nextCounter = nextStoredCounter(stored.counter, verification.authenticationInfo.newCounter);
+  if (nextCounter === null) {
+    return errorJson('cloned-passkey', 400);
+  }
+  await updateCredentialCounter(db, stored.id, nextCounter);
   const session = await createSessionCookie(db, stored.user_id, request.url);
   const passkeyCount = (await listCredentials(db, stored.user_id)).length;
   return json(
@@ -270,12 +358,15 @@ async function handleAddPasskeyOptions(
   if (!userId) {
     return errorJson('not-signed-in', 401);
   }
-  const { rpName, rpID } = relyingParty(env, request);
+  const rp = await readRelyingParty(env, request);
+  if (rp instanceof Response) {
+    return rp;
+  }
   const existing = await listCredentials(db, userId);
   const options = await generateRegistrationOptions({
-    rpName,
-    rpID,
-    userName: `learner-${userId.slice(0, 8)}`,
+    rpName: rp.rpName,
+    rpID: rp.rpID,
+    userName: randomLearnerHandle(),
     userID: new TextEncoder().encode(userId),
     userDisplayName: 'Externalize',
     attestationType: 'none',
@@ -285,7 +376,7 @@ async function handleAddPasskeyOptions(
     })),
     authenticatorSelection: {
       residentKey: 'required',
-      userVerification: 'preferred',
+      userVerification: 'required',
     },
     supportedAlgorithmIDs: [-7, -257],
   });
@@ -293,15 +384,13 @@ async function handleAddPasskeyOptions(
     challenge: options.challenge,
     type: 'add-passkey',
     userId,
+    origin: rp.origin,
+    rpId: rp.rpID,
   });
   return json({ challengeId, options });
 }
 
-async function handleAddPasskeyVerify(
-  db: D1Database,
-  env: Env,
-  request: Request,
-): Promise<Response> {
+async function handleAddPasskeyVerify(db: D1Database, request: Request): Promise<Response> {
   const userId = await readSessionUser(db, request);
   if (!userId) {
     return errorJson('not-signed-in', 401);
@@ -314,16 +403,15 @@ async function handleAddPasskeyVerify(
     return errorJson('invalid-body', 400);
   }
   const challenge = await takeChallenge(db, body.challengeId, 'add-passkey');
-  if (!challenge || challenge.user_id !== userId) {
+  if (!challenge || challenge.user_id !== userId || !challenge.origin || !challenge.rp_id) {
     return errorJson('challenge-expired', 400);
   }
-  const { rpID, origin } = relyingParty(env, request);
   const verification = await verifyRegistrationResponse({
     response: body.response as RegistrationResponseJSON,
     expectedChallenge: challenge.challenge,
-    expectedOrigin: origin,
-    expectedRPID: rpID,
-    requireUserVerification: false,
+    expectedOrigin: challenge.origin,
+    expectedRPID: challenge.rp_id,
+    requireUserVerification: true,
   });
   if (!verification.verified || !verification.registrationInfo) {
     return errorJson('verification-failed', 400);
@@ -349,18 +437,13 @@ async function handleSyncGet(db: D1Database, request: Request): Promise<Response
   }
   const row = await getProgress(db, userId);
   if (!row) {
-    return json({ progress: null, updatedAt: null });
+    return json({ progress: null, updatedAt: null, revision: null });
   }
-  let snapshot: unknown;
-  try {
-    snapshot = JSON.parse(row.snapshot);
-  } catch {
+  const snapshot = parseStoredSnapshot(row.snapshot);
+  if (!snapshot) {
     return errorJson('corrupt-snapshot', 500);
   }
-  if (!isProgressStore(snapshot)) {
-    return errorJson('corrupt-snapshot', 500);
-  }
-  return json({ progress: snapshot, updatedAt: row.updated_at });
+  return json({ progress: snapshot, updatedAt: row.updated_at, revision: row.revision });
 }
 
 async function handleSyncPost(db: D1Database, request: Request): Promise<Response> {
@@ -369,25 +452,31 @@ async function handleSyncPost(db: D1Database, request: Request): Promise<Respons
     return errorJson('not-signed-in', 401);
   }
   const body = (await readJsonBody(request)) as { progress?: unknown };
-  if (!isProgressStore(body.progress)) {
+  const incoming = parseProgressStore(body.progress);
+  if (!incoming) {
     return errorJson('invalid-progress', 400);
   }
-  const incoming = body.progress;
-  const row = await getProgress(db, userId);
-  let merged: ProgressStore = incoming;
-  if (row) {
-    let stored: unknown;
-    try {
-      stored = JSON.parse(row.snapshot);
-    } catch {
-      return errorJson('corrupt-snapshot', 500);
-    }
-    if (!isProgressStore(stored)) {
-      return errorJson('corrupt-snapshot', 500);
-    }
-    merged = mergeProgress(incoming, stored);
-  }
-  await upsertProgress(db, userId, JSON.stringify(merged));
+  const merged = await mergeWithCasRetry({
+    incoming,
+    read: async () => {
+      const row = await getProgress(db, userId);
+      if (!row) {
+        return null;
+      }
+      const snapshot = parseStoredSnapshot(row.snapshot);
+      if (!snapshot) {
+        throw new CorruptSnapshotError();
+      }
+      return { snapshot, revision: Number(row.revision) || 1 };
+    },
+    write: async (snapshot, expectedRevision) => {
+      const encoded = JSON.stringify(snapshot);
+      if (expectedRevision === null) {
+        return casInsertProgress(db, userId, encoded);
+      }
+      return casUpdateProgress(db, userId, encoded, expectedRevision);
+    },
+  });
   return json({ progress: merged });
 }
 
@@ -398,4 +487,19 @@ async function handleDeleteAccount(db: D1Database, request: Request): Promise<Re
   }
   await deleteAccount(db, userId);
   return json({ ok: true }, 200, { 'set-cookie': clearCookieHeader(request.url) });
+}
+
+function parseStoredSnapshot(raw: string): ProgressStore | null {
+  try {
+    return parseProgressStore(JSON.parse(raw) as unknown);
+  } catch {
+    return null;
+  }
+}
+
+class CorruptSnapshotError extends Error {
+  constructor() {
+    super('corrupt-snapshot');
+    this.name = 'CorruptSnapshotError';
+  }
 }

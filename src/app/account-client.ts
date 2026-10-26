@@ -10,6 +10,12 @@ export type AccountSession = {
   passkeyCount: number;
 };
 
+export type AccountStatus = {
+  available: boolean;
+  signedIn: boolean;
+  passkeyCount: number;
+};
+
 export class AccountApiError extends Error {
   readonly code: string;
   readonly status: number;
@@ -26,17 +32,33 @@ export function passkeysSupported(): boolean {
   return browserSupportsWebAuthn();
 }
 
-export async function fetchAccountAvailability(): Promise<boolean> {
+export async function fetchAccountStatus(): Promise<AccountStatus> {
   try {
     const response = await api('/api/status');
     if (!response.ok) {
-      return false;
+      return { available: false, signedIn: false, passkeyCount: 0 };
     }
-    const body = (await response.json()) as { available?: boolean };
-    return body.available === true;
+    const body = (await response.json()) as {
+      available?: boolean;
+      signedIn?: boolean;
+      passkeyCount?: number;
+    };
+    if (body.available !== true) {
+      return { available: false, signedIn: false, passkeyCount: 0 };
+    }
+    return {
+      available: true,
+      signedIn: body.signedIn === true,
+      passkeyCount: typeof body.passkeyCount === 'number' ? body.passkeyCount : 0,
+    };
   } catch {
-    return false;
+    return { available: false, signedIn: false, passkeyCount: 0 };
   }
+}
+
+export async function fetchAccountAvailability(): Promise<boolean> {
+  const status = await fetchAccountStatus();
+  return status.available;
 }
 
 export async function fetchAccountSession(): Promise<AccountSession> {

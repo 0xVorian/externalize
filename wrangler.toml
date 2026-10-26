@@ -1,6 +1,10 @@
 # Local Pages + D1 development. Production D1 is bound in the Cloudflare
 # dashboard — replace the placeholder database_id after creating the database.
 # See docs/accounts.md.
+#
+# The nil UUID does not make accounts available on its own. GET /api/status
+# runs SELECT 1 against the binding; a stub or unprovisioned D1 reports
+# { available: false } and the UI stays on file export/import.
 
 name = "externalize"
 compatibility_date = "2025-10-11"
@@ -13,9 +17,11 @@ WEBAUTHN_RP_NAME = "Externalize"
 # Optional overrides (also settable as Pages environment variables):
 # WEBAUTHN_RP_ID = "externalize.pages.dev"
 # WEBAUTHN_ORIGIN = "https://externalize.pages.dev"
+# WEBAUTHN_ALLOWED_ORIGINS = "https://logic.example.org"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "externalize-progress"
 database_id = "00000000-0000-0000-0000-000000000000"
+preview_database_id = "00000000-0000-0000-0000-000000000000"
 migrations_dir = "migrations"

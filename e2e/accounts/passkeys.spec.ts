@@ -125,4 +125,113 @@ test.describe('Passkey accounts', () => {
     }
     await expect(page.locator('.app-header')).toBeVisible();
   });
+
+  test('a same-device sync does not abort an in-flight bounded round', async ({ page }) => {
+    await page.goto('/');
+    await skipOnboarding(page);
+    const seeded = emptyProgress();
+    seeded.lessonsCompleted = ['level0-01-letters', 'level0-02-truth'];
+    seeded.queue = [
+      { exerciseId: 'eval-002', due: '2026-01-02T00:00:00.000Z', intervalDays: 1, ease: 2.5 },
+      { exerciseId: 'eval-001', due: '2026-01-03T00:00:00.000Z', intervalDays: 7, ease: 2.6 },
+    ];
+    await page.evaluate(
+      ({ key, data }) => {
+        localStorage.setItem(key, JSON.stringify(data));
+      },
+      { key: STORAGE_KEY, data: seeded },
+    );
+    await page.reload();
+    await skipOnboarding(page);
+    await attachVirtualAuthenticator(page);
+    await openProgressSync(page);
+    await page.locator('[data-action="create-passkey"]').click();
+    await expect(page.getByTestId('account-signed-in')).toBeVisible({ timeout: 15_000 });
+
+    await page.goto('/');
+    await skipOnboarding(page);
+    await expect(page.getByTestId('session-primary-action')).toBeVisible();
+    const syncResponse = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/sync') &&
+        response.request().method() === 'POST' &&
+        response.ok(),
+      { timeout: 15_000 },
+    );
+    await page.getByTestId('session-primary-action').click();
+    await expect(page.getByTestId('session-exit')).toBeVisible();
+    await syncResponse;
+    await expect(page.getByTestId('session-exit')).toBeVisible();
+  });
+
+  test('challenge replay, CSRF logout, malformed progress, and concurrent sync', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await skipOnboarding(page);
+    await attachVirtualAuthenticator(page);
+    await openProgressSync(page);
+
+    let verifyBody: unknown;
+    page.on('request', (request) => {
+      if (request.url().includes('/api/auth/register/verify') && request.method() === 'POST') {
+        verifyBody = request.postDataJSON();
+      }
+    });
+
+    await page.locator('[data-action="create-passkey"]').click();
+    await expect(page.getByTestId('account-signed-in')).toBeVisible({ timeout: 15_000 });
+    expect(verifyBody).toBeTruthy();
+
+    const origin = accountsBaseURL();
+    const replay = await page.request.post(`${origin}/api/auth/register/verify`, {
+      headers: { Origin: origin, 'content-type': 'application/json' },
+      data: verifyBody,
+    });
+    expect(replay.status()).toBe(400);
+    expect((await replay.json()) as { error?: string }).toMatchObject({ error: 'challenge-expired' });
+
+    const csrf = await page.request.post(`${origin}/api/auth/logout`, {
+      headers: { Origin: 'https://evil.example', 'content-type': 'application/json' },
+      data: {},
+    });
+    expect(csrf.status()).toBe(403);
+    await expect(page.getByTestId('account-signed-in')).toBeVisible();
+
+    const malformed = emptyProgress() as unknown as Record<string, unknown>;
+    malformed.queue = [{ exerciseId: 'eval-001', extra: true }];
+    malformed.skills = { 'practice:evaluate-formula': { attempts: 'nope' } };
+    const badSync = await page.request.post(`${origin}/api/sync`, {
+      headers: { Origin: origin, 'content-type': 'application/json' },
+      data: { progress: malformed },
+    });
+    expect(badSync.status()).toBe(400);
+    expect((await badSync.json()) as { error?: string }).toMatchObject({ error: 'invalid-progress' });
+
+    const phone = emptyProgress();
+    phone.lessonsCompleted = ['level0-01-letters'];
+    const laptop = emptyProgress();
+    laptop.lessonsCompleted = ['level0-02-truth'];
+    const [first, second] = await Promise.all([
+      page.request.post(`${origin}/api/sync`, {
+        headers: { Origin: origin, 'content-type': 'application/json' },
+        data: { progress: phone },
+      }),
+      page.request.post(`${origin}/api/sync`, {
+        headers: { Origin: origin, 'content-type': 'application/json' },
+        data: { progress: laptop },
+      }),
+    ]);
+    expect(first.ok()).toBe(true);
+    expect(second.ok()).toBe(true);
+    const pulled = await page.request.get(`${origin}/api/sync`);
+    expect(pulled.ok()).toBe(true);
+    const body = (await pulled.json()) as { progress?: { lessonsCompleted?: string[] } };
+    expect(body.progress?.lessonsCompleted).toEqual(
+      expect.arrayContaining(['level0-01-letters', 'level0-02-truth']),
+    );
+
+    const status = await page.request.get(`${origin}/api/status`);
+    expect(await status.json()).toMatchObject({ available: true, signedIn: true });
+  });
 });

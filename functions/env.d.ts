@@ -5,6 +5,7 @@ interface Env {
   WEBAUTHN_RP_NAME?: string;
   WEBAUTHN_RP_ID?: string;
   WEBAUTHN_ORIGIN?: string;
+  WEBAUTHN_ALLOWED_ORIGINS?: string;
 }
 
 interface ChallengeRow {
@@ -13,6 +14,8 @@ interface ChallengeRow {
   type: string;
   user_id: string | null;
   expires_at: string;
+  origin: string | null;
+  rp_id: string | null;
 }
 
 interface CredentialRow {
@@ -37,4 +40,5 @@ interface ProgressRow {
   user_id: string;
   snapshot: string;
   updated_at: string;
+  revision: number;
 }

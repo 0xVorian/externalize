@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { evidenceKey } from './curriculum';
-import { isProgressStore, mergeProgress, progressSnapshotsEqual } from './progress-merge';
+import { isProgressStore, mergeProgress, parseProgressStore, progressSnapshotsEqual } from './progress-merge';
 import type { PracticeDraft } from './practice-attempt';
 import type { ProgressStore } from './storage';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID, LOGIC_FOUNDATIONS_ROUTE_ID } from './routes';
@@ -111,7 +111,7 @@ describe('mergeProgress', () => {
     );
   });
 
-  it('keeps the more advanced SRS entry per exercise and sorts the queue by id', () => {
+  it('keeps the more advanced SRS entry per exercise and preserves left queue order', () => {
     const left = store({
       queue: [
         { exerciseId: 'eval-002', due: T1, intervalDays: 1, ease: 2.5 },
@@ -126,10 +126,20 @@ describe('mergeProgress', () => {
     });
 
     expect(mergeProgress(left, right).queue).toEqual([
-      { exerciseId: 'eval-001', due: T2, intervalDays: 7, ease: 2.6 },
       { exerciseId: 'eval-002', due: T1, intervalDays: 1, ease: 2.5 },
+      { exerciseId: 'eval-001', due: T2, intervalDays: 7, ease: 2.6 },
       { exerciseId: 'tt-001', due: T0, intervalDays: 1, ease: 2.5 },
     ]);
+  });
+
+  it('is idempotent on queue order: merge(x, x) does not reorder', () => {
+    const original = store({
+      queue: [
+        { exerciseId: 'eval-002', due: T1, intervalDays: 1, ease: 2.5 },
+        { exerciseId: 'eval-001', due: T2, intervalDays: 7, ease: 2.6 },
+      ],
+    });
+    expect(mergeProgress(original, original).queue).toEqual(original.queue);
   });
 
   it('breaks SRS ties by ease, then later due, then left', () => {
@@ -674,6 +684,28 @@ describe('isProgressStore', () => {
     expect(isProgressStore({ ...store(), version: 6 })).toBe(false);
     expect(isProgressStore(null)).toBe(false);
     expect(isProgressStore({ version: 7 })).toBe(false);
+  });
+
+  it('rejects malformed nested queue, skill, and route values', () => {
+    expect(isProgressStore({ ...store(), queue: [{ exerciseId: 'eval-001' }] })).toBe(false);
+    expect(
+      isProgressStore({
+        ...store(),
+        skills: { 'practice:evaluate-formula': { attempts: '1', successes: 0, recentErrorTags: [] } },
+      }),
+    ).toBe(false);
+    expect(
+      isProgressStore({
+        ...store(),
+        routes: { 'logic-foundations': { depthByStep: { 'unit-0-learn': 'skip' } } },
+      }),
+    ).toBe(false);
+  });
+
+  it('strips unknown top-level keys rather than storing them', () => {
+    const parsed = parseProgressStore({ ...store(), extraGarbage: { nested: true }, queue: store().queue });
+    expect(parsed).toEqual(store());
+    expect(parsed && 'extraGarbage' in parsed).toBe(false);
   });
 });
 

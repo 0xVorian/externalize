@@ -4,6 +4,8 @@ import type { ExerciseStat, ResumePoint, SkillStat } from './progress-tracker';
 import type { SrsEntry } from './srs';
 import type { ProgressStore } from './storage';
 
+export { isProgressStore, parseProgressStore } from './progress-parse';
+
 /**
  * Deterministic per-item merge of two progress v7 snapshots.
  *
@@ -23,8 +25,9 @@ import type { ProgressStore } from './storage';
  * - Practice drafts are kept per exercise; a finalized attempt beats an
  *   active one; otherwise more checks / later start win.
  * - Bounded sessions (`externalize-active-session-v1`) are not part of this
- *   snapshot. Callers should invalidate a local in-flight session when the
- *   merged snapshot differs from the pre-merge local store.
+ *   snapshot. Callers should invalidate a local in-flight session only when
+ *   learning state differs (completions, evidence, SRS values, drafts), not
+ *   when queue order or visit timestamps change.
  */
 export function mergeProgress(left: ProgressStore, right: ProgressStore): ProgressStore {
   const lessonsCompleted = unionIds(left.lessonsCompleted, right.lessonsCompleted);
@@ -74,53 +77,6 @@ export function progressSnapshotsEqual(left: ProgressStore, right: ProgressStore
   return stableStringify(left) === stableStringify(right);
 }
 
-export function isProgressStore(value: unknown): value is ProgressStore {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-  const store = value as Record<string, unknown>;
-  return (
-    store.version === 7 &&
-    isStringArray(store.lessonsCompleted) &&
-    typeof store.level0Complete === 'boolean' &&
-    typeof store.level1Complete === 'boolean' &&
-    typeof store.level2Complete === 'boolean' &&
-    Array.isArray(store.queue) &&
-    isStringArray(store.attempted) &&
-    isStringArray(store.passed) &&
-    isObject(store.practiceDrafts) &&
-    isResume(store.resume) &&
-    isObject(store.skills) &&
-    isObject(store.exerciseStats) &&
-    isObject(store.errorCounts) &&
-    typeof store.lastVisitedAt === 'string' &&
-    typeof store.onboardingComplete === 'boolean' &&
-    typeof store.activeRouteId === 'string' &&
-    isObject(store.routes) &&
-    isObject(store.conceptEvidence)
-  );
-}
-
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === 'string');
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-}
-
-function isResume(value: unknown): value is ResumePoint {
-  if (!isObject(value) || typeof value.updatedAt !== 'string') {
-    return false;
-  }
-  return (
-    value.mode === 'learn' ||
-    value.mode === 'practice' ||
-    value.mode === 'progress' ||
-    value.mode === 'explore'
-  );
-}
-
 function unionIds(left: string[], right: string[]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -166,11 +122,29 @@ function mergeQueue(left: SrsEntry[], right: SrsEntry[]): SrsEntry[] {
   for (const entry of left) {
     byId.set(entry.exerciseId, entry);
   }
+  const extras: SrsEntry[] = [];
   for (const entry of right) {
     const existing = byId.get(entry.exerciseId);
-    byId.set(entry.exerciseId, existing ? pickSrs(existing, entry) : entry);
+    if (existing) {
+      byId.set(entry.exerciseId, pickSrs(existing, entry));
+    } else {
+      byId.set(entry.exerciseId, entry);
+      extras.push(entry);
+    }
   }
-  return [...byId.values()].sort((a, b) => a.exerciseId.localeCompare(b.exerciseId));
+  const out: SrsEntry[] = [];
+  const seen = new Set<string>();
+  for (const entry of left) {
+    if (seen.has(entry.exerciseId)) {
+      continue;
+    }
+    seen.add(entry.exerciseId);
+    out.push(byId.get(entry.exerciseId)!);
+  }
+  for (const entry of extras) {
+    out.push(byId.get(entry.exerciseId)!);
+  }
+  return out;
 }
 
 function pickSrs(left: SrsEntry, right: SrsEntry): SrsEntry {

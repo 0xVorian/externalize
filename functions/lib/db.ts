@@ -1,8 +1,21 @@
+import { availabilityFromProbe } from '../../src/app/account-policy';
 import { CHALLENGE_TTL_MS, laterIso, nowIso } from './http';
 import { randomId } from './crypto';
 
 export async function requireDb(env: Env): Promise<D1Database | null> {
   return env.DB ?? null;
+}
+
+export async function probeDatabase(db: D1Database | undefined | null): Promise<boolean> {
+  if (!db) {
+    return false;
+  }
+  try {
+    const row = await db.prepare('SELECT 1 AS ok').first<{ ok: number }>();
+    return availabilityFromProbe(row, false);
+  } catch {
+    return availabilityFromProbe(null, true);
+  }
 }
 
 export async function purgeExpired(db: D1Database): Promise<void> {
@@ -13,16 +26,38 @@ export async function purgeExpired(db: D1Database): Promise<void> {
   ]);
 }
 
+export async function countChallenges(db: D1Database): Promise<number> {
+  const row = await db
+    .prepare('SELECT COUNT(*) AS n FROM challenges WHERE expires_at >= ?')
+    .bind(nowIso())
+    .first<{ n: number }>();
+  return typeof row?.n === 'number' ? row.n : 0;
+}
+
 export async function insertChallenge(
   db: D1Database,
-  input: { challenge: string; type: string; userId?: string | null },
+  input: {
+    challenge: string;
+    type: string;
+    userId?: string | null;
+    origin: string;
+    rpId: string;
+  },
 ): Promise<string> {
   const id = randomId();
   await db
     .prepare(
-      'INSERT INTO challenges (id, challenge, type, user_id, expires_at) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO challenges (id, challenge, type, user_id, expires_at, origin, rp_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
     )
-    .bind(id, input.challenge, input.type, input.userId ?? null, laterIso(CHALLENGE_TTL_MS))
+    .bind(
+      id,
+      input.challenge,
+      input.type,
+      input.userId ?? null,
+      laterIso(CHALLENGE_TTL_MS),
+      input.origin,
+      input.rpId,
+    )
     .run();
   return id;
 }
@@ -33,17 +68,14 @@ export async function takeChallenge(
   type: string,
 ): Promise<ChallengeRow | null> {
   const row = await db
-    .prepare('SELECT id, challenge, type, user_id, expires_at FROM challenges WHERE id = ? AND type = ?')
-    .bind(id, type)
+    .prepare(
+      `DELETE FROM challenges
+       WHERE id = ? AND type = ? AND expires_at >= ?
+       RETURNING id, challenge, type, user_id, expires_at, origin, rp_id`,
+    )
+    .bind(id, type, nowIso())
     .first<ChallengeRow>();
-  if (!row) {
-    return null;
-  }
-  await db.prepare('DELETE FROM challenges WHERE id = ?').bind(id).run();
-  if (row.expires_at < nowIso()) {
-    return null;
-  }
-  return row;
+  return row ?? null;
 }
 
 export async function createUser(db: D1Database, userId: string): Promise<void> {
@@ -83,6 +115,40 @@ export async function insertCredential(
       nowIso(),
     )
     .run();
+}
+
+export async function createUserWithCredential(
+  db: D1Database,
+  userId: string,
+  input: {
+    id: string;
+    publicKey: string;
+    counter: number;
+    deviceType?: string;
+    backedUp: boolean;
+    transports?: string[];
+  },
+): Promise<void> {
+  const at = nowIso();
+  await db.batch([
+    db.prepare('INSERT INTO users (id, created_at, updated_at) VALUES (?, ?, ?)').bind(userId, at, at),
+    db
+      .prepare(
+        `INSERT INTO credentials
+          (id, user_id, public_key, counter, device_type, backed_up, transports, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        input.id,
+        userId,
+        input.publicKey,
+        input.counter,
+        input.deviceType ?? null,
+        input.backedUp ? 1 : 0,
+        input.transports ? JSON.stringify(input.transports) : null,
+        at,
+      ),
+  ]);
 }
 
 export async function listCredentials(db: D1Database, userId: string): Promise<CredentialRow[]> {
@@ -137,25 +203,52 @@ export async function deleteSession(db: D1Database, tokenHash: string): Promise<
 
 export async function getProgress(db: D1Database, userId: string): Promise<ProgressRow | null> {
   return db
-    .prepare('SELECT user_id, snapshot, updated_at FROM progress WHERE user_id = ?')
+    .prepare('SELECT user_id, snapshot, updated_at, revision FROM progress WHERE user_id = ?')
     .bind(userId)
     .first<ProgressRow>();
 }
 
-export async function upsertProgress(
+export async function casInsertProgress(
   db: D1Database,
   userId: string,
   snapshot: string,
-): Promise<void> {
+): Promise<boolean> {
   const at = nowIso();
-  await db
+  try {
+    const result = await db
+      .prepare('INSERT INTO progress (user_id, snapshot, updated_at, revision) VALUES (?, ?, ?, 1)')
+      .bind(userId, snapshot, at)
+      .run();
+    if ((result.meta.changes ?? 0) < 1) {
+      return false;
+    }
+    await db.prepare('UPDATE users SET updated_at = ? WHERE id = ?').bind(at, userId).run();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function casUpdateProgress(
+  db: D1Database,
+  userId: string,
+  snapshot: string,
+  expectedRevision: number,
+): Promise<boolean> {
+  const at = nowIso();
+  const result = await db
     .prepare(
-      `INSERT INTO progress (user_id, snapshot, updated_at) VALUES (?, ?, ?)
-       ON CONFLICT(user_id) DO UPDATE SET snapshot = excluded.snapshot, updated_at = excluded.updated_at`,
+      `UPDATE progress
+       SET snapshot = ?, updated_at = ?, revision = revision + 1
+       WHERE user_id = ? AND revision = ?`,
     )
-    .bind(userId, snapshot, at)
+    .bind(snapshot, at, userId, expectedRevision)
     .run();
+  if ((result.meta.changes ?? 0) !== 1) {
+    return false;
+  }
   await db.prepare('UPDATE users SET updated_at = ? WHERE id = ?').bind(at, userId).run();
+  return true;
 }
 
 export async function deleteAccount(db: D1Database, userId: string): Promise<void> {

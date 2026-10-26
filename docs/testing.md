@@ -60,7 +60,7 @@ npm run test:e2e:ui
 | `e2e/smoke/tt-001.spec.ts` | Fill-truth-table cell submission |
 | `e2e/smoke/translate-001.spec.ts` | Symbol-palette translation exercise |
 | `e2e/smoke/progress-sync.spec.ts` | Progress export → clear → import; passkey UI hidden on the static preview |
-| `e2e/accounts/passkeys.spec.ts` | Passkey sign-up / sign-in / add-passkey / merge / delete against local wrangler + D1 at 320px and 390px |
+| `e2e/accounts/passkeys.spec.ts` | Passkey sign-up / sign-in / add-passkey / merge / delete against local wrangler + D1 at 320px and 390px; same-device session resume; challenge replay; CSRF logout; malformed progress; concurrent sync |
 | `e2e/smoke/unit-picker.spec.ts` | Unit 0 / Unit 1 tab navigation |
 | `e2e/smoke/onboarding.spec.ts` | First-run intro skip and finish |
 | `e2e/smoke/counter-001.spec.ts` | Find-counterexample toggle and check |
