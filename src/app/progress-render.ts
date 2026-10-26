@@ -17,7 +17,6 @@ import { renderConceptMap } from './concept-map-render';
 import { exerciseLabel } from './exercise-label';
 import {
   deriveCapabilityStates,
-  nextReadySkillId,
   type CapabilityState,
 } from './progress-visibility';
 import { TRACKED_SKILL_IDS, type SkillId } from './progress-tracker';
@@ -59,15 +58,15 @@ function renderCapabilityItems(
 function renderCapabilitySummary(
   locale: Locale,
   store: ProgressStore,
+  offer: OpeningOffer,
 ): string {
   const vis = visibilityUi(locale);
-  const progressCopy = progressUi(locale);
   const states = deriveCapabilityStates(store, getUnlockedExerciseIds(store));
   const consistent = TRACKED_SKILL_IDS.filter((id) => states[id] === 'consistent');
   const developing = TRACKED_SKILL_IDS.filter((id) => states[id] === 'developing');
-  const readyId = nextReadySkillId(states);
-  const upNextBody = readyId
-    ? `<ul class="capability-summary-list"><li><strong>${progressCopy.skillLabel(readyId)}</strong> <span class="capability-chip">${vis.stateReady}</span></li></ul>`
+  const topic = openingTopic(locale, offer);
+  const upNextBody = topic
+    ? `<p class="capability-up-next" data-testid="capability-up-next">${topic}</p>`
     : `<p class="progress-empty">${vis.upNextEmpty}</p>`;
 
   return `
@@ -307,7 +306,7 @@ export function renderProgressView(
 
       ${renderConceptMap(locale, store)}
 
-      ${renderCapabilitySummary(locale, store)}
+      ${renderCapabilitySummary(locale, store, offer)}
 
       ${renderDisclosure(
         copy.syncHeading,

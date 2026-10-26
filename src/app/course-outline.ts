@@ -127,3 +127,38 @@ export function buildCourseOutline(store: ProgressStore): CourseOutlineUnit[] {
     };
   });
 }
+
+/** Done lessons that sit above the here marker in the current unit. */
+export function splitCurrentUnitGroups(unit: CourseOutlineUnit): {
+  doneGroups: CourseOutlineConceptGroup[];
+  restGroups: CourseOutlineConceptGroup[];
+  doneCount: number;
+} {
+  const doneGroups: CourseOutlineConceptGroup[] = [];
+  const restGroups: CourseOutlineConceptGroup[] = [];
+  let pastDonePrefix = false;
+
+  for (const group of unit.concepts) {
+    if (pastDonePrefix) {
+      restGroups.push(group);
+      continue;
+    }
+    const doneLessons = group.lessons.filter((lesson) => lesson.status === 'done');
+    const restLessons = group.lessons.filter((lesson) => lesson.status !== 'done');
+    if (restLessons.length === 0) {
+      doneGroups.push(group);
+      continue;
+    }
+    if (doneLessons.length > 0) {
+      doneGroups.push({ conceptId: group.conceptId, lessons: doneLessons });
+    }
+    restGroups.push({ conceptId: group.conceptId, lessons: restLessons });
+    pastDonePrefix = true;
+  }
+
+  return {
+    doneGroups,
+    restGroups,
+    doneCount: doneGroups.reduce((count, group) => count + group.lessons.length, 0),
+  };
+}

@@ -123,9 +123,9 @@ The Progress view should answer where the learner is and what the next bounded r
 Foreground, in order:
 
 - **One next** — the same `offerOpening` round as Home, named by the concept or lesson it covers;
-- **Course outline** — all three units, with the current unit expanded by concept and lesson, a you-are-here marker, done items marked, and later units visible as upcoming or locked with what they wait on;
+- **Course outline** — all three units, with the current unit expanded from the here marker, a you-are-here marker, done items marked behind a count toggle, and later units visible as collapsed headers with counts and what they wait on;
 - **Concept map** — prerequisite graph whose main-route statuses do not depend on optional `lat-*` lessons;
-- **You can now / In progress / Up next** — capability summary, not a second “what’s next” action.
+- **You can now / In progress / Up next** — capability summary; “Up next” names the same `offerOpening` topic as Home and the next card, and is not a second action.
 
 Detailed exercise lists and statistics stay collapsed after the outline.
 

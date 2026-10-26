@@ -961,6 +961,7 @@ export type ProgressUiCopy = {
   waitingOn: (unitTitle: string) => string;
   currentUnitAria: string;
   showLessons: string;
+  doneLessonsSummary: (count: number) => string;
   exercisesLater: (count: number) => string;
   exercisesHeading: string;
   exercisesStatus: (done: number, unlocked: number) => string;
@@ -1009,6 +1010,8 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     waitingOn: (unitTitle) => `after ${unitTitle}`,
     currentUnitAria: 'current unit',
     showLessons: 'Show lessons',
+    doneLessonsSummary: (count) =>
+      count === 1 ? '1 lesson done' : `${count} lessons done`,
     exercisesLater: (count) =>
       count === 1 ? '1 later exercise' : `${count} later exercises`,
     exercisesHeading: 'Exercises',
@@ -1080,12 +1083,14 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lastSeen: (when) => `Dernière activité : ${when}`,
     outlineHeading: 'Le cours',
     lessonsStatus: (done, total) =>
-      `${done} leçon${done > 1 ? 's' : ''} sur ${total}`,
+      `${done} leçon${done === 1 ? '' : 's'} sur ${total}`,
     youAreHere: 'vous êtes ici',
     lessonUpcoming: 'à venir',
     waitingOn: (unitTitle) => `après ${unitTitle}`,
     currentUnitAria: 'unité en cours',
     showLessons: 'Voir les leçons',
+    doneLessonsSummary: (count) =>
+      count === 1 ? '1 leçon terminée' : `${count} leçons terminées`,
     exercisesLater: (count) =>
       count === 1 ? '1 exercice plus loin dans le cours' : `${count} exercices plus loin dans le cours`,
     exercisesHeading: 'Exercices',

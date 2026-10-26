@@ -35,11 +35,13 @@ describe('progress view course map', () => {
     expect(html).toContain('data-testid="course-outline-here"');
     expect(html).toContain('after Unit 1 — Connectives');
     expect(html).toMatch(
-      /data-testid="course-outline-unit-0"[\s\S]*course-outline-done-details[\s\S]*data-testid="course-outline-unit-1"/,
+      /data-testid="course-outline-unit-0"[\s\S]*course-outline-details[\s\S]*data-testid="course-outline-unit-1"/,
     );
     expect(html).not.toMatch(
-      /data-testid="course-outline-unit-0"[\s\S]*<details class="course-outline-done-details" open/,
+      /data-testid="course-outline-unit-0"[\s\S]*<details class="course-outline-details" open/,
     );
+    expect(html).toContain('data-testid="course-outline-done-lessons"');
+    expect(html).toContain('data-testid="course-outline-unit-2-lessons"');
     expect(html).toMatch(/0 of 9 lessons/);
     expect(html).not.toMatch(/Introductory unit/);
     expect(html).not.toMatch(/sections complete/);
@@ -54,9 +56,37 @@ describe('progress view course map', () => {
     expect(html).toContain(learnUi('fr').level1Title);
     expect(html).toContain('vous êtes ici');
     expect(html).toContain('après Unité 0 — Syntaxe propositionnelle');
-    expect(html).toMatch(/0 leçon sur 5/);
+    expect(html).toMatch(/0 leçons sur 5/);
     expect(html).not.toContain(progressUi('en').outlineHeading);
     expect(html).not.toMatch(/sections complete|sections sur/);
+  });
+
+  it('collapses locked units and does not repeat identical concept and lesson titles', () => {
+    const html = renderProgressView('en', loadProgress(), false);
+    expect(html).toContain('data-testid="course-outline-unit-1-lessons"');
+    expect(html).toContain('data-testid="course-outline-unit-2-lessons"');
+    expect(html).not.toMatch(
+      /data-testid="course-outline-unit-1-lessons"[^>]*open/,
+    );
+    const unit0 = html.slice(
+      html.indexOf('data-testid="course-outline-unit-0"'),
+      html.indexOf('data-testid="course-outline-unit-1"'),
+    );
+    expect(unit0).not.toMatch(
+      /course-outline-concept-title[^>]*>Sentence letters/,
+    );
+    expect(unit0.match(/progress-item-label">Sentence letters/g)).toEqual([
+      'progress-item-label">Sentence letters',
+    ]);
+    expect(html).toContain('course-outline-here-marker" aria-hidden="true"');
+    const topic = html.match(
+      /data-testid="opening-topic"[^>]*>([^<]+)</,
+    )?.[1];
+    const upNext = html.match(
+      /data-testid="capability-up-next"[^>]*>([^<]+)</,
+    )?.[1];
+    expect(topic).toBeTruthy();
+    expect(upNext).toBe(topic);
   });
 
   it('keeps the exercise list collapsed after the outline', () => {

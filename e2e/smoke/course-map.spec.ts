@@ -34,5 +34,10 @@ test('Progress outline shows all three units after Unit 0', async ({ page }) => 
   await expect(outline).toContainText('5 of 5 lessons');
   await expect(page.getByTestId('course-outline-here')).toBeVisible();
   await expect(page.getByTestId('course-outline-unit-2')).toContainText('after Unit 1');
+  await expect(page.getByTestId('course-outline-unit-0-lessons')).toBeVisible();
+  await expect(page.getByTestId('course-outline-unit-2-lessons')).toBeVisible();
+  await expect(page.getByTestId('capability-up-next')).toHaveText(
+    (await page.getByTestId('opening-topic').innerText()).trim(),
+  );
   await expect(sessionPrimary(page)).toHaveCount(0);
 });

@@ -3,6 +3,8 @@ import { getLessonCopy, learnUi, progressUi } from '../i18n';
 import { conceptLabel } from './prerequisites';
 import {
   buildCourseOutline,
+  splitCurrentUnitGroups,
+  type CourseOutlineConceptGroup,
   type CourseOutlineLesson,
   type CourseOutlineUnit,
   type OutlineLessonStatus,
@@ -26,6 +28,13 @@ function lessonStatusLabel(
   return copy.exerciseLocked;
 }
 
+/** True when the lesson title repeats the concept name, including `Name (symbol)`. */
+export function lessonTitleMatchesConcept(concept: string, lessonTitle: string): boolean {
+  const conceptName = concept.trim().toLowerCase();
+  const title = lessonTitle.trim().toLowerCase();
+  return conceptName === title || conceptName.startsWith(`${title} (`);
+}
+
 function renderLesson(
   locale: Locale,
   copy: ReturnType<typeof progressUi>,
@@ -38,7 +47,7 @@ function renderLesson(
     lesson.status === 'locked' && waitingOn ? `, ${copy.waitingOn(waitingOn)}` : '';
   const here =
     lesson.status === 'here'
-      ? `<span class="course-outline-here-marker">${copy.youAreHere}</span>`
+      ? `<span class="course-outline-here-marker" aria-hidden="true">${copy.youAreHere}</span>`
       : `<span class="progress-item-status" aria-hidden="true">${status}</span>`;
   const testId =
     lesson.status === 'here' ? ' data-testid="course-outline-here"' : '';
@@ -56,6 +65,63 @@ function renderLesson(
   `;
 }
 
+function renderConceptGroup(
+  locale: Locale,
+  copy: ReturnType<typeof progressUi>,
+  group: CourseOutlineConceptGroup,
+  waitingOn?: string,
+): string {
+  const concept = conceptLabel(locale, group.conceptId);
+  const first = group.lessons[0];
+  const firstTitle = first ? getLessonCopy(locale, first.id).title : '';
+  const dropFirst = Boolean(first && lessonTitleMatchesConcept(concept, firstTitle));
+  const rest = dropFirst ? group.lessons.slice(1) : group.lessons;
+
+  if (dropFirst && rest.length === 0 && first) {
+    return `
+      <li class="course-outline-concept" data-concept-id="${group.conceptId}">
+        <ul class="progress-list course-outline-lessons">${renderLesson(locale, copy, first, waitingOn)}</ul>
+      </li>
+    `;
+  }
+
+  const hereOnHeading = Boolean(dropFirst && first?.status === 'here' && rest.length > 0);
+  const headingHereClass = hereOnHeading ? ' is-here' : '';
+  const headingTestId = hereOnHeading ? ' data-testid="course-outline-here"' : '';
+  const headingAria = hereOnHeading
+    ? ` aria-label="${copy.progressItemAria(concept, copy.youAreHere)}"`
+    : '';
+  const headingMarker = hereOnHeading
+    ? `<span class="course-outline-here-marker" aria-hidden="true">${copy.youAreHere}</span>`
+    : '';
+  const lessons = rest
+    .map((lesson) => renderLesson(locale, copy, lesson, waitingOn))
+    .join('');
+
+  return `
+    <li class="course-outline-concept" data-concept-id="${group.conceptId}">
+      <h4 class="course-outline-concept-title${headingHereClass}"${headingTestId}${headingAria}>${concept}${headingMarker}</h4>
+      <ul class="progress-list course-outline-lessons">${lessons}</ul>
+    </li>
+  `;
+}
+
+function renderConceptList(
+  locale: Locale,
+  copy: ReturnType<typeof progressUi>,
+  groups: CourseOutlineConceptGroup[],
+  waitingOn?: string,
+): string {
+  const items = groups
+    .map((group) => renderConceptGroup(locale, copy, group, waitingOn))
+    .join('');
+  return `<ol class="course-outline-concepts">${items}</ol>`;
+}
+
+function renderCollapsedLessons(summary: string, body: string, testId: string): string {
+  return `<details class="course-outline-details" data-testid="${testId}"><summary>${summary}</summary>${body}</details>`;
+}
+
 function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: CourseOutlineUnit): string {
   const title = unitTitle(locale, unit.unit);
   const waitingTitle =
@@ -68,25 +134,27 @@ function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: C
   const currentLabel = unit.current
     ? ` <span class="sr-only">${copy.currentUnitAria}</span>`
     : '';
-  const concepts = unit.concepts
-    .map((group) => {
-      const concept = conceptLabel(locale, group.conceptId);
-      const lessons = group.lessons
-        .map((lesson) => renderLesson(locale, copy, lesson, waitingTitle))
-        .join('');
-      return `
-        <li class="course-outline-concept" data-concept-id="${group.conceptId}">
-          <h4 class="course-outline-concept-title">${concept}</h4>
-          <ul class="progress-list course-outline-lessons">${lessons}</ul>
-        </li>
-      `;
-    })
-    .join('');
-  const conceptsList = `<ol class="course-outline-concepts">${concepts}</ol>`;
-  const body =
-    unit.status === 'done'
-      ? `<details class="course-outline-done-details"><summary>${copy.showLessons}</summary>${conceptsList}</details>`
-      : conceptsList;
+
+  let body: string;
+  if (unit.status === 'current') {
+    const split = splitCurrentUnitGroups(unit);
+    const doneBlock =
+      split.doneCount > 0
+        ? renderCollapsedLessons(
+            copy.doneLessonsSummary(split.doneCount),
+            renderConceptList(locale, copy, split.doneGroups, waitingTitle),
+            'course-outline-done-lessons',
+          )
+        : '';
+    body = `${doneBlock}${renderConceptList(locale, copy, split.restGroups, waitingTitle)}`;
+  } else {
+    const conceptsList = renderConceptList(locale, copy, unit.concepts, waitingTitle);
+    body = renderCollapsedLessons(
+      copy.showLessons,
+      conceptsList,
+      `course-outline-unit-${unit.unit}-lessons`,
+    );
+  }
 
   return `
     <section

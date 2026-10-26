@@ -18,7 +18,7 @@ import {
   isConceptCompleted,
   renderConceptMap,
 } from './concept-map-render';
-import { SOURCE_LESSONS } from './source-lessons';
+import { SOURCE_LESSONS, isSourceLessonId } from './source-lessons';
 import { completeLesson, loadProgress } from './storage';
 
 function completeIds(ids: readonly string[]) {
@@ -109,14 +109,14 @@ describe('concept map render', () => {
 
   it('does not let optional lat-* lessons block main-route concept completion', () => {
     const latConditional = PREREQUISITES_GRAPH.lessons.filter(
-      (lesson) => lesson.concept === 'conditional' && lesson.id.startsWith('lat-'),
+      (lesson) => lesson.concept === 'conditional' && isSourceLessonId(lesson.id),
     );
     expect(latConditional.length).toBe(5);
     const store = completeIds([
       ...LEVEL_0_LESSONS.map((lesson) => lesson.id),
       ...LEVEL_1_LESSONS.map((lesson) => lesson.id),
     ]);
-    expect(store.lessonsCompleted.some((id) => id.startsWith('lat-'))).toBe(false);
+    expect(store.lessonsCompleted.some((id) => isSourceLessonId(id))).toBe(false);
     expect(isConceptCompleted(store, 'conditional')).toBe(true);
     expect(conceptStatus(store, 'conditional')).toBe('completed');
   });

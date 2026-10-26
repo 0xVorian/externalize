@@ -63,7 +63,7 @@ Implemented scope:
 - [x] Finite short practice-session arc (5 finalized exercises)
 - [x] Session-complete summary based on actual changes
 - [x] Visible transitions for capability consistency, new unlocks, and reduced scaffolding
-- [x] Capability-first summary in Progress (`You can now`, `In progress`, `Up next`)
+- [x] Capability-first summary in Progress (`You can now`, `In progress`, `Up next` matching the shared round)
 - [x] Course map v1 on Progress: one next matching Home, always-visible three-unit outline, translation on the concept map, main-route statuses independent of `lat-*` lessons
 - [x] EN/FR, accessibility, reduced-motion, and ~320px mobile coverage
 - [x] Unit and browser regression tests for progress derivation and transition behavior

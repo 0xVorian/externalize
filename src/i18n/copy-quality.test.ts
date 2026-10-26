@@ -62,6 +62,9 @@ describe('learner-facing copy quality', () => {
     expect(progressUi('fr').exercisesStatus(2, 4)).toContain('disponible');
     expect(progressUi('en').lessonsStatus(2, 5)).toMatch(/lessons/);
     expect(progressUi('fr').lessonsStatus(2, 5)).toMatch(/leçons/);
+    expect(progressUi('fr').lessonsStatus(0, 5)).toBe('0 leçons sur 5');
+    expect(progressUi('fr').lessonsStatus(1, 5)).toBe('1 leçon sur 5');
+    expect(progressUi('en').doneLessonsSummary(3)).not.toBe(progressUi('fr').doneLessonsSummary(3));
     expect(progressUi('en').outlineHeading).toBe('Course');
     expect(progressUi('fr').outlineHeading).toBe('Le cours');
     expect(progressUi('en').youAreHere).not.toBe(progressUi('fr').youAreHere);

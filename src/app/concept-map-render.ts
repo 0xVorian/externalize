@@ -5,6 +5,7 @@ import {
   conceptPrerequisites,
   PREREQUISITES_GRAPH,
 } from './prerequisites';
+import { isSourceLessonId } from './source-lessons';
 
 type ConceptMapUiCopy = {
   heading: string;
@@ -76,10 +77,6 @@ const LAYER_GAP_Y = 56;
 const NODE_GAP_X = 14;
 const GRAPH_PAD = 16;
 const CHAR_WIDTH = 6.2;
-
-function isSourceLessonId(id: string): boolean {
-  return id.startsWith('lat-');
-}
 
 function lessonsForConcept(conceptId: string): string[] {
   return PREREQUISITES_GRAPH.lessons

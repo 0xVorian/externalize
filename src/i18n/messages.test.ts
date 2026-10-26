@@ -98,6 +98,7 @@ describe('i18n', () => {
       expect(copy.youCanNowHeading).toBeTruthy();
       expect(copy.inProgressHeading).toBeTruthy();
       expect(copy.upNextHeading).toBeTruthy();
+      expect(progressUi(locale).doneLessonsSummary(3)).toBeTruthy();
       expect(copy.youCanNowEmpty).toBeTruthy();
       expect(copy.inProgressEmpty).toBeTruthy();
       expect(copy.upNextEmpty).toBeTruthy();

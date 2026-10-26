@@ -380,6 +380,7 @@ test.describe('progress visibility', () => {
     await expect(summary).toContainText('Consistent so far');
     await expect(summary).toContainText('In progress');
     await expect(summary).toContainText('Up next');
-    await expect(summary).toContainText('Evaluating formulas');
+    const topic = (await page.getByTestId('opening-topic').innerText()).trim();
+    await expect(page.getByTestId('capability-up-next')).toHaveText(topic);
   });
 });

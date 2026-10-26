@@ -162,7 +162,8 @@ button {
 .primary:focus-visible,
 .secondary:focus-visible,
 .palette-button:focus-visible,
-.reference-panel summary:focus-visible {
+.reference-panel summary:focus-visible,
+.course-outline-details > summary:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -392,11 +393,11 @@ button {
   gap: 0.65rem;
 }
 
-.course-outline-done-details {
+.course-outline-details {
   margin: 0;
 }
 
-.course-outline-done-details > summary {
+.course-outline-details > summary {
   min-height: var(--tap-min);
   display: flex;
   align-items: center;
@@ -406,13 +407,18 @@ button {
 }
 
 .course-outline-concept-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
   margin: 0.35rem 0 0;
   font-size: 0.82rem;
   font-weight: 650;
   letter-spacing: 0.01em;
 }
 
-.course-outline-lesson.is-here {
+.course-outline-lesson.is-here,
+.course-outline-concept-title.is-here {
   font-weight: 650;
   border-left: 3px solid var(--text);
   padding-left: 0.55rem;
@@ -1101,6 +1107,12 @@ button {
   justify-content: space-between;
   gap: 0.5rem;
   font-size: 0.9rem;
+}
+
+.capability-up-next {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
 }
 
 .progress-subheading {

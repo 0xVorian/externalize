@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { LEVEL_0_LESSONS, LEVEL_2_LESSONS } from './lessons';
-import { buildCourseOutline, hereLessonId } from './course-outline';
+import {
+  buildCourseOutline,
+  hereLessonId,
+  splitCurrentUnitGroups,
+} from './course-outline';
+import { lessonTitleMatchesConcept } from './course-outline-render';
 import { completeLesson, loadProgress } from './storage';
 
 function completeIds(ids: readonly string[]) {
@@ -62,5 +67,14 @@ describe('course outline', () => {
     expect(unit1Lessons.find((lesson) => lesson.id === 'level1-07-imp')?.status).toBe('upcoming');
     expect(outline[2]?.status).toBe('locked');
     expect(outline[2]?.total).toBe(LEVEL_2_LESSONS.length);
+    const split = splitCurrentUnitGroups(outline[1]!);
+    expect(split.doneCount).toBe(2);
+    expect(split.restGroups[0]?.lessons[0]?.status).toBe('here');
+  });
+
+  it('treats concept labels with a symbol suffix as matching the lesson title', () => {
+    expect(lessonTitleMatchesConcept('Sentence letters', 'Sentence letters')).toBe(true);
+    expect(lessonTitleMatchesConcept('Conjunction (∧)', 'Conjunction')).toBe(true);
+    expect(lessonTitleMatchesConcept('Conditional (→)', 'Material conditional')).toBe(false);
   });
 });

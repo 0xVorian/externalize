@@ -327,7 +327,8 @@
 .cell-segment:focus-visible,
 .proof-rule-btn:focus-visible,
 .proof-cite-chip:focus-visible,
-.progress-disclosure > summary:focus-visible {
+.progress-disclosure > summary:focus-visible,
+.course-outline-details > summary:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
