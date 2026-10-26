@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { EXERCISE_DEFINITIONS } from './exercises';
-import { PRACTICE_UNLOCK_ORDER } from './lessons';
+import { ALL_LEARN_LESSONS, PRACTICE_UNLOCK_ORDER } from './lessons';
 import {
   PREREQUISITES_GRAPH,
+  conceptForExercise,
   conceptForLesson,
   orderedConcepts,
   requiredLessonsForExercise,
@@ -12,16 +13,29 @@ import {
   isConceptCompleted,
   renderConceptMap,
 } from './concept-map-render';
+import { SOURCE_LESSONS } from './source-lessons';
 import { loadProgress } from './storage';
 
 describe('prerequisites graph', () => {
-  it('covers every lesson and exercise', () => {
-    for (const lesson of PREREQUISITES_GRAPH.lessons) {
+  it('maps every card, watch, and guided unit to a concept', () => {
+    const units = [...ALL_LEARN_LESSONS, ...SOURCE_LESSONS];
+    expect(units.length).toBeGreaterThan(0);
+    for (const lesson of units) {
+      expect(['card', 'watch', 'guided']).toContain(lesson.type);
       expect(conceptForLesson(lesson.id), lesson.id).toBeTruthy();
     }
+  });
+
+  it('maps every exercise to a concept and required lessons', () => {
     for (const exercise of EXERCISE_DEFINITIONS) {
+      expect(conceptForExercise(exercise.id), exercise.id).toBeTruthy();
       expect(requiredLessonsForExercise(exercise.id).length, exercise.id).toBeGreaterThan(0);
     }
+  });
+
+  it('clusters Unit 1 nesting explanation with its guided practice', () => {
+    expect(conceptForLesson('level1-13-nesting')).toBe('scope');
+    expect(conceptForLesson('level1-14-nesting-guided')).toBe('scope');
   });
 
   it('orders concepts without cycles', () => {

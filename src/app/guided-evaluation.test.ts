@@ -157,7 +157,7 @@ describe('single-target guided evaluation', () => {
     expect(afterP.assignment.Q).toBeUndefined();
     const afterPHtml = renderLessonView(afterP, defaultLearnProgress);
     expect(afterPHtml).toContain('Now set Q to false.');
-    expect(afterPHtml).toContain('>T</td>');
+    expect(afterPHtml).toContain('<th scope="row">T</th>');
     expect(afterPHtml).toContain('data-testid="guided-target-cell"');
     expect(afterPHtml).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
   });

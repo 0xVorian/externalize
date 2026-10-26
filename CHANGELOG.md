@@ -11,8 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Rounds now open with one warm-up check on the most recently practised concept (the last concept that has an exercise, independent of route). A correct answer continues into the planned material, or ends a short due-review early (`1 / 1` is honest). A miss on that step’s Check turns the rest of the round into a short repair of that concept. Only the one due item chosen as the warm-up is consumed; other due items and other skills on the same concept stay in the round. Short due lists are not padded with unlocked work from other concepts. A first-time learner still starts without a warm-up. **Exception:** a round whose next cluster already needs all 7 slots omits the warm-up so that cluster stays intact. The step counts toward the 5–7 envelope and the `n / m` counter.
 
+### Changed
+
+- `docs/roadmap.md` now describes the v0.5.0 / v0.5.1 shipped baseline, the post-0.5.1 remediations already on `master` (mobile truth tables, session envelope, warm-up), and the remaining GitHub Issues rather than “v0.4.0 + unreleased”.
+
 ### Fixed
 
+- Mapped Unit 1 nesting lessons `level1-13-nesting` and `level1-14-nesting-guided` onto the `scope` concept so the session envelope keeps the explanation with its guided practice. Also mapped the translation intro card `level1-15-translate`. A content check now fails if any card, watch, or guided unit, or any exercise, lacks a prerequisites entry.
+- Watch-table body rows use `<th scope="row">` for the hidden case label, so assistive tech announces it as a row header. Column alignment at 320px and 390px is unchanged.
 - A due-review warm-up now consumes only the one chosen item, so other due exercises (including a different skill on the same concept) stay in the round. Short due lists are not padded with unrelated exercises: a pass ends the honest small round; a miss grows into same-concept explanation plus practice. Repair waits for that step’s Check rather than the first graded cell or node.
 - Session rounds no longer end on a teaching step whose related practice was deferred to the next round. The envelope still targets 6 steps and stays within 5–7 when a cluster fits; otherwise it ends before that teaching step so the `n / m` counter stays honest. Applies to Logic foundations lessons and the Sobel preparation sequence.
 - Restored the 2×2 watch grid as a real table on narrow screens (down to ~320px). A leftover `display: grid` rule had stacked the `Q = T` / `Q = F` headers and wrapped row labels off the grid. The cryptic `P ↓ / Q →` corner legend is gone; row and column labels already name the axes, and a visually hidden label keeps the table accessible.

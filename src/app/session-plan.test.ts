@@ -453,6 +453,19 @@ describe('teach-practice session boundaries', () => {
     expect([...seen]).toEqual(ALL_LEARN_LESSONS.map((lesson) => lesson.id));
   });
 
+  it('treats Unit 1 nesting explanation and guided practice as one cluster', () => {
+    expect(sessionClusterKey('level1-13-nesting')).toBe('scope');
+    expect(sessionClusterKey('level1-14-nesting-guided')).toBe('scope');
+    const store = loadProgress();
+    const remaining = ['level1-13-nesting', 'level1-14-nesting-guided', 'level1-15-translate'];
+    const plan = composeSessionPlan(store, 'continue', remaining);
+    expect(plan.steps.map((step) => step.itemId)).toEqual(remaining);
+    expect(groupSessionSteps(plan.steps).map((group) => group.map((step) => step.itemId))).toEqual([
+      ['level1-13-nesting', 'level1-14-nesting-guided'],
+      ['level1-15-translate'],
+    ]);
+  });
+
   it('keeps Sobel teach sequences with their checks from every remaining prefix', () => {
     const store = setActiveRoute(loadProgress(), LOGIC_AND_THEISM_READING_ROUTE_ID);
     const items = plannedSourceItems(store);
