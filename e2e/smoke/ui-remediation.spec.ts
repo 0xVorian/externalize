@@ -151,7 +151,7 @@ test('Learn reference is closed by default and unit navigation does not claim ta
   await expect(page.locator('.reference-panel')).not.toHaveAttribute('open', '');
   await expect(page.locator('[role="tablist"]')).toHaveCount(0);
   await expect(page.locator('[role="tab"]')).toHaveCount(0);
-  await expect(page.locator('[data-action="select-unit"]')).toHaveCount(2);
+  await expect(page.locator('[data-action="select-unit"]')).toHaveCount(3);
 });
 
 test('locked Practice has no dangling aria-describedby', async ({ page }) => {

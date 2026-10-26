@@ -68,6 +68,9 @@ describe('learner-facing copy quality', () => {
     expect(progressUi('en').remainingLessonsSummary(4)).not.toBe(
       progressUi('fr').remainingLessonsSummary(4),
     );
+    expect(progressUi('en').waitingOn(0)).toBe('after Unit 0');
+    expect(progressUi('fr').waitingOn(0)).toBe('après l’unité 0');
+    expect(progressUi('en').waitingOn(1)).not.toBe(progressUi('fr').waitingOn(1));
     expect(progressUi('en').outlineHeading).toBe('Course');
     expect(progressUi('fr').outlineHeading).toBe('Le cours');
     expect(progressUi('en').youAreHere).not.toBe(progressUi('fr').youAreHere);

@@ -36,7 +36,7 @@ button {
 .app {
   max-width: 26rem;
   margin: 0 auto;
-  padding: 1rem 1rem 2rem;
+  padding: 1rem 1rem 1.25rem;
 }
 
 .app-header h1 {
@@ -341,13 +341,13 @@ button {
 
 .course-outline {
   display: grid;
-  gap: 1rem;
+  gap: 0.65rem;
 }
 
 .course-outline-unit {
   display: grid;
-  gap: 0.4rem;
-  padding-top: 0.35rem;
+  gap: 0.25rem;
+  padding-top: 0.2rem;
   border-top: 1px solid var(--border);
 }
 
@@ -368,8 +368,7 @@ button {
   font-size: 1rem;
 }
 
-.course-outline-unit-count,
-.course-outline-waiting {
+.course-outline-unit-count {
   margin: 0;
   color: var(--muted);
   font-size: 0.8rem;

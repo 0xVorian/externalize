@@ -35,16 +35,26 @@ export function lessonTitleMatchesConcept(concept: string, lessonTitle: string):
   return conceptName === title || conceptName.startsWith(`${title} (`);
 }
 
+export function unitCountLine(
+  copy: ReturnType<typeof progressUi>,
+  unit: CourseOutlineUnit,
+): string {
+  if (unit.status === 'locked' && unit.waitingOnUnit !== undefined) {
+    return `${copy.lessonsStatus(unit.done, unit.total)} · ${copy.waitingOn(unit.waitingOnUnit)}`;
+  }
+  return copy.lessonsStatus(unit.done, unit.total);
+}
+
 function renderLesson(
   locale: Locale,
   copy: ReturnType<typeof progressUi>,
   lesson: CourseOutlineLesson,
-  waitingOn?: string,
+  waitingPhrase?: string,
 ): string {
   const title = getLessonCopy(locale, lesson.id).title;
   const status = lessonStatusLabel(copy, lesson.status);
   const waiting =
-    lesson.status === 'locked' && waitingOn ? `, ${copy.waitingOn(waitingOn)}` : '';
+    lesson.status === 'locked' && waitingPhrase ? `, ${waitingPhrase}` : '';
   const here =
     lesson.status === 'here'
       ? `<span class="course-outline-here-marker" aria-hidden="true">${copy.youAreHere}</span>`
@@ -69,14 +79,14 @@ function renderConceptGroup(
   locale: Locale,
   copy: ReturnType<typeof progressUi>,
   group: CourseOutlineConceptGroup,
-  waitingOn?: string,
+  waitingPhrase?: string,
 ): string {
   const concept = conceptLabel(locale, group.conceptId);
   const first = group.lessons[0];
   const firstTitle = first ? getLessonCopy(locale, first.id).title : '';
   const skipHeading = Boolean(first && lessonTitleMatchesConcept(concept, firstTitle));
   const lessons = group.lessons
-    .map((lesson) => renderLesson(locale, copy, lesson, waitingOn))
+    .map((lesson) => renderLesson(locale, copy, lesson, waitingPhrase))
     .join('');
   const heading = skipHeading
     ? ''
@@ -94,10 +104,10 @@ function renderConceptList(
   locale: Locale,
   copy: ReturnType<typeof progressUi>,
   groups: CourseOutlineConceptGroup[],
-  waitingOn?: string,
+  waitingPhrase?: string,
 ): string {
   const items = groups
-    .map((group) => renderConceptGroup(locale, copy, group, waitingOn))
+    .map((group) => renderConceptGroup(locale, copy, group, waitingPhrase))
     .join('');
   return `<ol class="course-outline-concepts">${items}</ol>`;
 }
@@ -108,12 +118,9 @@ function renderCollapsedLessons(summary: string, body: string, testId: string): 
 
 function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: CourseOutlineUnit): string {
   const title = unitTitle(locale, unit.unit);
-  const waitingTitle =
-    unit.waitingOnUnit === undefined ? undefined : unitTitle(locale, unit.waitingOnUnit);
-  const countLine =
-    unit.status === 'locked' && waitingTitle
-      ? `${copy.lessonsStatus(unit.done, unit.total)} · ${copy.waitingOn(waitingTitle)}`
-      : copy.lessonsStatus(unit.done, unit.total);
+  const waitingPhrase =
+    unit.waitingOnUnit === undefined ? undefined : copy.waitingOn(unit.waitingOnUnit);
+  const countLine = unitCountLine(copy, unit);
   const currentAttr = unit.current ? ` aria-current="true"` : '';
   const currentLabel = unit.current
     ? ` <span class="sr-only">${copy.currentUnitAria}</span>`
@@ -126,7 +133,7 @@ function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: C
       split.doneCount > 0
         ? renderCollapsedLessons(
             copy.doneLessonsSummary(split.doneCount),
-            renderConceptList(locale, copy, split.doneGroups, waitingTitle),
+            renderConceptList(locale, copy, split.doneGroups, waitingPhrase),
             'course-outline-done-lessons',
           )
         : '';
@@ -134,13 +141,13 @@ function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: C
       split.remainingCount > 0
         ? renderCollapsedLessons(
             copy.remainingLessonsSummary(split.remainingCount),
-            renderConceptList(locale, copy, split.remainingGroups, waitingTitle),
+            renderConceptList(locale, copy, split.remainingGroups, waitingPhrase),
             'course-outline-remaining-lessons',
           )
         : '';
-    body = `${doneBlock}${renderConceptList(locale, copy, split.visibleGroups, waitingTitle)}${remainingBlock}`;
+    body = `${doneBlock}${renderConceptList(locale, copy, split.visibleGroups, waitingPhrase)}${remainingBlock}`;
   } else {
-    const conceptsList = renderConceptList(locale, copy, unit.concepts, waitingTitle);
+    const conceptsList = renderConceptList(locale, copy, unit.concepts, waitingPhrase);
     body = renderCollapsedLessons(
       copy.showLessons,
       conceptsList,

@@ -65,7 +65,7 @@ Audit and fixes for the MVP UI (learn, practice, progress). Mobile-first tap tar
 
 ### Focus and keyboard
 
-- **Focus-visible:** Consistent `:focus-visible` outline on buttons (mode nav, language, tree nodes, V/F segments, primary/secondary actions, palette stub, reference `<summary>`).
+- **Focus-visible:** Consistent `:focus-visible` outline on buttons (mode nav, language, tree nodes, V/F segments, primary/secondary actions, palette stub, reference `<summary>`, course-outline Show-lessons / done / remaining `<summary>`).
 - **Keyboard activation:** All interactive controls remain native `<button>` elements; Enter/Space activate via the existing delegated click handler. Read-only tree nodes are not in the tab order.
 - **Tree keyboard navigation:** Scope exercises (main-connective selection) use roving `tabindex` on connective buttons; Arrow Up/Down move between visible nodes, Arrow Right/Left move to first child or parent, Home/End jump to first/last node. Focus-visible outline applies; `aria-selected` reflects selection on `treeitem` elements.
 

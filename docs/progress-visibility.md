@@ -124,6 +124,7 @@ Foreground, in order:
 
 - **One next** — the same `offerOpening` round as Home, named by the concept or lesson it covers;
 - **Course outline** — all three units, with the current unit expanded from the here marker, a you-are-here marker, done items marked behind a count toggle, and later units visible as collapsed headers with counts and what they wait on;
+- **Course tab unit picker** — the same three-unit states and waiting-on wording; later units are visible while locked and cannot be started until the existing unlock rules say so;
 - **Concept map** — prerequisite graph whose main-route statuses do not depend on optional `lat-*` lessons;
 - **You can now / In progress / Up next** — capability summary; “Up next” names the same `offerOpening` topic as Home and the next card, and is not a second action.
 

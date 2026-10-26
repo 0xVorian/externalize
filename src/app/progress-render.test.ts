@@ -33,7 +33,8 @@ describe('progress view course map', () => {
     expect(html).toContain(learnUi('en').level2Title);
     expect(html).toContain('you are here');
     expect(html).toContain('data-testid="course-outline-here"');
-    expect(html).toContain('after Unit 1 — Connectives');
+    expect(html).toContain('after Unit 1');
+    expect(html).not.toContain('after Unit 1 — Connectives');
     expect(html).toMatch(
       /data-testid="course-outline-unit-0"[\s\S]*course-outline-details[\s\S]*data-testid="course-outline-unit-1"/,
     );
@@ -55,7 +56,8 @@ describe('progress view course map', () => {
     expect(html).toContain(learnUi('fr').level0Title);
     expect(html).toContain(learnUi('fr').level1Title);
     expect(html).toContain('vous êtes ici');
-    expect(html).toContain('après Unité 0 — Syntaxe propositionnelle');
+    expect(html).toContain('après l’unité 0');
+    expect(html).not.toContain('après Unité 0 — Syntaxe propositionnelle');
     expect(html).toMatch(/0 leçons sur 5/);
     expect(html).not.toContain(progressUi('en').outlineHeading);
     expect(html).not.toMatch(/sections complete|sections sur/);

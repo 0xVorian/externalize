@@ -61,7 +61,7 @@ npm run test:e2e:ui
 | `e2e/smoke/translate-001.spec.ts` | Symbol-palette translation exercise |
 | `e2e/smoke/progress-sync.spec.ts` | Progress export → clear → import; passkey UI hidden on the static preview |
 | `e2e/accounts/passkeys.spec.ts` | Passkey sign-up / sign-in / add-passkey / merge / delete against local wrangler + D1 at 320px and 390px; same-device session resume; challenge replay; CSRF logout; malformed progress; concurrent sync |
-| `e2e/smoke/unit-picker.spec.ts` | Unit 0 / Unit 1 tab navigation |
+| `e2e/smoke/unit-picker.spec.ts` | Whole-course unit picker: later units visible and locked until the previous unit is finished; Unit 0 / Unit 1 tab navigation once unlocked |
 | `e2e/smoke/onboarding.spec.ts` | First-run intro skip and finish |
 | `e2e/smoke/counter-001.spec.ts` | Find-counterexample toggle and check |
 | `e2e/smoke/translate-002.spec.ts` | Translation try-again after wrong answer |
@@ -74,7 +74,7 @@ npm run test:e2e:ui
 | `e2e/mobile/high-risk.spec.ts` | Watch grid, ¬P watch table, evaluation, scope, translation, truth table, and proof at 320px and 390px |
 | `e2e/smoke/progress-visibility.spec.ts` | Learn meters, Unit 1 lesson count, practice session counting, consistency/scaffold moments, Unit 2 completion one-shot, session complete, Progress capability summary |
 | `e2e/smoke/course-map.spec.ts` | Home and Progress share one named round; Progress outline shows all three units |
-| `e2e/mobile/course-map.spec.ts` | Progress outline at 320px and 390px; at 390×844 the empty state shows all three unit headers on the first screen and mid-Unit 1 shows you-are-here on the first screen |
+| `e2e/mobile/course-map.spec.ts` | Progress outline at 320px and 390px; at 390×844 the empty state shows all three unit headers on the first screen in EN and FR, and mid-Unit 1 shows you-are-here on the first screen; Course tab shows locked later units |
 | `e2e/smoke/session-first.spec.ts` | Opening offer, bounded-round start/resume/completion, effort contract, import invalidation, re-entry and telemetry boundaries |
 | `e2e/smoke/source-route.spec.ts` | Logic and Theism route planning, repair, terminal completion/revisit, and source-return behavior |
 | `e2e/smoke/guided-evaluation.spec.ts` | Guided unset/partial assignment semantics, True/False → formal notation bridge, provisional selection, explicit Check and repair |

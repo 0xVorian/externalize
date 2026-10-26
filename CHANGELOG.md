@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The Course tab unit picker now shows all three units. Later units stay visible as upcoming/locked with the same count and waiting-on wording as the Progress outline; existing unlock rules are unchanged, so a locked unit cannot be started. ([#45](https://github.com/0xVorian/externalize/issues/45))
 - Home and Progress now share one next: the Progress card starts the same `offerOpening` round as Home, and both name the concept or lesson the round covers. Unit names and “lessons” wording are consistent; the exercise list stays collapsed after the outline. Locked units and finished lessons in the current unit stay collapsed so all three unit headers, and the you-are-here marker mid-unit, fit a 390×844 first screen. Capability “Up next” names that same round. ([#43](https://github.com/0xVorian/externalize/issues/43))
 - Session-first docs now say a short due-review grows on a miss when the leftover tail cannot hold explanation plus practice, not merely because there was “no tail”. A one-item or two-item due list both grow.
 - `docs/roadmap.md` now describes the v0.5.0 / v0.5.1 shipped baseline, the post-0.5.1 remediations already on `master` (mobile truth tables, session envelope, warm-up), optional passkey sync (#37), and the remaining GitHub Issues rather than “v0.4.0 + unreleased”.
@@ -27,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Empty Progress in French now fits the next card and all three unit headers on a 390×844 first screen, matching English. Locked-unit waiting-on copy no longer repeats the previous unit’s full title, so the count line stays on one row at 390px. ([#45](https://github.com/0xVorian/externalize/issues/45))
 - Main-route concept-map completion no longer waits on optional Logic and Theism (`lat-*`) lessons, so after Unit 1 Conditional is completed and Scope is available rather than locked. ([#43](https://github.com/0xVorian/externalize/issues/43))
 - Passkey/D1 hardening before production bind (#39): `/api/status` probes the migrated schema rather than `SELECT 1`; challenge admission is a single conditional INSERT plus an atomic per-IP UPSERT; failed sync retries with exponential backoff and jitter (401 still keeps the queue); `/api/sync` responses are `parseProgressStore`d and merges cannot grow past the parser cap.
 - A successful `/api/sync` is merged into the current local snapshot rather than overwriting it, so a save made while the request is in flight is kept and re-queued. A 401 no longer drops that queued push.
