@@ -17,7 +17,14 @@ function fullyOnFirstScreen(
   return Boolean(box && box.y >= 0 && box.y + box.height <= viewportHeight);
 }
 
-async function expectEmptyFirstScreen(page: Page): Promise<void> {
+function boxRange(
+  box: { y: number; height: number } | null,
+): string {
+  if (!box) return 'missing';
+  return `y=${box.y.toFixed(1)} bottom=${(box.y + box.height).toFixed(1)}`;
+}
+
+async function expectEmptyFirstScreen(page: Page, locale: 'en' | 'fr'): Promise<void> {
   const viewportHeight = page.viewportSize()!.height;
   await expect(page.getByTestId('progress-next')).toBeVisible();
   const nextBox = await page.getByTestId('progress-next').boundingBox();
@@ -26,11 +33,17 @@ async function expectEmptyFirstScreen(page: Page): Promise<void> {
     const header = await page
       .locator(`[data-testid="course-outline-unit-${unit}"] .course-outline-unit-header`)
       .boundingBox();
-    expect(fullyOnFirstScreen(header, viewportHeight), `unit ${unit} header`).toBe(true);
+    expect(
+      fullyOnFirstScreen(header, viewportHeight),
+      `${locale} unit ${unit} header ${boxRange(header)} vs ${viewportHeight}`,
+    ).toBe(true);
     const count = await page
       .locator(`[data-testid="course-outline-unit-${unit}"] .course-outline-unit-count`)
       .boundingBox();
-    expect(fullyOnFirstScreen(count, viewportHeight), `unit ${unit} count`).toBe(true);
+    expect(
+      fullyOnFirstScreen(count, viewportHeight),
+      `${locale} unit ${unit} count ${boxRange(count)} vs ${viewportHeight}`,
+    ).toBe(true);
     expect(count).toBeTruthy();
     expect(count!.height).toBeLessThan(28);
   }
@@ -76,11 +89,11 @@ test('empty Progress shows all three unit headers on the first 390px screen', as
   await gotoWithProgress(page, emptyProgress());
   await clickMode(page, 'progress');
 
-  await expectEmptyFirstScreen(page);
+  await expectEmptyFirstScreen(page, 'en');
 
   await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
   await expect(page.getByTestId('course-outline')).toContainText('Le cours');
-  await expectEmptyFirstScreen(page);
+  await expectEmptyFirstScreen(page, 'fr');
 });
 
 test('mid-Unit 1 Progress shows you-are-here on the first 390px screen', async ({

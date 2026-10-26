@@ -17,6 +17,8 @@
   --tap-min: 44px;
   font-family: "Segoe UI", system-ui, sans-serif;
   line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 * {
@@ -366,10 +368,45 @@ button {
 /* Must live next to the header rule: remediation.css loads first, so a later
    unscoped header declaration would restore the 0.75rem row gap. */
 @media (max-width: 400px) {
+  .app {
+    padding: 0.75rem 1rem 1.25rem;
+  }
+
+  .mode-nav {
+    margin: 0.45rem 0;
+  }
+
+  .mode-button {
+    padding-inline: 0.35rem;
+    font-size: 0.9rem;
+  }
+
+  .app-header h1 {
+    margin: 0.1rem 0 0.2rem;
+  }
+
+  .progress-card.what-next-card,
+  .progress-card.course-outline {
+    margin-top: 0.7rem;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .course-outline {
+    gap: 0.3rem;
+  }
+
   .course-outline-unit-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.1rem;
+    gap: 0;
+  }
+
+  .course-outline-unit-title {
+    line-height: 1.25;
+  }
+
+  .course-outline-unit-count {
+    line-height: 1.2;
   }
 }
 
@@ -443,7 +480,7 @@ button {
 
 .what-next-card .session-topic,
 .what-next-card .session-effort {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .progress-stats li {
@@ -987,7 +1024,7 @@ button {
 
 .symbol-palette{margin-top:1rem}.palette-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.75rem}.palette-button{min-width:44px;min-height:44px;padding:.5rem .75rem;border:1px solid #ccc;border-radius:8px}.built-formula{font-family:ui-monospace,monospace;font-size:1.25rem}
 
-.what-next-detail{margin:0 0 .5rem;font-size:.95rem;line-height:1.5}.onboarding-overlay{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:1rem;background:var(--bg)}.onboarding-card{width:100%;max-width:26rem;padding:1.25rem;border:1px solid var(--border);border-radius:1rem;background:var(--surface)}.onboarding-step{margin:0 0 .5rem;color:var(--muted);font-size:.8rem;text-transform:uppercase}.onboarding-title{margin:0 0 .75rem;font-size:1.5rem}.onboarding-body{margin:0 0 1rem;font-size:.95rem;line-height:1.5}.onboarding-visual{margin:0 0 1.25rem;padding:1rem;border:1px solid var(--border);border-radius:.75rem;background:var(--bg)}.onboarding-actions{display:grid;gap:.5rem}.onboarding-tree-demo{display:flex;flex-direction:column;align-items:center;gap:.5rem}.onboarding-tree-row{display:flex;gap:2rem}.onboarding-tree-node{display:inline-flex;align-items:center;justify-content:center;min-width:2rem;min-height:2rem;border:1px solid var(--border);border-radius:.5rem;font-family:ui-monospace,monospace;padding:.25rem .5rem}.onboarding-tree-node.root{border-color:var(--accent);background:var(--accent-soft);font-weight:600}.onboarding-segment-demo{display:flex;align-items:center;justify-content:center;gap:.35rem}.onboarding-segment-label{margin-right:.35rem;font-family:ui-monospace,monospace;font-weight:600}.onboarding-segment{display:inline-flex;align-items:center;justify-content:center;min-width:var(--tap-min);min-height:var(--tap-min);border:1px solid var(--border);border-radius:.5rem;font-weight:600}.onboarding-segment.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}.onboarding-nav-demo{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem}.onboarding-nav-item{padding:.5rem .25rem;border:1px solid var(--border);border-radius:.5rem;font-size:.75rem;text-align:center}.onboarding-nav-item.active{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.what-next-detail{margin:0 0 .35rem;font-size:.95rem;line-height:1.5}.onboarding-overlay{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:1rem;background:var(--bg)}.onboarding-card{width:100%;max-width:26rem;padding:1.25rem;border:1px solid var(--border);border-radius:1rem;background:var(--surface)}.onboarding-step{margin:0 0 .5rem;color:var(--muted);font-size:.8rem;text-transform:uppercase}.onboarding-title{margin:0 0 .75rem;font-size:1.5rem}.onboarding-body{margin:0 0 1rem;font-size:.95rem;line-height:1.5}.onboarding-visual{margin:0 0 1.25rem;padding:1rem;border:1px solid var(--border);border-radius:.75rem;background:var(--bg)}.onboarding-actions{display:grid;gap:.5rem}.onboarding-tree-demo{display:flex;flex-direction:column;align-items:center;gap:.5rem}.onboarding-tree-row{display:flex;gap:2rem}.onboarding-tree-node{display:inline-flex;align-items:center;justify-content:center;min-width:2rem;min-height:2rem;border:1px solid var(--border);border-radius:.5rem;font-family:ui-monospace,monospace;padding:.25rem .5rem}.onboarding-tree-node.root{border-color:var(--accent);background:var(--accent-soft);font-weight:600}.onboarding-segment-demo{display:flex;align-items:center;justify-content:center;gap:.35rem}.onboarding-segment-label{margin-right:.35rem;font-family:ui-monospace,monospace;font-weight:600}.onboarding-segment{display:inline-flex;align-items:center;justify-content:center;min-width:var(--tap-min);min-height:var(--tap-min);border:1px solid var(--border);border-radius:.5rem;font-weight:600}.onboarding-segment.active{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}.onboarding-nav-demo{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem}.onboarding-nav-item{padding:.5rem .25rem;border:1px solid var(--border);border-radius:.5rem;font-size:.75rem;text-align:center}.onboarding-nav-item.active{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
 
 .proof-panel { margin-top: 0.75rem; }
 .proof-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
@@ -1255,5 +1292,17 @@ button {
   .session-opening h1,
   .session-complete h1 {
     font-size: 1.45rem;
+  }
+}
+
+/* After the bundled unscoped next-card rules so 390px Progress stays compact. */
+@media (max-width: 400px) {
+  .what-next-card .session-topic,
+  .what-next-card .session-effort {
+    margin-bottom: 0.3rem;
+  }
+
+  .what-next-detail {
+    margin-bottom: 0.35rem;
   }
 }
