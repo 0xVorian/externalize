@@ -340,12 +340,6 @@
 }
 
 @media (max-width: 400px) {
-  .course-outline-unit-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.1rem;
-  }
-
   .course-outline-lesson {
     align-items: flex-start;
   }
