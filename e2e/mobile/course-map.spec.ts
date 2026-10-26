@@ -10,17 +10,30 @@ function onFirstScreen(
   return Boolean(box && box.y >= 0 && box.y < viewportHeight);
 }
 
+function fullyOnFirstScreen(
+  box: { y: number; height: number } | null,
+  viewportHeight: number,
+): boolean {
+  return Boolean(box && box.y >= 0 && box.y + box.height <= viewportHeight);
+}
+
 async function expectEmptyFirstScreen(page: Page): Promise<void> {
   const viewportHeight = page.viewportSize()!.height;
   await expect(page.getByTestId('progress-next')).toBeVisible();
   const nextBox = await page.getByTestId('progress-next').boundingBox();
-  const unit0 = await page.locator('#course-outline-unit-0-heading').boundingBox();
-  const unit1 = await page.locator('#course-outline-unit-1-heading').boundingBox();
-  const unit2 = await page.locator('#course-outline-unit-2-heading').boundingBox();
   expect(onFirstScreen(nextBox, viewportHeight)).toBe(true);
-  expect(onFirstScreen(unit0, viewportHeight)).toBe(true);
-  expect(onFirstScreen(unit1, viewportHeight)).toBe(true);
-  expect(onFirstScreen(unit2, viewportHeight)).toBe(true);
+  for (const unit of [0, 1, 2] as const) {
+    const header = await page
+      .locator(`[data-testid="course-outline-unit-${unit}"] .course-outline-unit-header`)
+      .boundingBox();
+    expect(fullyOnFirstScreen(header, viewportHeight), `unit ${unit} header`).toBe(true);
+    const count = await page
+      .locator(`[data-testid="course-outline-unit-${unit}"] .course-outline-unit-count`)
+      .boundingBox();
+    expect(fullyOnFirstScreen(count, viewportHeight), `unit ${unit} count`).toBe(true);
+    expect(count).toBeTruthy();
+    expect(count!.height).toBeLessThan(28);
+  }
 }
 
 test('Progress outline fits a phone viewport and keeps later units visible', async ({ page }) => {
@@ -64,19 +77,10 @@ test('empty Progress shows all three unit headers on the first 390px screen', as
   await clickMode(page, 'progress');
 
   await expectEmptyFirstScreen(page);
-  const unit1Count = page.locator(
-    '[data-testid="course-outline-unit-1"] .course-outline-unit-count',
-  );
-  const countBox = await unit1Count.boundingBox();
-  expect(countBox).toBeTruthy();
-  expect(countBox!.height).toBeLessThan(28);
 
   await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
   await expect(page.getByTestId('course-outline')).toContainText('Le cours');
   await expectEmptyFirstScreen(page);
-  const frCountBox = await unit1Count.boundingBox();
-  expect(frCountBox).toBeTruthy();
-  expect(frCountBox!.height).toBeLessThan(28);
 });
 
 test('mid-Unit 1 Progress shows you-are-here on the first 390px screen', async ({

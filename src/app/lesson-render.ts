@@ -122,10 +122,8 @@ function renderUnitPickerButton(
   const viewing = viewingUnit === unit.unit;
   const status = lessonStatusForPicker(copy, unit.status);
   const ariaLabel = copy.progressItemAria(title, `${countLine}, ${status}`);
-  const lockedAttrs = locked
-    ? ' disabled aria-disabled="true"'
-    : '';
-  return `<button type="button" class="unit-button unit-button-${unit.status}${viewing ? ' active' : ''}" aria-current="${viewing ? 'page' : 'false'}" data-action="select-unit" data-unit="${unit.unit}" data-status="${unit.status}" data-testid="unit-picker-${unit.unit}" aria-label="${ariaLabel}"${lockedAttrs}><span class="unit-button-title">${title}</span><span class="unit-button-meta">${countLine}</span></button>`;
+  const lockedAttr = locked ? ' disabled' : '';
+  return `<button type="button" class="unit-button${viewing ? ' active' : ''}" aria-current="${viewing ? 'page' : 'false'}" data-action="select-unit" data-unit="${unit.unit}" data-status="${unit.status}" data-testid="unit-picker-${unit.unit}" aria-label="${ariaLabel}"${lockedAttr}><span class="unit-button-title">${title}</span><span class="unit-button-meta">${countLine}</span></button>`;
 }
 
 function lessonStatusForPicker(

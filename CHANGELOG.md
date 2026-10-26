@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Empty Progress in French now fits the next card and all three unit headers on a 390×844 first screen, matching English. Locked-unit waiting-on copy no longer repeats the previous unit’s full title, so the count line stays on one row at 390px. ([#45](https://github.com/0xVorian/externalize/issues/45))
+- Empty Progress in French now fits the next card and all three unit headers — including each unit’s count line — on a 390×844 first screen, matching English. Locked-unit waiting-on copy no longer repeats the previous unit’s full title, so the count line stays on one row at 390px. ([#45](https://github.com/0xVorian/externalize/issues/45))
 - Main-route concept-map completion no longer waits on optional Logic and Theism (`lat-*`) lessons, so after Unit 1 Conditional is completed and Scope is available rather than locked. ([#43](https://github.com/0xVorian/externalize/issues/43))
 - Passkey/D1 hardening before production bind (#39): `/api/status` probes the migrated schema rather than `SELECT 1`; challenge admission is a single conditional INSERT plus an atomic per-IP UPSERT; failed sync retries with exponential backoff and jitter (401 still keeps the queue); `/api/sync` responses are `parseProgressStore`d and merges cannot grow past the parser cap.
 - A successful `/api/sync` is merged into the current local snapshot rather than overwriting it, so a save made while the request is in flight is kept and re-queued. A 401 no longer drops that queued push.

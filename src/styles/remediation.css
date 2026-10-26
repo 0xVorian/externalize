@@ -72,8 +72,7 @@
   color: var(--accent);
 }
 
-.unit-button:disabled,
-.unit-button[aria-disabled="true"] {
+.unit-button:disabled {
   cursor: default;
   opacity: 1;
   color: var(--muted);
@@ -344,7 +343,7 @@
   .course-outline-unit-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.15rem;
+    gap: 0.1rem;
   }
 
   .course-outline-lesson {

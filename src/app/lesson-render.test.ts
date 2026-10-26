@@ -84,11 +84,14 @@ describe('lesson presentation routing', () => {
     expect(html).toMatch(/data-testid="unit-picker-1"[^>]* disabled/);
     expect(html).toMatch(/data-unit="2"[^>]*data-status="locked"/);
     expect(html).toMatch(/data-testid="unit-picker-2"[^>]* disabled/);
+    expect(html).not.toContain('aria-disabled');
     expect(html).toContain(progressUi('en').waitingOn(0));
     expect(html).toContain(progressUi('en').waitingOn(1));
     expect(html).not.toMatch(
       /data-testid="unit-picker-0"[^>]*disabled/,
     );
+    expect(html).not.toContain('unit-button-locked');
+    expect(html).not.toContain('unit-button-current');
   });
 
   it('uses independent French waiting-on wording on locked Course units', () => {
