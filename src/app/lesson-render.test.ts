@@ -80,12 +80,10 @@ describe('lesson presentation routing', () => {
     expect(html).toContain('data-testid="unit-picker-0"');
     expect(html).toContain('data-testid="unit-picker-1"');
     expect(html).toContain('data-testid="unit-picker-2"');
-    expect(html).toMatch(
-      /data-testid="unit-picker-1"[^>]*disabled[^>]*data-status="locked"|data-testid="unit-picker-1"[^>]*data-status="locked"[^>]*disabled/,
-    );
-    expect(html).toMatch(
-      /data-testid="unit-picker-2"[^>]*disabled[^>]*data-status="locked"|data-testid="unit-picker-2"[^>]*data-status="locked"[^>]*disabled/,
-    );
+    expect(html).toMatch(/data-unit="1"[^>]*data-status="locked"/);
+    expect(html).toMatch(/data-testid="unit-picker-1"[^>]* disabled/);
+    expect(html).toMatch(/data-unit="2"[^>]*data-status="locked"/);
+    expect(html).toMatch(/data-testid="unit-picker-2"[^>]* disabled/);
     expect(html).toContain(progressUi('en').waitingOn(0));
     expect(html).toContain(progressUi('en').waitingOn(1));
     expect(html).not.toMatch(
@@ -120,9 +118,8 @@ describe('lesson presentation routing', () => {
     expect(html).not.toMatch(
       /data-testid="unit-picker-1"[^>]*disabled/,
     );
-    expect(html).toMatch(
-      /data-testid="unit-picker-2"[^>]*(disabled|data-status="locked")/,
-    );
+    expect(html).toMatch(/data-unit="2"[^>]*data-status="locked"/);
+    expect(html).toMatch(/data-testid="unit-picker-2"[^>]* disabled/);
     expect(html).toContain(progressUi('en').waitingOn(1));
   });
 });
