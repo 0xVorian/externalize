@@ -187,6 +187,18 @@
       "concept": "biconditional"
     },
     {
+      "id": "level1-13-nesting",
+      "concept": "scope"
+    },
+    {
+      "id": "level1-14-nesting-guided",
+      "concept": "scope"
+    },
+    {
+      "id": "level1-15-translate",
+      "concept": "translation"
+    },
+    {
       "id": "level2-01-nesting",
       "concept": "scope"
     },

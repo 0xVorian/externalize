@@ -84,14 +84,14 @@ describe('truth-table-render', () => {
         targetAtom: 'Q',
         targetValue: null,
       });
-      expect(undetermined).toContain('>T</td>');
+      expect(undetermined).toContain('<th scope="row">T</th>');
       expect(undetermined).toMatch(/data-testid="truth-result-cell"><span[^>]*>—<\/span>/);
 
       const determined = renderLiveTruthRow('en', 'P ∧ Q', { P: false }, {
         targetAtom: 'Q',
         targetValue: null,
       });
-      expect(determined).toContain('>F</td>');
+      expect(determined).toContain('<th scope="row">F</th>');
       expect(determined).toMatch(/data-testid="truth-result-cell">F<\/td>/);
 
       const stillCommitted = renderLiveTruthRow('en', 'P ∧ Q', { P: false }, {
@@ -164,8 +164,10 @@ describe('truth-table-render', () => {
       expect(html).toContain('class="sr-only">Case 1 of 2</span>');
       for (const row of bodyRows) {
         expect(row.match(/<(?:th|td)\b/g)).toHaveLength(headerCells.length);
+        expect(row).toMatch(/<th scope="row">/);
       }
-      expect(html).toMatch(/<td><span class="sr-only">Case 1 of 2<\/span>T<\/td>/);
+      expect(html).toMatch(/<th scope="row"><span class="sr-only">Case 1 of 2<\/span>T<\/th>/);
+      expect(html).not.toMatch(/<td><span class="sr-only">/);
       expect(html).toMatch(/data-testid="truth-result-cell">F<\/td>/);
     });
   });
