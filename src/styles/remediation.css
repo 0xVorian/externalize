@@ -30,9 +30,14 @@
 }
 
 .unit-button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.15rem;
   min-width: 0;
   min-height: var(--tap-min);
-  padding: 0.55rem 0.4rem;
+  padding: 0.45rem 0.4rem;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
   background: var(--surface);
@@ -41,6 +46,19 @@
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.2;
+  text-align: left;
+}
+
+.unit-button-title {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.unit-button-meta {
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--muted);
 }
 
 .unit-button.active {
@@ -48,6 +66,16 @@
   background: var(--accent-soft);
   color: var(--accent);
   box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.unit-button.active .unit-button-meta {
+  color: var(--accent);
+}
+
+.unit-button:disabled {
+  cursor: default;
+  opacity: 1;
+  color: var(--muted);
 }
 
 .route-picker {
@@ -312,12 +340,6 @@
 }
 
 @media (max-width: 400px) {
-  .course-outline-unit-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.15rem;
-  }
-
   .course-outline-lesson {
     align-items: flex-start;
   }

@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { clickMode, gotoWithProgress } from '../helpers/app';
+import { test, expect, type Page } from '@playwright/test';
+import { clickMode, gotoLearnWithProgress, gotoWithProgress, unitTab } from '../helpers/app';
 import { emptyProgress, progressAtLesson } from '../helpers/progress';
 import { expectNoPageOverflow } from '../helpers/tables';
 
@@ -8,6 +8,45 @@ function onFirstScreen(
   viewportHeight: number,
 ): boolean {
   return Boolean(box && box.y >= 0 && box.y < viewportHeight);
+}
+
+function fullyOnFirstScreen(
+  box: { y: number; height: number } | null,
+  viewportHeight: number,
+): boolean {
+  return Boolean(box && box.y >= 0 && box.y + box.height <= viewportHeight);
+}
+
+function boxRange(
+  box: { y: number; height: number } | null,
+): string {
+  if (!box) return 'missing';
+  return `y=${box.y.toFixed(1)} bottom=${(box.y + box.height).toFixed(1)}`;
+}
+
+async function expectEmptyFirstScreen(page: Page, locale: 'en' | 'fr'): Promise<void> {
+  const viewportHeight = page.viewportSize()!.height;
+  await expect(page.getByTestId('progress-next')).toBeVisible();
+  const nextBox = await page.getByTestId('progress-next').boundingBox();
+  expect(onFirstScreen(nextBox, viewportHeight)).toBe(true);
+  for (const unit of [0, 1, 2] as const) {
+    const header = await page
+      .locator(`[data-testid="course-outline-unit-${unit}"] .course-outline-unit-header`)
+      .boundingBox();
+    expect(
+      fullyOnFirstScreen(header, viewportHeight),
+      `${locale} unit ${unit} header ${boxRange(header)} vs ${viewportHeight}`,
+    ).toBe(true);
+    const count = await page
+      .locator(`[data-testid="course-outline-unit-${unit}"] .course-outline-unit-count`)
+      .boundingBox();
+    expect(
+      fullyOnFirstScreen(count, viewportHeight),
+      `${locale} unit ${unit} count ${boxRange(count)} vs ${viewportHeight}`,
+    ).toBe(true);
+    expect(count).toBeTruthy();
+    expect(count!.height).toBeLessThan(28);
+  }
 }
 
 test('Progress outline fits a phone viewport and keeps later units visible', async ({ page }) => {
@@ -50,24 +89,11 @@ test('empty Progress shows all three unit headers on the first 390px screen', as
   await gotoWithProgress(page, emptyProgress());
   await clickMode(page, 'progress');
 
-  const viewportHeight = page.viewportSize()!.height;
-  await expect(page.getByTestId('progress-next')).toBeVisible();
-  const nextBox = await page.getByTestId('progress-next').boundingBox();
-  const unit0 = await page
-    .locator('#course-outline-unit-0-heading')
-    .boundingBox();
-  const unit1 = await page
-    .locator('#course-outline-unit-1-heading')
-    .boundingBox();
-  const unit2 = await page
-    .locator('#course-outline-unit-2-heading')
-    .boundingBox();
-  expect(onFirstScreen(nextBox, viewportHeight)).toBe(true);
-  expect(onFirstScreen(unit0, viewportHeight)).toBe(true);
-  expect(onFirstScreen(unit1, viewportHeight)).toBe(true);
-  expect(onFirstScreen(unit2, viewportHeight)).toBe(true);
-  const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
-  console.log(`empty Progress height ${pageHeight}px at 390x${viewportHeight}`);
+  await expectEmptyFirstScreen(page, 'en');
+
+  await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
+  await expect(page.getByTestId('course-outline')).toContainText('Le cours');
+  await expectEmptyFirstScreen(page, 'fr');
 });
 
 test('mid-Unit 1 Progress shows you-are-here on the first 390px screen', async ({
@@ -80,6 +106,16 @@ test('mid-Unit 1 Progress shows you-are-here on the first 390px screen', async (
   const viewportHeight = page.viewportSize()!.height;
   const hereBox = await page.getByTestId('course-outline-here').boundingBox();
   expect(onFirstScreen(hereBox, viewportHeight)).toBe(true);
-  const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
-  console.log(`mid-Unit 1 Progress height ${pageHeight}px at 390x${viewportHeight}`);
+});
+
+test('Course tab shows later units locked without starting them', async ({ page }) => {
+  await gotoLearnWithProgress(page, emptyProgress());
+  await expect(page.getByTestId('unit-picker')).toBeVisible();
+  await expect(unitTab(page, 0)).toHaveAttribute('aria-current', 'page');
+  await expect(unitTab(page, 1)).toBeDisabled();
+  await expect(unitTab(page, 2)).toBeDisabled();
+  await expect(unitTab(page, 1)).toContainText('after Unit 0');
+  await unitTab(page, 2).click({ force: true });
+  await expect(page.locator('h1')).toContainText('Unit 0');
+  await expectNoPageOverflow(page);
 });

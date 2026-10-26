@@ -66,7 +66,7 @@ export function modeButton(page: Page, mode: 'learn' | 'practice' | 'progress') 
   return page.locator(`[data-action="set-mode"][data-mode="${mode}"]`);
 }
 
-export function unitTab(page: Page, unit: 0 | 1) {
+export function unitTab(page: Page, unit: 0 | 1 | 2) {
   return page.locator(`[data-action="select-unit"][data-unit="${unit}"]`);
 }
 

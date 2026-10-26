@@ -1,4 +1,4 @@
-import { learnUi, getLessonCopy, ui } from '../i18n';
+import { learnUi, getLessonCopy, progressUi, ui } from '../i18n';
 import { lessonsForUnit, lessonUnit, ALL_LEARN_LESSONS } from './lessons';
 import type { LessonState } from './lesson-state';
 import { currentGuidedHint, currentGuidedTarget } from './lesson-state';
@@ -6,6 +6,8 @@ import { renderShellHeader } from './shell-render';
 import { renderRoutePicker } from './route-picker-render';
 import { renderLiveTruthRow, renderTruthTable, renderWatchGrid, usesWatchGrid } from './truth-table-render';
 import { renderSessionFrame } from './session-chrome-render';
+import { buildCourseOutline, type CourseOutlineUnit } from './course-outline';
+import { unitCountLine } from './course-outline-render';
 
 function renderGuidedValueWorkspace(state: LessonState, atom: string): string {
   const learn = learnUi(state.locale);
@@ -101,25 +103,59 @@ function renderWatchLesson(state: LessonState, sessionUnit = false): string {
   `;
 }
 
+function unitPickerTitle(locale: LessonState['locale'], unit: 0 | 1 | 2): string {
+  const learn = learnUi(locale);
+  if (unit === 0) return learn.level0Title;
+  if (unit === 1) return learn.level1Title;
+  return learn.level2Title;
+}
+
+function renderUnitPickerButton(
+  state: LessonState,
+  viewingUnit: 0 | 1 | 2,
+  unit: CourseOutlineUnit,
+): string {
+  const copy = progressUi(state.locale);
+  const title = unitPickerTitle(state.locale, unit.unit);
+  const countLine = unitCountLine(copy, unit);
+  const locked = unit.status === 'locked';
+  const viewing = viewingUnit === unit.unit;
+  const status = lessonStatusForPicker(copy, unit.status);
+  const ariaLabel = copy.progressItemAria(title, `${countLine}, ${status}`);
+  const lockedAttr = locked ? ' disabled' : '';
+  return `<button type="button" class="unit-button${viewing ? ' active' : ''}" aria-current="${viewing ? 'page' : 'false'}" data-action="select-unit" data-unit="${unit.unit}" data-status="${unit.status}" data-testid="unit-picker-${unit.unit}" aria-label="${ariaLabel}"${lockedAttr}><span class="unit-button-title">${title}</span><span class="unit-button-meta">${countLine}</span></button>`;
+}
+
+function lessonStatusForPicker(
+  copy: ReturnType<typeof progressUi>,
+  status: CourseOutlineUnit['status'],
+): string {
+  if (status === 'done') return copy.lessonDone;
+  if (status === 'current') return copy.currentUnitAria;
+  return copy.exerciseLocked;
+}
+
 function renderUnitPicker(
   state: LessonState,
-  level0Complete: boolean,
-  level1Complete: boolean,
+  options: {
+    level0Complete: boolean;
+    level1Complete: boolean;
+    lessonsCompleted: readonly string[];
+  },
 ): string {
-  if (!level0Complete) {
-    return '';
-  }
   const learn = learnUi(state.locale);
-  const unit = lessonUnit(state.lesson.id);
-  const unit2Button =
-    level1Complete
-      ? `<button type="button" class="unit-button ${unit === 2 ? 'active' : ''}" aria-current="${unit === 2 ? 'page' : 'false'}" data-action="select-unit" data-unit="2">${learn.level2Title}</button>`
-      : '';
+  const viewingUnit = lessonUnit(state.lesson.id);
+  const outline = buildCourseOutline({
+    lessonsCompleted: [...options.lessonsCompleted],
+    level0Complete: options.level0Complete,
+    level1Complete: options.level1Complete,
+  });
+  const buttons = outline
+    .map((unit) => renderUnitPickerButton(state, viewingUnit, unit))
+    .join('');
   return `
     <nav class="unit-picker" data-testid="unit-picker" aria-label="${learn.unitPickerLabel}">
-      <button type="button" class="unit-button ${unit === 0 ? 'active' : ''}" aria-current="${unit === 0 ? 'page' : 'false'}" data-action="select-unit" data-unit="0">${learn.level0Title}</button>
-      <button type="button" class="unit-button ${unit === 1 ? 'active' : ''}" aria-current="${unit === 1 ? 'page' : 'false'}" data-action="select-unit" data-unit="1">${learn.level1Title}</button>
-      ${unit2Button}
+      ${buttons}
     </nav>
   `;
 }
@@ -160,6 +196,7 @@ export function renderLessonView(
     practiceUnlocked: boolean;
     level0Complete: boolean;
     level1Complete: boolean;
+    lessonsCompleted?: readonly string[];
     learnPathComplete: boolean;
     activeRouteId?: string;
     learnProgress: {
@@ -266,7 +303,11 @@ export function renderLessonView(
       </section>
 
       ${options.activeRouteId ? renderRoutePicker(state.locale, options.activeRouteId) : ''}
-      ${renderUnitPicker(state, options.level0Complete, options.level1Complete)}
+      ${renderUnitPicker(state, {
+        level0Complete: options.level0Complete,
+        level1Complete: options.level1Complete,
+        lessonsCompleted: options.lessonsCompleted ?? [],
+      })}
       ${unitCompleteCard}
       ${renderCompletionToast(state)}
 

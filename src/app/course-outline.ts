@@ -6,6 +6,11 @@ import {
 import { conceptForLesson } from './prerequisites';
 import type { ProgressStore } from './storage';
 
+export type CourseOutlineStore = Pick<
+  ProgressStore,
+  'lessonsCompleted' | 'level0Complete' | 'level1Complete'
+>;
+
 export type OutlineLessonStatus = 'done' | 'here' | 'upcoming' | 'locked';
 export type OutlineUnitStatus = 'done' | 'current' | 'locked';
 
@@ -30,7 +35,7 @@ export type CourseOutlineUnit = {
   concepts: CourseOutlineConceptGroup[];
 };
 
-export function currentFoundationsUnit(store: ProgressStore): 0 | 1 | 2 {
+export function currentFoundationsUnit(store: CourseOutlineStore): 0 | 1 | 2 {
   if (!store.level0Complete) {
     return 0;
   }
@@ -40,7 +45,7 @@ export function currentFoundationsUnit(store: ProgressStore): 0 | 1 | 2 {
   return 2;
 }
 
-export function hereLessonId(store: ProgressStore): string | undefined {
+export function hereLessonId(store: CourseOutlineStore): string | undefined {
   if (isLearnPathComplete(store.lessonsCompleted)) {
     return undefined;
   }
@@ -51,7 +56,7 @@ export function hereLessonId(store: ProgressStore): string | undefined {
   return lesson.id;
 }
 
-function unitUnlocked(store: ProgressStore, unit: 0 | 1 | 2): boolean {
+function unitUnlocked(store: CourseOutlineStore, unit: 0 | 1 | 2): boolean {
   if (unit === 0) {
     return true;
   }
@@ -87,7 +92,7 @@ export function groupUnitLessonsByConcept(
   return groups;
 }
 
-export function buildCourseOutline(store: ProgressStore): CourseOutlineUnit[] {
+export function buildCourseOutline(store: CourseOutlineStore): CourseOutlineUnit[] {
   const current = currentFoundationsUnit(store);
   const hereId = hereLessonId(store);
   const completed = new Set(store.lessonsCompleted);

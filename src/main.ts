@@ -860,6 +860,7 @@ function render(): void {
       practiceUnlocked,
       level0Complete: progress.level0Complete,
       level1Complete: progress.level1Complete,
+      lessonsCompleted: progress.lessonsCompleted,
       learnPathComplete: isLearnPathComplete(progress.lessonsCompleted),
       activeRouteId: progress.activeRouteId,
       learnProgress: deriveLearnProgress(lessonState.lesson.id, progress.lessonsCompleted),

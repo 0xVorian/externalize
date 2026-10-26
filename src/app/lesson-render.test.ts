@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createLessonState } from './lesson-state';
 import { renderLessonView } from './lesson-render';
-import { getLessonDefinition } from './lessons';
+import { getLessonDefinition, LEVEL_0_LESSONS } from './lessons';
+import { progressUi } from '../i18n';
 
 const defaultLearnProgress = {
   practiceUnlocked: false,
@@ -70,5 +71,58 @@ describe('lesson presentation routing', () => {
     expect(laterTag).toContain('aria-live="off"');
     expect(laterTag).not.toContain('role="status"');
     expect(laterHtml).toContain(notice);
+  });
+
+  it('shows all three Course units for a new learner, with later units locked', () => {
+    const state = createLessonState('en', getLessonDefinition('level0-01-letters')!);
+    const html = renderLessonView(state, defaultLearnProgress);
+    expect(html).toContain('data-testid="unit-picker"');
+    expect(html).toContain('data-testid="unit-picker-0"');
+    expect(html).toContain('data-testid="unit-picker-1"');
+    expect(html).toContain('data-testid="unit-picker-2"');
+    expect(html).toMatch(/data-unit="1"[^>]*data-status="locked"/);
+    expect(html).toMatch(/data-testid="unit-picker-1"[^>]* disabled/);
+    expect(html).toMatch(/data-unit="2"[^>]*data-status="locked"/);
+    expect(html).toMatch(/data-testid="unit-picker-2"[^>]* disabled/);
+    expect(html).not.toContain('aria-disabled');
+    expect(html).toContain(progressUi('en').waitingOn(0));
+    expect(html).toContain(progressUi('en').waitingOn(1));
+    expect(html).not.toMatch(
+      /data-testid="unit-picker-0"[^>]*disabled/,
+    );
+    expect(html).not.toContain('unit-button-locked');
+    expect(html).not.toContain('unit-button-current');
+  });
+
+  it('uses independent French waiting-on wording on locked Course units', () => {
+    const state = createLessonState('fr', getLessonDefinition('level0-01-letters')!);
+    const html = renderLessonView(state, defaultLearnProgress);
+    expect(html).toContain(progressUi('fr').waitingOn(0));
+    expect(html).toContain('0 leçons sur 15');
+    expect(html).not.toContain(progressUi('en').waitingOn(0));
+  });
+
+  it('lets a finished Unit 0 stay selectable while Unit 2 remains locked', () => {
+    const state = createLessonState('en', getLessonDefinition('level1-01-neg')!);
+    const html = renderLessonView(state, {
+      ...defaultLearnProgress,
+      level0Complete: true,
+      lessonsCompleted: LEVEL_0_LESSONS.map((lesson) => lesson.id),
+      learnProgress: {
+        unit: 1,
+        lessonPosition: 1,
+        lessonTotal: 15,
+        completedInUnit: 0,
+      },
+    });
+    expect(html).not.toMatch(
+      /data-testid="unit-picker-0"[^>]*disabled/,
+    );
+    expect(html).not.toMatch(
+      /data-testid="unit-picker-1"[^>]*disabled/,
+    );
+    expect(html).toMatch(/data-unit="2"[^>]*data-status="locked"/);
+    expect(html).toMatch(/data-testid="unit-picker-2"[^>]* disabled/);
+    expect(html).toContain(progressUi('en').waitingOn(1));
   });
 });

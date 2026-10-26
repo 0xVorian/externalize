@@ -5,8 +5,9 @@ import {
   hereLessonId,
   splitCurrentUnitGroups,
 } from './course-outline';
-import { lessonTitleMatchesConcept } from './course-outline-render';
+import { lessonTitleMatchesConcept, unitCountLine } from './course-outline-render';
 import { completeLesson, loadProgress } from './storage';
+import { progressUi } from '../i18n';
 
 function completeIds(ids: readonly string[]) {
   let store = loadProgress();
@@ -71,6 +72,16 @@ describe('course outline', () => {
     expect(split.doneCount).toBe(2);
     expect(split.visibleGroups[0]?.lessons[0]?.status).toBe('here');
     expect(split.remainingCount).toBeGreaterThan(0);
+  });
+
+  it('keeps the locked count line short enough for a 390px row', () => {
+    const outline = buildCourseOutline(loadProgress());
+    const en = unitCountLine(progressUi('en'), outline[1]!);
+    const fr = unitCountLine(progressUi('fr'), outline[1]!);
+    expect(en).toBe('0 of 15 lessons · after Unit 0');
+    expect(fr).toBe('0 leçons sur 15 · après l’unité 0');
+    expect(en.length).toBeLessThan(36);
+    expect(fr.length).toBeLessThan(42);
   });
 
   it('treats concept labels with a symbol suffix as matching the lesson title', () => {

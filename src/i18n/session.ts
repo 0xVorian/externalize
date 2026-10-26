@@ -142,7 +142,7 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     detail: (kind) => {
       switch (kind) {
         case 'start':
-          return 'Quelques étapes courtes. Rien à configurer avant de commencer.';
+          return 'Quelques étapes courtes, sans préparation.';
         case 'continue':
           return 'Reprendre à la prochaine étape utile.';
         case 'quick-review':

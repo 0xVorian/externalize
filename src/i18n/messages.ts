@@ -958,7 +958,7 @@ export type ProgressUiCopy = {
   lessonsStatus: (done: number, total: number) => string;
   youAreHere: string;
   lessonUpcoming: string;
-  waitingOn: (unitTitle: string) => string;
+  waitingOn: (unit: 0 | 1) => string;
   currentUnitAria: string;
   showLessons: string;
   doneLessonsSummary: (count: number) => string;
@@ -1008,7 +1008,7 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lessonsStatus: (done, total) => `${done} of ${total} lessons`,
     youAreHere: 'you are here',
     lessonUpcoming: 'upcoming',
-    waitingOn: (unitTitle) => `after ${unitTitle}`,
+    waitingOn: (unit) => `after Unit ${unit}`,
     currentUnitAria: 'current unit',
     showLessons: 'Show lessons',
     doneLessonsSummary: (count) =>
@@ -1089,7 +1089,7 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
       `${done} leçon${done === 1 ? '' : 's'} sur ${total}`,
     youAreHere: 'vous êtes ici',
     lessonUpcoming: 'à venir',
-    waitingOn: (unitTitle) => `après ${unitTitle}`,
+    waitingOn: (unit) => `après l’unité ${unit}`,
     currentUnitAria: 'unité en cours',
     showLessons: 'Voir les leçons',
     doneLessonsSummary: (count) =>
