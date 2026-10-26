@@ -185,19 +185,15 @@ function renderDisclosure(
 
 function renderProgressNextCard(
   locale: Locale,
-  store: ProgressStore,
   offer: OpeningOffer,
 ): string {
-  const copy = progressUi(locale);
   const session = sessionUi(locale);
-  const lastSeen = `<p class="progress-meta">${copy.lastSeen(formatResumeTime(locale, store.lastVisitedAt))}</p>`;
 
   if (offer.kind === 'idle' || !offer.plan) {
     return `
       <section class="progress-card what-next-card" data-testid="progress-next" aria-labelledby="progress-what-next-heading">
         <h2 class="panel-title" id="progress-what-next-heading">${session.idleHeading}</h2>
         <p class="what-next-detail">${session.idleBody}</p>
-        ${lastSeen}
       </section>
     `;
   }
@@ -213,7 +209,6 @@ function renderProgressNextCard(
       ${topicLine}
       <p class="what-next-detail">${detail}</p>
       <p class="session-effort" data-testid="opening-effort">${session.effort(offer.plan.steps.length, offer.plan.estimatedMinutes)}</p>
-      ${lastSeen}
       <button
         type="button"
         class="primary"
@@ -306,7 +301,7 @@ export function renderProgressView(
         referenceOpen: false,
       })}
 
-      ${renderProgressNextCard(locale, store, offer)}
+      ${renderProgressNextCard(locale, offer)}
 
       ${renderCourseOutline(locale, store)}
 

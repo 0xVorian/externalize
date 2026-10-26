@@ -960,6 +960,7 @@ export type ProgressUiCopy = {
   lessonUpcoming: string;
   waitingOn: (unitTitle: string) => string;
   currentUnitAria: string;
+  showLessons: string;
   exercisesLater: (count: number) => string;
   exercisesHeading: string;
   exercisesStatus: (done: number, unlocked: number) => string;
@@ -1007,6 +1008,7 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lessonUpcoming: 'upcoming',
     waitingOn: (unitTitle) => `after ${unitTitle}`,
     currentUnitAria: 'current unit',
+    showLessons: 'Show lessons',
     exercisesLater: (count) =>
       count === 1 ? '1 later exercise' : `${count} later exercises`,
     exercisesHeading: 'Exercises',
@@ -1083,6 +1085,7 @@ const PROGRESS_UI: Record<Locale, ProgressUiCopy> = {
     lessonUpcoming: 'à venir',
     waitingOn: (unitTitle) => `après ${unitTitle}`,
     currentUnitAria: 'unité en cours',
+    showLessons: 'Voir les leçons',
     exercisesLater: (count) =>
       count === 1 ? '1 exercice plus loin dans le cours' : `${count} exercices plus loin dans le cours`,
     exercisesHeading: 'Exercices',

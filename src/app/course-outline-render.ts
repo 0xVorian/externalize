@@ -82,6 +82,11 @@ function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: C
       `;
     })
     .join('');
+  const conceptsList = `<ol class="course-outline-concepts">${concepts}</ol>`;
+  const body =
+    unit.status === 'done'
+      ? `<details class="course-outline-done-details"><summary>${copy.showLessons}</summary>${conceptsList}</details>`
+      : conceptsList;
 
   return `
     <section
@@ -97,7 +102,7 @@ function renderUnit(locale: Locale, copy: ReturnType<typeof progressUi>, unit: C
         <p class="course-outline-unit-count">${copy.lessonsStatus(unit.done, unit.total)}</p>
       </header>
       ${waitingLine}
-      <ol class="course-outline-concepts">${concepts}</ol>
+      ${body}
     </section>
   `;
 }

@@ -392,6 +392,19 @@ button {
   gap: 0.65rem;
 }
 
+.course-outline-done-details {
+  margin: 0;
+}
+
+.course-outline-done-details > summary {
+  min-height: var(--tap-min);
+  display: flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
 .course-outline-concept-title {
   margin: 0.35rem 0 0;
   font-size: 0.82rem;

@@ -34,6 +34,12 @@ describe('progress view course map', () => {
     expect(html).toContain('you are here');
     expect(html).toContain('data-testid="course-outline-here"');
     expect(html).toContain('after Unit 1 — Connectives');
+    expect(html).toMatch(
+      /data-testid="course-outline-unit-0"[\s\S]*course-outline-done-details[\s\S]*data-testid="course-outline-unit-1"/,
+    );
+    expect(html).not.toMatch(
+      /data-testid="course-outline-unit-0"[\s\S]*<details class="course-outline-done-details" open/,
+    );
     expect(html).toMatch(/0 of 9 lessons/);
     expect(html).not.toMatch(/Introductory unit/);
     expect(html).not.toMatch(/sections complete/);
