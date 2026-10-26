@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LEVEL_0_LESSONS, LEVEL_1_LESSONS, LEVEL_2_LESSONS } from './lessons';
+import { LEVEL_0_LESSONS, LEVEL_2_LESSONS } from './lessons';
 import { buildCourseOutline, hereLessonId } from './course-outline';
 import { completeLesson, loadProgress } from './storage';
 
