@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:pages": "npm run build && npm run d1:migrate:local && wrangler pages dev dist --ip 0.0.0.0 --port 8788",
+    "d1:migrate:local": "wrangler d1 migrations apply externalize-progress --local",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
@@ -18,14 +20,20 @@
     "release:check": "npm run inventory:check && npm test && npm run build && npm run test:e2e"
   },
   "devDependencies": {
-    "tsx": "^4.20.5",
+    "@cloudflare/workers-types": "^5.20261026.1",
+    "@playwright/test": "^1.52.0",
     "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
     "typescript": "~5.9.3",
     "vite": "^7.1.7",
     "vitest": "^3.2.4",
-    "@playwright/test": "^1.52.0"
+    "wrangler": "^4.152.0"
   },
   "engines": {
     "node": "22.x"
+  },
+  "dependencies": {
+    "@simplewebauthn/browser": "^14.0.0",
+    "@simplewebauthn/server": "^14.0.3"
   }
 }

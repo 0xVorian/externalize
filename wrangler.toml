@@ -1,0 +1,21 @@
+# Local Pages + D1 development. Production D1 is bound in the Cloudflare
+# dashboard — replace the placeholder database_id after creating the database.
+# See docs/accounts.md.
+
+name = "externalize"
+compatibility_date = "2025-10-11"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+[vars]
+WEBAUTHN_RP_NAME = "Externalize"
+
+# Optional overrides (also settable as Pages environment variables):
+# WEBAUTHN_RP_ID = "externalize.pages.dev"
+# WEBAUTHN_ORIGIN = "https://externalize.pages.dev"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "externalize-progress"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"

@@ -91,7 +91,7 @@ Do not create work simply to finish an old phase label. If real use does not jus
 
 ### Stop boundary
 
-Do **not** implement Chapter III–XIII interaction families, a generic curriculum/session generator, PDF reader, server/backend, cloud accounts, push/email reminders, framework migration, or universal workflow/reasoning engine as part of this assignment.
+Do **not** implement Chapter III–XIII interaction families, a generic curriculum/session generator, PDF reader, a generic server/backend, push/email reminders, framework migration, or universal workflow/reasoning engine as part of this assignment. Optional passkey accounts and D1 progress sync are the bounded exception authorized by issue #37; do not grow them into email identity, notifications, or a general accounts platform. See [`docs/accounts.md`](docs/accounts.md).
 
 ## Canonical UX anti-pattern
 
@@ -229,7 +229,7 @@ Treat the shipped baseline as successful only insofar as real use supports these
 8. re-entry after a gap yields a simple, bounded, pedagogically justified next action;
 9. learner-state/SRS/route semantics remain intact;
 10. EN/FR, accessibility, mobile, unit, build, and browser checks pass;
-11. work stops before speculative curriculum, backend, notification, gamification, or universal-engine expansion;
+11. work stops before speculative curriculum, extra backends, notification, gamification, or universal-engine expansion (optional passkeys on Pages + D1 are the #37 exception);
 12. the resulting PR remains unmerged until independently reviewed.
 
 The experiential product gate is:

@@ -29,6 +29,8 @@ export {
 } from './lessons';
 export { sessionUi } from './session';
 export type { SessionUiCopy } from './session';
+export { accountUi } from './account';
+export type { AccountUiCopy } from './account';
 export type {
   LessonCopy,
   LearnUiCopy,

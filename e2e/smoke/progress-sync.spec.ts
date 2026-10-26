@@ -56,5 +56,7 @@ test.describe('Progress export/import', () => {
 
     await expect(page.locator('.progress-notice-success')).toBeVisible();
     await expect(page.locator('.progress-item.done')).toHaveCount(2);
+    await expect(page.locator('[data-action="create-passkey"]')).toHaveCount(0);
+    await expect(page.getByTestId('account-panel')).toHaveCount(0);
   });
 });

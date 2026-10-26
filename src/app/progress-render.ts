@@ -10,6 +10,7 @@ import {
 } from './lessons';
 import { buildProgressSummary, type ProgressSummary } from './progress-tracker';
 import type { ProgressStore } from './storage';
+import { renderAccountPanel, type AccountView } from './account-render';
 import { countReviewDue, getUnlockedExerciseIds, exerciseLockReason } from './storage';
 import { renderShellHeader } from './shell-render';
 import { learnUi } from '../i18n';
@@ -154,6 +155,7 @@ export function buildSummaryFromStore(store: ProgressStore): ProgressSummary {
 
 export type ProgressViewOptions = {
   importNotice?: { kind: 'success' | 'error'; message: string };
+  account?: AccountView;
 };
 
 function renderDisclosure(
@@ -328,13 +330,19 @@ export function renderProgressView(
             ? `<p class="progress-notice progress-notice-${options.importNotice.kind}" role="status">${options.importNotice.message}</p>`
             : ''
         }
+        ${options.account ? renderAccountPanel(locale, options.account) : ''}
         <div class="progress-actions">
           <button type="button" class="secondary" data-action="export-progress">${copy.exportProgress}</button>
           <button type="button" class="secondary" data-action="import-progress">${copy.importProgress}</button>
         </div>
         `,
         undefined,
-        Boolean(options.importNotice),
+        Boolean(
+          options.importNotice ||
+            options.account?.notice ||
+            options.account?.confirmDelete ||
+            options.account?.busy,
+        ),
       )}
 
       ${renderDisclosure(

@@ -9,12 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Optional passkey accounts can copy progress v7 across devices on the Cloudflare free tier (Pages Functions + D1). Signed-out use is unchanged. Merge is per-item and never drops completions or evidence from either device; in-flight bounded sessions stay local and are invalidated when the merged snapshot changes. Passkey controls hide when the D1 binding is missing, so a static Pages deploy still works. Provisioning: `docs/accounts.md`.
 - Rounds now open with one warm-up check on the most recently practised concept (the last concept that has an exercise, independent of route). A correct answer continues into the planned material, or ends a short due-review early (`1 / 1` is honest). A miss on that step’s Check turns the rest of the round into a short repair of that concept. Only the one due item chosen as the warm-up is consumed; other due items and other skills on the same concept stay in the round. Short due lists are not padded with unlocked work from other concepts. A first-time learner still starts without a warm-up. **Exception:** a round whose next cluster already needs all 7 slots omits the warm-up so that cluster stays intact. The step counts toward the 5–7 envelope and the `n / m` counter.
 
 ### Changed
 
 - Session-first docs now say a short due-review grows on a miss when the leftover tail cannot hold explanation plus practice, not merely because there was “no tail”. A one-item or two-item due list both grow.
-- `docs/roadmap.md` now describes the v0.5.0 / v0.5.1 shipped baseline, the post-0.5.1 remediations already on `master` (mobile truth tables, session envelope, warm-up), and the remaining GitHub Issues rather than “v0.4.0 + unreleased”.
+- `docs/roadmap.md` now describes the v0.5.0 / v0.5.1 shipped baseline, the post-0.5.1 remediations already on `master` (mobile truth tables, session envelope, warm-up), optional passkey sync (#37), and the remaining GitHub Issues rather than “v0.4.0 + unreleased”.
 
 ### Fixed
 
