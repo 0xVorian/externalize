@@ -26,6 +26,21 @@ describe('session UI copy', () => {
     expect(blob).not.toMatch(/bounded round|retrieval round/i);
   });
 
+  it('labels warm-up and repair without streak or guilt language', () => {
+    const en = sessionUi('en');
+    const fr = sessionUi('fr');
+    const enWarm = en.warmupLabel('Conjunction (∧)');
+    const frWarm = fr.warmupLabel('Conjonction (∧)');
+    const enRepair = en.repairLabel('Conjunction (∧)');
+    const frRepair = fr.repairLabel('Conjonction (∧)');
+    expect(enWarm).toMatch(/Warm-up/i);
+    expect(frWarm).toMatch(/Rappel/);
+    expect(enWarm).not.toBe(frWarm);
+    expect(enRepair).not.toBe(frRepair);
+    const blob = `${enWarm} ${frWarm} ${enRepair} ${frRepair}`;
+    expect(blob).not.toMatch(/streak|série gagnante|forgot|oublié|missed days|failed|échoué|weeks away/i);
+  });
+
   it('keeps planner diagnostics out of learn UI copy', () => {
     const blob = JSON.stringify({ en: learnUi('en'), fr: learnUi('fr') });
     expect(blob).not.toMatch(/missing prerequisite/i);

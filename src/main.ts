@@ -119,6 +119,7 @@ import {
 } from './app/practice-ui-state';
 import { currentScaffoldLevel } from './app/evaluation-scaffold';
 import {
+  applyWarmupMissAfterCheck,
   offerOpening,
   startSession,
   resumeSession,
@@ -129,6 +130,7 @@ import {
   sessionSegmentMs,
   type PersistedSession,
 } from './app/session-plan';
+import { sessionStepLabel } from './app/session-chrome-render';
 import {
   loadActiveSession,
   saveActiveSession,
@@ -263,11 +265,34 @@ function currentOffer() {
   return offerOpening(progress, activeSession);
 }
 
-function sessionChrome(): { current: number; total: number } | undefined {
+function sessionChrome(): { current: number; total: number; label?: string } | undefined {
   if (surface !== 'session' || !activeSession) {
     return undefined;
   }
-  return sessionPosition(activeSession);
+  return {
+    ...sessionPosition(activeSession),
+    label: sessionStepLabel(locale, currentSessionStep(activeSession)),
+  };
+}
+
+function usingSourcePractice(): boolean {
+  return Boolean(sourcePracticeState) && (isSourceLearn() || isSourceSessionItem());
+}
+
+function maybeApplyWarmupRepair(isFinalCheck = false): void {
+  if (!activeSession) {
+    return;
+  }
+  const attempt = progress.practiceDraft?.attempt;
+  const next = applyWarmupMissAfterCheck(activeSession, {
+    isFinalCheck,
+    firstCheckedCorrect: attempt?.firstCheckedCorrect ?? null,
+  });
+  if (next === activeSession) {
+    return;
+  }
+  activeSession = next;
+  saveActiveSession(next);
 }
 
 function isSourceSessionItem(): boolean {
@@ -472,7 +497,10 @@ function persistPracticeState(): void {
   persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(practiceState)));
 }
 
-function commitCheckedPracticeState(nextState: AppState): void {
+function commitCheckedPracticeState(
+  nextState: AppState,
+  options?: { finalCheck?: boolean },
+): void {
   const before = snapshotProgressVisibility(progress);
   const wasFinalized = practiceState?.attempt.status === 'finalized';
   practiceState = nextState;
@@ -481,6 +509,7 @@ function commitCheckedPracticeState(nextState: AppState): void {
     practiceDraftSnapshot(nextState),
   );
   persistProgress(nextProgress);
+  maybeApplyWarmupRepair(options?.finalCheck === true);
   if (progress.practiceDraft?.attempt.id === nextState.attempt.id) {
     practiceState = {
       ...nextState,
@@ -515,8 +544,11 @@ function updatePracticeState(update: (state: AppState) => AppState): void {
   render();
 }
 
-function checkPracticeState(check: (state: AppState) => AppState): void {
-  commitCheckedPracticeState(check(ensurePracticeState()));
+function checkPracticeState(
+  check: (state: AppState) => AppState,
+  options?: { finalCheck?: boolean },
+): void {
+  commitCheckedPracticeState(check(ensurePracticeState()), options);
   render();
 }
 
@@ -968,7 +1000,7 @@ root.addEventListener('click', (event) => {
     if (!choiceId) {
       return;
     }
-    if (isSourceLearn() && sourcePracticeState) {
+    if (usingSourcePractice() && sourcePracticeState) {
       sourcePracticeState = selectClassificationChoice(sourcePracticeState, choiceId);
       persistProgress(persistPracticeDraft(progress, practiceDraftSnapshot(sourcePracticeState)));
       render();
@@ -979,17 +1011,18 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'check-classification') {
-    if (isSourceLearn() && sourcePracticeState) {
+    if (usingSourcePractice() && sourcePracticeState) {
       const next = checkClassification(sourcePracticeState);
       sourcePracticeState = next;
       persistProgress(recordCheckedPracticeState(progress, practiceDraftSnapshot(next)));
+      maybeApplyWarmupRepair(true);
       if (progress.practiceDraft) {
         sourcePracticeState = { ...next, attempt: progress.practiceDraft.attempt };
       }
       render();
       return;
     }
-    checkPracticeState(checkClassification);
+    checkPracticeState(checkClassification, { finalCheck: true });
     return;
   }
 
@@ -1009,7 +1042,7 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'try-again') {
-    if (isSourceLearn()) {
+    if (isSourceLearn() || isSourceSessionItem()) {
       if (!sourcePracticeState) {
         sourcePracticeState = loadSourcePracticeState();
       }
@@ -1109,13 +1142,13 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'check-scope') {
-    checkPracticeState(checkScope);
+    checkPracticeState(checkScope, { finalCheck: true });
     return;
   }
 
   if (action === 'submit-tautology-answer') {
     const value = button.dataset.value === 'true';
-    checkPracticeState((state) => submitTautologyAnswer(state, value));
+    checkPracticeState((state) => submitTautologyAnswer(state, value), { finalCheck: true });
     return;
   }
 
@@ -1150,7 +1183,7 @@ root.addEventListener('click', (event) => {
   }
 
   if (action === 'check-evaluation') {
-    checkPracticeState(checkEvaluation);
+    checkPracticeState(checkEvaluation, { finalCheck: true });
     return;
   }
 
@@ -1190,16 +1223,16 @@ root.addEventListener('click', (event) => {
     return;
   }
   if (action === 'check-proof') {
-    checkPracticeState(checkProofStep);
+    checkPracticeState(checkProofStep, { finalCheck: true });
     return;
   }
   if (action === 'check-translation') {
-    checkPracticeState(checkTranslation);
+    checkPracticeState(checkTranslation, { finalCheck: true });
     return;
   }
 
   if (action === 'check-counterexample') {
-    checkPracticeState(checkCounterexample);
+    checkPracticeState(checkCounterexample, { finalCheck: true });
     return;
   }
 

@@ -18,6 +18,7 @@ import {
 import { scaffoldMaxLevel } from '../../src/app/evaluation-scaffold';
 import type { SkillId } from '../../src/app/progress-tracker';
 import { LOGIC_FOUNDATIONS_ROUTE_ID } from '../../src/app/routes';
+import { evidenceKey } from '../../src/app/curriculum';
 
 export const STORAGE_KEY = 'externalize-progress-v1';
 
@@ -126,6 +127,63 @@ export function withSkillStats(
       ...store.skills,
       [skillId]: { attempts, successes, recentErrorTags: [] },
     },
+  };
+}
+
+/** Level 0+1 done, only conjunction eval-001 due; later concepts stay queued. */
+export function progressWithOneDueConjunctionReview(): ProgressStore {
+  let store = emptyProgress();
+  for (const lesson of LEVEL_0_LESSONS) {
+    store = completeLesson(store, lesson.id);
+  }
+  for (const lesson of LEVEL_1_LESSONS) {
+    store = completeLesson(store, lesson.id);
+  }
+  const lastSeenAt = new Date().toISOString();
+  const due = new Date(Date.now() - 60_000).toISOString();
+  const later = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+  return {
+    ...store,
+    passed: ['eval-001'],
+    attempted: ['eval-001'],
+    conceptEvidence: {
+      [evidenceKey('conjunction', 'apply')]: {
+        attempts: 1,
+        cleanPasses: 1,
+        transferPasses: 0,
+        recentErrors: [],
+        lastSeenAt,
+      },
+    },
+    queue: [
+      { exerciseId: 'eval-001', due, intervalDays: 1, ease: 2.5 },
+      { exerciseId: 'eval-010', due: later, intervalDays: 1, ease: 2.5 },
+      { exerciseId: 'tt-002', due: later, intervalDays: 1, ease: 2.5 },
+    ],
+  };
+}
+
+export function progressWithConjunctionPractice(): ProgressStore {
+  let store = emptyProgress();
+  for (const lesson of LEVEL_0_LESSONS) {
+    store = completeLesson(store, lesson.id);
+  }
+  const lastSeenAt = new Date().toISOString();
+  const due = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+  return {
+    ...store,
+    passed: ['eval-001'],
+    attempted: ['eval-001'],
+    conceptEvidence: {
+      [evidenceKey('conjunction', 'apply')]: {
+        attempts: 1,
+        cleanPasses: 1,
+        transferPasses: 0,
+        recentErrors: [],
+        lastSeenAt,
+      },
+    },
+    queue: [{ exerciseId: 'eval-001', due, intervalDays: 1, ease: 2.5 }],
   };
 }
 

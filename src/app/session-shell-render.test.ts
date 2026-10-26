@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createLessonState } from './lesson-state';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID } from './routes';
 import { renderRoundComplete } from './session-complete-render';
-import { renderSessionChrome, renderSessionFrame } from './session-chrome-render';
+import { renderSessionChrome, renderSessionFrame, sessionStepLabel } from './session-chrome-render';
 import { renderSessionOpening } from './session-opening-render';
 import { renderSourceLearnView } from './source-learn-render';
 import { renderLanguageToggle, renderModeNav } from './shell-render';
@@ -55,6 +55,51 @@ describe('session shell', () => {
     expect(renderSessionChrome({ locale: 'en', current: 2, total: 6 })).toContain(
       'Step 2 of 6 in this round',
     );
+  });
+
+  it('labels a warm-up step in the session frame', () => {
+    const html = renderSessionFrame({
+      locale: 'en',
+      current: 1,
+      total: 5,
+      label: 'Warm-up: last time you worked on Conjunction (∧)',
+      body: '<article>reason</article>',
+      actions: '<button type="button">Check</button>',
+    });
+    expect(html).toContain('data-testid="session-step-label"');
+    expect(html).toContain('Warm-up: last time you worked on Conjunction (∧)');
+  });
+
+  it('labels a warm-up step in independently authored French', () => {
+    const label = sessionStepLabel('fr', {
+      id: 'warmup:eval-001',
+      source: 'practice',
+      itemId: 'eval-001',
+      role: 'warmup',
+      conceptId: 'conjunction',
+    });
+    expect(label).toMatch(/Rappel/);
+    expect(label).toContain('Conjonction');
+    expect(label).not.toBe(
+      sessionStepLabel('en', {
+        id: 'warmup:eval-001',
+        source: 'practice',
+        itemId: 'eval-001',
+        role: 'warmup',
+        conceptId: 'conjunction',
+      }),
+    );
+    const html = renderSessionFrame({
+      locale: 'fr',
+      current: 1,
+      total: 5,
+      label,
+      body: '<article>raison</article>',
+      actions: '<button type="button">Vérifier</button>',
+    });
+    expect(html).toContain('data-testid="session-step-label"');
+    expect(html).toContain(label!);
+    expect(html).toContain('lang="fr"');
   });
 
   it('makes Done for now primary and another round secondary', () => {

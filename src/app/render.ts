@@ -32,7 +32,7 @@ export type PracticeViewContext = {
   scaffoldLevel?: number;
   unitCompleteNotice?: string | null;
   unitCompleteNoticeLive?: boolean;
-  session?: { current: number; total: number };
+  session?: { current: number; total: number; label?: string };
 };
 
 function showsEvaluatedTree(type: AppState['exercise']['type']): boolean {
@@ -384,6 +384,7 @@ export function renderApp(
       locale: state.locale,
       current: context.session.current,
       total: context.session.total,
+      label: context.session.label,
       body: renderExerciseCard(state, { includeFamily: false }),
       actions,
     });

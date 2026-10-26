@@ -104,6 +104,10 @@ describe('offerOpening', () => {
     const offer = offerOpening(store, null, now);
     expect(offer.kind).toBe('quick-review');
     expect(offer.plan?.steps.map((step) => step.itemId)).toEqual(['eval-001', 'eval-011']);
+    expect(offer.plan?.steps[0]).toMatchObject({
+      itemId: 'eval-001',
+      role: 'warmup',
+    });
     expect(offer.nextReviewAt).toBe('2026-09-08T12:00:00.000Z');
   });
 

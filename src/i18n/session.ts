@@ -28,6 +28,8 @@ export type SessionUiCopy = {
   browseExplore: string;
   browsePractice: string;
   browseProgress: string;
+  warmupLabel: (concept: string) => string;
+  repairLabel: (concept: string) => string;
 };
 
 const SESSION_UI: Record<Locale, SessionUiCopy> = {
@@ -104,6 +106,8 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     browseExplore: 'Explore formulas',
     browsePractice: 'Exercises',
     browseProgress: 'Progress',
+    warmupLabel: (concept) => `Warm-up: last time you worked on ${concept}`,
+    repairLabel: (concept) => `A short look back at ${concept}`,
   },
   fr: {
     productName: 'Externalize',
@@ -178,6 +182,8 @@ const SESSION_UI: Record<Locale, SessionUiCopy> = {
     browseExplore: 'Explorer les formules',
     browsePractice: 'Exercices',
     browseProgress: 'Suivi',
+    warmupLabel: (concept) => `Rappel : dernière notion travaillée — ${concept}`,
+    repairLabel: (concept) => `Revenir un moment sur ${concept}`,
   },
 };
 
