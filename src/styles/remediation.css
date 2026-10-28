@@ -96,10 +96,16 @@
 .choice-list {
   display: grid;
   gap: 0.5rem;
+  width: 100%;
   margin: 0.75rem 0 0;
 }
 
 .choice-option {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
   min-height: var(--tap-min);
   padding: 0.65rem 0.75rem;
   border: 1px solid var(--border);
@@ -108,12 +114,18 @@
   color: var(--text);
   text-align: left;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .choice-option.selected {
   border-color: var(--accent);
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+.choice-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
 }
 
 .planner-banner {
@@ -228,6 +240,9 @@
 }
 
 .cell-segment {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
   min-width: var(--tap-min);
   min-height: var(--tap-min);
   padding: 0.55rem 0.65rem;
@@ -238,6 +253,7 @@
   cursor: pointer;
   font-family: "Fira Code", "Cascadia Code", monospace;
   font-weight: 700;
+  touch-action: manipulation;
 }
 
 .cell-segment.selected {
@@ -457,6 +473,7 @@
 }
 
 .session-active .choice-option {
+  justify-self: stretch;
   padding: 0.8rem 0.9rem;
 }
 

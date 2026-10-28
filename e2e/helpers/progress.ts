@@ -17,8 +17,12 @@ import {
 } from '../../src/app/lessons';
 import { scaffoldMaxLevel } from '../../src/app/evaluation-scaffold';
 import type { SkillId } from '../../src/app/progress-tracker';
-import { LOGIC_FOUNDATIONS_ROUTE_ID } from '../../src/app/routes';
+import {
+  LOGIC_AND_THEISM_READING_ROUTE_ID,
+  LOGIC_FOUNDATIONS_ROUTE_ID,
+} from '../../src/app/routes';
 import { evidenceKey } from '../../src/app/curriculum';
+import { setActiveRoute } from '../../src/app/source-route';
 
 export const STORAGE_KEY = 'externalize-progress-v1';
 
@@ -201,6 +205,93 @@ export function progressWithOneDueConjunctionReview(): ProgressStore {
       { exerciseId: 'eval-010', due: later, intervalDays: 1, ease: 2.5 },
       { exerciseId: 'tt-002', due: later, intervalDays: 1, ease: 2.5 },
     ],
+  };
+}
+
+function recentConjunctionEvidence() {
+  return {
+    [evidenceKey('conjunction', 'apply')]: {
+      attempts: 2,
+      cleanPasses: 2,
+      transferPasses: 0,
+      recentErrors: [] as string[],
+      lastSeenAt: new Date().toISOString(),
+    },
+  };
+}
+
+function staleConditionalEvidence() {
+  return {
+    [evidenceKey('conditional', 'apply')]: {
+      attempts: 4,
+      cleanPasses: 4,
+      transferPasses: 0,
+      recentErrors: [] as string[],
+      lastSeenAt: '2025-01-01T00:00:00.000Z',
+    },
+  };
+}
+
+/**
+ * All lessons done; conjunction is the recent warm-up, conditional evidence is
+ * stale. Home opens a 5-step lapse recovery: warm-up, then lat-retrieve-conditional
+ * at 2 / 5 (the FR true/false step from issue #51).
+ */
+export function progressLapseRetrieveAtStep2(): ProgressStore {
+  let store = emptyProgress();
+  for (const lesson of ALL_LEARN_LESSONS) {
+    store = completeLesson(store, lesson.id);
+  }
+  return {
+    ...store,
+    passed: ['eval-001', 'eval-011', 'tt-001', 'counter-001'],
+    attempted: ['eval-001', 'eval-011', 'tt-001', 'counter-001'],
+    queue: [],
+    conceptEvidence: {
+      ...recentConjunctionEvidence(),
+      ...staleConditionalEvidence(),
+    },
+  };
+}
+
+/**
+ * Sobel remaining material after the first five preparation items, with a due
+ * conjunction recall. Home offers that recall; chaining then lands on a 5-step
+ * continue whose second step is lat-retrieve-conditional.
+ */
+export function progressSobelChainRetrieveAtStep2(): ProgressStore {
+  let store = emptyProgress();
+  for (const lesson of LEVEL_0_LESSONS) {
+    store = completeLesson(store, lesson.id);
+  }
+  store = setActiveRoute(store, LOGIC_AND_THEISM_READING_ROUTE_ID);
+  const due = new Date(Date.now() - 60_000).toISOString();
+  return {
+    ...store,
+    lessonsCompleted: [
+      ...store.lessonsCompleted,
+      'lat-conditional-bridge',
+      'lat-empty-no-counterexample',
+      'lat-name-vacuity',
+      'lat-conditional-meaning',
+    ],
+    passed: ['eval-001', 'lat-predict-empty-club'],
+    attempted: ['eval-001', 'lat-predict-empty-club'],
+    conceptEvidence: recentConjunctionEvidence(),
+    queue: [{ exerciseId: 'eval-001', due, intervalDays: 1, ease: 2.5 }],
+    routes: {
+      ...store.routes,
+      [LOGIC_AND_THEISM_READING_ROUTE_ID]: {
+        currentStepId: store.routes[LOGIC_AND_THEISM_READING_ROUTE_ID]?.currentStepId ?? 'ii-26-28',
+        seenItems: [
+          'lat-conditional-bridge',
+          'lat-predict-empty-club',
+          'lat-empty-no-counterexample',
+          'lat-name-vacuity',
+          'lat-conditional-meaning',
+        ],
+      },
+    },
   };
 }
 

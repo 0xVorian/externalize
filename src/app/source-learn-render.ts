@@ -52,10 +52,7 @@ function sourceBodyAndActions(options: {
         ? terminalActions
         : `<button type="button" class="primary" data-action="source-next">${learn.nextStep}</button>`;
     } else {
-      actions = renderClassifyChoiceActions(options.practiceState, true).replace(
-        'next-exercise',
-        'source-next',
-      );
+      actions = renderClassifyChoiceActions(options.practiceState, true);
     }
   }
   return { title, body, actions };

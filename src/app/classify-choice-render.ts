@@ -46,7 +46,7 @@ export function renderClassifyChoiceActions(state: AppState, hideContinue = fals
   if (state.attempt.status === 'finalized') {
     return hideContinue
       ? ''
-      : `<button type="button" class="primary" data-action="next-exercise">${copy.continue}</button>`;
+      : `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
   }
   return `<button type="button" class="secondary" data-action="try-again" data-testid="try-again">${copy.tryAgain}</button>`;
 }

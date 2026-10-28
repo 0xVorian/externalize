@@ -97,7 +97,7 @@ GitHub Actions runs on every push and pull request to `master` (see [`.github/wo
 | Job | Steps |
 |-----|-------|
 | `test-and-build` | `npm ci` → `npm test` → `npm run build` |
-| `e2e` | `npm ci` → Playwright Chromium install → `npm run test:e2e` with `CI=true` |
+| `e2e` | `npm ci` → Playwright Chromium + WebKit install → `npm run test:e2e` with `CI=true` |
 
 The e2e job runs after unit tests and build succeed. Playwright config enables retries and a single worker when `CI` is set. Account tests start a local `wrangler pages dev` with D1; no Cloudflare account is required for that.
 
@@ -107,7 +107,7 @@ To reproduce locally:
 npm ci
 npm run inventory:check
 npm test && npm run build
-npx playwright install --with-deps chromium
+npx playwright install --with-deps chromium webkit
 CI=1 npm run test:e2e
 ```
 
@@ -118,5 +118,5 @@ If browser smoke tests become flaky on GitHub runners, investigate and isolate t
 After `npm install`, download browsers once:
 
 ```bash
-npx playwright install chromium
+npx playwright install chromium webkit
 ```
