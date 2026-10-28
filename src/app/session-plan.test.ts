@@ -505,6 +505,28 @@ describe('offerAfterCompletedRound', () => {
     expect(chained.kind).toBe('continue');
     expect(chained.plan?.steps[0]?.role).not.toBe('warmup');
     expect(chained.plan?.steps[0]?.itemId).toBe(LEVEL_1_LESSONS[0]!.id);
+    expect(chained.plan?.steps).toHaveLength(4);
+    expect(chained.plan?.steps.every((step) => step.role !== 'warmup')).toBe(true);
+  });
+
+  it('a second chained round still skips leftover interval-0 reviews', () => {
+    const store = withDueReviewsAndRemainingLessons(loadProgress());
+    const first = offerAfterCompletedRound(store, now);
+    expect(first.kind).toBe('continue');
+    expect(first.plan?.steps).toHaveLength(4);
+
+    let afterFirst = store;
+    for (const step of first.plan!.steps) {
+      if (!afterFirst.lessonsCompleted.includes(step.itemId)) {
+        afterFirst = completeLesson(afterFirst, step.itemId);
+      }
+    }
+    expect(offerOpening(afterFirst, null, now).kind).toBe('quick-review');
+    const second = offerAfterCompletedRound(afterFirst, now);
+    expect(second.kind).toBe('continue');
+    expect(second.plan?.steps[0]?.role).not.toBe('warmup');
+    expect(second.plan?.steps.some((step) => step.itemId === 'eval-001')).toBe(false);
+    expect(second.plan?.steps[0]?.itemId).toBe(LEVEL_1_LESSONS[3]!.id);
   });
 });
 

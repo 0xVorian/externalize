@@ -328,11 +328,11 @@ function withReview(
 
 export type OfferOpeningOptions = {
   /**
-   * After a finished round, skip due-review / lapse-recovery and the opening
+   * After a finished round, skip due-review, lapse-recovery, and the opening
    * warm-up so "do another" cannot loop on recall. Home still offers those
-   * kinds on a fresh open.
+   * kinds on a fresh open. Short leftover clusters are not padded.
    */
-  skipRecall?: boolean;
+  afterCompletedRound?: boolean;
 };
 
 export function offerOpening(
@@ -341,7 +341,7 @@ export function offerOpening(
   now = Date.now(),
   options?: OfferOpeningOptions,
 ): OpeningOffer {
-  const skipRecall = options?.skipRecall === true;
+  const afterCompletedRound = options?.afterCompletedRound === true;
 
   if (
     persisted?.status === 'active' &&
@@ -358,7 +358,7 @@ export function offerOpening(
     );
   }
 
-  if (!skipRecall && isPracticeUnlocked(store)) {
+  if (!afterCompletedRound && isPracticeUnlocked(store)) {
     const due = dueExerciseIds(store, now);
     if (due.length > 0) {
       return withReview(
@@ -372,7 +372,7 @@ export function offerOpening(
     }
   }
 
-  if (!skipRecall && hasStaleEvidence(store, now)) {
+  if (!afterCompletedRound && hasStaleEvidence(store, now)) {
     const remaining = remainingRouteItems(store);
     const remainingIds = new Set(remaining.items);
     const lapse = lapseItemIds(store, now).filter((itemId) => {
@@ -402,7 +402,7 @@ export function offerOpening(
         plan: composeSessionPlan(store, kind, remaining.items, {
           preparation: remaining.preparation,
           now,
-          skipWarmup: skipRecall,
+          skipWarmup: afterCompletedRound,
         }),
       },
       store,
@@ -418,7 +418,7 @@ export function offerAfterCompletedRound(
   store: ProgressStore,
   now = Date.now(),
 ): OpeningOffer {
-  return offerOpening(store, null, now, { skipRecall: true });
+  return offerOpening(store, null, now, { afterCompletedRound: true });
 }
 
 export function startSession(plan: SessionPlan, nowIso: string): PersistedSession {

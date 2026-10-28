@@ -130,6 +130,47 @@ export function withSkillStats(
   };
 }
 
+function conjunctionDueQueue(intervalDays: number): ProgressStore['queue'] {
+  const due = new Date(Date.now() - 60_000).toISOString();
+  return [
+    { exerciseId: 'eval-001', due, intervalDays, ease: 2.3 },
+    { exerciseId: 'eval-011', due, intervalDays, ease: 2.3 },
+  ];
+}
+
+function withConjunctionEvidence(store: ProgressStore, extras: Partial<ProgressStore>): ProgressStore {
+  const lastSeenAt = new Date().toISOString();
+  return {
+    ...store,
+    passed: ['eval-001', 'eval-011'],
+    attempted: ['eval-001', 'eval-011'],
+    conceptEvidence: {
+      [evidenceKey('conjunction', 'apply')]: {
+        attempts: 2,
+        cleanPasses: 1,
+        transferPasses: 0,
+        recentErrors: [],
+        lastSeenAt,
+      },
+    },
+    ...extras,
+  };
+}
+
+/** All lessons done; two conjunction reviews still due (interval 0). */
+export function progressCourseCompleteWithRepairedDueReviews(): ProgressStore {
+  let store = emptyProgress();
+  for (const lesson of ALL_LEARN_LESSONS) {
+    store = completeLesson(store, lesson.id);
+  }
+  return withConjunctionEvidence(store, { queue: conjunctionDueQueue(0) });
+}
+
+/** Unit 0 done, remaining Unit 1, two conjunction reviews still due (interval 0). */
+export function progressWithLeftoverDueReviews(): ProgressStore {
+  return withConjunctionEvidence(progressAfterLevel0(), { queue: conjunctionDueQueue(0) });
+}
+
 /** Level 0+1 done, only conjunction eval-001 due; later concepts stay queued. */
 export function progressWithOneDueConjunctionReview(): ProgressStore {
   let store = emptyProgress();

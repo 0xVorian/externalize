@@ -197,6 +197,8 @@ type ShellSurface = 'opening' | 'session' | 'complete' | 'browse';
 let surface: ShellSurface = 'opening';
 let activeSession: PersistedSession | null = loadActiveSession();
 let recordedOpeningOffer = false;
+/** Honor offerAfterCompletedRound on the opening surface after "do another". */
+let honorCompletedRoundOffer = false;
 
 const importInput = document.createElement('input');
 importInput.type = 'file';
@@ -480,6 +482,9 @@ async function runAccountAction(work: () => Promise<void>): Promise<void> {
 }
 
 function currentOffer() {
+  if (honorCompletedRoundOffer && !activeSession) {
+    return offerAfterCompletedRound(progress);
+  }
   return offerOpening(progress, activeSession);
 }
 
@@ -648,6 +653,7 @@ function exitActiveSession(): void {
       durationMs: sessionSegmentMs(activeSession),
     });
   }
+  honorCompletedRoundOffer = false;
   surface = 'opening';
   recordedOpeningOffer = false;
   render();
@@ -656,6 +662,7 @@ function exitActiveSession(): void {
 function closeCompletedSession(): void {
   clearActiveSession();
   activeSession = null;
+  honorCompletedRoundOffer = false;
   surface = 'opening';
   recordedOpeningOffer = false;
   render();
@@ -666,11 +673,13 @@ function startAnotherRound(): void {
   activeSession = null;
   const offer = offerAfterCompletedRound(progress);
   if (!offer.plan) {
+    honorCompletedRoundOffer = true;
     surface = 'opening';
     recordedOpeningOffer = false;
     render();
     return;
   }
+  honorCompletedRoundOffer = false;
   enterSession(startSession(offer.plan, new Date().toISOString()));
   render();
 }
@@ -902,6 +911,7 @@ function setMode(nextMode: AppMode): void {
   if (nextMode === mode && surface === 'browse') {
     return;
   }
+  honorCompletedRoundOffer = false;
   surface = 'browse';
   if (nextMode !== 'progress') {
     importNotice = null;
@@ -932,6 +942,7 @@ function setMode(nextMode: AppMode): void {
 function finishOnboarding(): void {
   persistProgress(completeOnboarding(progress));
   onboardingStep = 0;
+  honorCompletedRoundOffer = false;
   surface = 'opening';
   recordedOpeningOffer = false;
   render();
@@ -1087,6 +1098,7 @@ function exportProgressFile(): void {
 function invalidateEphemeralSession(): void {
   clearActiveSession();
   activeSession = null;
+  honorCompletedRoundOffer = false;
   recordedOpeningOffer = false;
 }
 
