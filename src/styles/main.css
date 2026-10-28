@@ -67,7 +67,7 @@ button {
 .language-toggle > button,
 .depth-toggle > button {
   flex: 1;
-  min-width: 0;
+  min-width: var(--tap-min);
 }
 
 .app {

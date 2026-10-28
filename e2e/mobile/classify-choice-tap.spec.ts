@@ -158,7 +158,7 @@ test.describe('classify-choice taps on a phone', () => {
 
   async function dispatchTouchPointerThenClick(target: Locator): Promise<void> {
     await target.evaluate((el) => {
-      const touch = { bubbles: true, pointerType: 'touch', isPrimary: true };
+      const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
       el.dispatchEvent(new PointerEvent('pointerdown', touch));
       el.dispatchEvent(new PointerEvent('pointerup', touch));
       el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -180,15 +180,22 @@ test.describe('classify-choice taps on a phone', () => {
     await dispatchTouchPointerThenClick(page.locator(CHECK));
     await expect(page.locator('.feedback-correct')).toBeVisible();
     await expect(sessionPosition(page)).toHaveText('2 / 5');
-    await expect(page.locator(CONTINUE)).toBeVisible();
+    const continueBtn = page.locator(CONTINUE);
+    await expect(continueBtn).toBeVisible();
+    await dispatchTouchPointerThenClick(continueBtn);
+    await expect(sessionPosition(page)).toHaveText('3 / 5');
   });
 
   test('a drag that starts on an option does not select', async ({ page }) => {
     await openRetrieveAtStep2(page, 'fr');
     const holds = page.locator(HOLDS);
     await expect(holds).toBeVisible();
-    await holds.dispatchEvent('pointerdown', { ...TOUCH, clientX: 40, clientY: 40 });
-    await holds.dispatchEvent('pointerup', { ...TOUCH, clientX: 40, clientY: 120 });
+    await holds.evaluate((el) => {
+      const base = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
+      el.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: 40, clientY: 40 }));
+      el.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: 40, clientY: 72 }));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
     await expect(holds).not.toHaveClass(/selected/);
     await expect(holds).toHaveAttribute('aria-pressed', 'false');
     await expect(page.locator(CHECK)).toBeDisabled();
@@ -198,11 +205,53 @@ test.describe('classify-choice taps on a phone', () => {
     await openRetrieveAtStep2(page, 'fr');
     const holds = page.locator(HOLDS);
     await expect(holds).toBeVisible();
-    await holds.dispatchEvent('pointerdown', TOUCH);
-    await holds.dispatchEvent('pointercancel', TOUCH);
-    await holds.dispatchEvent('pointerup', TOUCH);
+    await holds.evaluate((el) => {
+      const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
+      el.dispatchEvent(new PointerEvent('pointerdown', touch));
+      el.dispatchEvent(new PointerEvent('pointercancel', touch));
+      el.dispatchEvent(new PointerEvent('pointerup', touch));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
     await expect(holds).not.toHaveClass(/selected/);
     await expect(page.locator(CHECK)).toBeDisabled();
+  });
+
+  test('a press that starts on one option and ends on another selects neither', async ({
+    page,
+  }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    const holds = page.locator(HOLDS);
+    const fails = page.locator(FAILS);
+    await expect(holds).toBeVisible();
+    await expect(fails).toBeVisible();
+    await page.evaluate(
+      ([holdsSel, failsSel]) => {
+        const start = document.querySelector(holdsSel);
+        const end = document.querySelector(failsSel);
+        if (!(start instanceof HTMLElement) || !(end instanceof HTMLElement)) {
+          throw new Error('missing choice buttons');
+        }
+        const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
+        start.dispatchEvent(new PointerEvent('pointerdown', touch));
+        end.dispatchEvent(new PointerEvent('pointerup', touch));
+        end.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      },
+      [HOLDS, FAILS] as const,
+    );
+    await expect(holds).not.toHaveClass(/selected/);
+    await expect(fails).not.toHaveClass(/selected/);
+    await expect(page.locator(CHECK)).toBeDisabled();
+  });
+
+  test('language toggle EN and FR stay at least 44px', async ({ page }) => {
+    await gotoWithProgress(page, progressLapseRetrieveAtStep2());
+    for (const locale of ['en', 'fr'] as const) {
+      const box = await page
+        .locator(`[data-action="set-locale"][data-locale="${locale}"]`)
+        .boundingBox();
+      expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
   });
 
   test('Home FR: Vraie/Fausse on retrieve at 2/5 can be selected and checked', async ({
@@ -258,7 +307,10 @@ test.describe('classify-choice taps on a phone', () => {
     await page.locator(CHECK).tap();
     await expect(page.locator('.feedback-correct')).toBeVisible();
     await page.locator('[data-action="source-next"]').tap();
-    for (let i = 0; i < 4; i += 1) {
+    for (let i = 0; i < 8; i += 1) {
+      if (await page.locator('.exercise-prompt').filter({ hasText: 'F(a) → G(a)' }).count()) {
+        break;
+      }
       await lessonNext(page).tap();
     }
     await expectRetrieveStep(page, 'fr');
