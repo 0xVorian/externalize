@@ -143,6 +143,8 @@ Do another short round
 
 `Done for now` is the primary action. `Do another` is secondary and optional.
 
+`Do another short round` / `Enchaîner une courte séance` continues into remaining new material (or an honest idle finish). It does not start another due-review, lapse-recovery, or warm-up, so a completed recall cannot loop. Home and Progress still offer due review on a fresh open.
+
 Do not use infinite-scroll or endless-continue semantics for the default learning loop.
 
 ### 4. One intellectual demand per screen
@@ -384,7 +386,7 @@ Required:
 - next-useful-review indication after a completed round when derivable from existing SRS state;
 - no notifications, conventional streak, XP, or backend required.
 
-**Gate:** returning after a gap produces one obvious, bounded, pedagogically justified next action. **Implemented** (`offerOpening` derives resume → due review → lapse recovery → continue → idle). A mid-course learner with remaining lessons and stale evidence is offered lapse recovery before new material.
+**Gate:** returning after a gap produces one obvious, bounded, pedagogically justified next action. **Implemented** (`offerOpening` derives resume → due review → lapse recovery → continue → idle). A mid-course learner with remaining lessons and stale evidence is offered lapse recovery before new material. Chaining from the completion screen uses `offerAfterCompletedRound`: skip due-review, lapse-recovery, and the opening warm-up so a recall cannot repeat.
 
 ## Phase UX-D — validation instrumentation
 

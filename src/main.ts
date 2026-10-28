@@ -144,6 +144,7 @@ import { currentScaffoldLevel } from './app/evaluation-scaffold';
 import {
   applyWarmupMissAfterCheck,
   offerOpening,
+  offerAfterCompletedRound,
   startSession,
   resumeSession,
   completeCurrentStep,
@@ -663,7 +664,7 @@ function closeCompletedSession(): void {
 function startAnotherRound(): void {
   clearActiveSession();
   activeSession = null;
-  const offer = offerOpening(progress, null);
+  const offer = offerAfterCompletedRound(progress);
   if (!offer.plan) {
     surface = 'opening';
     recordedOpeningOffer = false;
