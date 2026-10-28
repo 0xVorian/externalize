@@ -1138,14 +1138,33 @@ function handleImportRaw(raw: string): void {
   }
 }
 
-root.addEventListener('click', (event) => {
+function findActionButton(event: Event): HTMLElement | null {
+  if (typeof event.composedPath === 'function') {
+    for (const node of event.composedPath()) {
+      if (node instanceof HTMLElement && node.dataset.action) {
+        return node;
+      }
+    }
+  }
   const raw = event.target;
   const el = raw instanceof Element ? raw : raw instanceof Node ? raw.parentElement : null;
-  const button = el?.closest<HTMLElement>('[data-action]');
-  if (!button) {
-    return;
-  }
+  return el?.closest('[data-action]') ?? null;
+}
 
+function isDisabledActionControl(button: HTMLElement): boolean {
+  return (
+    (button instanceof HTMLButtonElement && button.disabled) ||
+    button.getAttribute('aria-disabled') === 'true'
+  );
+}
+
+/** Drop the compatibility click that follows a handled touch/pen pointerup. */
+let ignoreNextDelegatedClick = false;
+let pointerDownButton: HTMLElement | null = null;
+let pointerDownX = 0;
+let pointerDownY = 0;
+
+function dispatchRootAction(button: HTMLElement): void {
   const action = button.dataset.action;
 
   if (action === 'set-locale') {
@@ -1556,6 +1575,65 @@ root.addEventListener('click', (event) => {
   if (action === 'session-finish') {
     finishPracticeSession();
   }
+}
+
+root.addEventListener('pointerdown', (event) => {
+  ignoreNextDelegatedClick = false;
+  if (event.pointerType === 'mouse') {
+    pointerDownButton = null;
+    return;
+  }
+  const button = findActionButton(event);
+  pointerDownButton = button && !isDisabledActionControl(button) ? button : null;
+  pointerDownX = event.clientX;
+  pointerDownY = event.clientY;
+});
+
+const TOUCH_POINTER_ACTIONS = new Set([
+  'select-choice',
+  'check-classification',
+  'select-evaluation-prediction',
+  'check-evaluation',
+  'submit-tautology-answer',
+  'select-guided-value',
+  'check-guided-value',
+]);
+
+root.addEventListener('pointerup', (event) => {
+  if (event.pointerType === 'mouse') {
+    pointerDownButton = null;
+    return;
+  }
+  const down = pointerDownButton;
+  pointerDownButton = null;
+  const button = findActionButton(event);
+  if (!button || button !== down || isDisabledActionControl(button)) {
+    return;
+  }
+  const action = button.dataset.action;
+  if (!action || !TOUCH_POINTER_ACTIONS.has(action)) {
+    return;
+  }
+  const dx = event.clientX - pointerDownX;
+  const dy = event.clientY - pointerDownY;
+  if (dx * dx + dy * dy > 25 * 25) {
+    return;
+  }
+  ignoreNextDelegatedClick = true;
+  const target = button;
+  queueMicrotask(() => dispatchRootAction(target));
+});
+
+root.addEventListener('click', (event) => {
+  if (ignoreNextDelegatedClick) {
+    ignoreNextDelegatedClick = false;
+    return;
+  }
+  const button = findActionButton(event);
+  if (!button || isDisabledActionControl(button)) {
+    return;
+  }
+  dispatchRootAction(button);
 });
 
 root.addEventListener('keydown', (event) => {
