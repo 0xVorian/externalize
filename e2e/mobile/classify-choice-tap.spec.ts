@@ -21,6 +21,8 @@ const ARTIFACT_DIR = process.env.SCREENSHOT_DIR ?? '/opt/cursor/artifacts/screen
 const HOLDS = '[data-action="select-choice"][data-choice-id="holds"]';
 const FAILS = '[data-action="select-choice"][data-choice-id="fails"]';
 const CHECK = '[data-action="check-classification"]';
+const CONTINUE = '.actions [data-action="next"], .actions [data-action="source-next"]';
+const TOUCH = { bubbles: true, pointerType: 'touch', isPrimary: true } as const;
 
 async function screenshotIf390(page: Page, filename: string): Promise<void> {
   if (page.viewportSize()?.width !== 390) {
@@ -60,14 +62,22 @@ async function passWarmupEvaluation(page: Page): Promise<void> {
   await page.locator('[data-action="next"]').tap();
 }
 
+async function expectFillsParent(
+  child: Locator,
+  parent: Locator,
+  ratio = 0.85,
+): Promise<void> {
+  const parentBox = await parent.boundingBox();
+  const childBox = await child.boundingBox();
+  expect(parentBox).toBeTruthy();
+  expect(childBox).toBeTruthy();
+  expect(childBox!.width).toBeGreaterThan(parentBox!.width * ratio);
+}
+
 async function expectChoiceSelectable(page: Page, choice: Locator): Promise<void> {
   await expect(choice).toBeVisible();
   await expect(choice).toBeEnabled();
-  const listBox = await page.locator('.choice-list').boundingBox();
-  const choiceBox = await choice.boundingBox();
-  expect(listBox).toBeTruthy();
-  expect(choiceBox).toBeTruthy();
-  expect(choiceBox!.width).toBeGreaterThan((listBox!.width) * 0.85);
+  await expectFillsParent(choice, page.locator('.choice-list'));
   await choice.tap();
   await expect(choice).toHaveClass(/selected/);
   await expect(choice).toHaveAttribute('aria-pressed', 'true');
@@ -93,10 +103,21 @@ async function expectRetrieveStep(page: Page, locale: 'en' | 'fr'): Promise<void
   }
 }
 
+async function openRetrieveAtStep2(page: Page, locale: 'en' | 'fr'): Promise<void> {
+  await gotoWithProgress(page, progressLapseRetrieveAtStep2());
+  if (locale === 'fr') {
+    await setLocale(page, 'fr');
+  }
+  await beginOfferedSession(page);
+  await passWarmupEvaluation(page);
+  await expect(sessionPosition(page)).toHaveText('2 / 5');
+}
+
 async function selectHoldsAndCheck(
   page: Page,
   locale: 'en' | 'fr',
   screenshotBase: string,
+  options?: { afterContinue?: boolean },
 ): Promise<void> {
   await expectRetrieveStep(page, locale);
   const holds = page.locator(HOLDS);
@@ -104,26 +125,84 @@ async function selectHoldsAndCheck(
   await screenshotIf390(page, `${screenshotBase}-selected.png`);
   await page.locator(CHECK).tap();
   await expect(page.locator('.feedback-correct')).toBeVisible();
-  await screenshotIf390(page, `${screenshotBase}-verified.png`);
+  const continueBtn = page.locator(CONTINUE);
+  await expect(continueBtn).toBeVisible();
+  await expectFillsParent(continueBtn, page.locator('.actions'));
+  if (!options?.afterContinue) {
+    return;
+  }
+  if (locale === 'fr') {
+    await expect(continueBtn).toContainText('Continuer');
+  } else {
+    await expect(continueBtn).toContainText('Continue');
+  }
+  await continueBtn.tap();
+  await expect(sessionPosition(page)).toHaveText('3 / 5');
+  await screenshotIf390(page, `${screenshotBase}-after-continue.png`);
 }
 
 test.describe('classify-choice taps on a phone', () => {
   test.use({ hasTouch: true, isMobile: true });
 
   test('a touch pointerup without a click still selects the option', async ({ page }) => {
-    await gotoWithProgress(page, progressLapseRetrieveAtStep2());
-    await setLocale(page, 'fr');
-    await beginOfferedSession(page);
-    await passWarmupEvaluation(page);
-    await expect(sessionPosition(page)).toHaveText('2 / 5');
+    await openRetrieveAtStep2(page, 'fr');
     const holds = page.locator(HOLDS);
     await expect(holds).toBeVisible();
-    const touchPoint = { bubbles: true, pointerType: 'touch', isPrimary: true };
-    await holds.dispatchEvent('pointerdown', touchPoint);
-    await holds.dispatchEvent('pointerup', touchPoint);
+    await holds.dispatchEvent('pointerdown', TOUCH);
+    await holds.dispatchEvent('pointerup', TOUCH);
     await expect(holds).toHaveClass(/selected/);
     await expect(holds).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator(CHECK)).toBeEnabled();
+    await expect(page.locator('.feedback-correct')).toHaveCount(0);
+  });
+
+  async function dispatchTouchPointerThenClick(target: Locator): Promise<void> {
+    await target.evaluate((el) => {
+      const touch = { bubbles: true, pointerType: 'touch', isPrimary: true };
+      el.dispatchEvent(new PointerEvent('pointerdown', touch));
+      el.dispatchEvent(new PointerEvent('pointerup', touch));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+  }
+
+  test('pointerup then a compatibility click does not double-toggle or submit', async ({
+    page,
+  }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    const holds = page.locator(HOLDS);
+    await expect(holds).toBeVisible();
+    await dispatchTouchPointerThenClick(holds);
+    await expect(holds).toHaveClass(/selected/);
+    await expect(page.locator(FAILS)).not.toHaveClass(/selected/);
+    await expect(page.locator('.feedback-correct')).toHaveCount(0);
+    await expect(sessionPosition(page)).toHaveText('2 / 5');
+
+    await dispatchTouchPointerThenClick(page.locator(CHECK));
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+    await expect(sessionPosition(page)).toHaveText('2 / 5');
+    await expect(page.locator(CONTINUE)).toBeVisible();
+  });
+
+  test('a drag that starts on an option does not select', async ({ page }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    const holds = page.locator(HOLDS);
+    await expect(holds).toBeVisible();
+    await holds.dispatchEvent('pointerdown', { ...TOUCH, clientX: 40, clientY: 40 });
+    await holds.dispatchEvent('pointerup', { ...TOUCH, clientX: 40, clientY: 120 });
+    await expect(holds).not.toHaveClass(/selected/);
+    await expect(holds).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator(CHECK)).toBeDisabled();
+  });
+
+  test('pointercancel on an option does not select later', async ({ page }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    const holds = page.locator(HOLDS);
+    await expect(holds).toBeVisible();
+    await holds.dispatchEvent('pointerdown', TOUCH);
+    await holds.dispatchEvent('pointercancel', TOUCH);
+    await holds.dispatchEvent('pointerup', TOUCH);
+    await expect(holds).not.toHaveClass(/selected/);
+    await expect(page.locator(CHECK)).toBeDisabled();
   });
 
   test('Home FR: Vraie/Fausse on retrieve at 2/5 can be selected and checked', async ({
@@ -135,7 +214,7 @@ test.describe('classify-choice taps on a phone', () => {
     await expect(sessionPosition(page)).toHaveText('1 / 5');
     await passWarmupEvaluation(page);
     await expect(sessionPosition(page)).toHaveText('2 / 5');
-    await selectHoldsAndCheck(page, 'fr', 'fr-retrieve');
+    await selectHoldsAndCheck(page, 'fr', 'fr-retrieve', { afterContinue: true });
   });
 
   test('Home EN: True/False on retrieve at 2/5 can be selected and checked', async ({
@@ -145,7 +224,7 @@ test.describe('classify-choice taps on a phone', () => {
     await beginOfferedSession(page);
     await passWarmupEvaluation(page);
     await expect(sessionPosition(page)).toHaveText('2 / 5');
-    await selectHoldsAndCheck(page, 'en', 'en-retrieve');
+    await selectHoldsAndCheck(page, 'en', 'en-retrieve', { afterContinue: true });
   });
 
   test('Progress FR: same retrieve step is tappable', async ({ page }) => {
@@ -200,9 +279,8 @@ test.describe('classify-choice taps on a phone', () => {
       '[data-action="select-choice"][data-choice-id="still-true"]',
     );
     await expect(stillTrue).toBeVisible();
-    const touchPoint = { bubbles: true, pointerType: 'touch', isPrimary: true };
-    await stillTrue.dispatchEvent('pointerdown', touchPoint);
-    await stillTrue.dispatchEvent('pointerup', touchPoint);
+    await stillTrue.dispatchEvent('pointerdown', TOUCH);
+    await stillTrue.dispatchEvent('pointerup', TOUCH);
     await expect(stillTrue).toHaveClass(/selected/);
     await page.locator(CHECK).tap();
     await expect(page.locator('.feedback-correct')).toBeVisible();

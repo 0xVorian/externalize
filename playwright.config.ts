@@ -40,6 +40,15 @@ export default defineConfig({
         isMobile: true,
       },
     },
+    {
+      // WebKit is the engine that shrink-wraps grid-item <button>s. Limit
+      // this project to the choice-tap specs so CI stays within free minutes.
+      name: 'mobile-webkit-390',
+      testMatch: /e2e\/mobile\/classify-choice-tap\.spec\.ts/,
+      use: {
+        ...devices['iPhone 13'],
+      },
+    },
   ],
   webServer: {
     command:

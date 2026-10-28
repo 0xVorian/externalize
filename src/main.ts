@@ -1164,6 +1164,18 @@ let pointerDownButton: HTMLElement | null = null;
 let pointerDownX = 0;
 let pointerDownY = 0;
 
+/** WebAuthn and the file picker need the real click user-gesture, not pointerup. */
+const CLICK_ONLY_ACTIONS = new Set([
+  'create-passkey',
+  'use-passkey',
+  'add-passkey',
+  'import-progress',
+]);
+
+function resetPointerTracking(): void {
+  pointerDownButton = null;
+}
+
 function dispatchRootAction(button: HTMLElement): void {
   const action = button.dataset.action;
 
@@ -1580,7 +1592,7 @@ function dispatchRootAction(button: HTMLElement): void {
 root.addEventListener('pointerdown', (event) => {
   ignoreNextDelegatedClick = false;
   if (event.pointerType === 'mouse') {
-    pointerDownButton = null;
+    resetPointerTracking();
     return;
   }
   const button = findActionButton(event);
@@ -1589,33 +1601,30 @@ root.addEventListener('pointerdown', (event) => {
   pointerDownY = event.clientY;
 });
 
-const TOUCH_POINTER_ACTIONS = new Set([
-  'select-choice',
-  'check-classification',
-  'select-evaluation-prediction',
-  'check-evaluation',
-  'submit-tautology-answer',
-  'select-guided-value',
-  'check-guided-value',
-]);
+root.addEventListener('pointercancel', () => {
+  ignoreNextDelegatedClick = false;
+  resetPointerTracking();
+});
 
 root.addEventListener('pointerup', (event) => {
   if (event.pointerType === 'mouse') {
-    pointerDownButton = null;
+    resetPointerTracking();
     return;
   }
   const down = pointerDownButton;
-  pointerDownButton = null;
+  const downX = pointerDownX;
+  const downY = pointerDownY;
+  resetPointerTracking();
   const button = findActionButton(event);
   if (!button || button !== down || isDisabledActionControl(button)) {
     return;
   }
   const action = button.dataset.action;
-  if (!action || !TOUCH_POINTER_ACTIONS.has(action)) {
+  if (!action || CLICK_ONLY_ACTIONS.has(action)) {
     return;
   }
-  const dx = event.clientX - pointerDownX;
-  const dy = event.clientY - pointerDownY;
+  const dx = event.clientX - downX;
+  const dy = event.clientY - downY;
   if (dx * dx + dy * dy > 25 * 25) {
     return;
   }

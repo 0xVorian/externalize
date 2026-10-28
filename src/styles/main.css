@@ -33,10 +33,41 @@ body {
 
 button {
   font: inherit;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 [data-action] {
   touch-action: manipulation;
+}
+
+/*
+ * WebKit does not stretch <button> grid/flex items. A short label then
+ * leaves a dead zone in the painted row: the tap hits the parent, which
+ * has no handler. These containers are one control per cell — fill it.
+ */
+.actions > button,
+.progress-actions > button,
+.choice-list > button,
+.cell-segments > button,
+.tautology-segments > button,
+.atom-segments > button,
+.mode-nav > button,
+.unit-picker > button,
+.route-picker > button,
+.onboarding-actions > button,
+.session-more-nav > button,
+.truth-table-answer-tray > button {
+  width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+  align-self: stretch;
+}
+
+.language-toggle > button,
+.depth-toggle > button {
+  flex: 1;
+  min-width: 0;
 }
 
 .app {
