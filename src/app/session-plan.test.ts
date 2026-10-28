@@ -14,6 +14,7 @@ import {
   completeCurrentStep,
   composeSessionPlan,
   groupSessionSteps,
+  offerAfterCompletedRound,
   offerOpening,
   resumeSession,
   SESSION_MAX,
@@ -395,6 +396,137 @@ describe('offerOpening', () => {
     const offer = offerOpening(store, null, Date.parse('2026-09-07T12:00:00.000Z'));
     expect(offer.kind).toBe('lapse-recovery');
     expect(offer.plan?.steps.some((step) => step.itemId === 'lat-retrieve-conditional')).toBe(true);
+  });
+});
+
+describe('offerAfterCompletedRound', () => {
+  const now = Date.parse('2026-09-07T12:00:00.000Z');
+
+  function withDueReviewsAndRemainingLessons(store: ProgressStore): ProgressStore {
+    const next = withLevel0Complete(store);
+    return {
+      ...next,
+      passed: ['eval-001', 'eval-011'],
+      attempted: ['eval-001', 'eval-011'],
+      conceptEvidence: {
+        [evidenceKey('conjunction', 'apply')]: {
+          attempts: 2,
+          cleanPasses: 1,
+          transferPasses: 0,
+          recentErrors: [],
+          lastSeenAt: '2026-09-07T11:00:00.000Z',
+        },
+      },
+      queue: [
+        { exerciseId: 'eval-001', due: '2026-09-07T11:00:00.000Z', intervalDays: 0, ease: 2.3 },
+        { exerciseId: 'eval-011', due: '2026-09-07T11:30:00.000Z', intervalDays: 0, ease: 2.3 },
+      ],
+    };
+  }
+
+  it('home still offers a due recall, but chaining after that round does not', () => {
+    const store = withDueReviewsAndRemainingLessons(loadProgress());
+    const home = offerOpening(store, null, now);
+    expect(home.kind).toBe('quick-review');
+    expect(home.plan?.steps.some((step) => step.role === 'warmup')).toBe(true);
+
+    const chained = offerAfterCompletedRound(store, now);
+    expect(chained.kind).toBe('continue');
+    expect(chained.kind).not.toBe('quick-review');
+    expect(chained.plan?.steps[0]?.role).not.toBe('warmup');
+    expect(chained.plan?.steps[0]?.itemId).toBe(LEVEL_1_LESSONS[0]!.id);
+  });
+
+  it('does not reopen lapse recovery when chaining after a recall', () => {
+    let store = withLevel0Complete(loadProgress());
+    store = completeLesson(store, LEVEL_1_LESSONS[0]!.id);
+    store = {
+      ...store,
+      passed: ['eval-001', 'eval-011'],
+      queue: [],
+      conceptEvidence: {
+        [evidenceKey('conditional', 'apply')]: {
+          attempts: 4,
+          cleanPasses: 4,
+          transferPasses: 0,
+          recentErrors: [],
+          lastSeenAt: '2025-01-01T00:00:00.000Z',
+        },
+      },
+    };
+    expect(offerOpening(store, null, now).kind).toBe('lapse-recovery');
+    const chained = offerAfterCompletedRound(store, now);
+    expect(chained.kind).toBe('continue');
+    expect(chained.plan?.steps[0]?.role).not.toBe('warmup');
+    expect(chained.plan?.steps[0]?.itemId).toBe(LEVEL_1_LESSONS[1]!.id);
+  });
+
+  it('idles when nothing new remains, even if repaired reviews are still due', () => {
+    let store = loadProgress();
+    for (const lesson of ALL_LEARN_LESSONS) {
+      store = completeLesson(store, lesson.id);
+    }
+    store = {
+      ...store,
+      passed: ['eval-001', 'eval-011', 'tt-001', 'counter-001'],
+      queue: [
+        { exerciseId: 'eval-001', due: '2026-09-07T11:00:00.000Z', intervalDays: 0, ease: 2.3 },
+      ],
+    };
+    expect(offerOpening(store, null, now).kind).toBe('quick-review');
+    const chained = offerAfterCompletedRound(store, now);
+    expect(chained.kind).toBe('idle');
+    expect(chained.plan).toBeNull();
+  });
+
+  it('skips the warm-up on a chained continue so the next lesson is first', () => {
+    const store = withLevel0Complete(loadProgress());
+    store.passed = ['eval-001'];
+    store.conceptEvidence = {
+      [evidenceKey('conjunction', 'apply')]: {
+        attempts: 1,
+        cleanPasses: 1,
+        transferPasses: 0,
+        recentErrors: [],
+        lastSeenAt: '2026-09-07T11:00:00.000Z',
+      },
+    };
+    store.queue = [
+      { exerciseId: 'eval-001', due: '2026-09-10T12:00:00.000Z', intervalDays: 1, ease: 2.5 },
+    ];
+    const home = offerOpening(store, null, now);
+    expect(home.kind).toBe('continue');
+    expect(home.plan?.steps[0]).toMatchObject({
+      itemId: 'eval-001',
+      role: 'warmup',
+    });
+
+    const chained = offerAfterCompletedRound(store, now);
+    expect(chained.kind).toBe('continue');
+    expect(chained.plan?.steps[0]?.role).not.toBe('warmup');
+    expect(chained.plan?.steps[0]?.itemId).toBe(LEVEL_1_LESSONS[0]!.id);
+    expect(chained.plan?.steps).toHaveLength(4);
+    expect(chained.plan?.steps.every((step) => step.role !== 'warmup')).toBe(true);
+  });
+
+  it('a second chained round still skips leftover interval-0 reviews', () => {
+    const store = withDueReviewsAndRemainingLessons(loadProgress());
+    const first = offerAfterCompletedRound(store, now);
+    expect(first.kind).toBe('continue');
+    expect(first.plan?.steps).toHaveLength(4);
+
+    let afterFirst = store;
+    for (const step of first.plan!.steps) {
+      if (!afterFirst.lessonsCompleted.includes(step.itemId)) {
+        afterFirst = completeLesson(afterFirst, step.itemId);
+      }
+    }
+    expect(offerOpening(afterFirst, null, now).kind).toBe('quick-review');
+    const second = offerAfterCompletedRound(afterFirst, now);
+    expect(second.kind).toBe('continue');
+    expect(second.plan?.steps[0]?.role).not.toBe('warmup');
+    expect(second.plan?.steps.some((step) => step.itemId === 'eval-001')).toBe(false);
+    expect(second.plan?.steps[0]?.itemId).toBe(LEVEL_1_LESSONS[3]!.id);
   });
 });
 

@@ -207,10 +207,10 @@ export function composeSessionPlan(
   store: ProgressStore,
   kind: SessionKind,
   itemIds: string[],
-  options?: { preparation?: boolean; now?: number },
+  options?: { preparation?: boolean; now?: number; skipWarmup?: boolean },
 ): SessionPlan {
   const now = options?.now ?? Date.now();
-  const warmup = selectWarmup(store, now, itemIds);
+  const warmup = options?.skipWarmup ? undefined : selectWarmup(store, now, itemIds);
   const remainingIds = warmup
     ? bodyItemIdsWithoutWarmupDuplicate(itemIds, warmup)
     : itemIds;
@@ -326,11 +326,23 @@ function withReview(
   return { ...offer, nextReviewAt: offer.nextReviewAt ?? nextReviewAt(store, now) };
 }
 
+export type OfferOpeningOptions = {
+  /**
+   * After a finished round, skip due-review, lapse-recovery, and the opening
+   * warm-up so "do another" cannot loop on recall. Home still offers those
+   * kinds on a fresh open. Short leftover clusters are not padded.
+   */
+  afterCompletedRound?: boolean;
+};
+
 export function offerOpening(
   store: ProgressStore,
   persisted: PersistedSession | null,
   now = Date.now(),
+  options?: OfferOpeningOptions,
 ): OpeningOffer {
+  const afterCompletedRound = options?.afterCompletedRound === true;
+
   if (
     persisted?.status === 'active' &&
     persisted.currentIndex < persisted.plan.steps.length
@@ -346,7 +358,7 @@ export function offerOpening(
     );
   }
 
-  if (isPracticeUnlocked(store)) {
+  if (!afterCompletedRound && isPracticeUnlocked(store)) {
     const due = dueExerciseIds(store, now);
     if (due.length > 0) {
       return withReview(
@@ -360,7 +372,7 @@ export function offerOpening(
     }
   }
 
-  if (hasStaleEvidence(store, now)) {
+  if (!afterCompletedRound && hasStaleEvidence(store, now)) {
     const remaining = remainingRouteItems(store);
     const remainingIds = new Set(remaining.items);
     const lapse = lapseItemIds(store, now).filter((itemId) => {
@@ -390,6 +402,7 @@ export function offerOpening(
         plan: composeSessionPlan(store, kind, remaining.items, {
           preparation: remaining.preparation,
           now,
+          skipWarmup: afterCompletedRound,
         }),
       },
       store,
@@ -398,6 +411,14 @@ export function offerOpening(
   }
 
   return withReview({ kind: 'idle', plan: null }, store, now);
+}
+
+/** Next round after the learner taps "do another" on the completion screen. */
+export function offerAfterCompletedRound(
+  store: ProgressStore,
+  now = Date.now(),
+): OpeningOffer {
+  return offerOpening(store, null, now, { afterCompletedRound: true });
 }
 
 export function startSession(plan: SessionPlan, nowIso: string): PersistedSession {

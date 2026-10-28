@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- After a recall round, **Enchaîner une courte séance** / **Do another short round** continues into remaining new material, or shows the idle finish (**You're good for now** / **Rien de pressé pour l’instant**) when nothing new remains — including when a repaired item is still due. It does not fall back to a due-review or warm-up opening. Home and Progress still offer due review on a fresh open. Existing v7 progress does not need a reset. ([#48](https://github.com/0xVorian/externalize/issues/48))
 - Empty Progress in French now fits the next card and all three unit headers — including each unit’s count line — on a 390×844 first screen, matching English. Locked-unit waiting-on copy no longer repeats the previous unit’s full title, so the count line stays on one row at 390px. ([#45](https://github.com/0xVorian/externalize/issues/45))
 - Main-route concept-map completion no longer waits on optional Logic and Theism (`lat-*`) lessons, so after Unit 1 Conditional is completed and Scope is available rather than locked. ([#43](https://github.com/0xVorian/externalize/issues/43))
 - Passkey/D1 hardening before production bind (#39): `/api/status` probes the migrated schema rather than `SELECT 1`; challenge admission is a single conditional INSERT plus an atomic per-IP UPSERT; failed sync retries with exponential backoff and jitter (401 still keeps the queue); `/api/sync` responses are `parseProgressStore`d and merges cannot grow past the parser cap.
