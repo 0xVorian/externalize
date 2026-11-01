@@ -27,7 +27,14 @@ test.describe('First-run onboarding', () => {
     await page.locator('[data-action="onboarding-next"]').click();
     await expect(page.locator('#onboarding-title')).toContainText('Choose, then check');
 
-    await page.locator('[data-action="onboarding-next"]').click();
+    await page.evaluate(() => {
+      const next = document.querySelector('[data-action="onboarding-next"]');
+      if (!(next instanceof HTMLElement)) {
+        throw new Error('missing onboarding-next');
+      }
+      next.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+      next.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    });
     await expect(page.locator('#onboarding-title')).toContainText('Start with a short round');
     await expect(page.locator('.onboarding-overlay')).toContainText('More');
 

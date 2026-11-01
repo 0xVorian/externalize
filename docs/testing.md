@@ -72,7 +72,7 @@ npm run test:e2e:ui
 | `e2e/smoke/biconditional-symmetry.spec.ts` | Swapped biconditional operands accepted through the UI |
 | `e2e/smoke/french-content.spec.ts` | French-authored prompt and atom gloss rendering |
 | `e2e/mobile/high-risk.spec.ts` | Watch grid, ¬P watch table, evaluation, scope, translation, truth table, and proof at 320px and 390px |
-| `e2e/mobile/classify-choice-tap.spec.ts` | True/false choice tap, Check after option re-render, iOS mouse interop, drag/cancel, and mouse/keyboard clicks not eaten by touch suppression |
+| `e2e/mobile/classify-choice-tap.spec.ts` | True/false choice tap and Check; Continue advances one step; options fill their row; keyboard Space/Enter; onboarding-next one screen per tap |
 | `e2e/smoke/progress-visibility.spec.ts` | Learn meters, Unit 1 lesson count, practice session counting, consistency/scaffold moments, Unit 2 completion one-shot, session complete, Progress capability summary |
 | `e2e/smoke/course-map.spec.ts` | Home and Progress share one named round; Progress outline shows all three units |
 | `e2e/mobile/course-map.spec.ts` | Progress outline at 320px and 390px; at 390×844 the empty state shows all three unit headers and their count lines fully on the first screen in EN and FR, and mid-Unit 1 shows you-are-here on the first screen; Course tab shows locked later units |
