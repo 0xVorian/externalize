@@ -600,11 +600,19 @@ describe('warm-up repair resume', () => {
 });
 
 describe('scope warm-up recap', () => {
+  it('falls back to the first authored card when none are completed', () => {
+    const ids = repairItemIds(loadProgress(), 'conjunction', 'eval-001');
+    expect(ids[0]).toBe('level0-03-and');
+    expect(ids).toContain('level0-05-guided');
+  });
+
   it('recaps the latest completed nesting card, not Unit 1 after Unit 2', () => {
     const store = withScopePractice(loadProgress());
     const ids = repairItemIds(store, 'scope', 'scope-001');
     expect(ids[0]).toBe('level2-01-nesting');
     expect(ids).not.toContain('level1-13-nesting');
+    // Unit 2 has no same-concept guided sibling after the card, so the mixed
+    // pairing with Unit 1's only scope guided is intended.
     expect(ids).toContain('level1-14-nesting-guided');
   });
 
@@ -615,6 +623,33 @@ describe('scope warm-up recap', () => {
     const ids = repairItemIds(store, 'scope', 'scope-001');
     expect(ids[0]).toBe('level1-13-nesting');
     expect(ids).not.toContain('level2-01-nesting');
+  });
+
+  it('pairs a recap card with the same-concept guided that follows it when one exists', () => {
+    const store = withConjunctionPractice(loadProgress());
+    const ids = repairItemIds(store, 'conjunction', 'eval-001');
+    expect(ids[0]).toBe('level0-03-and');
+    expect(ids).toContain('level0-05-guided');
+  });
+
+  it('treats latest as curriculum order, not completion recency', () => {
+    let store = loadProgress();
+    store = completeLesson(store, 'lat-conditional-notation');
+    store = completeLesson(store, 'level1-07-imp');
+    expect(store.lessonsCompleted.at(-1)).toBe('level1-07-imp');
+    const ids = repairItemIds(store, 'conditional', 'eval-004');
+    expect(ids[0]).toBe('lat-conditional-notation');
+    expect(ids).not.toContain('level1-07-imp');
+  });
+
+  it('uses the later of several completed cards in curriculum order', () => {
+    let store = withLevel0Complete(loadProgress());
+    store = completeLesson(store, 'level1-13-nesting');
+    store = completeLesson(store, 'level1-14-nesting-guided');
+    store = completeLesson(store, 'level2-01-nesting');
+    const ids = repairItemIds(store, 'scope', 'scope-001');
+    expect(ids[0]).toBe('level2-01-nesting');
+    expect(ids).toContain('level1-14-nesting-guided');
   });
 });
 

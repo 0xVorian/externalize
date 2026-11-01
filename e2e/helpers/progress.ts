@@ -170,25 +170,33 @@ export function progressCourseCompleteWithDueScopeReview(): ProgressStore {
     }
   }
   const due = new Date(Date.now() - 60_000).toISOString();
-  const lastSeenAt = new Date(Date.now() + 60_000).toISOString();
+  const olderSeen = new Date(Date.now() - 86_400_000).toISOString();
+  const scopeSeen = new Date(Date.now() - 60_000).toISOString();
   const passed = store.passed.includes('scope-001')
     ? store.passed
     : [...store.passed, 'scope-001'];
   const attempted = store.attempted.includes('scope-001')
     ? store.attempted
     : [...store.attempted, 'scope-001'];
+  const agedEvidence: ProgressStore['conceptEvidence'] = {};
+  for (const [key, stat] of Object.entries(store.conceptEvidence)) {
+    if (!stat) {
+      continue;
+    }
+    agedEvidence[key] = { ...stat, lastSeenAt: olderSeen };
+  }
   return {
     ...store,
     passed,
     attempted,
     conceptEvidence: {
-      ...store.conceptEvidence,
+      ...agedEvidence,
       [evidenceKey('scope', 'apply')]: {
         attempts: 1,
         cleanPasses: 1,
         transferPasses: 0,
         recentErrors: [],
-        lastSeenAt,
+        lastSeenAt: scopeSeen,
       },
     },
     queue: [{ exerciseId: 'scope-001', due, intervalDays: 1, ease: 2.5 }],

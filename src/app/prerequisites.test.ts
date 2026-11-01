@@ -19,6 +19,7 @@ import {
   renderConceptMap,
 } from './concept-map-render';
 import { SOURCE_LESSONS, isSourceLessonId } from './source-lessons';
+import { isSourceExerciseId } from './source-route';
 import { completeLesson, loadProgress } from './storage';
 
 function completeIds(ids: readonly string[]) {
@@ -53,28 +54,61 @@ describe('prerequisites graph', () => {
   });
 
   it('requires foundations concept ids to exist as concept-map nodes', () => {
-    const knownConcepts = new Set(PREREQUISITES_GRAPH.concepts.map((concept) => concept.id));
-    // Source-route quantifiers and natural deduction are evidence keys, not
-    // nodes on the three-unit foundations map.
-    const evidenceOnly = new Set([
-      'universal-quantifier',
-      'existential-quantifier',
-      'existential-import',
-      'natural-deduction',
-    ]);
+    const mapConcepts = new Set(PREREQUISITES_GRAPH.concepts.map((concept) => concept.id));
+    // Evidence-only keys are those used by source-route lessons or by
+    // source / proof-fill exercises that are not nodes on the three-unit map.
+    // Foundations-path items may not borrow those keys.
+    const evidenceOnly = new Set<string>();
+    for (const lesson of SOURCE_LESSONS) {
+      const conceptId = conceptForLesson(lesson.id);
+      if (conceptId && !mapConcepts.has(conceptId)) {
+        evidenceOnly.add(conceptId);
+      }
+    }
+    for (const exercise of EXERCISE_DEFINITIONS) {
+      if (!isSourceExerciseId(exercise.id) && exercise.type !== 'proof-fill-step') {
+        continue;
+      }
+      const conceptId = conceptForExercise(exercise.id);
+      if (conceptId && !mapConcepts.has(conceptId)) {
+        evidenceOnly.add(conceptId);
+      }
+    }
+    expect(evidenceOnly.size).toBeGreaterThan(0);
+
+    function conceptFitsItem(
+      kind: 'foundations' | 'source-or-proof',
+      conceptId: string,
+    ): boolean {
+      if (mapConcepts.has(conceptId)) {
+        return true;
+      }
+      return kind === 'source-or-proof' && evidenceOnly.has(conceptId);
+    }
+
     for (const lesson of ALL_LEARN_LESSONS) {
       const conceptId = conceptForLesson(lesson.id);
-      expect(knownConcepts.has(conceptId!), lesson.id).toBe(true);
+      expect(conceptId, lesson.id).toBeTruthy();
+      expect(conceptFitsItem('foundations', conceptId!), lesson.id).toBe(true);
+    }
+    for (const lesson of SOURCE_LESSONS) {
+      const conceptId = conceptForLesson(lesson.id);
+      expect(conceptId, lesson.id).toBeTruthy();
+      expect(conceptFitsItem('source-or-proof', conceptId!), lesson.id).toBe(true);
     }
     for (const exercise of EXERCISE_DEFINITIONS) {
       const conceptId = conceptForExercise(exercise.id)!;
-      if (evidenceOnly.has(conceptId)) {
-        expect(knownConcepts.has(conceptId), exercise.id).toBe(false);
-        continue;
-      }
-      expect(knownConcepts.has(conceptId), exercise.id).toBe(true);
+      const kind =
+        isSourceExerciseId(exercise.id) || exercise.type === 'proof-fill-step'
+          ? 'source-or-proof'
+          : 'foundations';
+      expect(conceptFitsItem(kind, conceptId), exercise.id).toBe(true);
     }
-    expect(knownConcepts.has('translation')).toBe(true);
+
+    expect(conceptForExercise('eval-001')).toBe('conjunction');
+    expect(conceptFitsItem('foundations', 'natural-deduction')).toBe(false);
+    expect(conceptFitsItem('source-or-proof', conceptForExercise('nd-001')!)).toBe(true);
+    expect(mapConcepts.has('translation')).toBe(true);
   });
 
   it('clusters Unit 1 nesting explanation with its guided practice', () => {

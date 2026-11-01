@@ -148,6 +148,10 @@ test.describe('session warm-up', () => {
     await beginOfferedSession(page);
     await missThenPassScopeWarmup(page);
     await expect(page.locator('.lesson-card')).toBeVisible();
+    await expect(page.locator('.lesson-card')).toContainText('Composer des formules complexes');
+    await expect(page.locator('.lesson-card')).toContainText(
+      "l'antécédent est la conjonction tout entière",
+    );
     await expect(page.locator('.lesson-card')).toContainText('(P ∧ Q) → R');
     await expect(page.locator('.lesson-card')).not.toContainText('(P ∧ Q) ∨ R');
   });

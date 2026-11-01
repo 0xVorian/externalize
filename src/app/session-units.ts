@@ -6,6 +6,21 @@ import { watchCaseCount } from '../i18n';
 
 export { watchCaseCount };
 
+const watchCaseCountOverrides = new Map<string, number>();
+
+/** Test-only: pretend a watch lesson has more cases than the authored catalog. */
+export function setWatchCaseCountOverrideForTests(lessonId: string, count?: number): void {
+  if (count === undefined) {
+    watchCaseCountOverrides.delete(lessonId);
+  } else {
+    watchCaseCountOverrides.set(lessonId, count);
+  }
+}
+
+function resolvedWatchCaseCount(itemId: string): number {
+  return watchCaseCountOverrides.get(itemId) ?? watchCaseCount(itemId);
+}
+
 export function isTeachingItem(itemId: string): boolean {
   const lesson = getLessonDefinition(itemId);
   return lesson?.type === 'card' || lesson?.type === 'watch';
@@ -22,7 +37,7 @@ export function isLastWatchUnit(itemId: string, unitIndex: number | undefined): 
   if (unitIndex === undefined) {
     return true;
   }
-  const count = watchCaseCount(itemId);
+  const count = resolvedWatchCaseCount(itemId);
   return count <= 0 || unitIndex >= count - 1;
 }
 
@@ -30,7 +45,7 @@ export function unitsForItem(itemId: string, fromIndex = 0): SessionStep[] {
   const lesson = getLessonDefinition(itemId);
   const source: SessionStepSource = getExerciseDefinition(itemId) ? 'practice' : 'route';
   if (lesson?.type === 'watch') {
-    const count = watchCaseCount(itemId);
+    const count = resolvedWatchCaseCount(itemId);
     const start = Math.max(0, Math.min(fromIndex, count));
     const steps: SessionStep[] = [];
     for (let index = start; index < count; index += 1) {

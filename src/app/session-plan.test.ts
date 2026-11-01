@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { evidenceKey } from './curriculum';
 import {
   ALL_LEARN_LESSONS,
@@ -28,7 +28,12 @@ import {
   takeSessionEnvelope,
 } from './session-plan';
 import type { SessionStep } from './session-types';
-import { expandItemsToUnits, isPracticeItem, isTeachingItem } from './session-units';
+import {
+  expandItemsToUnits,
+  isPracticeItem,
+  isTeachingItem,
+  setWatchCaseCountOverrideForTests,
+} from './session-units';
 import { completeLesson, loadProgress, type ProgressStore } from './storage';
 import { plannedSourceItems, setActiveRoute } from './source-route';
 
@@ -76,6 +81,10 @@ function teachingOnlyCards(count: number): SessionStep[] {
 }
 
 describe('session envelope', () => {
+  afterEach(() => {
+    setWatchCaseCountOverrideForTests('level0-04-watch');
+  });
+
   it('keeps 1–7 items and caps longer lists at 6', () => {
     expect(takeEnvelope(['a', 'b', 'c', 'd', 'e'])).toHaveLength(5);
     expect(takeEnvelope(['a', 'b', 'c', 'd', 'e', 'f', 'g'])).toHaveLength(7);
@@ -287,6 +296,62 @@ describe('session envelope', () => {
     expect(offer.plan?.steps[0]).toMatchObject({
       itemId: 'level0-04-watch',
       unitIndex: 3,
+    });
+    expect(offer.plan?.steps[0]?.itemId).not.toBe('level0-05-guided');
+    expect(
+      offer.plan?.steps.some((step) => step.itemId === 'level0-04-watch' && step.unitIndex === 0),
+    ).toBe(false);
+  });
+
+  it('the next round after a genuine oversized-cluster split resumes at the leftover watch case', () => {
+    setWatchCaseCountOverrideForTests('level0-04-watch', 6);
+    let store = loadProgress();
+    store = completeLesson(store, 'level0-01-letters');
+    store = completeLesson(store, 'level0-02-truth');
+    const remaining = LEVEL_0_LESSONS.filter(
+      (lesson) => !store.lessonsCompleted.includes(lesson.id),
+    ).map((lesson) => lesson.id);
+    expect(remaining).toEqual(['level0-03-and', 'level0-04-watch', 'level0-05-guided']);
+
+    const first = composeSessionPlan(store, 'continue', remaining);
+    expect(first.steps.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+    ]);
+    expect(first.steps.some((step) => step.itemId === 'level0-05-guided')).toBe(false);
+
+    for (const step of first.steps) {
+      store = applyCompletedSessionItem(store, step.itemId, step.unitIndex);
+    }
+    expect(store.lessonsCompleted).toContain('level0-03-and');
+    expect(store.lessonsCompleted).not.toContain('level0-04-watch');
+    expect(store.resume).toMatchObject({
+      lessonId: 'level0-04-watch',
+      watchStep: 5,
+    });
+
+    const leftover = LEVEL_0_LESSONS.filter(
+      (lesson) => !store.lessonsCompleted.includes(lesson.id),
+    ).map((lesson) => lesson.id);
+    const second = composeSessionPlan(store, 'continue', leftover);
+    expect(second.steps.map((step) => step.id)).toEqual([
+      'level0-04-watch#5',
+      'level0-05-guided',
+    ]);
+    expect(second.steps[0]).toMatchObject({
+      itemId: 'level0-04-watch',
+      unitIndex: 5,
+    });
+
+    const offer = offerOpening(store, null);
+    expect(offer.kind).toBe('continue');
+    expect(offer.plan?.steps[0]).toMatchObject({
+      itemId: 'level0-04-watch',
+      unitIndex: 5,
     });
     expect(offer.plan?.steps[0]?.itemId).not.toBe('level0-05-guided');
     expect(

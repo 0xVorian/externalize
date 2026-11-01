@@ -169,13 +169,54 @@ function lessonsOfType(conceptId: string, type: 'card' | 'guided'): string[] {
     .map((lesson) => lesson.id);
 }
 
+/**
+ * Latest completed lesson of this type in authored curriculum order
+ * (`ALL_LEARN_LESSONS` then `SOURCE_LESSONS`). Completion recency is ignored
+ * so replaying an earlier card cannot undo a later unit's recap. With none
+ * completed, fall back to the first authored card of that type.
+ */
+function latestLessonOfType(
+  store: ProgressStore,
+  conceptId: string,
+  type: 'card' | 'guided',
+): string | undefined {
+  const ids = lessonsOfType(conceptId, type);
+  const completed = ids.filter((id) => store.lessonsCompleted.includes(id));
+  return completed.at(-1) ?? ids[0];
+}
+
 function explanationLessonId(store: ProgressStore, conceptId: string): string | undefined {
-  const cards = lessonsOfType(conceptId, 'card');
-  const completed = cards.filter((id) => store.lessonsCompleted.includes(id));
-  // Prefer the latest completed card in curriculum order so a later unit's
-  // explanation is recapped once it has been seen (e.g. Unit 2 nesting for
-  // `scope` rather than always replaying Unit 1).
-  return completed.at(-1) ?? cards[0];
+  return latestLessonOfType(store, conceptId, 'card');
+}
+
+/**
+ * Guided repair prefers the same-concept guided lesson that follows the recap
+ * card in curriculum order (card → watch → guided). Unit 2 nesting has no such
+ * sibling, so the mixed pairing with Unit 1's `level1-14-nesting-guided` is
+ * intended: it is the only scope guided unit in the catalog.
+ */
+function pairedGuidedId(
+  store: ProgressStore,
+  conceptId: string,
+  explanationId: string | undefined,
+): string | undefined {
+  const guidedIds = lessonsOfType(conceptId, 'guided').filter((id) => id !== explanationId);
+  if (guidedIds.length === 0) {
+    return undefined;
+  }
+  if (explanationId) {
+    const all = [...ALL_LEARN_LESSONS, ...SOURCE_LESSONS];
+    const start = all.findIndex((lesson) => lesson.id === explanationId);
+    if (start >= 0) {
+      const sibling = all.slice(start + 1).find(
+        (lesson) => lesson.type === 'guided' && conceptForLesson(lesson.id) === conceptId,
+      );
+      if (sibling) {
+        return sibling.id;
+      }
+    }
+  }
+  return latestLessonOfType(store, conceptId, 'guided');
 }
 
 function extraPracticeExercise(
@@ -212,8 +253,8 @@ export function repairItemIds(
     ids.push(explanation);
     excluded.add(explanation);
   }
-  const guided = lessonsOfType(conceptId, 'guided').find((id) => !excluded.has(id));
-  if (guided) {
+  const guided = pairedGuidedId(store, conceptId, explanation);
+  if (guided && !excluded.has(guided)) {
     ids.push(guided);
     excluded.add(guided);
   }
