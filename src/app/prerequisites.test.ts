@@ -55,26 +55,18 @@ describe('prerequisites graph', () => {
 
   it('requires foundations concept ids to exist as concept-map nodes', () => {
     const mapConcepts = new Set(PREREQUISITES_GRAPH.concepts.map((concept) => concept.id));
-    // Evidence-only keys are those used by source-route lessons or by
-    // source / proof-fill exercises that are not nodes on the three-unit map.
-    // Foundations-path items may not borrow those keys.
-    const evidenceOnly = new Set<string>();
-    for (const lesson of SOURCE_LESSONS) {
-      const conceptId = conceptForLesson(lesson.id);
-      if (conceptId && !mapConcepts.has(conceptId)) {
-        evidenceOnly.add(conceptId);
-      }
-    }
-    for (const exercise of EXERCISE_DEFINITIONS) {
-      if (!isSourceExerciseId(exercise.id) && exercise.type !== 'proof-fill-step') {
-        continue;
-      }
-      const conceptId = conceptForExercise(exercise.id);
-      if (conceptId && !mapConcepts.has(conceptId)) {
-        evidenceOnly.add(conceptId);
-      }
-    }
-    expect(evidenceOnly.size).toBeGreaterThan(0);
+    // Explicit off-map keys. A derived "whatever source items already use"
+    // set would accept a typo such as `banana`.
+    const evidenceOnly: Record<string, string> = {
+      'universal-quantifier':
+        'Sobel ∀ meaning/notation; portable evidence, not a three-unit map node.',
+      'existential-quantifier':
+        'Sobel ∃ meaning/notation; portable evidence, not a three-unit map node.',
+      'existential-import':
+        'Sobel empty-domain / vacuity evidence; not a three-unit map node.',
+      'natural-deduction':
+        'Proof-fill-step exercises; not taught as a three-unit map node.',
+    };
 
     function conceptFitsItem(
       kind: 'foundations' | 'source-or-proof',
@@ -83,7 +75,7 @@ describe('prerequisites graph', () => {
       if (mapConcepts.has(conceptId)) {
         return true;
       }
-      return kind === 'source-or-proof' && evidenceOnly.has(conceptId);
+      return kind === 'source-or-proof' && Object.hasOwn(evidenceOnly, conceptId);
     }
 
     for (const lesson of ALL_LEARN_LESSONS) {
@@ -108,7 +100,15 @@ describe('prerequisites graph', () => {
     expect(conceptForExercise('eval-001')).toBe('conjunction');
     expect(conceptFitsItem('foundations', 'natural-deduction')).toBe(false);
     expect(conceptFitsItem('source-or-proof', conceptForExercise('nd-001')!)).toBe(true);
+    expect(conceptFitsItem('source-or-proof', conceptForLesson('lat-universal-meaning')!)).toBe(
+      true,
+    );
+    expect(conceptFitsItem('source-or-proof', 'banana')).toBe(false);
     expect(mapConcepts.has('translation')).toBe(true);
+    for (const [key, reason] of Object.entries(evidenceOnly)) {
+      expect(mapConcepts.has(key), key).toBe(false);
+      expect(reason.length, key).toBeGreaterThan(0);
+    }
   });
 
   it('clusters Unit 1 nesting explanation with its guided practice', () => {
