@@ -125,6 +125,7 @@ async function selectHoldsAndCheck(
   await screenshotIf390(page, `${screenshotBase}-selected.png`);
   await page.locator(CHECK).tap();
   await expect(page.locator('.feedback-correct')).toBeVisible();
+  await screenshotIf390(page, `${screenshotBase}-after-check.png`);
   const continueBtn = page.locator(CONTINUE);
   await expect(continueBtn).toBeVisible();
   await expectFillsParent(continueBtn, page.locator('.actions'));
@@ -161,7 +162,7 @@ test.describe('classify-choice taps on a phone', () => {
       const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
       el.dispatchEvent(new PointerEvent('pointerdown', touch));
       el.dispatchEvent(new PointerEvent('pointerup', touch));
-      el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     });
   }
 
@@ -194,7 +195,7 @@ test.describe('classify-choice taps on a phone', () => {
       const base = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
       el.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: 40, clientY: 40 }));
       el.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: 40, clientY: 72 }));
-      el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     });
     await expect(holds).not.toHaveClass(/selected/);
     await expect(holds).toHaveAttribute('aria-pressed', 'false');
@@ -210,7 +211,7 @@ test.describe('classify-choice taps on a phone', () => {
       el.dispatchEvent(new PointerEvent('pointerdown', touch));
       el.dispatchEvent(new PointerEvent('pointercancel', touch));
       el.dispatchEvent(new PointerEvent('pointerup', touch));
-      el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     });
     await expect(holds).not.toHaveClass(/selected/);
     await expect(page.locator(CHECK)).toBeDisabled();
@@ -234,13 +235,156 @@ test.describe('classify-choice taps on a phone', () => {
         const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
         start.dispatchEvent(new PointerEvent('pointerdown', touch));
         end.dispatchEvent(new PointerEvent('pointerup', touch));
-        end.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        end.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
       },
       [HOLDS, FAILS] as const,
     );
     await expect(holds).not.toHaveClass(/selected/);
     await expect(fails).not.toHaveClass(/selected/);
     await expect(page.locator(CHECK)).toBeDisabled();
+  });
+
+  async function selectHoldsWithTouchNoClick(page: Page): Promise<void> {
+    const holds = page.locator(HOLDS);
+    await holds.evaluate((el) => {
+      const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
+      el.dispatchEvent(new PointerEvent('pointerdown', touch));
+      el.dispatchEvent(new PointerEvent('pointerup', touch));
+    });
+    await expect(holds).toHaveClass(/selected/);
+    await expect(page.locator(CHECK)).toBeEnabled();
+    await expect(page.locator('.feedback-correct')).toHaveCount(0);
+  }
+
+  test('Check still submits from a pointerup without a follow-up click', async ({ page }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    await selectHoldsWithTouchNoClick(page);
+    await page.locator(CHECK).evaluate((el) => {
+      const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 2 };
+      el.dispatchEvent(new PointerEvent('pointerdown', touch));
+      el.dispatchEvent(new PointerEvent('pointerup', touch));
+    });
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+    await expect(sessionPosition(page)).toHaveText('2 / 5');
+  });
+
+  test('Check still submits when iOS mouse pointer events arrive mid-tap', async ({
+    page,
+  }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    await selectHoldsWithTouchNoClick(page);
+    await page.evaluate((checkSel) => {
+      const check = document.querySelector(checkSel);
+      if (!(check instanceof HTMLElement)) {
+        throw new Error('missing Check');
+      }
+      const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 2 };
+      const mouse = { bubbles: true, pointerType: 'mouse', isPrimary: true, pointerId: 1 };
+      check.dispatchEvent(new PointerEvent('pointerdown', touch));
+      // Compatibility mouse events from the option tap, delayed into this gesture.
+      check.dispatchEvent(new PointerEvent('pointerdown', mouse));
+      check.dispatchEvent(new PointerEvent('pointerup', mouse));
+      check.dispatchEvent(new PointerEvent('pointerup', touch));
+    }, CHECK);
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+  });
+
+  test('Check still submits when a late option click re-renders the button', async ({
+    page,
+  }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    await selectHoldsWithTouchNoClick(page);
+    await page.evaluate(([checkSel, holdsSel]) => {
+      const check = document.querySelector(checkSel);
+      if (!(check instanceof HTMLElement)) {
+        throw new Error('missing Check');
+      }
+      const touch = {
+        bubbles: true,
+        pointerType: 'touch',
+        isPrimary: true,
+        pointerId: 2,
+        clientX: 24,
+        clientY: 24,
+      };
+      check.dispatchEvent(new PointerEvent('pointerdown', touch));
+      const holds = document.querySelector(holdsSel);
+      if (!(holds instanceof HTMLElement)) {
+        throw new Error('missing option');
+      }
+      holds.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+      const checkAfter = document.querySelector(checkSel);
+      if (!(checkAfter instanceof HTMLElement)) {
+        throw new Error('missing Check after render');
+      }
+      checkAfter.dispatchEvent(new PointerEvent('pointerup', touch));
+      checkAfter.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+    }, [CHECK, HOLDS] as const);
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+    await expect(sessionPosition(page)).toHaveText('2 / 5');
+  });
+
+  test('a late click on the re-rendered Continue does not skip the feedback', async ({
+    page,
+  }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    await selectHoldsWithTouchNoClick(page);
+    await page.evaluate((checkSel) => {
+      const check = document.querySelector(checkSel);
+      if (!(check instanceof HTMLElement)) {
+        throw new Error('missing Check');
+      }
+      const touch = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 2 };
+      check.dispatchEvent(new PointerEvent('pointerdown', touch));
+      check.dispatchEvent(new PointerEvent('pointerup', touch));
+    }, CHECK);
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+    const continueBtn = page.locator(CONTINUE);
+    await expect(continueBtn).toBeVisible();
+    await continueBtn.evaluate((el) => {
+      el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+    });
+    await expect(sessionPosition(page)).toHaveText('2 / 5');
+  });
+
+  test('a mouse click after a touch drag is not eaten', async ({ page }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    const holds = page.locator(HOLDS);
+    await holds.evaluate((el) => {
+      const base = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
+      el.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: 40, clientY: 40 }));
+      el.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: 40, clientY: 72 }));
+    });
+    await expect(holds).not.toHaveClass(/selected/);
+    await page.evaluate(() => {
+      const exit = document.querySelector('[data-action="session-exit"]');
+      if (!(exit instanceof HTMLElement)) {
+        throw new Error('missing session exit');
+      }
+      const mouse = { bubbles: true, pointerType: 'mouse', isPrimary: true, pointerId: 1 };
+      exit.dispatchEvent(new PointerEvent('pointerdown', mouse));
+      exit.dispatchEvent(new PointerEvent('pointerup', mouse));
+      exit.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+    });
+    await expect(page.getByTestId('session-opening')).toBeVisible();
+  });
+
+  test('a keyboard click is not eaten after a touch drag', async ({ page }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    const holds = page.locator(HOLDS);
+    await holds.evaluate((el) => {
+      const base = { bubbles: true, pointerType: 'touch', isPrimary: true, pointerId: 1 };
+      el.dispatchEvent(new PointerEvent('pointerdown', { ...base, clientX: 40, clientY: 40 }));
+      el.dispatchEvent(new PointerEvent('pointerup', { ...base, clientX: 40, clientY: 72 }));
+    });
+    await page.evaluate(() => {
+      const exit = document.querySelector('[data-action="session-exit"]');
+      if (!(exit instanceof HTMLElement)) {
+        throw new Error('missing session exit');
+      }
+      exit.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 0 }));
+    });
+    await expect(page.getByTestId('session-opening')).toBeVisible();
   });
 
   test('language toggle EN and FR stay at least 44px', async ({ page }) => {

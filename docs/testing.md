@@ -72,6 +72,7 @@ npm run test:e2e:ui
 | `e2e/smoke/biconditional-symmetry.spec.ts` | Swapped biconditional operands accepted through the UI |
 | `e2e/smoke/french-content.spec.ts` | French-authored prompt and atom gloss rendering |
 | `e2e/mobile/high-risk.spec.ts` | Watch grid, ¬P watch table, evaluation, scope, translation, truth table, and proof at 320px and 390px |
+| `e2e/mobile/classify-choice-tap.spec.ts` | True/false choice tap, Check after option re-render, iOS mouse interop, drag/cancel, and mouse/keyboard clicks not eaten by touch suppression |
 | `e2e/smoke/progress-visibility.spec.ts` | Learn meters, Unit 1 lesson count, practice session counting, consistency/scaffold moments, Unit 2 completion one-shot, session complete, Progress capability summary |
 | `e2e/smoke/course-map.spec.ts` | Home and Progress share one named round; Progress outline shows all three units |
 | `e2e/mobile/course-map.spec.ts` | Progress outline at 320px and 390px; at 390×844 the empty state shows all three unit headers and their count lines fully on the first screen in EN and FR, and mid-Unit 1 shows you-are-here on the first screen; Course tab shows locked later units |
@@ -84,7 +85,7 @@ npm run test:e2e:ui
 
 Helpers under `e2e/helpers/` seed `localStorage` with the same progress shapes the app uses in production.
 
-Desktop Chromium runs the complete smoke directory plus `e2e/accounts/`. Account tests start `wrangler pages dev` with a local D1 (see [accounts.md](accounts.md)). The mobile projects run only `e2e/mobile/` at 320×640 and an emulated 390px phone, so the full suite is not multiplied across devices; passkey layout is checked at both widths inside the accounts spec.
+Desktop Chromium runs the complete smoke directory plus `e2e/accounts/`. Account tests start `wrangler pages dev` with a local D1 (see [accounts.md](accounts.md)). The mobile projects run `e2e/mobile/` at 320×640 and an emulated 390px phone, plus `mobile-webkit-390` (iPhone 13) for `classify-choice-tap.spec.ts` only, so the full suite is not multiplied across devices; passkey layout is checked at both widths inside the accounts spec.
 
 ### Selectors
 

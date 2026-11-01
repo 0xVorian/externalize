@@ -1159,16 +1159,32 @@ function isDisabledActionControl(button: HTMLElement): boolean {
 }
 
 /**
- * Swallow the compatibility click that follows a touch/pen pointerup — including
- * after a drag, target mismatch, or pointercancel, so that click cannot still
- * select. Scoped to the pointer and expired so a later genuine tap is not eaten.
+ * Touch/pen activate on pointerup; click is the mouse/keyboard path and the
+ * fallback when pointerup did not fire. A click is ignored if it matches a
+ * control that just activated, so a compatibility click cannot double-dispatch.
+ * Successive pointerups of the same action (Continuer, then Continuer) are not
+ * deduped. After a touch gesture, swallow the follow-up click — never a
+ * keyboard activation (`detail === 0`) or a real mouse click (#53).
+ *
+ * Match the gesture by control key, not element identity, so a re-render that
+ * replaces Check still completes the tap. Mouse pointer events must not reset
+ * an in-flight touch gesture: iOS compatibility mouse events from the option
+ * tap can arrive during Check and would otherwise look like a mismatch.
  */
 const FOLLOWUP_CLICK_MS = 700;
-let suppressClickUntil = 0;
-let suppressClickPointerId: number | null = null;
-let pointerDownButton: HTMLElement | null = null;
-let pointerDownX = 0;
-let pointerDownY = 0;
+const DRAG_THRESHOLD_PX = 25;
+
+type PointerGesture = {
+  pointerId: number;
+  key: string;
+  x: number;
+  y: number;
+};
+
+let pointerGesture: PointerGesture | null = null;
+let lastActivatedKey = '';
+let lastActivatedAt = 0;
+let suppressTouchClickUntil = 0;
 
 /**
  * These actions synthesize a click or need a real user-gesture (WebAuthn,
@@ -1183,45 +1199,89 @@ const CLICK_ONLY_ACTIONS = new Set([
   'export-progress',
 ]);
 
-function resetPointerTracking(): void {
-  pointerDownButton = null;
-}
-
-function suppressFollowUpClick(pointerId: number): void {
-  suppressClickUntil = performance.now() + FOLLOWUP_CLICK_MS;
-  suppressClickPointerId = pointerId;
-}
-
-function clearClickSuppress(): void {
-  suppressClickUntil = 0;
-  suppressClickPointerId = null;
-}
-
-function eventPointerId(event: Event): number | undefined {
-  if ('pointerId' in event && typeof (event as PointerEvent).pointerId === 'number') {
-    return (event as PointerEvent).pointerId;
+function controlKey(button: HTMLElement | null): string {
+  if (!button) {
+    return '';
   }
-  return undefined;
+  const d = button.dataset;
+  return [
+    d.action ?? '',
+    d.choiceId ?? '',
+    d.locale ?? '',
+    d.mode ?? '',
+    d.routeId ?? '',
+    d.value ?? '',
+    d.exerciseId ?? '',
+    d.atom ?? '',
+    d.token ?? '',
+    d.ruleId ?? '',
+    d.depth ?? '',
+  ].join('|');
 }
 
-function consumeSuppressedClick(event: Event): boolean {
-  if (suppressClickPointerId === null) {
+function firesTouchEvents(event: Event): boolean {
+  const caps = (event as Event & {
+    sourceCapabilities?: { firesTouchEvents?: boolean } | null;
+  }).sourceCapabilities;
+  return Boolean(caps?.firesTouchEvents);
+}
+
+function markActivated(key: string): void {
+  lastActivatedKey = key;
+  lastActivatedAt = performance.now();
+}
+
+function clearLastActivation(): void {
+  lastActivatedKey = '';
+  lastActivatedAt = 0;
+}
+
+function suppressTouchFollowUpClick(): void {
+  suppressTouchClickUntil = performance.now() + FOLLOWUP_CLICK_MS;
+}
+
+function clearTouchClickSuppress(): void {
+  suppressTouchClickUntil = 0;
+}
+
+function shouldIgnoreFollowUpClick(event: MouseEvent): boolean {
+  if (event.detail === 0) {
     return false;
   }
-  if (performance.now() > suppressClickUntil) {
-    clearClickSuppress();
+  if (performance.now() > suppressTouchClickUntil) {
+    clearTouchClickSuppress();
     return false;
   }
-  const pointerId = eventPointerId(event);
-  if (
-    pointerId !== undefined &&
-    pointerId !== 0 &&
-    pointerId !== suppressClickPointerId
-  ) {
-    return false;
-  }
-  clearClickSuppress();
   return true;
+}
+
+function activateFromPointerUp(button: HTMLElement): void {
+  if (isDisabledActionControl(button)) {
+    return;
+  }
+  const action = button.dataset.action;
+  if (!action || CLICK_ONLY_ACTIONS.has(action)) {
+    return;
+  }
+  markActivated(controlKey(button));
+  dispatchRootAction(button);
+}
+
+function activateFromClick(button: HTMLElement): void {
+  if (isDisabledActionControl(button)) {
+    return;
+  }
+  const action = button.dataset.action;
+  if (!action) {
+    return;
+  }
+  const key = controlKey(button);
+  const now = performance.now();
+  if (key && key === lastActivatedKey && now - lastActivatedAt < FOLLOWUP_CLICK_MS) {
+    return;
+  }
+  markActivated(key);
+  dispatchRootAction(button);
 }
 
 function dispatchRootAction(button: HTMLElement): void {
@@ -1639,59 +1699,64 @@ function dispatchRootAction(button: HTMLElement): void {
 
 root.addEventListener('pointerdown', (event) => {
   if (event.pointerType === 'mouse') {
-    resetPointerTracking();
+    if (!firesTouchEvents(event)) {
+      clearTouchClickSuppress();
+      clearLastActivation();
+    }
     return;
   }
-  // A new gesture must not inherit a previous suppress (same or new pointer id).
-  clearClickSuppress();
+  clearLastActivation();
   const button = findActionButton(event);
-  pointerDownButton = button && !isDisabledActionControl(button) ? button : null;
-  pointerDownX = event.clientX;
-  pointerDownY = event.clientY;
+  pointerGesture = {
+    pointerId: event.pointerId,
+    key: controlKey(button),
+    x: event.clientX,
+    y: event.clientY,
+  };
 });
 
 root.addEventListener('pointercancel', (event) => {
-  if (event.pointerType !== 'mouse') {
-    suppressFollowUpClick(event.pointerId);
+  if (event.pointerType === 'mouse') {
+    return;
   }
-  resetPointerTracking();
+  pointerGesture = null;
+  suppressTouchFollowUpClick();
 });
 
 root.addEventListener('pointerup', (event) => {
   if (event.pointerType === 'mouse') {
-    resetPointerTracking();
     return;
   }
-  const down = pointerDownButton;
-  const downX = pointerDownX;
-  const downY = pointerDownY;
-  resetPointerTracking();
+  const down = pointerGesture;
+  pointerGesture = null;
   const button = findActionButton(event);
-  const dx = event.clientX - downX;
-  const dy = event.clientY - downY;
-  const dragged = dx * dx + dy * dy > 25 * 25;
-  if (!button || button !== down || isDisabledActionControl(button) || dragged) {
-    suppressFollowUpClick(event.pointerId);
+  const key = controlKey(button);
+  const dx = event.clientX - (down?.x ?? 0);
+  const dy = event.clientY - (down?.y ?? 0);
+  const dragged = dx * dx + dy * dy > DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX;
+  const mismatch = !down || down.pointerId !== event.pointerId || !button || !key || key !== down.key;
+  if (mismatch || dragged || (button !== null && isDisabledActionControl(button))) {
+    suppressTouchFollowUpClick();
     return;
   }
   const action = button.dataset.action;
   if (!action || CLICK_ONLY_ACTIONS.has(action)) {
     return;
   }
-  suppressFollowUpClick(event.pointerId);
+  suppressTouchFollowUpClick();
   const target = button;
-  queueMicrotask(() => dispatchRootAction(target));
+  queueMicrotask(() => activateFromPointerUp(target));
 });
 
 root.addEventListener('click', (event) => {
-  if (consumeSuppressedClick(event)) {
+  if (shouldIgnoreFollowUpClick(event)) {
     return;
   }
   const button = findActionButton(event);
-  if (!button || isDisabledActionControl(button)) {
+  if (!button) {
     return;
   }
-  dispatchRootAction(button);
+  activateFromClick(button);
 });
 
 root.addEventListener('keydown', (event) => {
