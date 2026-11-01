@@ -1,3 +1,4 @@
+import { getExerciseDefinition } from './exercises';
 import {
   LEVEL_0_LESSONS,
   LEVEL_1_LESSONS,
@@ -13,11 +14,22 @@ import {
 } from './planner';
 import { conceptForItem } from './prerequisites';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID } from './routes';
-import { plannedSourceItems, sourcePlan } from './source-route';
-import { getUnlockedExerciseIds, isPracticeUnlocked, type ProgressStore } from './storage';
+import {
+  completeSourceItem,
+  isSourceExerciseId,
+  isSourceItemId,
+  plannedSourceItems,
+  sourcePlan,
+} from './source-route';
+import {
+  completeLesson,
+  getUnlockedExerciseIds,
+  isPracticeUnlocked,
+  updateResume,
+  type ProgressStore,
+} from './storage';
 import {
   SESSION_MAX,
-  SESSION_MIN,
   SESSION_TARGET,
   type OpeningOffer,
   type PersistedSession,
@@ -25,7 +37,12 @@ import {
   type SessionPlan,
   type SessionStep,
 } from './session-types';
-import { expandItemsToUnits, isPracticeItem, isTeachingItem } from './session-units';
+import {
+  expandItemsToUnits,
+  isLastWatchUnit,
+  isPracticeItem,
+  isTeachingItem,
+} from './session-units';
 import {
   applyWarmupMiss,
   bodyItemIdsWithoutWarmupDuplicate,
@@ -108,15 +125,16 @@ function firstPracticeIndex(steps: SessionStep[]): number {
   return steps.findIndex((step) => isPracticeItem(step.itemId));
 }
 
-function isCardStep(step: SessionStep | undefined): boolean {
-  return getLessonDefinition(step?.itemId ?? '')?.type === 'card';
-}
-
 /**
  * Split a teach–practice cluster longer than SESSION_MAX. Prefer 6, stay in
  * 5–7. Keep the first practice with the explanation it depends on when that
  * still fits. Otherwise cut between watch cases so the leftover round still
- * opens with teaching — never a stranded guided step, never a lone card.
+ * opens with teaching — never a stranded guided step.
+ *
+ * Once practice cannot fit (`firstPractice >= 7`), the cut is always 6:
+ * `min(SESSION_TARGET, firstPractice - 1)` cannot be smaller than 6, so a
+ * SESSION_MIN stretch is unreachable. Ending on a card is not a live case
+ * for that cut either.
  */
 function splitOversizedCluster(group: SessionStep[]): SessionStep[] {
   const firstPractice = firstPracticeIndex(group);
@@ -133,14 +151,7 @@ function splitOversizedCluster(group: SessionStep[]): SessionStep[] {
   // Practice cannot fit this round. Leave at least one teaching unit with it
   // so the next round does not open on a stranded guided step.
   const maxTake = Math.max(1, Math.min(SESSION_MAX, firstPractice - 1));
-  let take = Math.min(SESSION_TARGET, maxTake);
-  if (take < SESSION_MIN && SESSION_MIN <= maxTake) {
-    take = SESSION_MIN;
-  }
-  if (take > 0 && isCardStep(group[take - 1]) && take < maxTake) {
-    take = Math.min(maxTake, Math.max(take, SESSION_MIN));
-  }
-  return group.slice(0, take);
+  return group.slice(0, Math.min(SESSION_TARGET, maxTake));
 }
 
 /**
@@ -462,6 +473,35 @@ export function sessionPosition(persisted: PersistedSession): { current: number;
 
 export function isSessionComplete(persisted: PersistedSession): boolean {
   return persisted.status === 'completed' || persisted.currentIndex >= persisted.plan.steps.length;
+}
+
+/**
+ * Persist the learner-state effect of finishing one session step, matching
+ * production `completeSessionItem` in `main.ts`. Exercises do not write
+ * mastery here — graded evidence still goes through the practice-attempt
+ * path. Unshown item ids are never touched.
+ */
+export function applyCompletedSessionItem(
+  store: ProgressStore,
+  itemId: string,
+  unitIndex?: number,
+): ProgressStore {
+  if (isSourceItemId(itemId) || isSourceExerciseId(itemId)) {
+    return completeSourceItem(store, itemId);
+  }
+  const lesson = getLessonDefinition(itemId);
+  if (lesson && !getExerciseDefinition(itemId)) {
+    if (lesson.type === 'watch' && unitIndex !== undefined && !isLastWatchUnit(itemId, unitIndex)) {
+      return updateResume(store, {
+        mode: 'learn',
+        lessonId: itemId,
+        watchStep: unitIndex + 1,
+        watchComplete: false,
+      });
+    }
+    return completeLesson(store, itemId);
+  }
+  return store;
 }
 
 export function completeCurrentStep(persisted: PersistedSession): PersistedSession {

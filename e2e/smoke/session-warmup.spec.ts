@@ -2,10 +2,16 @@ import { test, expect, type Page } from '@playwright/test';
 import { evaluate, parse } from '../../engine';
 import { gotoWithProgress } from '../helpers/app';
 import {
+  progressCourseCompleteWithDueScopeReview,
   progressWithConjunctionPractice,
   progressWithOneDueConjunctionReview,
 } from '../helpers/progress';
-import { beginOfferedSession, roundComplete, sessionPosition } from '../helpers/session';
+import {
+  beginOfferedSession,
+  missThenPassScopeWarmup,
+  roundComplete,
+  sessionPosition,
+} from '../helpers/session';
 
 async function atomIsTrue(page: Page, atom: string): Promise<boolean> {
   const row = page.locator('.atom-row', {
@@ -125,5 +131,24 @@ test.describe('session warm-up', () => {
     await expect(page.getByTestId('session-step-label')).toContainText(/Rappel/);
     await expect(page.getByTestId('session-step-label')).toContainText(/Conjonction/);
     await expect(sessionPosition(page)).toHaveText('1 / 5');
+  });
+
+  test('a scope warm-up miss recaps Unit 2 nesting after that card is done', async ({ page }) => {
+    await gotoWithProgress(page, progressCourseCompleteWithDueScopeReview());
+    await beginOfferedSession(page);
+    await missThenPassScopeWarmup(page);
+    await expect(page.locator('.lesson-card')).toBeVisible();
+    await expect(page.locator('.lesson-card')).toContainText('(P ∧ Q) → R');
+    await expect(page.locator('.lesson-card')).not.toContainText('(P ∧ Q) ∨ R');
+  });
+
+  test('a scope warm-up miss recaps the Unit 2 card in French', async ({ page }) => {
+    await gotoWithProgress(page, progressCourseCompleteWithDueScopeReview());
+    await page.locator('[data-action="set-locale"][data-locale="fr"]').click();
+    await beginOfferedSession(page);
+    await missThenPassScopeWarmup(page);
+    await expect(page.locator('.lesson-card')).toBeVisible();
+    await expect(page.locator('.lesson-card')).toContainText('(P ∧ Q) → R');
+    await expect(page.locator('.lesson-card')).not.toContainText('(P ∧ Q) ∨ R');
   });
 });

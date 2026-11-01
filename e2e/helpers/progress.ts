@@ -161,6 +161,40 @@ function withConjunctionEvidence(store: ProgressStore, extras: Partial<ProgressS
   };
 }
 
+/** All lessons done; one due scope review so a miss recaps Unit 2 nesting. */
+export function progressCourseCompleteWithDueScopeReview(): ProgressStore {
+  let store = progressReadyForExercise('scope-001');
+  for (const lesson of ALL_LEARN_LESSONS) {
+    if (!store.lessonsCompleted.includes(lesson.id)) {
+      store = completeLesson(store, lesson.id);
+    }
+  }
+  const due = new Date(Date.now() - 60_000).toISOString();
+  const lastSeenAt = new Date(Date.now() + 60_000).toISOString();
+  const passed = store.passed.includes('scope-001')
+    ? store.passed
+    : [...store.passed, 'scope-001'];
+  const attempted = store.attempted.includes('scope-001')
+    ? store.attempted
+    : [...store.attempted, 'scope-001'];
+  return {
+    ...store,
+    passed,
+    attempted,
+    conceptEvidence: {
+      ...store.conceptEvidence,
+      [evidenceKey('scope', 'apply')]: {
+        attempts: 1,
+        cleanPasses: 1,
+        transferPasses: 0,
+        recentErrors: [],
+        lastSeenAt,
+      },
+    },
+    queue: [{ exerciseId: 'scope-001', due, intervalDays: 1, ease: 2.5 }],
+  };
+}
+
 /** All lessons done; two conjunction reviews still due (interval 0). */
 export function progressCourseCompleteWithRepairedDueReviews(): ProgressStore {
   let store = emptyProgress();

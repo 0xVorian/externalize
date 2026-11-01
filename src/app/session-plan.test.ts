@@ -11,6 +11,7 @@ import {
   LOGIC_FOUNDATIONS_ROUTE_ID,
 } from './routes';
 import {
+  applyCompletedSessionItem,
   completeCurrentStep,
   composeSessionPlan,
   groupSessionSteps,
@@ -43,6 +44,12 @@ function withLevel0Complete(store: ProgressStore): ProgressStore {
   return next;
 }
 
+/**
+ * Envelope-math fixture shaped like conjunction (card + watches + guided).
+ * Authored `level0-04-watch` has 4 cases; extra `unitIndex` values are not
+ * real watchSteps. The real lesson id is reused only so `isTeachingItem` /
+ * `isPracticeItem` still classify the steps.
+ */
 function conjunctionLikeCluster(watchCount: number, extras: SessionStep[] = []): SessionStep[] {
   const watches: SessionStep[] = Array.from({ length: watchCount }, (_, index) => ({
     id: `level0-04-watch#${index}`,
@@ -56,6 +63,16 @@ function conjunctionLikeCluster(watchCount: number, extras: SessionStep[] = []):
     { id: 'level0-05-guided', source: 'route', itemId: 'level0-05-guided' },
     ...extras,
   ];
+}
+
+function teachingOnlyCards(count: number): SessionStep[] {
+  const cards = ALL_LEARN_LESSONS.filter((lesson) => lesson.type === 'card').slice(0, count);
+  expect(cards).toHaveLength(count);
+  return cards.map((lesson) => ({
+    id: lesson.id,
+    source: 'route' as const,
+    itemId: lesson.id,
+  }));
 }
 
 describe('session envelope', () => {
@@ -146,6 +163,135 @@ describe('session envelope', () => {
     expect(isTeachingItem(leftover[0]!.itemId)).toBe(true);
     expect(isPracticeItem(leftover[1]!.itemId)).toBe(true);
     expect(taken.some((step) => step.itemId === 'level0-05-guided')).toBe(false);
+  });
+
+  it('splits a 9-step cluster at 6 so leftover still opens with teaching', () => {
+    const cluster = conjunctionLikeCluster(7);
+    expect(cluster.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+      'level0-04-watch#5',
+      'level0-04-watch#6',
+      'level0-05-guided',
+    ]);
+    const taken = takeSessionEnvelope(cluster);
+    expect(taken.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+    ]);
+    const leftover = cluster.slice(taken.length);
+    expect(leftover.map((step) => step.id)).toEqual([
+      'level0-04-watch#5',
+      'level0-04-watch#6',
+      'level0-05-guided',
+    ]);
+    expect(isTeachingItem(leftover[0]!.itemId)).toBe(true);
+  });
+
+  it('splits a 12-step cluster at 6 so leftover still opens with teaching', () => {
+    const cluster = conjunctionLikeCluster(10);
+    expect(cluster).toHaveLength(12);
+    const taken = takeSessionEnvelope(cluster);
+    expect(taken.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+    ]);
+    const leftover = cluster.slice(taken.length);
+    expect(leftover).toHaveLength(6);
+    expect(leftover.map((step) => step.id)).toEqual([
+      'level0-04-watch#5',
+      'level0-04-watch#6',
+      'level0-04-watch#7',
+      'level0-04-watch#8',
+      'level0-04-watch#9',
+      'level0-05-guided',
+    ]);
+    expect(isTeachingItem(leftover[0]!.itemId)).toBe(true);
+    expect(leftover.length).toBeLessThanOrEqual(SESSION_MAX);
+  });
+
+  it('caps a teaching-only oversized group at 6', () => {
+    const cluster = teachingOnlyCards(9);
+    expect(cluster.every((step) => isTeachingItem(step.itemId))).toBe(true);
+    expect(cluster.every((step) => !isPracticeItem(step.itemId))).toBe(true);
+    const taken = takeSessionEnvelope(cluster);
+    expect(taken.map((step) => step.id)).toEqual(
+      cluster.slice(0, SESSION_TARGET).map((step) => step.id),
+    );
+    expect(taken).toHaveLength(6);
+  });
+
+  it('cannot-fit guided split ignores the warm-up body budget used by composeSessionPlan', () => {
+    const cluster = conjunctionLikeCluster(6);
+    const taken = takeSessionEnvelope(cluster, {
+      max: SESSION_MAX - 1,
+      target: SESSION_TARGET - 1,
+    });
+    expect(taken.map((step) => step.id)).toEqual([
+      'level0-03-and',
+      'level0-04-watch#0',
+      'level0-04-watch#1',
+      'level0-04-watch#2',
+      'level0-04-watch#3',
+      'level0-04-watch#4',
+    ]);
+    expect(taken).toHaveLength(6);
+    expect(taken.some((step) => step.itemId === 'level0-05-guided')).toBe(false);
+    const leftover = cluster.slice(taken.length);
+    expect(leftover.map((step) => step.id)).toEqual([
+      'level0-04-watch#5',
+      'level0-05-guided',
+    ]);
+    expect(isTeachingItem(leftover[0]!.itemId)).toBe(true);
+  });
+
+  it('the next round after a watch prefix resumes at the leftover case, not the lesson start or guided', () => {
+    let store = loadProgress();
+    store = completeLesson(store, 'level0-01-letters');
+    store = completeLesson(store, 'level0-02-truth');
+    store = completeLesson(store, 'level0-03-and');
+    store = applyCompletedSessionItem(store, 'level0-04-watch', 0);
+    store = applyCompletedSessionItem(store, 'level0-04-watch', 1);
+    store = applyCompletedSessionItem(store, 'level0-04-watch', 2);
+    expect(store.resume.watchStep).toBe(3);
+    expect(store.lessonsCompleted).not.toContain('level0-04-watch');
+
+    const remaining = ['level0-04-watch', 'level0-05-guided'];
+    const plan = composeSessionPlan(store, 'continue', remaining);
+    expect(plan.steps.map((step) => step.id)).toEqual([
+      'level0-04-watch#3',
+      'level0-05-guided',
+    ]);
+    expect(plan.steps[0]).toMatchObject({
+      itemId: 'level0-04-watch',
+      unitIndex: 3,
+    });
+    expect(plan.steps.some((step) => step.itemId === 'level0-04-watch' && step.unitIndex === 0)).toBe(
+      false,
+    );
+
+    const offer = offerOpening(store, null);
+    expect(offer.kind).toBe('continue');
+    expect(offer.plan?.steps[0]).toMatchObject({
+      itemId: 'level0-04-watch',
+      unitIndex: 3,
+    });
+    expect(offer.plan?.steps[0]?.itemId).not.toBe('level0-05-guided');
+    expect(
+      offer.plan?.steps.some((step) => step.itemId === 'level0-04-watch' && step.unitIndex === 0),
+    ).toBe(false);
   });
 });
 

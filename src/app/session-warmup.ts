@@ -171,8 +171,11 @@ function lessonsOfType(conceptId: string, type: 'card' | 'guided'): string[] {
 
 function explanationLessonId(store: ProgressStore, conceptId: string): string | undefined {
   const cards = lessonsOfType(conceptId, 'card');
-  const seen = cards.find((id) => store.lessonsCompleted.includes(id));
-  return seen ?? cards[0];
+  const completed = cards.filter((id) => store.lessonsCompleted.includes(id));
+  // Prefer the latest completed card in curriculum order so a later unit's
+  // explanation is recapped once it has been seen (e.g. Unit 2 nesting for
+  // `scope` rather than always replaying Unit 1).
+  return completed.at(-1) ?? cards[0];
 }
 
 function extraPracticeExercise(

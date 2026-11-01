@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { evidenceKey } from './curriculum';
-import { LEVEL_0_LESSONS, LEVEL_1_LESSONS } from './lessons';
+import { ALL_LEARN_LESSONS, LEVEL_0_LESSONS, LEVEL_1_LESSONS } from './lessons';
 import { PREREQUISITE_BRIDGES } from './planner';
 import { recordAttemptCheck } from './practice-attempt';
 import { conceptForItem } from './prerequisites';
 import {
+  applyCompletedSessionItem,
   applyWarmupMiss,
   applyWarmupMissAfterCheck,
   completeCurrentStep,
@@ -49,6 +50,32 @@ function withLevel1Complete(store: ProgressStore): ProgressStore {
     next = completeLesson(next, lesson.id);
   }
   return next;
+}
+
+function withAllLessonsComplete(store: ProgressStore): ProgressStore {
+  let next = store;
+  for (const lesson of ALL_LEARN_LESSONS) {
+    next = completeLesson(next, lesson.id);
+  }
+  return next;
+}
+
+function withScopePractice(store: ProgressStore, at = '2026-09-07T12:00:00.000Z'): ProgressStore {
+  const next = withAllLessonsComplete(store);
+  return {
+    ...next,
+    passed: ['scope-001'],
+    attempted: ['scope-001'],
+    conceptEvidence: {
+      [evidenceKey('scope', 'apply')]: {
+        attempts: 1,
+        cleanPasses: 1,
+        transferPasses: 0,
+        recentErrors: [],
+        lastSeenAt: at,
+      },
+    },
+  };
 }
 
 function withOneDueConjunctionAndLaterConcepts(
@@ -418,12 +445,13 @@ describe('short due-review rounds', () => {
     const beforeEvidence = structuredClone(store.conceptEvidence);
     const started = beginPracticeAttempt(store, step!.itemId);
     const draft = started.practiceDraft!;
-    const next = recordCheckedPracticeState(started, {
+    let next = recordCheckedPracticeState(started, {
       ...draft,
       phase: 'answered',
       feedbackTag: 'correct',
       attempt: recordAttemptCheck(draft.attempt, true),
     });
+    next = applyCompletedSessionItem(next, step!.itemId, step?.unitIndex);
     session = completeCurrentStep(session);
     expect(session.status).toBe('completed');
     expect(session.plan.repairApplied).toBeUndefined();
@@ -440,6 +468,10 @@ describe('short due-review rounds', () => {
     expect(next.exerciseStats['eval-001']?.successes).toBe(1);
     expect(next.exerciseStats['eval-010']).toBeUndefined();
     expect(next.exerciseStats['tt-002']).toBeUndefined();
+    expect(next.passed).not.toContain('eval-010');
+    expect(next.passed).not.toContain('tt-002');
+    expect(next.lessonsCompleted).not.toContain('eval-010');
+    expect(next.lessonsCompleted).not.toContain('tt-002');
     expect(next.conceptEvidence[evidenceKey('conjunction', 'apply')]?.attempts).toBe(
       (beforeEvidence[evidenceKey('conjunction', 'apply')]?.attempts ?? 0) + 1,
     );
@@ -564,6 +596,25 @@ describe('warm-up repair resume', () => {
       'eval-011',
     ]);
     expect(sessionPosition(advanced)).toEqual({ current: 2, total: 4 });
+  });
+});
+
+describe('scope warm-up recap', () => {
+  it('recaps the latest completed nesting card, not Unit 1 after Unit 2', () => {
+    const store = withScopePractice(loadProgress());
+    const ids = repairItemIds(store, 'scope', 'scope-001');
+    expect(ids[0]).toBe('level2-01-nesting');
+    expect(ids).not.toContain('level1-13-nesting');
+    expect(ids).toContain('level1-14-nesting-guided');
+  });
+
+  it('still recaps Unit 1 nesting when that is the latest completed card', () => {
+    let store = withLevel0Complete(loadProgress());
+    store = completeLesson(store, 'level1-13-nesting');
+    store = completeLesson(store, 'level1-14-nesting-guided');
+    const ids = repairItemIds(store, 'scope', 'scope-001');
+    expect(ids[0]).toBe('level1-13-nesting');
+    expect(ids).not.toContain('level2-01-nesting');
   });
 });
 

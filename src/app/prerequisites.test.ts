@@ -52,6 +52,31 @@ describe('prerequisites graph', () => {
     }
   });
 
+  it('requires foundations concept ids to exist as concept-map nodes', () => {
+    const knownConcepts = new Set(PREREQUISITES_GRAPH.concepts.map((concept) => concept.id));
+    // Source-route quantifiers and natural deduction are evidence keys, not
+    // nodes on the three-unit foundations map.
+    const evidenceOnly = new Set([
+      'universal-quantifier',
+      'existential-quantifier',
+      'existential-import',
+      'natural-deduction',
+    ]);
+    for (const lesson of ALL_LEARN_LESSONS) {
+      const conceptId = conceptForLesson(lesson.id);
+      expect(knownConcepts.has(conceptId!), lesson.id).toBe(true);
+    }
+    for (const exercise of EXERCISE_DEFINITIONS) {
+      const conceptId = conceptForExercise(exercise.id)!;
+      if (evidenceOnly.has(conceptId)) {
+        expect(knownConcepts.has(conceptId), exercise.id).toBe(false);
+        continue;
+      }
+      expect(knownConcepts.has(conceptId), exercise.id).toBe(true);
+    }
+    expect(knownConcepts.has('translation')).toBe(true);
+  });
+
   it('clusters Unit 1 nesting explanation with its guided practice', () => {
     expect(conceptForLesson('level1-13-nesting')).toBe('scope');
     expect(conceptForLesson('level1-14-nesting-guided')).toBe('scope');
