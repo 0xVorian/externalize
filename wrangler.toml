@@ -26,11 +26,6 @@ pages_build_output_dir = "dist"
 [vars]
 WEBAUTHN_RP_NAME = "Externalize"
 
-# Optional overrides (also settable as Pages environment variables):
-# WEBAUTHN_RP_ID = "externalize.pages.dev"
-# WEBAUTHN_ORIGIN = "https://externalize.pages.dev"
-# WEBAUTHN_ALLOWED_ORIGINS = "https://logic.example.org"
-
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "externalize-progress"
@@ -38,3 +33,8 @@ database_id = "6d9806e2-46c4-41b1-a5fe-8c224ecbadf3"
 
 [env.production.vars]
 WEBAUTHN_RP_NAME = "Externalize"
+# Custom domain: add these here. vars do not inherit from [vars], and
+# dashboard env vars cannot stick once pages_build_output_dir is set.
+# WEBAUTHN_RP_ID = "logic.example.org"
+# WEBAUTHN_ORIGIN = "https://logic.example.org"
+# WEBAUTHN_ALLOWED_ORIGINS = "https://preview.logic.example.org"

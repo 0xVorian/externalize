@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Session-first docs now say a short due-review grows on a miss when the leftover tail cannot hold explanation plus practice, not merely because there was “no tail”. A one-item or two-item due list both grow.
 - `docs/roadmap.md` now describes the v0.5.0 / v0.5.1 shipped baseline, the post-0.5.1 remediations already on `master` (mobile truth tables, session envelope, warm-up), optional passkey sync (#37), and the remaining GitHub Issues rather than “v0.4.0 + unreleased”.
 - Production D1 (`externalize-progress`, id `6d9806e2-46c4-41b1-a5fe-8c224ecbadf3`) is bound only under `[[env.production.d1_databases]]` in committed `wrangler.toml`, with `[env.production.vars]` repeating `WEBAUTHN_RP_NAME` (vars and bindings do not inherit). `pages_build_output_dir` makes that file the source of truth, so a dashboard bind cannot stick. Preview stays unbound. Future remote migrations use the D1 console / query API or a gitignored `wrangler.remote.toml`.
+- Custom-domain WebAuthn vars are documented under `[env.production.vars]` in `wrangler.toml`, not the Pages dashboard: with `pages_build_output_dir` set, vars do not inherit and dashboard env vars cannot stick. README passkey wording matches the committed production D1 bind. Config tests lock that production inherits `compatibility_date`, `nodejs_compat`, and the other required Pages keys. ([#42](https://github.com/0xVorian/externalize/issues/42))
 
 ### Removed
 
