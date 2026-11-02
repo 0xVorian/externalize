@@ -142,6 +142,7 @@ import {
 } from './app/practice-ui-state';
 import { currentScaffoldLevel } from './app/evaluation-scaffold';
 import {
+  applyCompletedSessionItem,
   applyWarmupMissAfterCheck,
   offerOpening,
   offerAfterCompletedRound,
@@ -163,7 +164,6 @@ import {
 import { recordSessionEvent } from './app/session-telemetry';
 import { renderSessionOpening } from './app/session-opening-render';
 import { renderRoundComplete } from './app/session-complete-render';
-import { isLastWatchUnit } from './app/session-units';
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
 if (!appRoot) {
@@ -623,22 +623,9 @@ function advanceActiveSession(): void {
 function completeSessionItem(itemId: string): void {
   const step = activeSession ? currentSessionStep(activeSession) : undefined;
   const unitIndex = step?.itemId === itemId ? step.unitIndex : undefined;
-  const lesson = getLessonDefinition(itemId);
-  if (isSourceItemId(itemId) || isSourceExerciseId(itemId)) {
-    persistProgress(completeSourceItem(progress, itemId));
-  } else if (lesson && !getExerciseDefinition(itemId)) {
-    if (lesson.type === 'watch' && unitIndex !== undefined && !isLastWatchUnit(itemId, unitIndex)) {
-      persistProgress(
-        updateResume(progress, {
-          mode: 'learn',
-          lessonId: itemId,
-          watchStep: unitIndex + 1,
-          watchComplete: false,
-        }),
-      );
-    } else {
-      persistProgress(completeLesson(progress, itemId));
-    }
+  const next = applyCompletedSessionItem(progress, itemId, unitIndex);
+  if (next !== progress) {
+    persistProgress(next);
   }
   advanceActiveSession();
 }

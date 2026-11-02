@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export function sessionOpening(page: Page) {
   return page.getByTestId('session-opening');
@@ -23,6 +23,19 @@ export function roundComplete(page: Page) {
 export async function beginOfferedSession(page: Page): Promise<void> {
   await sessionPrimary(page).click();
   await page.getByTestId('session-active').waitFor();
+}
+
+/** Miss a scope warm-up, repair in place, then advance to the recap card. */
+export async function missThenPassScopeWarmup(page: Page): Promise<void> {
+  const nodes = page.locator('[data-action="select-node"]');
+  await nodes.nth(1).click();
+  await page.locator('[data-action="check-scope"]').click();
+  await expect(page.locator('.feedback-wrong')).toBeVisible();
+  await page.locator('[data-action="try-again"]').click();
+  await nodes.first().click();
+  await page.locator('[data-action="check-scope"]').click();
+  await expect(page.locator('.feedback-correct')).toBeVisible();
+  await page.locator('[data-action="next"]').click();
 }
 
 export async function expandSessionMore(page: Page): Promise<void> {

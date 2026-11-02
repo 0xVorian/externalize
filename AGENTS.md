@@ -81,6 +81,7 @@ Do not create work simply to finish an old phase label. If real use does not jus
 
 - one obvious bounded opening action with a frozen session envelope;
 - teach–practice clusters longer than 7 micro-units split through the first practice or between watch cases, never immediately before guided;
+- a warm-up Check miss leaves advertised `n / m` unchanged on the Try again screen; the new total appears once the first repair step begins;
 - interruption/resume and explicit completion;
 - planner/debug language hidden from the learner;
 - meaning → use → name → notation → independent use for novice material where practicable;
