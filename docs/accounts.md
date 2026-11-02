@@ -129,16 +129,24 @@ npx wrangler -c wrangler.remote.toml d1 migrations apply externalize-progress --
 ```
 Do not pass `-c wrangler.local.toml` for `--remote` (that file uses the local nil UUID). Do not pass the nil UUID (`00000000-0000-0000-0000-000000000000`).
 
-**Environment variables** (Pages → Settings → Environment variables), production and preview:
+**Custom-domain WebAuthn vars** belong in `[env.production.vars]` in committed [`wrangler.toml`](../wrangler.toml). `pages_build_output_dir` makes that file the source of truth: dashboard **Pages → Settings → Environment variables** cannot stick (the dashboard can show the same fields but not edit them). `vars` are non-inheritable, so a later custom domain must add these keys next to the existing `WEBAUTHN_RP_NAME`. Putting them only under top-level `[vars]` would not reach production.
+
+```toml
+[env.production.vars]
+WEBAUTHN_RP_NAME = "Externalize"
+WEBAUTHN_RP_ID = "logic.example.org"
+WEBAUTHN_ORIGIN = "https://logic.example.org"
+WEBAUTHN_ALLOWED_ORIGINS = "https://preview.logic.example.org"
+```
 
 | Variable | When to set | Example |
 |---|---|---|
-| `WEBAUTHN_RP_NAME` | Display name on the passkey prompt | `Externalize` |
+| `WEBAUTHN_RP_NAME` | Display name on the passkey prompt (already set) | `Externalize` |
 | `WEBAUTHN_RP_ID` | Custom domain (registrable domain, no scheme) | `logic.example.org` |
 | `WEBAUTHN_ORIGIN` | Full origin, no trailing slash | `https://logic.example.org` |
 | `WEBAUTHN_ALLOWED_ORIGINS` | Extra exact origins, comma-separated | `https://preview.logic.example.org` |
 
-On `*.externalize.pages.dev` these may be omitted: Functions use the built-in allowlist and pin RP ID to `externalize.pages.dev`. They do **not** fall back to the request Host.
+On `*.externalize.pages.dev` the custom-domain keys may be omitted: Functions use the built-in allowlist and pin RP ID to `externalize.pages.dev`. They do **not** fall back to the request Host. Preview has no `[env.preview]` / `[env.preview.vars]` block, so it keeps the top-level `[vars]` map (`WEBAUTHN_RP_NAME` only) and the pages.dev RP ID.
 
 After `master` deploys with this config, confirm `https://externalize.pages.dev/api/status` returns `{ "available": true, ... }`. Open Progress → Another device; **Create a passkey** should appear. Git-connected **preview** URLs must stay `{ "available": false }` (no D1). If production is unbound, unmigrated, or D1 queries fail, the JSON is `{ "available": false }` and the UI stays on file export/import only.
 
