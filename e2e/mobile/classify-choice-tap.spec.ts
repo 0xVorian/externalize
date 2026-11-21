@@ -16,6 +16,7 @@ import {
 } from '../helpers/session';
 import { setActiveRoute } from '../../src/app/source-route';
 import { LOGIC_AND_THEISM_READING_ROUTE_ID } from '../../src/app/routes';
+import type { PracticeDraft } from '../../src/app/practice-attempt';
 
 const ARTIFACT_DIR = process.env.SCREENSHOT_DIR ?? '/opt/cursor/artifacts/screenshots';
 const HOLDS = '[data-action="select-choice"][data-choice-id="holds"]';
@@ -296,6 +297,81 @@ test.describe('classify-choice taps on a phone', () => {
     }
     await expectRetrieveStep(page, 'fr');
     await selectHoldsAndCheck(page, 'fr', 'fr-retrieve-from-course');
+  });
+
+  test('wrong Check on FR retrieve does not lock Vraie/Fausse', async ({ page }) => {
+    await openRetrieveAtStep2(page, 'fr');
+    const holds = page.locator(HOLDS);
+    const fails = page.locator(FAILS);
+    await fails.tap();
+    await expect(fails).toHaveClass(/selected/);
+    await page.locator(CHECK).tap();
+    await expect(page.locator('.feedback-wrong')).toBeVisible();
+    await expect(page.locator('.feedback-wrong')).toContainText(
+      'Une implication est fausse seulement',
+    );
+    await expect(page.getByTestId('try-again')).toHaveCount(0);
+    await expect(holds).toBeEnabled();
+    await expect(fails).toBeEnabled();
+    await expect(fails).toHaveClass(/selected/);
+    await screenshotIf390(page, 'fr-retrieve-wrong-check.png');
+    await holds.tap();
+    await expect(holds).toHaveClass(/selected/);
+    await expect(page.locator('.feedback-wrong')).toHaveCount(0);
+    await expect(page.locator(CHECK)).toBeEnabled();
+    await page.locator(CHECK).tap();
+    await expect(page.locator('.feedback-correct')).toBeVisible();
+  });
+
+  test('leftover Try again draft does not restore spoiler feedback or lock options', async ({
+    page,
+  }) => {
+    const leftover: PracticeDraft = {
+      attempt: {
+        id: 'attempt-leftover-retrieve',
+        exerciseId: 'lat-retrieve-conditional',
+        status: 'active',
+        checkedAnswers: 1,
+        firstCheckedCorrect: false,
+        lastCheckCorrect: false,
+        repairOccurred: false,
+        errorTags: ['incorrect-classification'],
+        startedAt: '2026-11-21T12:00:00.000Z',
+      },
+      phase: 'ready',
+      selectedChoiceId: null,
+      feedbackTag: 'incorrect-classification',
+    };
+    const store = progressLapseRetrieveAtStep2();
+    await gotoWithProgress(page, {
+      ...store,
+      practiceDrafts: {
+        ...store.practiceDrafts,
+        'lat-retrieve-conditional': leftover,
+      },
+    });
+    await setLocale(page, 'fr');
+    await beginOfferedSession(page);
+    await passWarmupEvaluation(page);
+    await expectRetrieveStep(page, 'fr');
+    await expect(page.locator('.feedback-wrong')).toHaveCount(0);
+    await expect(page.getByTestId('session-active')).not.toContainText(
+      'Une implication est fausse seulement',
+    );
+    const holds = page.locator(HOLDS);
+    const fails = page.locator(FAILS);
+    await expect(holds).toBeEnabled();
+    await expect(fails).toBeEnabled();
+    await expect(holds).not.toHaveClass(/selected/);
+    await expect(fails).not.toHaveClass(/selected/);
+    const check = page.locator(CHECK);
+    await expect(check).toBeDisabled();
+    const opacity = await check.evaluate((el) => Number(getComputedStyle(el).opacity));
+    expect(opacity).toBeLessThan(1);
+    await screenshotIf390(page, 'fr-retrieve-leftover-draft.png');
+    await holds.tap();
+    await expect(holds).toHaveClass(/selected/);
+    await expect(check).toBeEnabled();
   });
 
   test('empty-club prediction choices select from a tap', async ({ page }) => {

@@ -57,8 +57,7 @@ async function answerCurrentClassify(page: Page, options?: { wrongFirst?: boolea
     await page.locator(`[data-action="select-choice"][data-choice-id="${wrong}"]`).click();
     await page.locator('[data-action="check-classification"]').click();
     await expect(page.locator('.feedback-wrong')).toBeVisible();
-    await expect(page.getByTestId('try-again')).toBeVisible();
-    await page.getByTestId('try-again').click();
+    await expect(page.getByTestId('try-again')).toHaveCount(0);
     await expect(page.locator('[data-action="check-classification"]')).toBeVisible();
     await expect(page.locator('[data-action="select-choice"]').first()).toBeEnabled();
   }

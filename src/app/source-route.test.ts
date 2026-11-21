@@ -34,7 +34,7 @@ import {
   persistPracticeDraft,
   recordCheckedPracticeState,
 } from './storage';
-import { createState, selectClassificationChoice, checkClassification, tryAgainPractice, practiceDraftSnapshot } from './state';
+import { createState, selectClassificationChoice, checkClassification, practiceDraftSnapshot } from './state';
 import { LEVEL_0_LESSONS, LEVEL_1_LESSONS } from './lessons';
 import { recordAttemptCheck } from './practice-attempt';
 import { SOURCE_LESSONS } from './source-lessons';
@@ -361,9 +361,9 @@ describe('Sobel prediction, conditional teaching, and evidence integrity', () =>
     expect(store.practiceDraft?.attempt.status).toBe('active');
     expect(currentSourceItemId(store)).toBe('lat-predict-empty-club');
 
-    state = tryAgainPractice(state);
-    expect(state.phase).toBe('ready');
     state = selectClassificationChoice(state, 'still-true');
+    expect(state.phase).toBe('ready');
+    expect(state.feedback).toBeNull();
     state = checkClassification(state);
     store = recordCheckedPracticeState(store, practiceDraftSnapshot(state));
     expect(state.feedback?.correct).toBe(true);
@@ -596,9 +596,11 @@ describe('classify-choice interaction', () => {
     state = checkClassification(state);
     expect(state.feedback?.correct).toBe(false);
     expect(state.attempt.status).toBe('active');
-    state = tryAgainPractice(state);
+    state = selectClassificationChoice(state, 'universal');
     expect(state.phase).toBe('ready');
-    expect(state.selectedChoiceId).toBeNull();
+    expect(state.feedback).toBeNull();
+    state = checkClassification(state);
+    expect(state.feedback?.correct).toBe(true);
   });
 
   it('repairs a persisted wrong classify-choice check in place', () => {
@@ -615,8 +617,13 @@ describe('classify-choice interaction', () => {
     }
     expect(state.feedback?.correct).toBe(false);
     expect(state.attempt.status).toBe('active');
-    state = tryAgainPractice(state);
+    state = selectClassificationChoice(state, 'universal');
     expect(state.phase).toBe('ready');
-    expect(state.selectedChoiceId).toBeNull();
+    expect(state.selectedChoiceId).toBe('universal');
+    expect(state.feedback).toBeNull();
+    state = checkClassification(state);
+    store = recordCheckedPracticeState(store, practiceDraftSnapshot(state));
+    expect(state.feedback?.correct).toBe(true);
+    expect(store.practiceDraft?.attempt.status).toBe('finalized');
   });
 });

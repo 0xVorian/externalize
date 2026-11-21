@@ -992,6 +992,12 @@ button {
   color: var(--text);
 }
 
+.primary:disabled,
+.secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* Watch grid is a real <table>. Never set display:grid/flex on the table, rows, or cells —
    that leftover CSS-grid layout breaks the 2×2 on narrow screens (see remediation.css). */
 .watch-grid-wrap {

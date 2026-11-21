@@ -195,6 +195,16 @@ function restoreDraftFeedback(
   if (!tag || state.attempt.lastCheckCorrect === null) {
     return state;
   }
+  // A classify-choice Try again draft is phase ready with no selection, but
+  // still carries incorrect-classification. Restoring the spoiler copy there
+  // is the 2026-11-21 iPhone screenshot: red feedback, no option selected,
+  // Check disabled while still painted as the enabled primary.
+  if (
+    state.exercise.type === 'classify-choice' &&
+    (state.phase !== 'answered' || !state.selectedChoiceId)
+  ) {
+    return state;
+  }
   const correct = state.attempt.lastCheckCorrect;
   if (
     state.exercise.type === 'identify-main-connective' &&
@@ -677,14 +687,26 @@ export function checkEvaluation(state: AppState): AppState {
 }
 
 export function selectClassificationChoice(state: AppState, choiceId: string): AppState {
-  if (state.exercise.type !== 'classify-choice' || state.phase === 'answered') {
+  if (state.exercise.type !== 'classify-choice' || state.attempt.status === 'finalized') {
     return state;
   }
-  if (state.attempt.status === 'finalized') {
+  if (state.feedback?.correct) {
     return state;
   }
   if (!state.exercise.choiceIds?.includes(choiceId)) {
     return state;
+  }
+  if (state.phase === 'answered') {
+    if (state.selectedChoiceId === choiceId) {
+      return state;
+    }
+    return {
+      ...state,
+      selectedChoiceId: choiceId,
+      phase: 'ready',
+      feedback: null,
+      message: null,
+    };
   }
   return { ...state, selectedChoiceId: choiceId };
 }
@@ -724,8 +746,8 @@ export function tryAgainPractice(state: AppState): AppState {
     selectedChoiceId: state.exercise.type === 'classify-choice' ? null : state.selectedChoiceId,
     proofDerivedFormula: null,
     hintVisible: false,
-    feedback: state.feedback,
-    message: state.message,
+    feedback: state.exercise.type === 'classify-choice' ? null : state.feedback,
+    message: state.exercise.type === 'classify-choice' ? null : state.message,
   };
 }
 
