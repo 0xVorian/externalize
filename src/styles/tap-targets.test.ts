@@ -37,4 +37,8 @@ describe('tap targets fill grid/flex cells', () => {
       expect(rule).toContain(selector);
     }
   });
+
+  it('makes disabled primary actions look disabled', () => {
+    expect(css).toMatch(/\.primary:disabled,\s*\.secondary:disabled\s*\{[^}]*opacity:\s*0\.55/);
+  });
 });

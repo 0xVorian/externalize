@@ -209,9 +209,9 @@ test.describe('session-first UX', () => {
     await page.locator('[data-action="select-choice"][data-choice-id="needs-instance"]').click();
     await page.locator('[data-action="check-classification"]').click();
     await expect(page.locator('.feedback-wrong')).toBeVisible();
-    await expect(page.getByTestId('try-again')).toBeVisible();
+    await expect(page.getByTestId('try-again')).toHaveCount(0);
     await expect(page.locator('[data-action="lesson-next"]')).toHaveCount(0);
-    await page.getByTestId('try-again').click();
+    await expect(page.locator('[data-action="select-choice"][data-choice-id="still-true"]')).toBeEnabled();
     await page.locator('[data-action="select-choice"][data-choice-id="still-true"]').click();
     await page.locator('[data-action="check-classification"]').click();
     await expect(page.locator('.feedback-correct')).toBeVisible();

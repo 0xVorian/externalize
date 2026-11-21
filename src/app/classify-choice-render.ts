@@ -11,7 +11,7 @@ export function renderClassifyChoiceBody(state: AppState): string {
   const context = copy.context?.length
     ? `<div class="exercise-context">${copy.context.map((line) => `<p>${line}</p>`).join('')}</div>`
     : '';
-  const disabled = state.phase === 'answered' || state.attempt.status === 'finalized';
+  const disabled = state.attempt.status === 'finalized';
   const options = choiceIds
     .map((choiceId) => {
       const label = copy.choices?.[choiceId] ?? choiceId;
@@ -40,13 +40,10 @@ export function renderClassifyChoiceBody(state: AppState): string {
 
 export function renderClassifyChoiceActions(state: AppState, hideContinue = false): string {
   const copy = ui(state.locale);
-  if (state.phase === 'ready') {
-    return `<button type="button" class="primary" data-action="check-classification"${state.selectedChoiceId ? '' : ' disabled'}>${copy.checkScope}</button>`;
-  }
   if (state.attempt.status === 'finalized') {
     return hideContinue
       ? ''
       : `<button type="button" class="primary" data-action="next">${copy.continue}</button>`;
   }
-  return `<button type="button" class="secondary" data-action="try-again" data-testid="try-again">${copy.tryAgain}</button>`;
+  return `<button type="button" class="primary" data-action="check-classification"${state.selectedChoiceId ? '' : ' disabled'}>${copy.checkScope}</button>`;
 }

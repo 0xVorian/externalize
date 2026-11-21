@@ -216,9 +216,9 @@ test('Sobel empty-club prediction remains usable on a narrow phone', async ({ pa
   await expectNoPageOverflow(page);
   await page.locator('[data-action="select-choice"][data-choice-id="needs-instance"]').click();
   await page.locator('[data-action="check-classification"]').click();
-  await expect(page.getByTestId('try-again')).toBeVisible();
+  await expect(page.locator('.feedback-wrong')).toBeVisible();
+  await expect(page.getByTestId('try-again')).toHaveCount(0);
   await expectNoPageOverflow(page);
-  await page.getByTestId('try-again').click();
   await page.locator('[data-action="select-choice"][data-choice-id="still-true"]').click();
   await page.locator('[data-action="check-classification"]').click();
   await expect(page.locator('.feedback-correct')).toBeVisible();
