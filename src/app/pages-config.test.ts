@@ -21,6 +21,35 @@ function section(toml: string, header: string): string {
   return (end === -1 ? rest : rest.slice(0, end)).join('\n');
 }
 
+function assignments(block: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const line of block.split('\n')) {
+    const match = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+?)\s*$/.exec(line);
+    if (match) {
+      out[match[1]] = match[2];
+    }
+  }
+  return out;
+}
+
+function topLevelAssignments(toml: string): Record<string, string> {
+  const lines = uncommented(toml).split('\n');
+  const end = lines.findIndex((line) => line.trim().startsWith('['));
+  return assignments((end === -1 ? lines : lines.slice(0, end)).join('\n'));
+}
+
+/**
+ * Pages inheritable keys resolve from the top level unless `[env.<name>]`
+ * overrides them. Non-inheritable keys (`vars`, `d1_databases`, …) do not.
+ * https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+ */
+function resolvePagesInheritable(
+  toml: string,
+  env: 'production' | 'preview',
+): Record<string, string> {
+  return { ...topLevelAssignments(toml), ...assignments(section(toml, `[env.${env}]`)) };
+}
+
 describe('Pages git-connected config', () => {
   it('binds D1 only under env.production, with the real database id', () => {
     const toml = readFileSync('wrangler.toml', 'utf8');
@@ -42,6 +71,35 @@ describe('Pages git-connected config', () => {
     expect(section(toml, '[vars]')).toMatch(/WEBAUTHN_RP_NAME = "Externalize"/);
     expect(toml).toMatch(/wrangler\.local\.toml/);
     expect(toml).toMatch(/pages_build_output_dir/);
+  });
+
+  it('gives production the inherited required Pages keys and nodejs_compat', () => {
+    const toml = readFileSync('wrangler.toml', 'utf8');
+    const top = topLevelAssignments(toml);
+    expect(top.name).toBe('"externalize"');
+    expect(top.pages_build_output_dir).toBe('"dist"');
+    expect(top.compatibility_date).toBe('"2025-10-11"');
+    expect(top.compatibility_flags).toMatch(/nodejs_compat/);
+
+    // `[env.production]` does not exist, so inheritable keys are not emptied.
+    expect(section(toml, '[env.production]')).toBe('');
+
+    const production = resolvePagesInheritable(toml, 'production');
+    expect(production.name).toBe(top.name);
+    expect(production.pages_build_output_dir).toBe(top.pages_build_output_dir);
+    expect(production.compatibility_date).toBe(top.compatibility_date);
+    expect(production.compatibility_flags).toBe(top.compatibility_flags);
+    expect(production.compatibility_date).toMatch(/^"\d{4}-\d{2}-\d{2}"$/);
+    expect(production.compatibility_flags).toMatch(/nodejs_compat/);
+    expect(production.compatibility_flags).not.toMatch(/\[\s*\]/);
+
+    const preview = resolvePagesInheritable(toml, 'preview');
+    expect(preview.compatibility_date).toBe(top.compatibility_date);
+    expect(preview.compatibility_flags).toMatch(/nodejs_compat/);
+
+    // Overriding any non-inheritable key (D1) requires specifying all of them.
+    expect(section(toml, '[env.production.vars]')).toMatch(/WEBAUTHN_RP_NAME = "Externalize"/);
+    expect(section(toml, '[[env.production.d1_databases]]')).toMatch(/binding = "DB"/);
   });
 
   it('keeps the local D1 bind in wrangler.local.toml for wrangler d1, not pages --config', () => {

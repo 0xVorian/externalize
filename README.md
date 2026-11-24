@@ -85,7 +85,7 @@ After deploy, open the Pages URL on your phone to run the real-use validation.
 
 ## Install as PWA (home screen)
 
-Externalize ships a web app manifest and a service worker that pre-caches the built app shell, refreshes navigation from the network when available, and falls back to the cached shell offline. Progress still lives in `localStorage` on each device. Use Progress → Another device to export/import a file, or create a passkey when the Cloudflare D1 binding is configured.
+Externalize ships a web app manifest and a service worker that pre-caches the built app shell, refreshes navigation from the network when available, and falls back to the cached shell offline. Progress still lives in `localStorage` on each device. Use Progress → Another device to export/import a file, or create a passkey on production (D1 is bound in committed `wrangler.toml`; preview deploys stay unbound).
 
 **Android (Chrome):** open the site → menu (⋮) → **Install app** or **Add to Home screen**.
 
